@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Web con Matter.js y GSAP</title>
+    <style>
+        body, html {
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            overflow: hidden;
+            
+        }
+
+         #ct-drc{
+            width: 40%;
+            height: 100%;
+
+        }
+
+        #ct-izq{
+            width: 60%;
+            height: 100%;
+
+        }
+        #ct-arb{
+            width: 100%;
+            height: 100%;
+            align-items: center;
+        }
+       #soltar-arb, #soltar-izq{
+        flex-direction: row;
+       }
+
+       #soltar-drc{
+        flex-direction: column;
+       }
+
+        .contenedor-izquierdo, #contenedor-derecho {
+           
+            display: flex;
+            transition: height 0.5s ease, width 0.5s ease, background-color 0.5s ease;
+        }
+        .contenedor-izquierdo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .contendor-soltar {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            border: solid 1pt rgb(0, 0, 0);
+            transition: background-color 0.5s ease, width 0.5s ease;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            
+        }
+        #contenedor-derecho {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        .draggable-mut, .draggable {
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            cursor: pointer;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
+            border-radius: 10px;
+            justify-content: center;
+            flex-shrink: 1;
+            
+
+        }
+      img, video  {
+        max-width: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            border: solid 1pt black;
+            max-height: auto;
+
+      }
+     
+        .contenedores {
+            display: flex;
+            width: calc(100% - 4rem);
+            height: calc(100% - 3rem);
+            position: absolute;
+            z-index: 2;
+            align-items: center;
+            flex-direction: column;
+            top: 1.5rem;
+            left: 2rem;
+            border-radius: 4px;
+
+        }
+        .contenedor-superior{
+            width: 100%;
+            height: 5%;
+            display: flex;
+            border-radius: 4px;
+
+
+        }
+        .contenedores-inferiores{
+            width: 100%;
+            height: 95%;
+            display: flex;
+            border-radius: 4px;
+flex-direction: row;
+
+        }
+        #separador {
+    width: 0.5rem;
+    cursor: ew-resize;
+    background-color: transparent;
+    height: 100%;
+    position: relative;
+    z-index: 3;
+    transition: all 0.5s ease;
+
+}
+
+#separador:hover {
+    background-color: #000000;
+
+        }
+
+#separador-vertical {
+    height: 0.5rem;
+    cursor: ns-resize;
+    background-color: transparent;
+    width: 100%;
+    position: relative;
+    transition: all 0.5s ease;
+
+}
+#separador-vertical:hover {
+    background-color: #000000;
+
+        }
+        #draggable1{
+            background-color: #FF8145;
+        }
+
+        #draggable2{
+            background-color: #FDFD57;
+           
+        
+        }
+
+        #draggable3{
+            background-color: white;
+            }
+         #draggable4{
+            background-color: #F85484;       
+         }
+         #draggable5{
+            background-color: #8C70A5;       
+         }
+.contenido-prj{
+display: flex;
+flex-direction: column;
+flex-direction: column;
+            overflow-y: auto;
+            width: calc(100% - 1rem);
+            height: calc(100% - 1rem);
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: hidden;
+}
+
+.contenido-prj::-webkit-scrollbar {
+    width: 1rem; /* Ancho de la barra lateral */
+    opacity: 80%;
+    margin: 0;
+    display: flex;
+    position: absolute;
+
+  }
+  .contenido-prj::-webkit-scrollbar-track {
+    background-color: #F6B8C3;	
+	
+    border-radius: 4px; /* Bordes redondeados */
+    border: solid 1pt black;
+ }
+
+ .contenido-prj::-webkit-scrollbar-thumb {
+    background-color:#4DA77D; /* Color de la barra */
+    border-radius: 4px; /* Bordes redondeados */
+    opacity: 80%;
+    border: solid 1pt black;
+  }
+
+  .contenido-prj::-webkit-scrollbar-thumb:hover {
+    opacity: 80%;
+
+  }
+
+
+        .fondo{
+            position: absolute;
+            height: 100%;
+            width: 100%;
+        }
+        .cmyk-container {
+            
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background-color: white;
+        }
+
+        .naranja, .azul1, .verde {
+            position: relative;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+.tamaño-completo{
+    width: 100%;
+            height: 100%;
+}
+        .layer {
+            position: absolute;
+            width: 2000%;
+            height: 2000%;
+            background-size: 2.7px 2.7px;
+            display: flex;
+            mix-blend-mode: multiply;
+          
+        }
+
+        .contenedor-naranja {
+            width: 300px;
+            height: 300px;
+            background-color: #FF8145;
+        }
+
+        .contenedor-azulclaro {
+            width: 300px;
+            height: 300px;
+            background-color: #85C5EE;
+        }
+
+        .circle {
+          position: absolute;
+            border-radius: 50%;
+            z-index: 2;
+            width: 100%;
+            height: 100%;
+           
+        }
+        .base{
+            width: 100%;
+            height: 100%;
+        }
+        .texto{
+            color: blue;
+            font-size: 50pt;
+            position: absolute;
+            z-index: 3;
+            mix-blend-mode: soft-light;
+        }
+
+        .regla {
+            position: absolute;
+            display: flex;
+        }
+
+        /* Reglas laterales */
+        .regla-vertical {
+            width: 2rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .regla-izquierda {
+            left: 0;
+            top: 0;
+            display: flex;
+            border-right: 0.5pt solid black;
+
+        }
+
+        .regla-derecha {
+            right: 0;
+            top: 0;
+            display: flex;
+            border-left: 0.5pt solid black;
+
+        }
+
+        /* Reglas horizontales */
+        .regla-horizontal {
+            height: 1.5rem;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        .regla-superior {
+            top: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+            border-bottom: 0.5pt solid black;
+            display: flex;
+
+        }
+
+        .regla-inferior {
+            bottom: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            border-top: 0.5pt solid black;
+
+
+        }
+
+        /* Estilos de las subdivisiones */
+        .subdivision {
+            height: 0.5pt;
+            width: 100%;
+            margin: 0;
+        }
+
+        .subdivision-vertical {
+            width: 0.5pt;
+            height: 100%;
+            margin: 0;
+        }
+
+        .texto-regla {
+            color: black;
+            font-size: 10px;
+        }
+
+        @media (max-width: 767px) {
+            .contenedores-inferiores{
+            width: 100%;
+            height: 95%;
+            display: flex;
+            border-radius: 4px;
+flex-direction: column;
+
+        }
+        #ct-izq{
+            width: 100%;
+            height: 50%;
+
+        }
+
+        #ct-drc{
+            width: 100%;
+            height: 50%;
+
+        }
+        .draggable-mut, .draggable {
+            width: 130px;
+            height: 130px;
+            position: absolute;
+            cursor: pointer;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
+            border-radius: 10px;
+            justify-content: center;
+            flex-shrink: 1;
+            
+
+        }
+
+        #separador {
+    width: 100%;
+    cursor: ew-resize;
+    background-color: transparent;
+    height: 0.5rem;
+    position: relative;
+    z-index: 3;
+    transition: all 0.5s ease;
+
+}
+
+#soltar-drc{
+        flex-direction: row;
+       }
+        }
+    </style>
+</head>
+<body>
+  
+    </div>
+    <div class="contenedores">
+        <div class="contenedor-superior">
+            <div class="contenedor-izquierdo" id="ct-arb">
+                <div class="contendor-soltar" id="soltar-arb"></div>
+            </div>
+        </div>
+        <div id="separador-vertical"></div>
+        <div class="contenedores-inferiores">
+            <div class="contenedor-izquierdo" id="ct-izq">
+                <div class="contendor-soltar" id="soltar-izq"></div>
+            </div>
+            <div id="separador"></div> <!-- Nuevo div separador -->
+            <div class="contenedor-izquierdo" id="ct-drc">
+                <div class="contendor-soltar" id="soltar-drc"></div>
+            </div>
+        </div>
+        
+    </div> 
+    </div>
+    <div id="contenedor-derecho"></div>
+    <div class="draggable-mut" id="draggable1" style="left: 1px;">
+        <div class="circle">ABOUT</div>
+
+    </div>
+    <div class="draggable-mut" id="draggable2" style="left: 1.5px;">
+        <div class="contenido-prj">
+        <img src="DELTA_FOTO CAMPAÑA FINAL_optimizado.png">
+        <video loop autoplay muted>
+            <source src="POST 1 LOGO.mp4" type="video/mp4">
+            Tu navegador no soporta la etiqueta de video.
+        </video>
+    </div>
+    </div>
+    <div class="draggable-mut" id="draggable3" style="left: 2px;">
+        <div class="cmyk-container base">
+        <div class="naranja tamaño-completo">
+            <div class="cmyk-container circle">
+                 <div class="azul1 tamaño-completo"></div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="draggable-mut" id="draggable4">
+        <div class="cmyk-container base">
+        <div class="texto">hola</div>
+        <div class="verde tamaño-completo"></div>
+    </div>
+</div>
+    <div class="draggable-mut" id="draggable5">SERVICES</div>
+
+    <div class="regla regla-vertical regla-izquierda" id="regla-izquierda"></div>
+<div class="regla regla-vertical regla-derecha" id="regla-derecha"></div>
+
+<!-- Reglas horizontales -->
+<div class="regla regla-horizontal regla-superior" id="regla-superior"></div>
+<div class="regla regla-horizontal regla-inferior" id="regla-inferior"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    
+    <script>
+    const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
+    const dropZones = document.querySelectorAll('.contendor-soltar');
+    const draggables = document.querySelectorAll('.draggable-mut');
+    const draggableMutBodies = new Map();
+    let isDragging = false;
+    let currentDraggingBody = null;
+    
+    const { Engine, Render, World, Bodies, Body } = Matter;
+    const engine = Engine.create();
+    const world = engine.world;
+    
+    const contDerecho = document.getElementById('contenedor-derecho');
+    
+    // Renderizado de Matter.js
+    const render = Render.create({
+        element: contDerecho,
+        engine: engine,
+        options: {
+            width: contDerecho.clientWidth,
+            height: contDerecho.clientHeight,
+            wireframes: false,
+            background: 'transparent'
+        }
+    });
+    
+    Render.run(render);
+    
+    function createWalls() {
+        const width = contDerecho.clientWidth;
+        const height = contDerecho.clientHeight;
+    
+        const walls = [
+            Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+            Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+            Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
+            Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
+        ];
+    
+        World.add(world, walls);
+    }
+    
+    createWalls();
+    
+    window.addEventListener('resize', function() {
+        World.clear(world, false);
+        createWalls();
+    });
+    
+    // Funcionalidad Draggable con Matter.js y GSAP
+   // Funcionalidad Draggable con Matter.js y GSAP
+draggables.forEach((draggable) => {
+    addBody(draggable);
+
+    Draggable.create(draggable, {
+        type: 'x,y',
+        zIndexBoost: true,
+        onPress: function(e) {
+            const isTouch = e.type === "touchstart";
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+            const body = draggableMutBodies.get(draggable);
+            const rect = draggable.getBoundingClientRect();
+
+            // Si el div está dentro de un contenedor-soltar
+            if (draggable.parentElement.classList.contains('contendor-soltar')) {
+                const offsetX = clientX - (rect.left + rect.width / 2);
+                const offsetY = clientY - (rect.top + rect.height / 2);
+
+                document.body.appendChild(draggable);
+
+                gsap.set(draggable, {
+                    position: 'absolute',
+                    x: clientX - draggable.offsetWidth / 2,
+                    y: clientY - draggable.offsetHeight / 2,
+                    width: '200px',
+                    height: '200px'
+                });
+
+                draggable.style.transform = `translate(${clientX - draggable.offsetWidth / 2}px, ${clientY - draggable.offsetHeight / 2}px)`;
+
+                this.vars.offsetX = offsetX;
+                this.vars.offsetY = offsetY;
+            } else {
+                const offsetX = clientX - (rect.left + rect.width / 2);
+                const offsetY = clientY - (rect.top + rect.height / 2);
+
+                gsap.set(draggable, {
+                    x: clientX - draggable.offsetWidth / 2,
+                    y: clientY - draggable.offsetHeight / 2
+                });
+
+                draggable.style.transform = `translate(${clientX - draggable.offsetWidth / 2}px, ${clientY - draggable.offsetHeight / 2}px)`;
+
+                this.vars.offsetX = offsetX;
+                this.vars.offsetY = offsetY;
+            }
+
+            if (body) {
+                Body.setStatic(body, true);
+                Body.setAngle(body, body.angle);
+                currentDraggingBody = body;
+            }
+
+            isDragging = true;
+        },
+        onDrag: function(e) {
+            const isTouch = e.type === "touchmove";
+            const clientX = isTouch ? e.touches[0].clientX : e.x;
+            const clientY = isTouch ? e.touches[0].clientY : e.y;
+
+            const body = draggableMutBodies.get(draggable);
+
+            gsap.set(draggable, {
+                x: clientX - draggable.offsetWidth / 2,
+                y: clientY - draggable.offsetHeight / 2
+            });
+
+            if (body) {
+                Body.setPosition(body, {
+                    x: clientX,
+                    y: clientY
+                });
+            }
+        },
+        onRelease: function(e) {
+            const isTouch = e.type === "touchend";
+            const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
+
+            const body = draggableMutBodies.get(draggable);
+            isDragging = false;
+
+            const elemRect = draggable.getBoundingClientRect();
+
+            const matchingLeftContainer = Array.from(contIzquierdos).find(container => {
+                const rectIzquierdo = container.getBoundingClientRect();
+                return isOverlapping(elemRect, rectIzquierdo);
+            });
+
+            if (matchingLeftContainer) {
+                if (!draggable.classList.contains('draggable')) {
+                    draggable.className = 'draggable';
+                    removeBody(draggable);
+                }
+            } else {
+                if (!draggable.classList.contains('draggable-mut')) {
+                    draggable.className = 'draggable-mut';
+                }
+                addBody(draggable);
+            }
+
+            if (body) {
+                Body.setStatic(body, false);
+                currentDraggingBody = null;
+            }
+
+            const dropZone = Array.from(dropZones).find(zone => {
+                const zoneRect = zone.getBoundingClientRect();
+                return isOverlapping(elemRect, zoneRect);
+            });
+
+            if (dropZone) {
+                dropZone.appendChild(draggable);
+
+                gsap.set(draggable, {
+                    position: 'relative',
+                    top: 'auto',
+                    left: 'auto',
+                    x: 0,
+                    y: 0,
+                    width: '100%',
+                    height: '100%'
+                });
+
+                removeBody(draggable);
+            }
+        }
+    });
+});
+
+    
+    function isOverlapping(rect1, rect2) {
+        return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
+    }
+    
+    function addBody(element) {
+        const elemRect = element.getBoundingClientRect();
+        const body = Bodies.rectangle(
+            elemRect.left + elemRect.width / 2,
+            elemRect.top + elemRect.height / 2,
+            elemRect.width,
+            elemRect.height,
+            { restitution: 0.5 }
+        );
+        draggableMutBodies.set(element, body);
+        World.add(world, body);
+    }
+    
+    function removeBody(element) {
+        const body = draggableMutBodies.get(element);
+        if (body) {
+            World.remove(world, body);
+            draggableMutBodies.delete(element);
+        }
+    }
+    
+    function update() {
+        Engine.update(engine);
+    
+        draggableMutBodies.forEach((body, element) => {
+            if (!isDragging || body !== currentDraggingBody) {
+                const pos = body.position;
+                const angle = body.angle;
+    
+                element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
+            }
+        });
+    
+        requestAnimationFrame(update);
+    }
+    
+    update();
+    
+  // Redimensionamiento Horizontal
+const separador = document.getElementById('separador');
+const contenedorIzq = document.getElementById('ct-izq');
+const contenedorDrc = document.getElementById('ct-drc');
+const contenedoresInferiores = document.querySelector('.contenedores-inferiores');
+
+let isResizing = false;
+
+function iniciarRedimensionamiento(e) {
+    isResizing = true;
+}
+
+function detenerRedimensionamiento() {
+    isResizing = false;
+}
+
+function redimensionarHorizontal(e) {
+    if (!isResizing) return;
+
+    // Prevenir el comportamiento por defecto del touchmove (scroll) en pantallas táctiles
+    if (e.type === 'touchmove') {
+        e.preventDefault();
+    }
+
+    const eventX = e.clientX || (e.touches && e.touches[0].clientX);
+    const contenedoresRect = contenedoresInferiores.getBoundingClientRect();
+    const mouseX = eventX - contenedoresRect.left;
+
+    const newLeftWidth = (mouseX / contenedoresRect.width) * 100;
+    const newRightWidth = 100 - newLeftWidth;
+
+    if (newLeftWidth > 5 && newRightWidth > 5) {
+        contenedorIzq.style.width = `${newLeftWidth}%`;
+        contenedorDrc.style.width = `${newRightWidth}%`;
+    }
+}
+
+// Eventos para ratón y táctiles
+separador.addEventListener('mousedown', iniciarRedimensionamiento);
+separador.addEventListener('touchstart', iniciarRedimensionamiento, { passive: false });
+
+window.addEventListener('mousemove', redimensionarHorizontal);
+window.addEventListener('touchmove', redimensionarHorizontal, { passive: false });
+
+window.addEventListener('mouseup', detenerRedimensionamiento);
+window.addEventListener('touchend', detenerRedimensionamiento);
+
+// Redimensionamiento Vertical
+const separadorVertical = document.getElementById('separador-vertical');
+const contenedorSup = document.querySelector('.contenedor-superior');
+const contenedorInf = document.querySelector('.contenedores-inferiores');
+const contenedoresTotal = document.querySelector('.contenedores');
+
+let isResizingVertical = false;
+
+function iniciarRedimensionamientoVertical(e) {
+    isResizingVertical = true;
+}
+
+function detenerRedimensionamientoVertical() {
+    isResizingVertical = false;
+}
+
+function redimensionarVertical(e) {
+    if (!isResizingVertical) return;
+
+    // Prevenir el comportamiento por defecto del touchmove (scroll) en pantallas táctiles
+    if (e.type === 'touchmove') {
+        e.preventDefault();
+    }
+
+    const eventY = e.clientY || (e.touches && e.touches[0].clientY);
+    const contenedoresRect2 = contenedoresTotal.getBoundingClientRect();
+    const mouseY = eventY - contenedoresRect2.top;
+
+    const newTopHeight = (mouseY / contenedoresRect2.height) * 100;
+    const newBottomHeight = 100 - newTopHeight;
+
+    if (newTopHeight > 5 && newBottomHeight > 5) {
+        contenedorSup.style.height = `${newTopHeight}%`;
+        contenedorInf.style.height = `${newBottomHeight}%`;
+    }
+}
+
+// Eventos para ratón y táctiles
+separadorVertical.addEventListener('mousedown', iniciarRedimensionamientoVertical);
+separadorVertical.addEventListener('touchstart', iniciarRedimensionamientoVertical, { passive: false });
+
+window.addEventListener('mousemove', redimensionarVertical);
+window.addEventListener('touchmove', redimensionarVertical, { passive: false });
+
+window.addEventListener('mouseup', detenerRedimensionamientoVertical);
+window.addEventListener('touchend', detenerRedimensionamientoVertical);
+
+    
+    // Generación de capas
+    function generarCapas(contenedor, capas) {
+        capas.forEach(({ gradient, rotation, opacity }) => {
+            const layer = document.createElement('div');
+            layer.classList.add('layer');
+            layer.style.backgroundImage = gradient;
+            layer.style.transform = `rotate(${rotation})`;
+            layer.style.opacity = opacity;
+            contenedor.appendChild(layer);
+        });
+    }
+    
+    const naranjaGradients = [
+        { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 53%, transparent 50%)', rotation: '0deg', opacity: '0%' },
+        { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 53%, transparent 58%)', rotation: '45deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
+    ];
+    
+    const azul1Gradients = [
+        { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 50%, transparent 50%)', rotation: '0deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 9%, transparent 58%)', rotation: '45deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '0%' },
+        { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
+    ];
+    
+    const verdeGradients = [
+        { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 80%, transparent 70%)', rotation: '45deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 10%, transparent 70%)', rotation: '15deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 62%, transparent 60%)', rotation: '75deg', opacity: '100%' },
+        { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
+    ];
+    
+    const naranjaDiv = document.querySelector('.naranja');
+    generarCapas(naranjaDiv, naranjaGradients);
+    
+    const azul1Div = document.querySelector('.azul1');
+    generarCapas(azul1Div, azul1Gradients);
+    
+    const verdeDiv = document.querySelector('.verde');
+    generarCapas(verdeDiv, verdeGradients);
+    
+    function actualizarReglas() {
+        const alturaPantalla = window.innerHeight;
+        const anchuraPantalla = window.innerWidth;
+        const numSubdivisiones = 15;
+    
+        const reglaIzquierda = document.getElementById('regla-izquierda');
+        const reglaDerecha = document.getElementById('regla-derecha');
+        const reglaSuperior = document.getElementById('regla-superior');
+        const reglaInferior = document.getElementById('regla-inferior');
+    
+        [reglaIzquierda, reglaDerecha, reglaSuperior, reglaInferior].forEach(regla => regla.innerHTML = '');
+    
+        function crearSubdivisiones(limite, esVertical) {
+            const fragmento = document.createDocumentFragment();
+            const paso = limite / numSubdivisiones;
+    
+            for (let i = 0; i <= numSubdivisiones; i++) {
+                const div = document.createElement('div');
+                const texto = document.createElement('span');
+                texto.classList.add('texto-regla');
+                texto.innerText = Math.round(paso * i) + 'px';
+    
+                if (esVertical) {
+                    div.classList.add('subdivision-vertical');
+                    div.style.top = `${paso * i}px`;
+                    texto.style.transform = 'rotate(-90deg)';
+                    div.appendChild(texto);
+                } else {
+                    div.classList.add('subdivision');
+                    div.style.left = `${paso * i}px`;
+                    div.appendChild(texto);
+                }
+    
+                fragmento.appendChild(div);
+            }
+    
+            return fragmento;
+        }
+    
+        reglaIzquierda.appendChild(crearSubdivisiones(alturaPantalla, true));
+        reglaDerecha.appendChild(crearSubdivisiones(alturaPantalla, true));
+        reglaSuperior.appendChild(crearSubdivisiones(anchuraPantalla, false));
+        reglaInferior.appendChild(crearSubdivisiones(anchuraPantalla, false));
+    }
+    
+    window.addEventListener('load', actualizarReglas);
+    window.addEventListener('resize', actualizarReglas);
+    
+
+    
+    </script>
+    
+</body>
+</html>
