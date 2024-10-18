@@ -441,11 +441,13 @@ flex-direction: column;
     </div>
     <div class="draggable-mut" id="draggable2" style="left: 1.5px;">
         <div class="contenido-prj">
-        <img src="DELTA_FOTO CAMPAÑA FINAL_optimizado.png">
+        <img src="delta_foto.jpg">
+        
         <video loop autoplay muted>
             <source src="POST 1 LOGO.mp4" type="video/mp4">
             Tu navegador no soporta la etiqueta de video.
         </video>
+        <img src="DELTA_TABLAS_web.png">
     </div>
     </div>
     <div class="draggable-mut" id="draggable3" style="left: 2px;">
@@ -481,119 +483,147 @@ flex-direction: column;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     
     <script>
-    const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
-    const dropZones = document.querySelectorAll('.contendor-soltar');
-    const draggables = document.querySelectorAll('.draggable-mut');
-    const draggableMutBodies = new Map();
-    let isDragging = false;
-    let currentDraggingBody = null;
-    
-    const { Engine, Render, World, Bodies, Body } = Matter;
-    const engine = Engine.create();
-    const world = engine.world;
-    
-    const contDerecho = document.getElementById('contenedor-derecho');
-    
-    // Renderizado de Matter.js
-    const render = Render.create({
-        element: contDerecho,
-        engine: engine,
-        options: {
-            width: contDerecho.clientWidth,
-            height: contDerecho.clientHeight,
-            wireframes: false,
-            background: 'transparent'
-        }
-    });
-    
-    Render.run(render);
-    
-    function createWalls() {
-        const width = contDerecho.clientWidth;
-        const height = contDerecho.clientHeight;
-    
-        const walls = [
-            Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
-            Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
-            Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
-            Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
-        ];
-    
-        World.add(world, walls);
+const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
+const dropZones = document.querySelectorAll('.contendor-soltar');
+const draggables = document.querySelectorAll('.draggable-mut');
+const draggableMutBodies = new Map();
+let isDragging = false;
+let currentDraggingBody = null;
+
+const { Engine, Render, World, Bodies, Body } = Matter;
+const engine = Engine.create();
+const world = engine.world;
+
+const contDerecho = document.getElementById('contenedor-derecho');
+
+// Renderizado de Matter.js
+const render = Render.create({
+    element: contDerecho,
+    engine: engine,
+    options: {
+        width: contDerecho.clientWidth,
+        height: contDerecho.clientHeight,
+        wireframes: false,
+        background: 'transparent'
     }
-    
+});
+
+Render.run(render);
+
+function createWalls() {
+    const width = contDerecho.clientWidth;
+    const height = contDerecho.clientHeight;
+
+    const walls = [
+        Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
+    ];
+
+    World.add(world, walls);
+}
+
+createWalls();
+
+window.addEventListener('resize', function() {
+    World.clear(world, false);
     createWalls();
-    
-    window.addEventListener('resize', function() {
-        World.clear(world, false);
-        createWalls();
-    });
-    
-    // Funcionalidad Draggable con Matter.js y GSAP
-   // Funcionalidad Draggable con Matter.js y GSAP
+});
+
+// Funcionalidad Draggable con Matter.js y GSAP
+function esDispositivoTactil() {
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+}
+
+const isTouchDevice = esDispositivoTactil();
+
 draggables.forEach((draggable) => {
+    let dragTimeout;
+    let draggableInstance;
+    let hasBeenReleased = false; // Variable para saber si se soltó antes del tiempo
+
     addBody(draggable);
 
-    Draggable.create(draggable, {
+    // Crear instancia de Draggable y guardar referencia correcta
+    draggableInstance = Draggable.create(draggable, {
         type: 'x,y',
         zIndexBoost: true,
         onPress: function(e) {
             const isTouch = e.type === "touchstart";
             const clientX = isTouch ? e.touches[0].clientX : e.clientX;
             const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
             const body = draggableMutBodies.get(draggable);
-            const rect = draggable.getBoundingClientRect();
 
-            // Si el div está dentro de un contenedor-soltar
+            hasBeenReleased = false;  // Reiniciamos la variable al comenzar el arrastre
+
+            const releaseHandler = () => {
+                hasBeenReleased = true;  // Marcamos que el draggable fue soltado antes de tiempo
+                clearTimeout(dragTimeout);  // Cancelamos el timeout
+                draggableInstance.enable();  // Aseguramos que el draggable esté habilitado
+                // Quitamos los event listeners de liberación
+                window.removeEventListener('mouseup', releaseHandler);
+                window.removeEventListener('touchend', releaseHandler);
+            };
+
+            // Añadir listeners para detectar cuándo se suelta el elemento
+            window.addEventListener('mouseup', releaseHandler);
+            window.addEventListener('touchend', releaseHandler, { passive: false });
+
+            // Si el draggable está dentro de un contenedor-soltar, iniciar un timeout
             if (draggable.parentElement.classList.contains('contendor-soltar')) {
-                const offsetX = clientX - (rect.left + rect.width / 2);
-                const offsetY = clientY - (rect.top + rect.height / 2);
+                draggableInstance.disable();  // Desactiva temporalmente el arrastre de GSAP
 
-                document.body.appendChild(draggable);
+                dragTimeout = setTimeout(() => {
+                    if (!hasBeenReleased) {  // Si no ha sido soltado antes del tiempo
+                        // Cambiar el tamaño y mover el elemento fuera del contenedor-soltar
+                        document.body.appendChild(draggable);
+                        gsap.set(draggable, {
+                            position: 'absolute',
+                            x: clientX - draggable.offsetWidth / 2,
+                            y: clientY - draggable.offsetHeight / 2,
+                            width: '200px',
+                            height: '200px'
+                        });
 
-                gsap.set(draggable, {
-                    position: 'absolute',
-                    x: clientX - draggable.offsetWidth / 2,
-                    y: clientY - draggable.offsetHeight / 2,
-                    width: '200px',
-                    height: '200px'
-                });
+                        if (body) {
+                            Body.setStatic(body, true);
+                            Body.setAngle(body, body.angle);
+                            currentDraggingBody = body;
+                        }
 
-                draggable.style.transform = `translate(${clientX - draggable.offsetWidth / 2}px, ${clientY - draggable.offsetHeight / 2}px)`;
+                        isDragging = true;
 
-                this.vars.offsetX = offsetX;
-                this.vars.offsetY = offsetY;
+                        // Iniciar el drag inmediatamente
+                        draggableInstance.enable();  // Habilita el arrastre nuevamente
+                        draggableInstance.startDrag(e);
+                    }
+                }, 500);  // Espera de 0.5 segundos antes de mover el draggable
             } else {
-                const offsetX = clientX - (rect.left + rect.width / 2);
-                const offsetY = clientY - (rect.top + rect.height / 2);
-
+                // Si no está dentro de un contenedor-soltar, moverlo inmediatamente
                 gsap.set(draggable, {
                     x: clientX - draggable.offsetWidth / 2,
                     y: clientY - draggable.offsetHeight / 2
                 });
 
-                draggable.style.transform = `translate(${clientX - draggable.offsetWidth / 2}px, ${clientY - draggable.offsetHeight / 2}px)`;
+                if (body) {
+                    Body.setStatic(body, true);
+                    Body.setAngle(body, body.angle);
+                    currentDraggingBody = body;
+                }
 
-                this.vars.offsetX = offsetX;
-                this.vars.offsetY = offsetY;
+                isDragging = true;
             }
-
-            if (body) {
-                Body.setStatic(body, true);
-                Body.setAngle(body, body.angle);
-                currentDraggingBody = body;
-            }
-
-            isDragging = true;
         },
         onDrag: function(e) {
+            if (!isDragging) return;
+
             const isTouch = e.type === "touchmove";
             const clientX = isTouch ? e.touches[0].clientX : e.x;
             const clientY = isTouch ? e.touches[0].clientY : e.y;
-
             const body = draggableMutBodies.get(draggable);
 
+            // Mantener el draggable centrado con el cursor o el dedo
             gsap.set(draggable, {
                 x: clientX - draggable.offsetWidth / 2,
                 y: clientY - draggable.offsetHeight / 2
@@ -607,12 +637,13 @@ draggables.forEach((draggable) => {
             }
         },
         onRelease: function(e) {
+            clearTimeout(dragTimeout);  // Limpiar el timeout si el usuario suelta antes de 0.5 segundos
+            isDragging = false;
+
             const isTouch = e.type === "touchend";
             const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
             const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
-
             const body = draggableMutBodies.get(draggable);
-            isDragging = false;
 
             const elemRect = draggable.getBoundingClientRect();
 
@@ -658,54 +689,58 @@ draggables.forEach((draggable) => {
 
                 removeBody(draggable);
             }
+
+            // Remover listeners de liberación después del release
+            window.removeEventListener('mouseup', releaseHandler);
+            window.removeEventListener('touchend', releaseHandler);
         }
-    });
+    })[0];  // Almacenamos la instancia de Draggable correcta
 });
 
-    
-    function isOverlapping(rect1, rect2) {
-        return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
+
+function isOverlapping(rect1, rect2) {
+    return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
+}
+
+function addBody(element) {
+    const elemRect = element.getBoundingClientRect();
+    const body = Bodies.rectangle(
+        elemRect.left + elemRect.width / 2,
+        elemRect.top + elemRect.height / 2,
+        elemRect.width,
+        elemRect.height,
+        { restitution: 0.5 }
+    );
+    draggableMutBodies.set(element, body);
+    World.add(world, body);
+}
+
+function removeBody(element) {
+    const body = draggableMutBodies.get(element);
+    if (body) {
+        World.remove(world, body);
+        draggableMutBodies.delete(element);
     }
-    
-    function addBody(element) {
-        const elemRect = element.getBoundingClientRect();
-        const body = Bodies.rectangle(
-            elemRect.left + elemRect.width / 2,
-            elemRect.top + elemRect.height / 2,
-            elemRect.width,
-            elemRect.height,
-            { restitution: 0.5 }
-        );
-        draggableMutBodies.set(element, body);
-        World.add(world, body);
-    }
-    
-    function removeBody(element) {
-        const body = draggableMutBodies.get(element);
-        if (body) {
-            World.remove(world, body);
-            draggableMutBodies.delete(element);
+}
+
+function update() {
+    Engine.update(engine);
+
+    draggableMutBodies.forEach((body, element) => {
+        if (!isDragging || body !== currentDraggingBody) {
+            const pos = body.position;
+            const angle = body.angle;
+
+            element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
         }
-    }
-    
-    function update() {
-        Engine.update(engine);
-    
-        draggableMutBodies.forEach((body, element) => {
-            if (!isDragging || body !== currentDraggingBody) {
-                const pos = body.position;
-                const angle = body.angle;
-    
-                element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
-            }
-        });
-    
-        requestAnimationFrame(update);
-    }
-    
-    update();
-    
-  // Redimensionamiento Horizontal
+    });
+
+    requestAnimationFrame(update);
+}
+
+update();
+
+// Redimensionamiento Horizontal
 const separador = document.getElementById('separador');
 const contenedorIzq = document.getElementById('ct-izq');
 const contenedorDrc = document.getElementById('ct-drc');
@@ -724,7 +759,6 @@ function detenerRedimensionamiento() {
 function redimensionarHorizontal(e) {
     if (!isResizing) return;
 
-    // Prevenir el comportamiento por defecto del touchmove (scroll) en pantallas táctiles
     if (e.type === 'touchmove') {
         e.preventDefault();
     }
@@ -771,7 +805,6 @@ function detenerRedimensionamientoVertical() {
 function redimensionarVertical(e) {
     if (!isResizingVertical) return;
 
-    // Prevenir el comportamiento por defecto del touchmove (scroll) en pantallas táctiles
     if (e.type === 'touchmove') {
         e.preventDefault();
     }
@@ -799,97 +832,95 @@ window.addEventListener('touchmove', redimensionarVertical, { passive: false });
 window.addEventListener('mouseup', detenerRedimensionamientoVertical);
 window.addEventListener('touchend', detenerRedimensionamientoVertical);
 
-    
-    // Generación de capas
-    function generarCapas(contenedor, capas) {
-        capas.forEach(({ gradient, rotation, opacity }) => {
-            const layer = document.createElement('div');
-            layer.classList.add('layer');
-            layer.style.backgroundImage = gradient;
-            layer.style.transform = `rotate(${rotation})`;
-            layer.style.opacity = opacity;
-            contenedor.appendChild(layer);
-        });
-    }
-    
-    const naranjaGradients = [
-        { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 53%, transparent 50%)', rotation: '0deg', opacity: '0%' },
-        { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 53%, transparent 58%)', rotation: '45deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
-    ];
-    
-    const azul1Gradients = [
-        { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 50%, transparent 50%)', rotation: '0deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 9%, transparent 58%)', rotation: '45deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '0%' },
-        { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
-    ];
-    
-    const verdeGradients = [
-        { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 80%, transparent 70%)', rotation: '45deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 10%, transparent 70%)', rotation: '15deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 62%, transparent 60%)', rotation: '75deg', opacity: '100%' },
-        { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
-    ];
-    
-    const naranjaDiv = document.querySelector('.naranja');
-    generarCapas(naranjaDiv, naranjaGradients);
-    
-    const azul1Div = document.querySelector('.azul1');
-    generarCapas(azul1Div, azul1Gradients);
-    
-    const verdeDiv = document.querySelector('.verde');
-    generarCapas(verdeDiv, verdeGradients);
-    
-    function actualizarReglas() {
-        const alturaPantalla = window.innerHeight;
-        const anchuraPantalla = window.innerWidth;
-        const numSubdivisiones = 15;
-    
-        const reglaIzquierda = document.getElementById('regla-izquierda');
-        const reglaDerecha = document.getElementById('regla-derecha');
-        const reglaSuperior = document.getElementById('regla-superior');
-        const reglaInferior = document.getElementById('regla-inferior');
-    
-        [reglaIzquierda, reglaDerecha, reglaSuperior, reglaInferior].forEach(regla => regla.innerHTML = '');
-    
-        function crearSubdivisiones(limite, esVertical) {
-            const fragmento = document.createDocumentFragment();
-            const paso = limite / numSubdivisiones;
-    
-            for (let i = 0; i <= numSubdivisiones; i++) {
-                const div = document.createElement('div');
-                const texto = document.createElement('span');
-                texto.classList.add('texto-regla');
-                texto.innerText = Math.round(paso * i) + 'px';
-    
-                if (esVertical) {
-                    div.classList.add('subdivision-vertical');
-                    div.style.top = `${paso * i}px`;
-                    texto.style.transform = 'rotate(-90deg)';
-                    div.appendChild(texto);
-                } else {
-                    div.classList.add('subdivision');
-                    div.style.left = `${paso * i}px`;
-                    div.appendChild(texto);
-                }
-    
-                fragmento.appendChild(div);
+// Generación de capas
+function generarCapas(contenedor, capas) {
+    capas.forEach(({ gradient, rotation, opacity }) => {
+        const layer = document.createElement('div');
+        layer.classList.add('layer');
+        layer.style.backgroundImage = gradient;
+        layer.style.transform = `rotate(${rotation})`;
+        layer.style.opacity = opacity;
+        contenedor.appendChild(layer);
+    });
+}
+
+const naranjaGradients = [
+    { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 53%, transparent 50%)', rotation: '0deg', opacity: '0%' },
+    { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 53%, transparent 58%)', rotation: '45deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
+];
+
+const azul1Gradients = [
+    { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 50%, transparent 50%)', rotation: '0deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 9%, transparent 58%)', rotation: '45deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '0%' },
+    { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
+];
+
+const verdeGradients = [
+    { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 80%, transparent 70%)', rotation: '45deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 10%, transparent 70%)', rotation: '15deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 62%, transparent 60%)', rotation: '75deg', opacity: '100%' },
+    { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
+];
+
+const naranjaDiv = document.querySelector('.naranja');
+generarCapas(naranjaDiv, naranjaGradients);
+
+const azul1Div = document.querySelector('.azul1');
+generarCapas(azul1Div, azul1Gradients);
+
+const verdeDiv = document.querySelector('.verde');
+generarCapas(verdeDiv, verdeGradients);
+
+function actualizarReglas() {
+    const alturaPantalla = window.innerHeight;
+    const anchuraPantalla = window.innerWidth;
+    const numSubdivisiones = 15;
+
+    const reglaIzquierda = document.getElementById('regla-izquierda');
+    const reglaDerecha = document.getElementById('regla-derecha');
+    const reglaSuperior = document.getElementById('regla-superior');
+    const reglaInferior = document.getElementById('regla-inferior');
+
+    [reglaIzquierda, reglaDerecha, reglaSuperior, reglaInferior].forEach(regla => regla.innerHTML = '');
+
+    function crearSubdivisiones(limite, esVertical) {
+        const fragmento = document.createDocumentFragment();
+        const paso = limite / numSubdivisiones;
+
+        for (let i = 0; i <= numSubdivisiones; i++) {
+            const div = document.createElement('div');
+            const texto = document.createElement('span');
+            texto.classList.add('texto-regla');
+            texto.innerText = Math.round(paso * i) + 'px';
+
+            if (esVertical) {
+                div.classList.add('subdivision-vertical');
+                div.style.top = `${paso * i}px`;
+                texto.style.transform = 'rotate(-90deg)';
+                div.appendChild(texto);
+            } else {
+                div.classList.add('subdivision');
+                div.style.left = `${paso * i}px`;
+                div.appendChild(texto);
             }
-    
-            return fragmento;
+
+            fragmento.appendChild(div);
         }
-    
-        reglaIzquierda.appendChild(crearSubdivisiones(alturaPantalla, true));
-        reglaDerecha.appendChild(crearSubdivisiones(alturaPantalla, true));
-        reglaSuperior.appendChild(crearSubdivisiones(anchuraPantalla, false));
-        reglaInferior.appendChild(crearSubdivisiones(anchuraPantalla, false));
+
+        return fragmento;
     }
-    
-    window.addEventListener('load', actualizarReglas);
-    window.addEventListener('resize', actualizarReglas);
-    
+
+    reglaIzquierda.appendChild(crearSubdivisiones(alturaPantalla, true));
+    reglaDerecha.appendChild(crearSubdivisiones(alturaPantalla, true));
+    reglaSuperior.appendChild(crearSubdivisiones(anchuraPantalla, false));
+    reglaInferior.appendChild(crearSubdivisiones(anchuraPantalla, false));
+}
+
+window.addEventListener('load', actualizarReglas);
+window.addEventListener('resize', actualizarReglas);
 
     
     </script>
