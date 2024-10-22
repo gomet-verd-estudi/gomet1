@@ -67,7 +67,7 @@
             width: 100%;
             height: 100%;
         }
-        .draggable-mut, .draggable {
+        .draggable-mut, .draggable, .hijo-de {
             width: 200px;
             height: 200px;
             position: absolute;
@@ -127,8 +127,13 @@ flex-direction: row;
     background-color: transparent;
     height: 100%;
     position: relative;
-    z-index: 3;
+    z-index: 1000;
     transition: all 0.5s ease;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
 
 }
 
@@ -144,6 +149,9 @@ flex-direction: row;
     width: 100%;
     position: relative;
     transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 }
 #separador-vertical:hover {
@@ -179,6 +187,8 @@ flex-direction: column;
             align-items: center;
             gap: 0.5rem;
             overflow-x: hidden;
+            overflow-y: auto; /* Permitir scroll vertical */
+    touch-action: pan-y; /* Permitir desplazamiento */
 }
 
 .contenido-prj::-webkit-scrollbar {
@@ -358,6 +368,49 @@ flex-direction: column;
             font-size: 10px;
         }
 
+        .int-separador-v{
+            width: 100%;
+            height: 300%;
+            position: absolute;
+            z-index: 1001;
+background-color: rgb(0, 0, 0); 
+transition: all 0.5s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+color: white;
+opacity: 0;
+text-align: center;
+text-justify: center;
+border-radius: 4px;
+
+       }
+
+       .int-separador-h{
+            width: 300%;
+            height: 100%;
+            position: absolute;
+            z-index: 10001;
+background-color: rgb(0, 0, 0); 
+transition: all 0.5s ease;
+display: flex;
+align-items: center;
+justify-content: center;
+color: white;
+opacity: 0;
+text-align: center;
+text-justify: center;
+border-radius: 4px;
+
+       }
+       .int-separador-v:hover{
+        opacity: 100%;
+
+       }
+       .int-separador-h:hover{
+        opacity: 100%;
+
+       }
         @media (max-width: 767px) {
             .contenedores-inferiores{
             width: 100%;
@@ -401,7 +454,7 @@ flex-direction: column;
     background-color: transparent;
     height: 0.5rem;
     position: relative;
-    z-index: 3;
+    z-index: 1000;
     transition: all 0.5s ease;
 
 }
@@ -421,12 +474,14 @@ flex-direction: column;
                 <div class="contendor-soltar" id="soltar-arb"></div>
             </div>
         </div>
-        <div id="separador-vertical"></div>
+        <div id="separador-vertical"> 
+            <div class="int-separador-v">▼▲</div>
+        </div>
         <div class="contenedores-inferiores">
             <div class="contenedor-izquierdo" id="ct-izq">
                 <div class="contendor-soltar" id="soltar-izq"></div>
             </div>
-            <div id="separador"></div> <!-- Nuevo div separador -->
+            <div id="separador"><div class="int-separador-h">◀<br>▶</div></div> <!-- Nuevo div separador -->
             <div class="contenedor-izquierdo" id="ct-drc">
                 <div class="contendor-soltar" id="soltar-drc"></div>
             </div>
@@ -476,11 +531,9 @@ flex-direction: column;
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="matter.min.js""></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+   
     
     <script>
 const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
@@ -540,43 +593,45 @@ const isTouchDevice = esDispositivoTactil();
 
 draggables.forEach((draggable) => {
     let dragTimeout;
+    let isDragging = false;
+    let isMouseDown = false;
     let draggableInstance;
-    let hasBeenReleased = false; // Variable para saber si se soltó antes del tiempo
+    let hasBeenReleased = false;
+    let releaseHandler;
 
     addBody(draggable);
 
-    // Crear instancia de Draggable y guardar referencia correcta
     draggableInstance = Draggable.create(draggable, {
         type: 'x,y',
         zIndexBoost: true,
-        onPress: function(e) {
+        onPress: function (e) {
             const isTouch = e.type === "touchstart";
             const clientX = isTouch ? e.touches[0].clientX : e.clientX;
             const clientY = isTouch ? e.touches[0].clientY : e.clientY;
             const body = draggableMutBodies.get(draggable);
 
-            hasBeenReleased = false;  // Reiniciamos la variable al comenzar el arrastre
+            hasBeenReleased = false;
+            isMouseDown = true;
+            isDragging = false;
 
-            const releaseHandler = () => {
-                hasBeenReleased = true;  // Marcamos que el draggable fue soltado antes de tiempo
-                clearTimeout(dragTimeout);  // Cancelamos el timeout
-                draggableInstance.enable();  // Aseguramos que el draggable esté habilitado
-                // Quitamos los event listeners de liberación
+            releaseHandler = () => {
+                hasBeenReleased = true;
+                clearTimeout(dragTimeout);
+                draggableInstance.enable();
+                isMouseDown = false;
+                isDragging = false;
                 window.removeEventListener('mouseup', releaseHandler);
                 window.removeEventListener('touchend', releaseHandler);
             };
 
-            // Añadir listeners para detectar cuándo se suelta el elemento
             window.addEventListener('mouseup', releaseHandler);
             window.addEventListener('touchend', releaseHandler, { passive: false });
 
-            // Si el draggable está dentro de un contenedor-soltar, iniciar un timeout
-            if (draggable.parentElement.classList.contains('contendor-soltar')) {
-                draggableInstance.disable();  // Desactiva temporalmente el arrastre de GSAP
+            if (draggable.parentElement.classList.contains('contenedor-soltar')) {
+                draggableInstance.disable();
 
                 dragTimeout = setTimeout(() => {
-                    if (!hasBeenReleased) {  // Si no ha sido soltado antes del tiempo
-                        // Cambiar el tamaño y mover el elemento fuera del contenedor-soltar
+                    if (!hasBeenReleased && isMouseDown) {
                         document.body.appendChild(draggable);
                         gsap.set(draggable, {
                             position: 'absolute',
@@ -593,14 +648,11 @@ draggables.forEach((draggable) => {
                         }
 
                         isDragging = true;
-
-                        // Iniciar el drag inmediatamente
-                        draggableInstance.enable();  // Habilita el arrastre nuevamente
+                        draggableInstance.enable();
                         draggableInstance.startDrag(e);
                     }
-                }, 500);  // Espera de 0.5 segundos antes de mover el draggable
+                }, 300);
             } else {
-                // Si no está dentro de un contenedor-soltar, moverlo inmediatamente
                 gsap.set(draggable, {
                     x: clientX - draggable.offsetWidth / 2,
                     y: clientY - draggable.offsetHeight / 2
@@ -615,7 +667,7 @@ draggables.forEach((draggable) => {
                 isDragging = true;
             }
         },
-        onDrag: function(e) {
+        onDrag: function (e) {
             if (!isDragging) return;
 
             const isTouch = e.type === "touchmove";
@@ -623,7 +675,6 @@ draggables.forEach((draggable) => {
             const clientY = isTouch ? e.touches[0].clientY : e.y;
             const body = draggableMutBodies.get(draggable);
 
-            // Mantener el draggable centrado con el cursor o el dedo
             gsap.set(draggable, {
                 x: clientX - draggable.offsetWidth / 2,
                 y: clientY - draggable.offsetHeight / 2
@@ -636,46 +687,33 @@ draggables.forEach((draggable) => {
                 });
             }
         },
-        onRelease: function(e) {
-            clearTimeout(dragTimeout);  // Limpiar el timeout si el usuario suelta antes de 0.5 segundos
+        onRelease: function (e) {
+            clearTimeout(dragTimeout);
+            isMouseDown = false;
             isDragging = false;
 
-            const isTouch = e.type === "touchend";
-            const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
-            const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
             const body = draggableMutBodies.get(draggable);
-
-            const elemRect = draggable.getBoundingClientRect();
-
-            const matchingLeftContainer = Array.from(contIzquierdos).find(container => {
-                const rectIzquierdo = container.getBoundingClientRect();
-                return isOverlapping(elemRect, rectIzquierdo);
-            });
-
-            if (matchingLeftContainer) {
-                if (!draggable.classList.contains('draggable')) {
-                    draggable.className = 'draggable';
-                    removeBody(draggable);
-                }
-            } else {
-                if (!draggable.classList.contains('draggable-mut')) {
-                    draggable.className = 'draggable-mut';
-                }
-                addBody(draggable);
-            }
 
             if (body) {
                 Body.setStatic(body, false);
                 currentDraggingBody = null;
             }
 
+            const elemRect = draggable.getBoundingClientRect();
             const dropZone = Array.from(dropZones).find(zone => {
                 const zoneRect = zone.getBoundingClientRect();
                 return isOverlapping(elemRect, zoneRect);
             });
 
             if (dropZone) {
+                // Cambiar clase y mover el elemento al contenedor de destino
                 dropZone.appendChild(draggable);
+                draggable.classList.replace('draggable-mut', 'hijo-de');
+                
+                // Asegurarse de que el nuevo hijo no tenga el comportamiento de arrastre
+                if (draggableInstance) {
+                    draggableInstance.kill();
+                }
 
                 gsap.set(draggable, {
                     position: 'relative',
@@ -687,16 +725,103 @@ draggables.forEach((draggable) => {
                     height: '100%'
                 });
 
+                // Remover el cuerpo físico de Matter.js asociado
                 removeBody(draggable);
+
+                // Aquí añadimos la funcionalidad de tiempo de clic y cambio de clase
+                monitorClickTime(draggable);
             }
 
-            // Remover listeners de liberación después del release
             window.removeEventListener('mouseup', releaseHandler);
             window.removeEventListener('touchend', releaseHandler);
         }
-    })[0];  // Almacenamos la instancia de Draggable correcta
+    })[0];
 });
 
+function monitorClickTime(element) {
+    let startTime, timer;
+
+    element.addEventListener('mousedown', () => {
+        startTime = Date.now();
+        timer = setInterval(() => {
+            const elapsedTime = Date.now() - startTime;
+            console.log(`Tiempo presionado: ${elapsedTime}ms`);
+
+            // Si el clic dura más de 300 ms, cambiamos la clase de nuevo a 'draggable-mut'
+            if (elapsedTime > 300) {
+                element.classList.replace('hijo-de', 'draggable-mut');
+                clearInterval(timer);  // Detenemos el temporizador
+
+                // Mostrar en la consola el cambio de clase
+                console.log('Cambio de clase: hijo-de a draggable-mut');
+
+                // Quitar el div del contenedor padre
+                if (element.parentElement.classList.contains('contenedor-soltar')) {
+                    document.body.appendChild(element);
+                }
+
+                // Cambiar el tamaño del 100% a su tamaño original
+                gsap.set(element, {
+                    width: '200px', // Cambiar al tamaño original deseado
+                    height: '200px',
+                    position: 'absolute', // Cambiar de relative a absolute
+                    x: element.offsetLeft, // Mantener la posición actual
+                    y: element.offsetTop
+                });
+
+                // Reactivar el drag and drop con GSAP
+                Draggable.create(element, {
+                    type: 'x,y',
+                    zIndexBoost: true
+                });
+            }
+        }, 100);  // Actualización en tiempo real cada 100ms
+    });
+
+    element.addEventListener('mouseup', () => {
+        clearInterval(timer);
+        const totalTime = Date.now() - startTime;
+        console.log(`Clic liberado. Tiempo total: ${totalTime}ms`);
+    });
+
+    element.addEventListener('touchstart', () => {
+        startTime = Date.now();
+        timer = setInterval(() => {
+            const elapsedTime = Date.now() - startTime;
+            console.log(`Tiempo presionado (touch): ${elapsedTime}ms`);
+
+            if (elapsedTime > 300) {
+                element.classList.replace('hijo-de', 'draggable-mut');
+                clearInterval(timer);
+
+                console.log('Cambio de clase: hijo-de a draggable-mut');
+
+                if (element.parentElement.classList.contains('contenedor-soltar')) {
+                    document.body.appendChild(element);
+                }
+
+                gsap.set(element, {
+                    width: '200px',
+                    height: '200px',
+                    position: 'absolute',
+                    x: element.offsetLeft,
+                    y: element.offsetTop
+                });
+
+                Draggable.create(element, {
+                    type: 'x,y',
+                    zIndexBoost: true
+                });
+            }
+        }, 100);
+    });
+
+    element.addEventListener('touchend', () => {
+        clearInterval(timer);
+        const totalTime = Date.now() - startTime;
+        console.log(`Clic liberado (touch). Tiempo total: ${totalTime}ms`);
+    });
+}
 
 function isOverlapping(rect1, rect2) {
     return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
@@ -740,6 +865,7 @@ function update() {
 
 update();
 
+
 // Redimensionamiento Horizontal
 const separador = document.getElementById('separador');
 const contenedorIzq = document.getElementById('ct-izq');
@@ -776,7 +902,7 @@ function redimensionarHorizontal(e) {
     }
 }
 
-// Eventos para ratón y táctiles
+// Eventos para redimensionamiento
 separador.addEventListener('mousedown', iniciarRedimensionamiento);
 separador.addEventListener('touchstart', iniciarRedimensionamiento, { passive: false });
 
@@ -822,7 +948,7 @@ function redimensionarVertical(e) {
     }
 }
 
-// Eventos para ratón y táctiles
+// Eventos para redimensionamiento vertical
 separadorVertical.addEventListener('mousedown', iniciarRedimensionamientoVertical);
 separadorVertical.addEventListener('touchstart', iniciarRedimensionamientoVertical, { passive: false });
 
@@ -922,8 +1048,34 @@ function actualizarReglas() {
 window.addEventListener('load', actualizarReglas);
 window.addEventListener('resize', actualizarReglas);
 
+// Ajustar el manejo de scroll y arrastre en pantallas táctiles
+document.querySelector('.contenido-prj').addEventListener('touchstart', function (event) {
+    let scrollTimeout;
+    const touchStartHandler = (event) => {
+        scrollTimeout = setTimeout(() => {
+            if (!isMouseDown) {
+                event.preventDefault();
+            }
+        }, 300); // 300ms antes de activar el drag
+    };
+
+    const touchEndHandler = () => {
+        clearTimeout(scrollTimeout);
+    };
+
+    this.addEventListener('touchmove', touchStartHandler, { passive: false });
+    this.addEventListener('touchend', touchEndHandler);
+    this.addEventListener('touchcancel', touchEndHandler);
+});
+
+
+
     
     </script>
     
 </body>
 </html>
+
+
+    
+
