@@ -83,6 +83,13 @@
             
 
         }
+
+        .draggable-mut{
+            color: #000000;
+        }
+        .hijo-de{
+            color: red;
+        }
       img, video  {
         max-width: 100%;
             object-fit: contain;
@@ -584,7 +591,6 @@ window.addEventListener('resize', function() {
     createWalls();
 });
 
-// Funcionalidad Draggable con Matter.js y GSAP
 function esDispositivoTactil() {
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
 }
@@ -628,7 +634,7 @@ draggables.forEach((draggable) => {
             window.addEventListener('touchend', releaseHandler, { passive: false });
 
             if (draggable.parentElement.classList.contains('contenedor-soltar')) {
-                draggableInstance.disable();
+                draggableInstance.disable(); // Deshabilitar arrastre si está en un contenedor de soltar
 
                 dragTimeout = setTimeout(() => {
                     if (!hasBeenReleased && isMouseDown) {
@@ -706,13 +712,12 @@ draggables.forEach((draggable) => {
             });
 
             if (dropZone) {
-                // Cambiar clase y mover el elemento al contenedor de destino
                 dropZone.appendChild(draggable);
                 draggable.classList.replace('draggable-mut', 'hijo-de');
-                
-                // Asegurarse de que el nuevo hijo no tenga el comportamiento de arrastre
+
+                // Eliminar Draggable para los hijos-de
                 if (draggableInstance) {
-                    draggableInstance.kill();
+                    draggableInstance.kill();  // Deshabilitar Draggable para elementos que son hijos-de
                 }
 
                 gsap.set(draggable, {
@@ -725,11 +730,8 @@ draggables.forEach((draggable) => {
                     height: '100%'
                 });
 
-                // Remover el cuerpo físico de Matter.js asociado
                 removeBody(draggable);
-
-                // Aquí añadimos la funcionalidad de tiempo de clic y cambio de clase
-                monitorClickTime(draggable);
+                monitorClickTime(draggable); // Reiniciar monitoreo de clic prolongado
             }
 
             window.removeEventListener('mouseup', releaseHandler);
@@ -741,41 +743,91 @@ draggables.forEach((draggable) => {
 function monitorClickTime(element) {
     let startTime, timer;
 
+    // Listener para el clic o toque prolongado
     element.addEventListener('mousedown', () => {
         startTime = Date.now();
         timer = setInterval(() => {
             const elapsedTime = Date.now() - startTime;
             console.log(`Tiempo presionado: ${elapsedTime}ms`);
 
-            // Si el clic dura más de 300 ms, cambiamos la clase de nuevo a 'draggable-mut'
-            if (elapsedTime > 300) {
-                element.classList.replace('hijo-de', 'draggable-mut');
-                clearInterval(timer);  // Detenemos el temporizador
+            if (elapsedTime > 300) {  // Si se mantiene más de 0.3 segundos
+                if (element.classList.contains('hijo-de')) {
+                    // Cambiar de clase de 'hijo-de' a 'draggable-mut'
+                    element.classList.replace('hijo-de', 'draggable-mut');
 
-                // Mostrar en la consola el cambio de clase
-                console.log('Cambio de clase: hijo-de a draggable-mut');
+                    // Mover al body si está dentro de un contenedor-soltar
+                    if (element.parentElement.classList.contains('contendor-soltar')) {
+                        document.body.appendChild(element);
+                        console.log('El elemento ha dejado de ser hijo del contenedor-soltar y ahora es hijo del body.');
+                    }
 
-                // Quitar el div del contenedor padre
-                if (element.parentElement.classList.contains('contenedor-soltar')) {
-                    document.body.appendChild(element);
+                    // Ajustar tamaño y posición
+                    gsap.set(element, {
+                        width: '200px',
+                        height: '200px',
+                        position: 'absolute',
+                        x: element.offsetLeft,
+                        y: element.offsetTop
+                    });
+
+                    // Reactivar el drag and drop con GSAP
+                    Draggable.create(element, {
+                        type: 'x,y',
+                        zIndexBoost: true,
+                        onPress: function (e) {
+                            console.log('onPress activado');
+                            const isTouch = e.type === "touchstart";
+                            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+                            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+                            gsap.set(element, {
+                                x: clientX - element.offsetWidth / 2,
+                                y: clientY - element.offsetHeight / 2
+                            });
+                        },
+                        onDrag: function (e) {
+                            console.log('onDrag activado');
+                        },
+                        onRelease: function (e) {
+                            console.log('onRelease activado');
+
+                            // Verificar si se soltó en un contenedor de soltar
+                            const elemRect = element.getBoundingClientRect();
+                            const dropZone = Array.from(dropZones).find(zone => {
+                                const zoneRect = zone.getBoundingClientRect();
+                                return isOverlapping(elemRect, zoneRect);
+                            });
+
+                            if (dropZone) {
+                                // Mover el div al contenedor de soltar
+                                dropZone.appendChild(element);
+
+                                // Cambiar la clase de nuevo a 'hijo-de'
+                                element.classList.replace('draggable-mut', 'hijo-de');
+
+                                // Ajustar tamaño y posición
+                                gsap.set(element, {
+                                    position: 'relative',
+                                    top: 'auto',
+                                    left: 'auto',
+                                    x: 0,
+                                    y: 0,
+                                    width: '100%',
+                                    height: '100%'
+                                });
+
+                                removeBody(element);  // Eliminar el cuerpo de Matter.js
+
+                                // **Asegúrate de volver a activar la función monitorClickTime**
+                                monitorClickTime(element); // <- Llamada aquí para reiniciar el monitoreo del clic prolongado
+                            }
+                        }
+                    });
                 }
 
-                // Cambiar el tamaño del 100% a su tamaño original
-                gsap.set(element, {
-                    width: '200px', // Cambiar al tamaño original deseado
-                    height: '200px',
-                    position: 'absolute', // Cambiar de relative a absolute
-                    x: element.offsetLeft, // Mantener la posición actual
-                    y: element.offsetTop
-                });
-
-                // Reactivar el drag and drop con GSAP
-                Draggable.create(element, {
-                    type: 'x,y',
-                    zIndexBoost: true
-                });
+                clearInterval(timer);  // Detener el temporizador después del cambio
             }
-        }, 100);  // Actualización en tiempo real cada 100ms
+        }, 100);
     });
 
     element.addEventListener('mouseup', () => {
@@ -784,6 +836,7 @@ function monitorClickTime(element) {
         console.log(`Clic liberado. Tiempo total: ${totalTime}ms`);
     });
 
+    // Touch equivalent for touch devices
     element.addEventListener('touchstart', () => {
         startTime = Date.now();
         timer = setInterval(() => {
@@ -791,27 +844,29 @@ function monitorClickTime(element) {
             console.log(`Tiempo presionado (touch): ${elapsedTime}ms`);
 
             if (elapsedTime > 300) {
-                element.classList.replace('hijo-de', 'draggable-mut');
-                clearInterval(timer);
+                if (element.classList.contains('hijo-de')) {
+                    element.classList.replace('hijo-de', 'draggable-mut');
 
-                console.log('Cambio de clase: hijo-de a draggable-mut');
+                    if (element.parentElement.classList.contains('contendor-soltar')) {
+                        document.body.appendChild(element);
+                        console.log('El elemento ha dejado de ser hijo del contenedor-soltar y ahora es hijo del body.');
+                    }
 
-                if (element.parentElement.classList.contains('contenedor-soltar')) {
-                    document.body.appendChild(element);
+                    gsap.set(element, {
+                        width: '200px',
+                        height: '200px',
+                        position: 'absolute',
+                        x: element.offsetLeft,
+                        y: element.offsetTop
+                    });
+
+                    Draggable.create(element, {
+                        type: 'x,y',
+                        zIndexBoost: true
+                    });
+
+                    clearInterval(timer);  // Detener el temporizador después del cambio
                 }
-
-                gsap.set(element, {
-                    width: '200px',
-                    height: '200px',
-                    position: 'absolute',
-                    x: element.offsetLeft,
-                    y: element.offsetTop
-                });
-
-                Draggable.create(element, {
-                    type: 'x,y',
-                    zIndexBoost: true
-                });
             }
         }, 100);
     });
@@ -864,6 +919,8 @@ function update() {
 }
 
 update();
+
+
 
 
 // Redimensionamiento Horizontal
@@ -1075,7 +1132,3 @@ document.querySelector('.contenido-prj').addEventListener('touchstart', function
     
 </body>
 </html>
-
-
-    
-
