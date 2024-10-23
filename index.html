@@ -549,6 +549,7 @@ const draggables = document.querySelectorAll('.draggable-mut');
 const draggableMutBodies = new Map();
 let isDragging = false;
 let currentDraggingBody = null;
+let cursorPosition = { x: 0, y: 0 };  // Guardar la posición del cursor o dedo
 
 const { Engine, Render, World, Bodies, Body } = Matter;
 const engine = Engine.create();
@@ -589,6 +590,14 @@ createWalls();
 window.addEventListener('resize', function() {
     World.clear(world, false);
     createWalls();
+    // Actualizar la posición de los cuerpos al redimensionar
+    draggableMutBodies.forEach((body, element) => {
+        const elemRect = element.getBoundingClientRect();
+        Body.setPosition(body, {
+            x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
+            y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
+        });
+    });
 });
 
 function esDispositivoTactil() {
@@ -599,7 +608,6 @@ const isTouchDevice = esDispositivoTactil();
 
 draggables.forEach((draggable) => {
     let dragTimeout;
-    let isDragging = false;
     let isMouseDown = false;
     let draggableInstance;
     let hasBeenReleased = false;
@@ -607,13 +615,14 @@ draggables.forEach((draggable) => {
 
     addBody(draggable);
 
+    // Inicialización de GSAP Draggable
     draggableInstance = Draggable.create(draggable, {
         type: 'x,y',
         zIndexBoost: true,
         onPress: function (e) {
             const isTouch = e.type === "touchstart";
-            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            cursorPosition.x = isTouch ? e.touches[0].clientX : e.clientX;  // Guardar posición inicial del cursor
+            cursorPosition.y = isTouch ? e.touches[0].clientY : e.clientY;
             const body = draggableMutBodies.get(draggable);
 
             hasBeenReleased = false;
@@ -633,20 +642,23 @@ draggables.forEach((draggable) => {
             window.addEventListener('mouseup', releaseHandler);
             window.addEventListener('touchend', releaseHandler, { passive: false });
 
+            // Detectar si está dentro de una zona de soltado (contenedor-soltar)
             if (draggable.parentElement.classList.contains('contenedor-soltar')) {
-                draggableInstance.disable();
+                draggableInstance.disable(); // Deshabilitamos el Draggable
 
                 dragTimeout = setTimeout(() => {
                     if (!hasBeenReleased && isMouseDown) {
+                        // Mover el elemento al body
                         document.body.appendChild(draggable);
                         gsap.set(draggable, {
                             position: 'absolute',
-                            x: clientX - draggable.offsetWidth / 2,
-                            y: clientY - draggable.offsetHeight / 2,
+                            x: cursorPosition.x - draggable.offsetWidth / 2,  // Centrar en el cursor
+                            y: cursorPosition.y - draggable.offsetHeight / 2,
                             width: '200px',
                             height: '200px'
                         });
 
+                        // Sincronizamos con Matter.js
                         if (body) {
                             Body.setStatic(body, true);
                             Body.setAngle(body, body.angle);
@@ -654,14 +666,14 @@ draggables.forEach((draggable) => {
                         }
 
                         isDragging = true;
-                        draggableInstance.enable();
+                        draggableInstance.enable();  // Reactivamos el Draggable
                         draggableInstance.startDrag(e);
                     }
                 }, 300);
             } else {
                 gsap.set(draggable, {
-                    x: clientX - draggable.offsetWidth / 2,
-                    y: clientY - draggable.offsetHeight / 2
+                    x: cursorPosition.x - draggable.offsetWidth / 2,  // Centrar en el cursor
+                    y: cursorPosition.y - draggable.offsetHeight / 2
                 });
 
                 if (body) {
@@ -677,8 +689,8 @@ draggables.forEach((draggable) => {
             if (!isDragging) return;
 
             const isTouch = e.type === "touchmove";
-            const clientX = isTouch ? e.touches[0].clientX : e.x;
-            const clientY = isTouch ? e.touches[0].clientY : e.y;
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
             const body = draggableMutBodies.get(draggable);
 
             gsap.set(draggable, {
@@ -688,13 +700,13 @@ draggables.forEach((draggable) => {
 
             if (body) {
                 Body.setPosition(body, {
-                    x: clientX,
-                    y: clientY
+                    x: Math.min(Math.max(clientX, 0), contDerecho.clientWidth),
+                    y: Math.min(Math.max(clientY, 0), contDerecho.clientHeight)
                 });
             }
         },
         onRelease: function (e) {
-            clearTimeout(dragTimeout);
+            clearTimeout(dragTimeout);  // Limpiar el temporizador cada vez
             isMouseDown = false;
             isDragging = false;
 
@@ -715,8 +727,10 @@ draggables.forEach((draggable) => {
                 dropZone.appendChild(draggable);
                 draggable.classList.replace('draggable-mut', 'hijo-de');
 
+                // **Matar completamente Draggable** al convertir a hijo-de
                 if (draggableInstance) {
                     draggableInstance.kill();
+                    draggableInstance = null; // Eliminar referencia de la instancia
                 }
 
                 gsap.set(draggable, {
@@ -742,156 +756,91 @@ draggables.forEach((draggable) => {
 function monitorClickTime(element) {
     let startTime, timer;
 
-    element.addEventListener('mousedown', () => {
+    // Listener para eventos de ratón y táctiles
+    const startHandler = (e) => {
+        const isTouch = e.type === 'touchstart';
+        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+        cursorPosition.x = clientX;
+        cursorPosition.y = clientY;
+
         startTime = Date.now();
-        timer = setInterval(() => {
+        timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            console.log(`Tiempo presionado: ${elapsedTime}ms`);
+            if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
+                // **Cambio de clase a draggable-mut**
+                element.classList.replace('hijo-de', 'draggable-mut');
 
-            if (elapsedTime > 300) {
-                if (element.classList.contains('hijo-de')) {
-                    element.classList.replace('hijo-de', 'draggable-mut');
+                // Mover el div al body para ser draggable de nuevo
+                document.body.appendChild(element);
 
-                    if (element.parentElement.classList.contains('contendor-soltar')) {
-                        document.body.appendChild(element);
-                        console.log('El elemento ha dejado de ser hijo del contenedor-soltar y ahora es hijo del body.');
-                    }
+                // Ajustar tamaño y estilo al tamaño original
+                gsap.set(element, {
+                    width: '200px',
+                    height: '200px',
+                    position: 'absolute',
+                    x: cursorPosition.x - element.offsetWidth / 2,  // Centrar en el cursor
+                    y: cursorPosition.y - element.offsetHeight / 2
+                });
 
-                    gsap.set(element, {
-                        width: '200px',
-                        height: '200px',
-                        position: 'absolute',
-                        x: element.offsetLeft,
-                        y: element.offsetTop
-                    });
+                // **Reiniciar Draggable**
+                draggableInstance = Draggable.create(element, {
+                    type: 'x,y',
+                    zIndexBoost: true,
+                    onPress: function(e) {
+                        const isTouch = e.type === "touchstart";
+                        const cx = isTouch ? e.touches[0].clientX : e.clientX;
+                        const cy = isTouch ? e.touches[0].clientY : e.clientY;
+                        gsap.set(element, {
+                            x: cx - element.offsetWidth / 2,
+                            y: cy - element.offsetHeight / 2
+                        });
+                    },
+                    onDrag: function(e) {},
+                    onRelease: function(e) {
+                        const elemRect = element.getBoundingClientRect();
+                        const dropZone = Array.from(dropZones).find(zone => {
+                            const zoneRect = zone.getBoundingClientRect();
+                            return isOverlapping(elemRect, zoneRect);
+                        });
 
-                    // Reactivar el drag and drop con la configuración completa de eventos
-                    Draggable.create(element, {
-                        type: 'x,y',
-                        zIndexBoost: true,
-                        onPress: function(e) {
-                            // Lógica onPress original
-                        },
-                        onDrag: function(e) {
-                            // Lógica onDrag original
-                        },
-                        onRelease: function(e) {
-                            const elemRect = element.getBoundingClientRect();
-                            const dropZone = Array.from(dropZones).find(zone => {
-                                const zoneRect = zone.getBoundingClientRect();
-                                return isOverlapping(elemRect, zoneRect);
+                        if (dropZone) {
+                            dropZone.appendChild(element);
+                            element.classList.replace('draggable-mut', 'hijo-de');
+
+                            // Desactivar GSAP Draggable
+                            draggableInstance.kill();
+                            draggableInstance = null;
+
+                            gsap.set(element, {
+                                position: 'relative',
+                                top: 'auto',
+                                left: 'auto',
+                                x: 0,
+                                y: 0,
+                                width: '100%',
+                                height: '100%'
                             });
 
-                            if (dropZone) {
-                                dropZone.appendChild(element);
-                                element.classList.replace('draggable-mut', 'hijo-de');
-
-                                // Ajuste visual para hijo-de
-                                gsap.set(element, {
-                                    position: 'relative',
-                                    top: 'auto',
-                                    left: 'auto',
-                                    x: 0,
-                                    y: 0,
-                                    width: '100%',
-                                    height: '100%'
-                                });
-
-                                removeBody(element);
-
-                                // **Asegúrate de volver a activar la función monitorClickTime**
-                                monitorClickTime(element); // <- Llamada aquí para reiniciar el monitoreo del clic prolongado
-                            }
+                            removeBody(element);
+                            monitorClickTime(element);  // Reiniciar el ciclo de click
                         }
-                    });
-                }
-
-                clearInterval(timer);
-            }
-        }, 100);
-    });
-
-    element.addEventListener('mouseup', () => {
-        clearInterval(timer);
-        const totalTime = Date.now() - startTime;
-        console.log(`Clic liberado. Tiempo total: ${totalTime}ms`);
-    });
-
-    element.addEventListener('touchstart', () => {
-        startTime = Date.now();
-        timer = setInterval(() => {
-            const elapsedTime = Date.now() - startTime;
-            console.log(`Tiempo presionado (touch): ${elapsedTime}ms`);
-
-            if (elapsedTime > 300) {
-                if (element.classList.contains('hijo-de')) {
-                    element.classList.replace('hijo-de', 'draggable-mut');
-
-                    if (element.parentElement.classList.contains('contendor-soltar')) {
-                        document.body.appendChild(element);
-                        console.log('El elemento ha dejado de ser hijo del contenedor-soltar y ahora es hijo del body.');
                     }
-
-                    gsap.set(element, {
-                        width: '200px',
-                        height: '200px',
-                        position: 'absolute',
-                        x: element.offsetLeft,
-                        y: element.offsetTop
-                    });
-
-                    Draggable.create(element, {
-                        type: 'x,y',
-                        zIndexBoost: true,
-                        onPress: function(e) {
-                            // Lógica onPress original
-                        },
-                        onDrag: function(e) {
-                            // Lógica onDrag original
-                        },
-                        onRelease: function(e) {
-                            const elemRect = element.getBoundingClientRect();
-                            const dropZone = Array.from(dropZones).find(zone => {
-                                const zoneRect = zone.getBoundingClientRect();
-                                return isOverlapping(elemRect, zoneRect);
-                            });
-
-                            if (dropZone) {
-                                dropZone.appendChild(element);
-                                element.classList.replace('draggable-mut', 'hijo-de');
-
-                                // Ajuste visual para hijo-de
-                                gsap.set(element, {
-                                    position: 'relative',
-                                    top: 'auto',
-                                    left: 'auto',
-                                    x: 0,
-                                    y: 0,
-                                    width: '100%',
-                                    height: '100%'
-                                });
-
-                                removeBody(element);
-
-                                // **Reiniciar el monitoreo del clic prolongado**
-                                monitorClickTime(element); // <- Llamada aquí para reiniciar el monitoreo
-                            }
-                        }
-                    });
-                }
-
-                clearInterval(timer);
+                })[0];
             }
-        }, 100);
-    });
+        }, 300);
+    };
 
-    element.addEventListener('touchend', () => {
-        clearInterval(timer);
-        const totalTime = Date.now() - startTime;
-        console.log(`Clic liberado (touch). Tiempo total: ${totalTime}ms`);
-    });
+    element.addEventListener('mousedown', startHandler);
+    element.addEventListener('touchstart', startHandler);
+
+    // Limpieza del temporizador
+    const endHandler = () => clearTimeout(timer);
+
+    element.addEventListener('mouseup', endHandler);
+    element.addEventListener('touchend', endHandler);
 }
-
 
 function isOverlapping(rect1, rect2) {
     return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
@@ -934,6 +883,10 @@ function update() {
 }
 
 update();
+
+
+
+
 
 
 
@@ -1146,4 +1099,3 @@ document.querySelector('.contenido-prj').addEventListener('touchstart', function
     
 </body>
 </html>
-
