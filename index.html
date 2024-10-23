@@ -634,7 +634,7 @@ draggables.forEach((draggable) => {
             window.addEventListener('touchend', releaseHandler, { passive: false });
 
             if (draggable.parentElement.classList.contains('contenedor-soltar')) {
-                draggableInstance.disable(); // Deshabilitar arrastre si está en un contenedor de soltar
+                draggableInstance.disable();
 
                 dragTimeout = setTimeout(() => {
                     if (!hasBeenReleased && isMouseDown) {
@@ -715,9 +715,8 @@ draggables.forEach((draggable) => {
                 dropZone.appendChild(draggable);
                 draggable.classList.replace('draggable-mut', 'hijo-de');
 
-                // Eliminar Draggable para los hijos-de
                 if (draggableInstance) {
-                    draggableInstance.kill();  // Deshabilitar Draggable para elementos que son hijos-de
+                    draggableInstance.kill();
                 }
 
                 gsap.set(draggable, {
@@ -731,7 +730,7 @@ draggables.forEach((draggable) => {
                 });
 
                 removeBody(draggable);
-                monitorClickTime(draggable); // Reiniciar monitoreo de clic prolongado
+                monitorClickTime(draggable);
             }
 
             window.removeEventListener('mouseup', releaseHandler);
@@ -743,25 +742,21 @@ draggables.forEach((draggable) => {
 function monitorClickTime(element) {
     let startTime, timer;
 
-    // Listener para el clic o toque prolongado
     element.addEventListener('mousedown', () => {
         startTime = Date.now();
         timer = setInterval(() => {
             const elapsedTime = Date.now() - startTime;
             console.log(`Tiempo presionado: ${elapsedTime}ms`);
 
-            if (elapsedTime > 300) {  // Si se mantiene más de 0.3 segundos
+            if (elapsedTime > 300) {
                 if (element.classList.contains('hijo-de')) {
-                    // Cambiar de clase de 'hijo-de' a 'draggable-mut'
                     element.classList.replace('hijo-de', 'draggable-mut');
 
-                    // Mover al body si está dentro de un contenedor-soltar
                     if (element.parentElement.classList.contains('contendor-soltar')) {
                         document.body.appendChild(element);
                         console.log('El elemento ha dejado de ser hijo del contenedor-soltar y ahora es hijo del body.');
                     }
 
-                    // Ajustar tamaño y posición
                     gsap.set(element, {
                         width: '200px',
                         height: '200px',
@@ -770,28 +765,17 @@ function monitorClickTime(element) {
                         y: element.offsetTop
                     });
 
-                    // Reactivar el drag and drop con GSAP
+                    // Reactivar el drag and drop con la configuración completa de eventos
                     Draggable.create(element, {
                         type: 'x,y',
                         zIndexBoost: true,
-                        onPress: function (e) {
-                            console.log('onPress activado');
-                            const isTouch = e.type === "touchstart";
-                            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
-                            gsap.set(element, {
-                                x: clientX - element.offsetWidth / 2,
-                                y: clientY - element.offsetHeight / 2
-                            });
+                        onPress: function(e) {
+                            // Lógica onPress original
                         },
-                        onDrag: function (e) {
-                            console.log('onDrag activado');
+                        onDrag: function(e) {
+                            // Lógica onDrag original
                         },
-                        onRelease: function (e) {
-                            console.log('onRelease activado');
-
-                            // Verificar si se soltó en un contenedor de soltar
+                        onRelease: function(e) {
                             const elemRect = element.getBoundingClientRect();
                             const dropZone = Array.from(dropZones).find(zone => {
                                 const zoneRect = zone.getBoundingClientRect();
@@ -799,13 +783,10 @@ function monitorClickTime(element) {
                             });
 
                             if (dropZone) {
-                                // Mover el div al contenedor de soltar
                                 dropZone.appendChild(element);
-
-                                // Cambiar la clase de nuevo a 'hijo-de'
                                 element.classList.replace('draggable-mut', 'hijo-de');
 
-                                // Ajustar tamaño y posición
+                                // Ajuste visual para hijo-de
                                 gsap.set(element, {
                                     position: 'relative',
                                     top: 'auto',
@@ -816,7 +797,7 @@ function monitorClickTime(element) {
                                     height: '100%'
                                 });
 
-                                removeBody(element);  // Eliminar el cuerpo de Matter.js
+                                removeBody(element);
 
                                 // **Asegúrate de volver a activar la función monitorClickTime**
                                 monitorClickTime(element); // <- Llamada aquí para reiniciar el monitoreo del clic prolongado
@@ -825,7 +806,7 @@ function monitorClickTime(element) {
                     });
                 }
 
-                clearInterval(timer);  // Detener el temporizador después del cambio
+                clearInterval(timer);
             }
         }, 100);
     });
@@ -836,7 +817,6 @@ function monitorClickTime(element) {
         console.log(`Clic liberado. Tiempo total: ${totalTime}ms`);
     });
 
-    // Touch equivalent for touch devices
     element.addEventListener('touchstart', () => {
         startTime = Date.now();
         timer = setInterval(() => {
@@ -862,11 +842,45 @@ function monitorClickTime(element) {
 
                     Draggable.create(element, {
                         type: 'x,y',
-                        zIndexBoost: true
-                    });
+                        zIndexBoost: true,
+                        onPress: function(e) {
+                            // Lógica onPress original
+                        },
+                        onDrag: function(e) {
+                            // Lógica onDrag original
+                        },
+                        onRelease: function(e) {
+                            const elemRect = element.getBoundingClientRect();
+                            const dropZone = Array.from(dropZones).find(zone => {
+                                const zoneRect = zone.getBoundingClientRect();
+                                return isOverlapping(elemRect, zoneRect);
+                            });
 
-                    clearInterval(timer);  // Detener el temporizador después del cambio
+                            if (dropZone) {
+                                dropZone.appendChild(element);
+                                element.classList.replace('draggable-mut', 'hijo-de');
+
+                                // Ajuste visual para hijo-de
+                                gsap.set(element, {
+                                    position: 'relative',
+                                    top: 'auto',
+                                    left: 'auto',
+                                    x: 0,
+                                    y: 0,
+                                    width: '100%',
+                                    height: '100%'
+                                });
+
+                                removeBody(element);
+
+                                // **Reiniciar el monitoreo del clic prolongado**
+                                monitorClickTime(element); // <- Llamada aquí para reiniciar el monitoreo
+                            }
+                        }
+                    });
                 }
+
+                clearInterval(timer);
             }
         }, 100);
     });
@@ -877,6 +891,7 @@ function monitorClickTime(element) {
         console.log(`Clic liberado (touch). Tiempo total: ${totalTime}ms`);
     });
 }
+
 
 function isOverlapping(rect1, rect2) {
     return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
@@ -919,7 +934,6 @@ function update() {
 }
 
 update();
-
 
 
 
@@ -1132,3 +1146,4 @@ document.querySelector('.contenido-prj').addEventListener('touchstart', function
     
 </body>
 </html>
+
