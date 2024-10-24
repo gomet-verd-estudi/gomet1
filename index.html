@@ -7,22 +7,22 @@
     <style>
         body, html {
             margin: 0;
-            height: 100%;
-            width: 100%;
+            width: 100vw;
             display: flex;
             overflow: hidden;
             user-select: none; /* Evitar selección de texto */
-
+            height: 100vh; /* Asegura que el body se ajuste al 100% de la altura de la pantalla */
+            touch-action: none; /* Desactiva gestos de desplazamiento en pantallas táctiles */
         }
 
          #ct-drc{
-            width: 40%;
+            width: 30%;
             height: 100%;
 
         }
 
         #ct-izq{
-            width: 60%;
+            width: 70%;
             height: 100%;
 
         }
@@ -40,8 +40,6 @@
        }
 
         .contenedor-izquierdo, #contenedor-derecho {
-           
-            display: flex;
             transition: height 0.5s ease, width 0.5s ease, background-color 0.5s ease;
         }
         .contenedor-izquierdo {
@@ -293,12 +291,41 @@ flex-direction: column;
             height: 100%;
         }
         .texto{
-            color: blue;
-            font-size: 50pt;
+            color: #4DA77D;;
+            font-size: 18pt;
             position: absolute;
             z-index: 3;
-            mix-blend-mode: soft-light;
-        }
+            overflow-y: auto;
+            width: calc(100% - 1rem);
+            height: calc(100% - 1rem);
+            overflow-x: hidden;
+text-align: start;        }
+        .texto::-webkit-scrollbar {
+    width: 1rem; /* Ancho de la barra lateral */
+    opacity: 80%;
+    margin: 0;
+    display: flex;
+    position: absolute;
+
+  }
+  .texto::-webkit-scrollbar-track {
+    background-color: #2386EF;	
+	
+    border-radius: 4px; /* Bordes redondeados */
+    border: solid 1pt black;
+ }
+
+ .texto::-webkit-scrollbar-thumb {
+    background-color:#F85484; /* Color de la barra */
+    border-radius: 4px; /* Bordes redondeados */
+    opacity: 80%;
+    border: solid 1pt black;
+  }
+
+  .texto::-webkit-scrollbar-thumb:hover {
+    opacity: 80%;
+
+  }
 
         .regla {
             position: absolute;
@@ -528,6 +555,12 @@ flex-direction: column;
     </div>
     <div class="draggable-mut" id="draggable3" style="left: 2px;">
         <div class="cmyk-container base">
+            <div class="texto">Soy Manel Vila, diseñador gráfico graduado por la EASD (Escuela Arte Superior de Valencia).
+                Durante los tres últimos años he estado trabajando como freelance, con proyectos como los
+                que veréis a continuación. Además, he colaborado durante un año con Jotateam Studio.
+                Trabajo con comodidad en cualquier rama del diseño gráfico, pero me he especializado
+                principalmente en brandig y lettering.
+                Me considero una persona implicada y con capacidad a trabajo en equipo y bajo presión.</div>
         <div class="naranja tamaño-completo">
             <div class="cmyk-container circle">
                  <div class="azul1 tamaño-completo"></div>
@@ -537,7 +570,7 @@ flex-direction: column;
     </div>
     <div class="draggable-mut" id="draggable4">
         <div class="cmyk-container base">
-        <div class="texto">hola</div>
+       
         <div class="verde tamaño-completo"></div>
     </div>
 </div>
