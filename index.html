@@ -590,374 +590,340 @@ flex-direction: column;
    
     
     <script>
+// Código original
 const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
-        const dropZones = document.querySelectorAll('.contendor-soltar');
-        const draggables = document.querySelectorAll('.draggable-mut');
-        const draggableMutBodies = new Map();
-        let isDragging = false;
-        let currentDraggingBody = null;
-        let cursorPosition = { x: 0, y: 0 };  // Guardar la posición del cursor o dedo
+const dropZones = document.querySelectorAll('.contendor-soltar');
+const draggables = document.querySelectorAll('.draggable-mut');
+const draggableMutBodies = new Map();
+let isDragging = false;
+let currentDraggingBody = null;
+let cursorPosition = { x: 0, y: 0 };
 
-        const { Engine, Render, World, Bodies, Body } = Matter;
-        const engine = Engine.create();
-        const world = engine.world;
+const { Engine, Render, World, Bodies, Body } = Matter;
+const engine = Engine.create();
+const world = engine.world;
 
-        const contDerecho = document.getElementById('contenedor-derecho');
+const contDerecho = document.getElementById('contenedor-derecho');
 
-        // Renderizado de Matter.js con formas transparentes
-        const render = Render.create({
-            element: contDerecho,
-            engine: engine,
-            options: {
-                width: contDerecho.clientWidth,
-                height: contDerecho.clientHeight,
-                wireframes: false,
-                background: 'transparent'
-            }
+// Renderizado de Matter.js con formas transparentes
+const render = Render.create({
+    element: contDerecho,
+    engine: engine,
+    options: {
+        width: contDerecho.clientWidth,
+        height: contDerecho.clientHeight,
+        wireframes: false,
+        background: 'transparent'
+    }
+});
+
+Render.run(render);
+
+function createWalls() {
+    const width = contDerecho.clientWidth;
+    const height = contDerecho.clientHeight;
+
+    const walls = [
+        Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
+    ];
+
+    World.add(world, walls);
+}
+
+createWalls();
+
+window.addEventListener('resize', function() {
+    World.clear(world, false);
+    createWalls();
+    draggableMutBodies.forEach((body, element) => {
+        const elemRect = element.getBoundingClientRect();
+        Body.setPosition(body, {
+            x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
+            y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
         });
+    });
+});
 
-        Render.run(render);
+function esDispositivoTactil() {
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+}
 
-        function createWalls() {
-            const width = contDerecho.clientWidth;
-            const height = contDerecho.clientHeight;
+const isTouchDevice = esDispositivoTactil();
 
-            const walls = [
-                Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
-                Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
-                Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
-                Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
-            ];
+draggables.forEach((draggable) => {
+    let dragTimeout;
+    let isMouseDown = false;
+    let draggableInstance;
+    let hasBeenReleased = false;
+    let releaseHandler;
 
-            World.add(world, walls);
-        }
+    addBody(draggable);
 
-        createWalls();
+    // Inicialización de GSAP Draggable
+    draggableInstance = Draggable.create(draggable, {
+        type: 'x,y',
+        zIndexBoost: true,
+        onPress: function (e) {
+            const isTouch = e.type === "touchstart";
+            cursorPosition.x = isTouch ? e.touches[0].clientX : e.clientX;
+            cursorPosition.y = isTouch ? e.touches[0].clientY : e.clientY;
+            const body = draggableMutBodies.get(draggable);
 
-        window.addEventListener('resize', function() {
-            World.clear(world, false);
-            createWalls();
-            // Actualizar la posición de los cuerpos al redimensionar
-            draggableMutBodies.forEach((body, element) => {
-                const elemRect = element.getBoundingClientRect();
-                Body.setPosition(body, {
-                    x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
-                    y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
-                });
-            });
-        });
+            hasBeenReleased = false;
+            isMouseDown = true;
+            isDragging = false;
 
-        function esDispositivoTactil() {
-            return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-        }
+            releaseHandler = () => {
+                hasBeenReleased = true;
+                clearTimeout(dragTimeout);
+                draggableInstance.enable();
+                isMouseDown = false;
+                isDragging = false;
+                window.removeEventListener('mouseup', releaseHandler);
+                window.removeEventListener('touchend', releaseHandler);
+            };
 
-        const isTouchDevice = esDispositivoTactil();
+            window.addEventListener('mouseup', releaseHandler);
+            window.addEventListener('touchend', releaseHandler, { passive: false });
 
-        draggables.forEach((draggable) => {
-            let dragTimeout;
-            let isMouseDown = false;
-            let draggableInstance;
-            let hasBeenReleased = false;
-            let releaseHandler;
-
-            addBody(draggable);
-
-            // Inicialización de GSAP Draggable
-            draggableInstance = Draggable.create(draggable, {
-                type: 'x,y',
-                zIndexBoost: true,
-                onPress: function (e) {
-                    const isTouch = e.type === "touchstart";
-                    cursorPosition.x = isTouch ? e.touches[0].clientX : e.clientX;  // Guardar posición inicial del cursor
-                    cursorPosition.y = isTouch ? e.touches[0].clientY : e.clientY;
-                    const body = draggableMutBodies.get(draggable);
-
-                    hasBeenReleased = false;
-                    isMouseDown = true;
-                    isDragging = false;
-
-                    releaseHandler = () => {
-                        hasBeenReleased = true;
-                        clearTimeout(dragTimeout);
-                        draggableInstance.enable();
-                        isMouseDown = false;
-                        isDragging = false;
-                        window.removeEventListener('mouseup', releaseHandler);
-                        window.removeEventListener('touchend', releaseHandler);
-                    };
-
-                    window.addEventListener('mouseup', releaseHandler);
-                    window.addEventListener('touchend', releaseHandler, { passive: false });
-
-                    // Detectar si está dentro de una zona de soltado (contenedor-soltar)
-                    if (draggable.parentElement.classList.contains('contenedor-soltar')) {
-                        draggableInstance.disable(); // Deshabilitamos el Draggable
-
-                        dragTimeout = setTimeout(() => {
-                            if (!hasBeenReleased && isMouseDown) {
-                                // Mover el elemento al body
-                                document.body.appendChild(draggable);
-                                gsap.set(draggable, {
-                                    position: 'absolute',
-                                    x: cursorPosition.x - draggable.offsetWidth / 2,  // Centrar en el cursor
-                                    y: cursorPosition.y - draggable.offsetHeight / 2,
-                                    width: '200px',
-                                    height: '200px'
-                                });
-
-                                // Sincronizamos con Matter.js
-                                if (body) {
-                                    Body.setStatic(body, true);
-                                    Body.setAngle(body, body.angle);
-                                    currentDraggingBody = body;
-                                }
-
-                                isDragging = true;
-                                draggableInstance.enable();  // Reactivamos el Draggable
-                                draggableInstance.startDrag(e);
-                            }
-                        }, 300);
-                    } else {
+            if (draggable.parentElement.classList.contains('contenedor-soltar')) {
+                draggableInstance.disable();
+                dragTimeout = setTimeout(() => {
+                    if (!hasBeenReleased && isMouseDown) {
+                        document.body.appendChild(draggable);
                         gsap.set(draggable, {
-                            x: cursorPosition.x - draggable.offsetWidth / 2,  // Centrar en el cursor
-                            y: cursorPosition.y - draggable.offsetHeight / 2
+                            position: 'absolute',
+                            x: cursorPosition.x - draggable.offsetWidth / 2,
+                            y: cursorPosition.y - draggable.offsetHeight / 2,
+                            width: '200px',
+                            height: '200px'
                         });
-
                         if (body) {
                             Body.setStatic(body, true);
                             Body.setAngle(body, body.angle);
                             currentDraggingBody = body;
                         }
-
                         isDragging = true;
-                    }
-                },
-                onDrag: function (e) {
-                    if (!isDragging) return;
-
-                    const isTouch = e.type === "touchmove";
-                    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-                    const body = draggableMutBodies.get(draggable);
-
-                    gsap.set(draggable, {
-                        x: clientX - draggable.offsetWidth / 2,
-                        y: clientY - draggable.offsetHeight / 2
-                    });
-
-                    if (body) {
-                        Body.setPosition(body, {
-                            x: Math.min(Math.max(clientX, 0), contDerecho.clientWidth),
-                            y: Math.min(Math.max(clientY, 0), contDerecho.clientHeight)
-                        });
-                    }
-                },
-                onRelease: function (e) {
-                    clearTimeout(dragTimeout);  // Limpiar el temporizador cada vez
-                    isMouseDown = false;
-                    isDragging = false;
-
-                    const body = draggableMutBodies.get(draggable);
-
-                    if (body) {
-                        Body.setStatic(body, false);
-                        currentDraggingBody = null;
-                    }
-
-                    const elemRect = draggable.getBoundingClientRect();
-                    const dropZone = Array.from(dropZones).find(zone => {
-                        const zoneRect = zone.getBoundingClientRect();
-                        return isOverlapping(elemRect, zoneRect);
-                    });
-
-                    if (dropZone) {
-                        dropZone.appendChild(draggable);
-                        draggable.classList.replace('draggable-mut', 'hijo-de');
-
-                        // **Matar completamente Draggable** al convertir a hijo-de
-                        if (draggableInstance) {
-                            draggableInstance.kill();
-                            draggableInstance = null; // Eliminar referencia de la instancia
-                        }
-
-                        gsap.set(draggable, {
-                            position: 'relative',
-                            top: 'auto',
-                            left: 'auto',
-                            x: 0,
-                            y: 0,
-                            width: '100%',
-                            height: '100%',
-                            zIndex: '5'
-                        });
-
-                        removeBody(draggable);
-                        monitorClickTime(draggable);
-                    }
-
-                    window.removeEventListener('mouseup', releaseHandler);
-                    window.removeEventListener('touchend', releaseHandler);
-                }
-            })[0];
-        });
-
-        function monitorClickTime(element) {
-            let startTime, timer;
-            let cursorPos = { x: 0, y: 0 };
-            let offset = { x: 0, y: 0 }; // Desplazamiento inicial entre el centro del div y el cursor
-
-            const startHandler = (e) => {
-                const isTouch = e.type === 'touchstart';
-                cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
-                cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
-
-                // Obtener las dimensiones iniciales del elemento
-                const rect = element.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-
-                // Calcular el desplazamiento entre el centro del div y el cursor
-                offset.x = cursorPos.x - centerX;
-                offset.y = cursorPos.y - centerY;
-
-                startTime = Date.now();
-                timer = setTimeout(() => {
-                    const elapsedTime = Date.now() - startTime;
-                    if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
-                        // Cambio de clase a draggable-mut
-                        element.classList.replace('hijo-de', 'draggable-mut');
-
-                        // Mover el div al body para ser draggable de nuevo
-                        document.body.appendChild(element);
-
-                        // Obtener las dimensiones actuales del elemento
-                        const originalWidth = element.offsetWidth;
-                        const originalHeight = element.offsetHeight;
-
-                        // Centrar respecto al cursor en la posición actual, ajustando el desplazamiento
-                        gsap.set(element, {
-                            position: 'absolute',
-                            x: cursorPos.x - originalWidth / 2 + offset.x,
-                            y: cursorPos.y - originalHeight / 2 + offset.y
-                        });
-
-                        // Animación de cambio de tamaño con actualización constante de posición
-                        gsap.to(element, {
-                            duration: 0.2,  // Duración del cambio de tamaño
-                            width: '200px',  // Ancho original
-                            height: '200px',  // Altura original
-                            onUpdate: function() {
-                                // Mantener el div centrado respecto al cursor durante la transformación de tamaño
-                                const newWidth = element.offsetWidth;
-                                const newHeight = element.offsetHeight;
-
-                                gsap.set(element, {
-                                    x: cursorPos.x - newWidth / 2 + offset.x,
-                                    y: cursorPos.y - newHeight / 2 + offset.y
-                                });
-                            },
-                            onComplete: function() {
-                                // Asegurarse de que al final de la animación el div sigue centrado
-                                gsap.set(element, {
-                                    x: cursorPos.x - element.offsetWidth / 2 + offset.x,
-                                    y: cursorPos.y - element.offsetHeight / 2 + offset.y
-                                });
-
-                                // Reactivar Draggable inmediatamente sin requerir un nuevo "click"
-                                draggableInstance = Draggable.create(element, {
-                                    type: 'x,y',
-                                    zIndexBoost: true,
-                                    onPress: function(e) {
-                                        const isTouch = e.type === "touchstart";
-                                        const cx = isTouch ? e.touches[0].clientX : e.clientX;
-                                        const cy = isTouch ? e.touches[0].clientY : e.clientY;
-
-                                        // Volver a centrar el div en el cursor al iniciar el drag
-                                        gsap.set(element, {
-                                            x: cx - element.offsetWidth / 2 + offset.x,
-                                            y: cy - element.offsetHeight / 2 + offset.y
-                                        });
-                                    },
-                                    onDrag: function(e) {
-                                        const isTouch = e.type === "touchmove";
-                                        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                                        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
-                                        // Mover el div con el cursor
-                                        gsap.set(element, {
-                                            x: clientX - element.offsetWidth / 2,
-                                            y: clientY - element.offsetHeight / 2
-                                        });
-                                    },
-                                    onRelease: function(e) {
-                                        const elemRect = element.getBoundingClientRect();
-                                        const dropZone = Array.from(dropZones).find(zone => {
-                                            const zoneRect = zone.getBoundingClientRect();
-                                            return isOverlapping(elemRect, zoneRect);
-                                        });
-
-                                        if (dropZone) {
-                                            dropZone.appendChild(element);
-                                            element.classList.replace('draggable-mut', 'hijo-de');
-
-                                            // Desactivar GSAP Draggable
-                                            draggableInstance.kill();
-                                            draggableInstance = null;
-
-                                            gsap.set(element, {
-                                                position: 'relative',
-                                                top: 'auto',
-                                                left: 'auto',
-                                                x: 0,
-                                                y: 0,
-                                                width: '100%',
-                                                height: '100%',
-                                                zIndex: '5'
-
-                                            });
-
-                                            removeBody(element);
-                                            monitorClickTime(element);  // Reiniciar el ciclo de click
-                                        }
-                                    }
-                                })[0];
-
-                                // Iniciar el drag inmediatamente sin esperar otro click
-                                draggableInstance.startDrag(e);
-                            }
-                        });
-
-                        // Crear un ciclo de actualización para mantener el div centrado mientras cambia de tamaño
-                        const updatePosition = () => {
-                            const newWidth = element.offsetWidth;
-                            const newHeight = element.offsetHeight;
-                            gsap.set(element, {
-                                x: cursorPos.x - newWidth / 2 + offset.x,
-                                y: cursorPos.y - newHeight / 2 + offset.y
-                            });
-                        };
-                        
-                        // Bucle constante de actualización hasta que finalice la transformación
-                        const intervalId = setInterval(updatePosition, 16); // 60 FPS
-
-                        setTimeout(() => clearInterval(intervalId), 200); // Parar el bucle tras la animación
+                        draggableInstance.enable();
+                        draggableInstance.startDrag(e);
                     }
                 }, 300);
-            };
+            } else {
+                gsap.set(draggable, {
+                    x: cursorPosition.x - draggable.offsetWidth / 2,
+                    y: cursorPosition.y - draggable.offsetHeight / 2
+                });
+                if (body) {
+                    Body.setStatic(body, true);
+                    Body.setAngle(body, body.angle);
+                    currentDraggingBody = body;
+                }
+                isDragging = true;
+            }
+        },
+        onDrag: function (e) {
+            if (!isDragging) return;
+            const isTouch = e.type === "touchmove";
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            const body = draggableMutBodies.get(draggable);
 
-            element.addEventListener('mousedown', startHandler);
-            element.addEventListener('touchstart', startHandler);
+            gsap.set(draggable, {
+                x: clientX - draggable.offsetWidth / 2,
+                y: clientY - draggable.offsetHeight / 2
+            });
+            if (body) {
+                Body.setPosition(body, {
+                    x: Math.min(Math.max(clientX, 0), contDerecho.clientWidth),
+                    y: Math.min(Math.max(clientY, 0), contDerecho.clientHeight)
+                });
+            }
+        },
+        onRelease: function (e) {
+            clearTimeout(dragTimeout);
+            isMouseDown = false;
+            isDragging = false;
+            const body = draggableMutBodies.get(draggable);
 
-            const endHandler = () => clearTimeout(timer);
-            element.addEventListener('mouseup', endHandler);
-            element.addEventListener('touchend', endHandler);
+            if (body) {
+                Body.setStatic(body, false);
+                currentDraggingBody = null;
+            }
+
+            const elemRect = draggable.getBoundingClientRect();
+            const dropZone = Array.from(dropZones).find(zone => {
+                const zoneRect = zone.getBoundingClientRect();
+                return isOverlapping(elemRect, zoneRect);
+            });
+
+            if (dropZone) {
+                dropZone.appendChild(draggable);
+                draggable.classList.replace('draggable-mut', 'hijo-de');
+
+                if (draggableInstance) {
+                    draggableInstance.kill();
+                    draggableInstance = null;
+                }
+
+                gsap.set(draggable, {
+                    position: 'relative',
+                    top: 'auto',
+                    left: 'auto',
+                    x: 0,
+                    y: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: '5'
+                });
+
+                removeBody(draggable);
+                monitorClickTime(draggable);
+            }
+
+            window.removeEventListener('mouseup', releaseHandler);
+            window.removeEventListener('touchend', releaseHandler);
         }
+    })[0];
+});
 
-        function isOverlapping(rect1, rect2) {
-            return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
-        }
+function monitorClickTime(element) {
+    let startTime, timer;
+    let cursorPos = { x: 0, y: 0 };
+    let offset = { x: 0, y: 0 };
 
-        function addBody(element) {
+    const startHandler = (e) => {
+        const isTouch = e.type === 'touchstart';
+        cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
+        cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
+
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        offset.x = cursorPos.x - centerX;
+        offset.y = cursorPos.y - centerY;
+
+        startTime = Date.now();
+        timer = setTimeout(() => {
+            const elapsedTime = Date.now() - startTime;
+            if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
+                element.classList.replace('hijo-de', 'draggable-mut');
+                document.body.appendChild(element);
+                const originalWidth = element.offsetWidth;
+                const originalHeight = element.offsetHeight;
+
+                gsap.set(element, {
+                    position: 'absolute',
+                    x: cursorPos.x - originalWidth / 2 + offset.x,
+                    y: cursorPos.y - originalHeight / 2 + offset.y
+                });
+
+                gsap.to(element, {
+                    duration: 0.2,
+                    width: '200px',
+                    height: '200px',
+                    onUpdate: function() {
+                        const newWidth = element.offsetWidth;
+                        const newHeight = element.offsetHeight;
+                        gsap.set(element, {
+                            x: cursorPos.x - newWidth / 2 + offset.x,
+                            y: cursorPos.y - newHeight / 2 + offset.y
+                        });
+                    },
+                    onComplete: function() {
+                        gsap.set(element, {
+                            x: cursorPos.x - element.offsetWidth / 2 + offset.x,
+                            y: cursorPos.y - element.offsetHeight / 2 + offset.y
+                        });
+
+                        draggableInstance = Draggable.create(element, {
+                            type: 'x,y',
+                            zIndexBoost: true,
+                            onPress: function(e) {
+                                const isTouch = e.type === "touchstart";
+                                const cx = isTouch ? e.touches[0].clientX : e.clientX;
+                                const cy = isTouch ? e.touches[0].clientY : e.clientY;
+
+                                gsap.set(element, {
+                                    x: cx - element.offsetWidth / 2 + offset.x,
+                                    y: cy - element.offsetHeight / 2 + offset.y
+                                });
+                            },
+                            onDrag: function(e) {
+                                const isTouch = e.type === "touchmove";
+                                const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+                                const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+                                gsap.set(element, {
+                                    x: clientX - element.offsetWidth / 2,
+                                    y: clientY - element.offsetHeight / 2
+                                });
+                            },
+                            onRelease: function(e) {
+                                const elemRect = element.getBoundingClientRect();
+                                const dropZone = Array.from(dropZones).find(zone => {
+                                    const zoneRect = zone.getBoundingClientRect();
+                                    return isOverlapping(elemRect, zoneRect);
+                                });
+
+                                if (dropZone) {
+                                    dropZone.appendChild(element);
+                                    element.classList.replace('draggable-mut', 'hijo-de');
+
+                                    draggableInstance.kill();
+                                    draggableInstance = null;
+
+                                    gsap.set(element, {
+                                        position: 'relative',
+                                        top: 'auto',
+                                        left: 'auto',
+                                        x: 0,
+                                        y: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        zIndex: '5'
+                                    });
+
+                                    removeBody(element);
+                                    monitorClickTime(element);
+                                }
+                            }
+                        })[0];
+                        draggableInstance.startDrag(e);
+                    }
+                });
+
+                const updatePosition = () => {
+                    const newWidth = element.offsetWidth;
+                    const newHeight = element.offsetHeight;
+                    gsap.set(element, {
+                        x: cursorPos.x - newWidth / 2 + offset.x,
+                        y: cursorPos.y - newHeight / 2 + offset.y
+                    });
+                };
+                
+                const intervalId = setInterval(updatePosition, 16);
+
+                setTimeout(() => clearInterval(intervalId), 200);
+            }
+        }, 300);
+    };
+
+    element.addEventListener('mousedown', startHandler);
+    element.addEventListener('touchstart', startHandler);
+
+    const endHandler = () => clearTimeout(timer);
+    element.addEventListener('mouseup', endHandler);
+    element.addEventListener('touchend', endHandler);
+}
+
+function isOverlapping(rect1, rect2) {
+    return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
+}
+
+function addBody(element) {
     const elemRect = element.getBoundingClientRect();
     const body = Bodies.rectangle(
         elemRect.left + elemRect.width / 2,
@@ -966,43 +932,20 @@ const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
         elemRect.height,
         { 
             restitution: 0.5, 
-            render: { fillStyle: 'transparent', strokeStyle: 'transparent' }  // Hacer el cuerpo transparente
+            render: { fillStyle: 'transparent', strokeStyle: 'transparent' }
         }
     );
-            draggableMutBodies.set(element, body);
-            World.add(world, body);
-        }
+    draggableMutBodies.set(element, body);
+    World.add(world, body);
+}
 
-        function removeBody(element) {
-            const body = draggableMutBodies.get(element);
-            if (body) {
-                World.remove(world, body);
-                draggableMutBodies.delete(element);
-            }
-        }
-
-        function update() {
-            Engine.update(engine);
-
-            draggableMutBodies.forEach((body, element) => {
-                if (!isDragging || body !== currentDraggingBody) {
-                    const pos = body.position;
-                    const angle = body.angle;
-
-                    element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
-                }
-            });
-
-            requestAnimationFrame(update);
-        }
-
-        update();
-
-
-
-
-
-
+function removeBody(element) {
+    const body = draggableMutBodies.get(element);
+    if (body) {
+        World.remove(world, body);
+        draggableMutBodies.delete(element);
+    }
+}
 
 // Redimensionamiento Horizontal
 const separador = document.getElementById('separador');
@@ -1040,7 +983,6 @@ function redimensionarHorizontal(e) {
     }
 }
 
-// Eventos para redimensionamiento
 separador.addEventListener('mousedown', iniciarRedimensionamiento);
 separador.addEventListener('touchstart', iniciarRedimensionamiento, { passive: false });
 
@@ -1086,7 +1028,6 @@ function redimensionarVertical(e) {
     }
 }
 
-// Eventos para redimensionamiento vertical
 separadorVertical.addEventListener('mousedown', iniciarRedimensionamientoVertical);
 separadorVertical.addEventListener('touchstart', iniciarRedimensionamientoVertical, { passive: false });
 
@@ -1186,7 +1127,94 @@ function actualizarReglas() {
 window.addEventListener('load', actualizarReglas);
 window.addEventListener('resize', actualizarReglas);
 
-// Ajustar el manejo de scroll y arrastre en pantallas táctiles
+// Giroscopio añadido
+let isGyroscopeActive = false;
+let gyroscopeForce = { x: 0, y: 0 };
+
+// Detectar el soporte del giroscopio y activarlo
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', handleOrientation, true);
+} else {
+    console.log("Giroscopio no soportado en este dispositivo");
+}
+
+// Función para manejar los eventos de orientación del dispositivo
+function handleOrientation(event) {
+    const tiltX = event.beta;  // Inclinación adelante/atrás [-90, 90]
+    const tiltY = event.gamma; // Inclinación izquierda/derecha [-45, 45]
+    
+    // Convertir los valores de inclinación en fuerzas para Matter.js
+    gyroscopeForce.x = tiltY / 45;  // Ajustar la fuerza en función del rango del giroscopio
+    gyroscopeForce.y = tiltX / 90;  // Ajustar la fuerza en función del rango del giroscopio
+}
+
+// Aplicar la fuerza del giroscopio a los cuerpos de Matter.js
+function applyGyroscopeToBodies() {
+    if (!isGyroscopeActive) return;
+
+    draggableMutBodies.forEach((body, element) => {
+        if (element.classList.contains('draggable-mut')) {
+            // Aplicar las fuerzas basadas en los valores del giroscopio
+            Body.applyForce(body, body.position, {
+                x: gyroscopeForce.x * 0.005,  // Ajustar la magnitud de la fuerza
+                y: gyroscopeForce.y * 0.005   // Ajustar la magnitud de la fuerza
+            });
+        }
+    });
+}
+
+// Activar o desactivar las físicas del giroscopio
+function toggleGyroscope(state) {
+    isGyroscopeActive = state;
+    if (!state) {
+        gyroscopeForce = { x: 0, y: 0 };
+    }
+}
+
+// Modificar la lógica del Draggable para controlar el giroscopio
+draggables.forEach((draggable) => {
+    draggable.addEventListener('mousedown', () => {
+        toggleGyroscope(true);  // Activar el giroscopio al empezar a arrastrar
+    });
+
+    draggable.addEventListener('mouseup', () => {
+        if (draggable.classList.contains('hijo-de')) {
+            toggleGyroscope(false);  // Desactivar el giroscopio al soltar en un contenedor
+        }
+    });
+
+    draggable.addEventListener('touchstart', () => {
+        toggleGyroscope(true);  // Activar el giroscopio en dispositivos táctiles
+    });
+
+    draggable.addEventListener('touchend', () => {
+        if (draggable.classList.contains('hijo-de')) {
+            toggleGyroscope(false);  // Desactivar el giroscopio en dispositivos táctiles
+        }
+    });
+});
+
+// Actualizar las físicas en cada frame
+function update() {
+    Engine.update(engine);
+
+    draggableMutBodies.forEach((body, element) => {
+        if (!isDragging || body !== currentDraggingBody) {
+            const pos = body.position;
+            const angle = body.angle;
+
+            element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
+        }
+    });
+
+    // Aplicar el giroscopio a los cuerpos
+    applyGyroscopeToBodies();
+
+    requestAnimationFrame(update);
+}
+
+update();
+
 document.querySelector('.contenido-prj').addEventListener('touchstart', function (event) {
     let scrollTimeout;
     const touchStartHandler = (event) => {
@@ -1208,8 +1236,11 @@ document.querySelector('.contenido-prj').addEventListener('touchstart', function
 
 
 
+
     
     </script>
     
 </body>
+</html>
+
 </html>
