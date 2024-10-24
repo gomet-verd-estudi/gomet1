@@ -586,6 +586,31 @@ textarea{
 text-decoration: none;
 }
 
+.nota::-webkit-scrollbar {
+    width: 1rem; /* Ancho de la barra lateral */
+    opacity: 80%;
+    margin: 0;
+    display: flex;
+    position: absolute;
+
+  }
+.nota::-webkit-scrollbar-track {
+    background-color: #2386EF;	
+	
+    border-radius: 4px; /* Bordes redondeados */
+    border: solid 1pt black;
+ }
+
+ .nota::-webkit-scrollbar-thumb {
+    background-color:#FDFD57; /* Color de la barra */
+    border-radius: 4px; /* Bordes redondeados */
+    opacity: 80%;
+    border: solid 1pt black;
+  }
+
+  .nota::-webkit-scrollbar-thumb:hover {
+    opacity: 80%;
+}
 .nota::placeholder {
     font-size: 20pt; /* Tamaño de la tipografía del placeholder */
     color: #FDFD57;
