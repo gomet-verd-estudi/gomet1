@@ -29,6 +29,13 @@
             height: 100%;
 
         }
+
+        #ct-izq-2{
+            width: 100%;
+            height: 100%;
+            margin-bottom: 0.5rem;
+
+        }
         #ct-arb{
             width: 100%;
             height: 100%;
@@ -153,6 +160,16 @@ margin-bottom: 0.10rem;
 flex-direction: row;
 
         }
+
+        .contenedores-inferiores-2{
+            width: 100%;
+            height: 5%;
+                        display: none;
+            border-radius: 4px;
+flex-direction: row;
+
+
+        }
         #separador {
     width: 0.5rem;
     cursor: ew-resize;
@@ -186,7 +203,25 @@ flex-direction: row;
     justify-content: center;
 
 }
+
+#separador-vertical-2 {
+    height: 0.5rem;
+    cursor: ns-resize;
+    background-color: transparent;
+    width: 100%;
+    position: relative;
+    transition: all 0.5s ease;
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+}
 #separador-vertical:hover {
+    background-color: #107C31;
+
+        }
+
+        #separador-vertical-2:hover {
     background-color: #107C31;
 
         }
@@ -698,8 +733,8 @@ opacity: 100%;
       z-index: 10;
       display: flex;
       gap: 5px;
-      right: 1rem;
-      top: 0.75rem;
+      right: 0.5rem;
+      top: 0.5rem;
       text-align: center;
 
     }
@@ -808,6 +843,8 @@ transition: all 0.3s ease;
         padding: 0.5rem;
         border-radius: 10px;
 border: solid 3pt #107C31;     
+font-weight: bold; 
+
      }
 .little-desc{
     font-size: 10pt;
@@ -827,7 +864,7 @@ border: solid 3pt #107C31;
 @media (max-width: 767px) {
     .contenedor-superior{
             width: 100%;
-            height: 5%;
+            min-height: 5%;
            
 
         }
@@ -838,20 +875,39 @@ display: flex;
 font-size: 12pt;
 padding: 0.5rem;
 border-radius: 10px;
-border: solid 3pt #107C31;     
+border: solid 2.5pt #107C31;    
+font-weight: bold; 
 }
 .contenedores-inferiores{
 width: calc(100% - 0.1rem);
-height: calc(95% - 0.6rem);
+max-height: 100%;
 display: flex;
 border-radius: 4px;
 flex-direction: column;
+min-height: 5%;
 
 
 }
+
+
+.contenedores-inferiores-2{
+            width: 100%;
+            min-height: 5%;
+                        display: flex;
+            border-radius: 4px;
+flex-direction: row;
+
+        }
 #ct-izq{
 width: 100%;
 height: calc(95% - 0.5rem);
+flex-direction: column;
+
+}
+
+#ct-izq{
+width: 100%;
+height: 100%;
 flex-direction: column;
 
 }
@@ -860,7 +916,7 @@ flex-direction: column;
 width: 100%;
 height: 5%;
 flex-direction: column;
-
+display: none;
 
 }
 .draggable-mut, .draggable {
@@ -898,6 +954,10 @@ flex-direction: column;
 }
 
  #soltar-izq{
+        flex-direction: column;
+       }
+
+       #soltar-izq-2{
         flex-direction: column;
        }
 
@@ -946,8 +1006,33 @@ width: 40px;
 opacity: 100%;
 
 }
+#separador-vertical-2 {
+    min-height: 0.5rem;
+    cursor: ns-resize;
+    background-color: transparent;
+    width: 100%;
+    position: relative;
+    transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
 
+
+}
+
+#separador-vertical {
+    min-height: 0.5rem;
+    cursor: ns-resize;
+    background-color: transparent;
+    width: 100%;
+    position: relative;
+    transition: all 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
 
 }
     </style>
@@ -975,6 +1060,17 @@ opacity: 100%;
         <div id="separador-vertical"> 
             <div class="int-separador-v">▼▲</div>
         </div>
+        <div class="contenedores-inferiores-2">
+            <div class="contenedor-izquierdo" id="ct-izq-2">
+                <div class="contendor-soltar" id="soltar-izq-2"></div>
+            </div>
+           
+            </div>
+
+            <div id="separador-vertical-2"> 
+                <div class="int-separador-v">▼▲</div>
+            </div>
+        
         <div class="contenedores-inferiores">
             <div class="contenedor-izquierdo" id="ct-izq">
                 <div class="contendor-soltar" id="soltar-izq"></div>
@@ -983,6 +1079,9 @@ opacity: 100%;
             <div class="contenedor-izquierdo" id="ct-drc">
                 <div class="contendor-soltar" id="soltar-drc"></div>
             </div>
+        </div>
+        
+      
         </div>
         
     </div> 
@@ -1614,6 +1713,8 @@ window.addEventListener('touchmove', redimensionarHorizontal, { passive: false }
 window.addEventListener('mouseup', detenerRedimensionamiento);
 window.addEventListener('touchend', detenerRedimensionamiento);
 
+
+
 // Redimensionamiento Vertical
 const separadorVertical = document.getElementById('separador-vertical');
 const contenedorSup = document.querySelector('.contenedor-superior');
@@ -1644,7 +1745,7 @@ function redimensionarVertical(e) {
     const newTopHeight = (mouseY / contenedoresRect2.height) * 100;
     const newBottomHeight = 100 - newTopHeight;
 
-    if (newTopHeight > 2.6 && newBottomHeight > 2.6) {
+    if (newTopHeight > 5 && newBottomHeight > 5) {
         contenedorSup.style.height = `${newTopHeight}%`;
         contenedorInf.style.height = `${newBottomHeight}%`;
     }
@@ -1659,6 +1760,64 @@ window.addEventListener('touchmove', redimensionarVertical, { passive: false });
 
 window.addEventListener('mouseup', detenerRedimensionamientoVertical);
 window.addEventListener('touchend', detenerRedimensionamientoVertical);
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const separadorVertical = document.getElementById('separador-vertical-2');
+const contenedorSup = document.querySelector('.contenedores-inferiores');
+const contenedorInf = document.querySelector('.contenedores-inferiores-2');
+const contenedoresTotal = document.querySelector('.contenedores');
+
+let isResizingVertical = false;
+
+function iniciarRedimensionamientoVertical(e) {
+    isResizingVertical = true;
+}
+
+function detenerRedimensionamientoVertical() {
+    isResizingVertical = false;
+}
+
+function redimensionarVertical(e) {
+    if (!isResizingVertical) return;
+
+    if (e.type === 'touchmove') {
+        e.preventDefault();
+    }
+
+    const eventY = e.clientY || (e.touches && e.touches[0].clientY);
+    const contenedoresRect2 = contenedoresTotal.getBoundingClientRect();
+    const mouseY = eventY - contenedoresRect2.top;
+
+    const newBottomHeight = (mouseY / contenedoresRect2.height) * 100;
+    const newTopHeight = 100 - newBottomHeight;
+
+    if (newBottomHeight > 2.6 && newTopHeight > 2.6) {
+        contenedorSup.style.height = `${newTopHeight}%`;
+        contenedorInf.style.height = `${newBottomHeight}%`;
+    }
+}
+
+// Eventos para redimensionamiento vertical
+separadorVertical.addEventListener('mousedown', iniciarRedimensionamientoVertical);
+separadorVertical.addEventListener('touchstart', iniciarRedimensionamientoVertical, { passive: false });
+
+window.addEventListener('mousemove', redimensionarVertical);
+window.addEventListener('touchmove', redimensionarVertical, { passive: false });
+
+window.addEventListener('mouseup', detenerRedimensionamientoVertical);
+window.addEventListener('touchend', detenerRedimensionamientoVertical);
+   
+
+});
+
+
+
+
 
 
 function actualizarReglas() {
@@ -1756,13 +1915,27 @@ toggleButtonsVisibility();
 // Agregar un listener para ajustar los botones cuando se redimensiona la ventana
 window.addEventListener('resize', toggleButtonsVisibility);
 
-    
-    </script>
-    
-</body>
-</html>
+    // Función para obtener las dimensiones de los divs con la clase 'contendor-soltar'
+function medirDimensionesSoltar() {
+    // Seleccionar todos los elementos con la clase 'contendor-soltar'
+    const contenedoresSoltar = document.querySelectorAll('.contendor-soltar');
 
-    
+    // Iterar sobre cada elemento y obtener su altura y ancho
+    contenedoresSoltar.forEach((contendor, index) => {
+        const { offsetHeight, offsetWidth } = contendor; // Obtener altura y ancho
+
+        // Mostrar los datos en la consola
+        console.log(`Contenedor Soltar ${index + 1}: Altura = ${offsetHeight}px, Ancho = ${offsetWidth}px`);
+    });
+}
+
+// Llamar a la función cada 500 ms para medir las dimensiones en tiempo real
+setInterval(medirDimensionesSoltar, 500);
+
+
+
+
+
     </script>
     
 </body>
