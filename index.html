@@ -14,6 +14,8 @@
             height: 100%; /* Asegura que el body se ajuste al 100% de la altura de la pantalla */
             touch-action: none; /* Desactiva gestos de desplazamiento en pantallas táctiles */
             position: fixed;
+            padding: 0;
+            background-color: white;
         }
 
          #ct-drc{
@@ -49,29 +51,38 @@
             justify-content: center;
             
         }
+        
         .contendor-soltar {
             position: relative;
             overflow: hidden;
             display: flex;
-            border: solid 1pt rgb(0, 0, 0);
+            border: solid 1pt #107C31;
             transition: background-color 0.5s ease, width 0.5s ease;
             align-items: center;
             justify-content: center;
             height: 100%;
             width: 100%;
+            gap: 0.5rem;
             border-radius: 10px;
-            background-color: white; /* Fondo blanco */
+            background-color: transparent; /* Fondo blanco */
             background-image: linear-gradient(45deg, 
-                                  rgba(128, 128, 128, 1) 2%, 
+            #107C31 2%, 
                                   transparent 2%, 
                                   transparent 50%, 
-                                  rgba(128, 128, 128, 1) 50%, 
-                                  rgba(128, 128, 128, 1) 5%, 
+                                  #107C31 50%, 
+                                  #107C31 5%, 
                                   transparent 55%, 
                                   transparent 100%);
 background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
 
         }
+        .contendor-soltar:hover{
+            background-color: rgba(190, 189, 189, 0.377); /* Fondo blanco */
+            backdrop-filter: blur(5px);
+            border: solid 1.5pt #107C31;
+
+        }
+
         #contenedor-derecho {
             position: relative;
             overflow: hidden;
@@ -92,21 +103,19 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
             border-radius: 10px;
             justify-content: center;
             flex-shrink: 1;
-            
-
-        }
-
-        .draggable-mut{
-            color: #000000;
-        }
-        .hijo-de{
-            color: red;
-        }
+            overflow: hidden;
+background-color: #FBE83F;
+border: solid 10pt #107C31;
+}
+#draggable2{
+    justify-content: center;
+}
+      
       img, video  {
         max-width: 100%;
             object-fit: contain;
             border-radius: 10px;
-            border: solid 1pt black;
+           
             max-height: auto;
             pointer-events: none; /* Evitar arrastre de imágenes y videos */
 
@@ -115,14 +124,14 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
      
         .contenedores {
             display: flex;
-            width: calc(100% - 3rem);
-            height: calc(100% - 3rem);
+            width: calc(100% - 2.1rem);
+            height: calc(100% - 2.2rem);
             position: absolute;
             z-index: 2;
             align-items: center;
             flex-direction: column;
-            top: 1.5rem;
-            left: 1.5rem;
+            top: 1.1rem;
+            left: 1.05rem;
             border-radius: 4px;
             margin: 0;
 
@@ -133,13 +142,13 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
             display: flex;
             border-radius: 4px;
             position: relative;
-
+margin-bottom: 0.10rem;
 
         }
         .contenedores-inferiores{
             width: 100%;
-            height: 95%;
-            display: flex;
+            height: calc(95% - 0.6rem);
+                        display: flex;
             border-radius: 4px;
 flex-direction: row;
 
@@ -161,7 +170,7 @@ flex-direction: row;
 }
 
 #separador:hover {
-    background-color: #000000;
+    background-color: #107C31;
 
         }
 
@@ -178,68 +187,33 @@ flex-direction: row;
 
 }
 #separador-vertical:hover {
-    background-color: #000000;
+    background-color: #107C31;
 
         }
-        #draggable1{
-            background-color: #FF8145;
-        }
-
-        #draggable2{
-            background-color: #FDFD57;
-           
-        
-        }
-
-        #draggable3{
-            background-color: white;
-            }
-         #draggable4{
-            background-color: #F85484;       
-         }
-         #draggable5{
-            background-color: #8C70A5;       
-         }
+   
 .contenido-prj{
-display: flex;
-flex-direction: column;
-            overflow-y: auto;
+    display: grid;
+
+    grid-template-columns: repeat(var(--num-columns), 1fr);
+    align-items: start; /* Alinear elementos hijos al margen superior */          
+      overflow-y: auto;
             width: calc(100% - 1rem);
             height: calc(100% - 1rem);
-            align-items: center;
             gap: 0.5rem;
             overflow-x: hidden;
             overflow-y: auto; /* Permitir scroll vertical */
     touch-action: pan-y; /* Permitir desplazamiento */
     position: relative;
+
+
+  
 }
 
 .contenido-prj::-webkit-scrollbar {
-    width: 1rem; /* Ancho de la barra lateral */
-    opacity: 80%;
-    margin: 0;
-    display: flex;
-    position: absolute;
+    display: none;
 
   }
-  .contenido-prj::-webkit-scrollbar-track {
-    background-color: #F6B8C3;	
-	
-    border-radius: 4px; /* Bordes redondeados */
-    border: solid 1pt black;
- }
 
- .contenido-prj::-webkit-scrollbar-thumb {
-    background-color:#4DA77D; /* Color de la barra */
-    border-radius: 4px; /* Bordes redondeados */
-    opacity: 80%;
-    border: solid 1pt black;
-  }
-
-  .contenido-prj::-webkit-scrollbar-thumb:hover {
-    opacity: 80%;
-
-  }
 
 
         .fondo{
@@ -254,7 +228,6 @@ flex-direction: column;
             align-items: center;
             justify-content: center;
             border-radius: 10px;
-            background-color: white;
         }
 
         .naranja, .azul1, .verde {
@@ -304,42 +277,23 @@ flex-direction: column;
             height: 100%;
         }
         .texto{
-            color: #4DA77D;;
-            font-size: 18pt;
-            position: absolute;
-            z-index: 3;
+            color: #107C31;
+            font-size: 13pt;
+           padding-right: 0.5rem;
             overflow-y: auto;
-            width: calc(100% - 1rem);
-            height: calc(100% - 1rem);
+            width: calc(100% - 1.5rem);
+            height: calc(100% - 1.5rem);
             overflow-x: hidden;
+           
+
 text-align: start;        }
+
         .texto::-webkit-scrollbar {
-    width: 1rem; /* Ancho de la barra lateral */
-    opacity: 80%;
-    margin: 0;
-    display: flex;
-    position: absolute;
-
+           
+    display: none;
+   
   }
-  .texto::-webkit-scrollbar-track {
-    background-color: #2386EF;	
-	
-    border-radius: 4px; /* Bordes redondeados */
-    border: solid 1pt black;
- }
-
- .texto::-webkit-scrollbar-thumb {
-    background-color:#F85484; /* Color de la barra */
-    border-radius: 4px; /* Bordes redondeados */
-    opacity: 80%;
-    border: solid 1pt black;
-  }
-
-  .texto::-webkit-scrollbar-thumb:hover {
-    opacity: 80%;
-
-  }
-
+ 
         .regla {
             position: absolute;
             display: flex;
@@ -347,8 +301,8 @@ text-align: start;        }
 
         /* Reglas laterales */
         .regla-vertical {
-            width: 1.5rem;
             height: 100%;
+
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -356,22 +310,22 @@ text-align: start;        }
 
         .regla-izquierda {
             left: 0;
-            top: 0;
+            bottom: 0;
             display: flex;
+            width: 1rem;
 
         }
 
         .regla-derecha {
             right: 0;
-            top: 0;
+            bottom: 0;
             display: flex;
-            align-items: center;
-flex-direction: column;
+            width: 1.1rem;
+
         }
 
         /* Reglas horizontales */
         .regla-horizontal {
-            height: 1.5rem;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -386,6 +340,7 @@ flex-direction: column;
             margin: 0;
             padding: 0;
             display: flex;
+            height: 1rem;
 
         }
 
@@ -395,7 +350,8 @@ flex-direction: column;
             margin: 0;
             padding: 0;
             display: flex;
-          
+            height: 1.1rem;
+
 
         }
 
@@ -404,7 +360,7 @@ flex-direction: column;
             width: 100%;
             height: 100%;
             display: flex;
-            border: solid, 0.5pt black;
+            border: solid, 0.5pt #107C31;
             align-items: center;
             justify-content: center;
         }
@@ -413,14 +369,14 @@ flex-direction: column;
             width: 100%;
             height: 100%;
             display: flex;
-            border: solid, 0.5pt black;
+            border: solid, 0.5pt #107C31;
             
             align-items: center;
             justify-content: center;
         }
 
         .texto-regla {
-            color: black;
+            color: #107C31;
             font-size: 8pt;
             display: flex;
             position: relative;
@@ -434,7 +390,7 @@ flex-direction: column;
             height: 300%;
             position: absolute;
             z-index: 1001;
-background-color: rgb(0, 0, 0); 
+background-color: #107C31; 
 transition: all 0.5s ease;
 display: flex;
 align-items: center;
@@ -452,7 +408,7 @@ border-radius: 4px;
             height: 100%;
             position: absolute;
             z-index: 10001;
-background-color: rgb(0, 0, 0); 
+background-color: #107C31; 
 transition: all 0.5s ease;
 display: flex;
 align-items: center;
@@ -472,122 +428,68 @@ border-radius: 4px;
         opacity: 100%;
 
        }
-        @media (max-width: 767px) {
-            .contenedores-inferiores{
-            width: 100%;
-            height: 95%;
-            display: flex;
-            border-radius: 4px;
-flex-direction: column;
-
-        }
-        #ct-izq{
-            width: 100%;
-            height: 70%;
-
-        }
-
-        #ct-drc{
-            width: 100%;
-            height: 30%;
-
-        }
-        .draggable-mut, .draggable {
-            width: 130px;
-            height: 130px;
-            position: absolute;
-            cursor: pointer;
-            z-index: 4;
-            display: flex;
-            align-items: center;
-            text-align: center;
-            transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
-            border-radius: 10px;
-            justify-content: center;
-            flex-shrink: 1;
-            
-
-        }
-
-        #separador {
-    width: 100%;
-    cursor: ew-resize;
-    background-color: transparent;
-    height: 0.5rem;
-    position: relative;
-    z-index: 1000;
-    transition: all 0.5s ease;
-
-}
-
-#soltar-drc{
-        flex-direction: row;
-       }
-        }
+     
 
 
-.caja-nota{
-    width: calc(100% - 1rem);
-    height: calc(100% - 1rem);
-    display: flex;
-    flex-direction: column;
-    position: absolute;
-    z-index: 5;
 
-}
 .nota {
     width: 100%;
     height: 100%;
-    border-radius: 4px;
+    border-radius: 10px;
     padding: 10px;
     font-size: 1em;
     background-color: transparent;
     display: flex;
-    color: #FDFD57;
-    font-size: 20pt;
-    box-sizing: border-box; /* Incluir borde y padding en el ancho total */
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;    box-sizing: border-box; /* Incluir borde y padding en el ancho total */
     resize: none; /* Sin redimensionar */
-
+background-color: #107C31;
 font-family: sans-serif;
 }
 
 .nota:focus {
     outline: none; /* Sin contorno */
-    color: #FDFD57;
+    color: white;
 width: 100%;
 height: 100%;
 }
 
 .guardar {
     width: auto;
-    background-color: #85C5EE;
-    color: #F85484;
+    background-color:transparent;
+    color: #107C31;
     border: none;
     border-radius: 4px;
     padding: 4px;
     cursor: pointer;
-    font-size: 20pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
     margin-top: 10px;
     display: flex;
-    border: 1pt solid black;
+    transition: all 0.5s ease;
+    font-size: 18pt;
+
 }
 
 .guardar:hover {
-    background-color: #0056b3; /* Color al pasar el cursor */
+    font-size: 22pt;
+
 }
 
 textarea{
     background-color: transparent;
     width: 100%;
     height: 100%;
-    color: #FDFD57;
-    font-size: 20pt;
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
     border: none;
 text-decoration: none;
 }
 
 .nota::-webkit-scrollbar {
-    width: 1rem; /* Ancho de la barra lateral */
+    width: 0.5rem; /* Ancho de la barra lateral */
     opacity: 80%;
     margin: 0;
     display: flex;
@@ -595,17 +497,15 @@ text-decoration: none;
 
   }
 .nota::-webkit-scrollbar-track {
-    background-color: #2386EF;	
+    background-color: transparent;	
 	
-    border-radius: 4px; /* Bordes redondeados */
-    border: solid 1pt black;
+    border-radius: 10px; /* Bordes redondeados */
  }
 
  .nota::-webkit-scrollbar-thumb {
-    background-color:#FDFD57; /* Color de la barra */
-    border-radius: 4px; /* Bordes redondeados */
+    background-color:#ffffff; /* Color de la barra */
+    border-radius: 10px; /* Bordes redondeados */
     opacity: 80%;
-    border: solid 1pt black;
   }
 
   .nota::-webkit-scrollbar-thumb:hover {
@@ -613,14 +513,459 @@ text-decoration: none;
 }
 .nota::placeholder {
     font-size: 20pt; /* Tamaño de la tipografía del placeholder */
-    color: #FDFD57;
+    color: white;
     font-family: sans-serif;
+}
+
+.contenido-general{
+    width: calc(100% - 1.5rem);
+    height: calc(100% - 1.5rem);
+    border-radius: 4px;
+    display: flex;
+    color: #107C31;
+
+
+}
+
+#cont-gen-1{
+    font-size: 18pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+
+}
+#cont-gen-5{
+    font-size: 18pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+#cont-gen-4{
+    font-size: 18pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+}
+#cont-gen-3{
+    
+    font-size: 18pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    overflow-y: hidden;
+    overflow-x: hidden;
+
+}
+.macro-superior{
+    display: flex;
+    height: 1.5rem;
+    width: auto;
+    position: absolute;
+    color: #107C31;
+   width: 100%;
+   height: 100%;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    z-index: 2;
+    justify-content: center;
+    align-items: center;
+   mix-blend-mode: multiply;
+}
+.circulos-esquinas{
+    width: 1rem;
+    height: 1rem;
+    border: 0.5pt solid #107C31;
+    border-radius: 50%;
+    position: absolute;
+    background-color: white;
+    z-index: 4;
+}
+#circ-1{
+    left: 0;
+    top: 0;
+}
+#circ-2{
+    right: 0;
+    top: 0;
+}
+
+#circ-3{
+    left: 0;
+    bottom: 0;
+}
+#circ-4{
+    right: 0;
+    bottom: 0;
+}
+
+.projecto-unidad{
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    transition: flex-basis 0.3s ease; /* Transición suave de ancho */
+}
+.info{
+    width: 100%;
+    height: auto;
+    color: #ffffff;
+
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 0.5rem;
+    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    gap: 0.5rem;
+}
+
+
+.info-nombre{
+    width: auto;
+    height: auto;
+    display: flex;
+    padding-top: 0.2rem;
+    padding-bottom: 0.1rem;    
+    padding-left: 0.5rem;
+    background-color: #107C31;
+    border-radius: 10px;
+    padding-right: 0.5rem;
+    text-align: center;
+justify-content: center;
+align-items: center;
+
+}
+
+.info-tag{
+    width: auto;
+    height: auto;
+    display: flex;
+    padding-top: 0.2rem;
+    padding-bottom: 0.1rem;
+justify-content: end;
+padding-right: 0.5rem;
+background-color: #107C31;
+border-radius: 10px;
+padding-left: 0.5rem;
+text-align: center;
+justify-content: center;
+align-items: center;
+
+
+
+}
+
+.info-mas{
+    width: 40px;
+    height: auto;
+    display: flex;
+    padding-top: 0.2rem;
+    padding-bottom: 0.1rem;
+justify-content: end;
+padding-right: 0.5rem;
+background-color: #107C31;
+border-radius: 10px;
+padding-left: 0.5rem;
+text-align: center;
+justify-content: center;
+align-items: center;
+transition: all 0.3s ease; /* Transición suave de ancho */
+opacity: 50%;
+
+}
+
+.info-mas:hover{
+width: 60px;
+opacity: 100%;
+
+}
+#controls {
+      position: fixed;
+      z-index: 10;
+      display: flex;
+      gap: 5px;
+      right: 1rem;
+      top: 0.75rem;
+      text-align: center;
+
+    }
+
+    .column-button {
+      width: 15px;
+      height: 15px;
+      border-radius: 7.5px;
+      background-color: white;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 7pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    border: none;
+    
+    }
+
+    .column-button.active {
+      opacity: 1;
+      background-color: white;
+      color: #107C31;
+      border: none;
+      width: 40px;
+      text-align: center;
+
+
+    }
+
+    .column-button:hover{
+        width: 40px;
+        text-align: center;
+
+    }
+    .conjunto-bot-grid{
+        height: 21px;  
+        display: none;
+      gap: 5px; 
+      background-color: #107C31;
+align-items: center;
+border-radius: 11.5px;
+padding-left: 5px;
+padding-right: 5px;
+text-align: center;
+opacity: 50%;
+backdrop-filter: blur(10px); /* Efecto cristal */
+transition: all 0.3s ease;
+
+     }
+
+     .conjunto-bot-grid:hover{
+        opacity: 100%;
+
+     }
+
+     .bot-grid{
+        width: 40px;
+        height: 21px;  
+        display: flex;
+      gap: 5px; 
+      background-color: #107C31;
+align-items: center;
+border-radius: 11.5px;
+padding-left: 5px;
+padding-right: 5px;
+text-align: center;
+font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color: white;
+    justify-content: center;
+align-items: center;
+transition: all 0.3s ease;
+ opacity: 50%;
+ backdrop-filter: blur(10px); /* Efecto cristal */
+
+     }
+
+     .bot-grid.hover {
+  width: 20px;
+  transition: all 0.3s ease;
+  opacity: 50%;
+  backdrop-filter: blur(10px); /* Efecto cristal */
+}
+     .bot-grid:hover{
+        width: 60px;
+        opacity: 100%;
+
+
+
+     }
+     .bot-grid.hover:hover{
+        width: 40px;
+        opacity: 100%;
+     }
+     .contenido-logo{
+        width: auto;
+        height: auto;
+        display: flex;
+        font-size: 13pt;
+        padding: 0.5rem;
+        border-radius: 10px;
+border: solid 3pt #107C31;     
+     }
+.little-desc{
+    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    background-color: #107C31;
+    padding: 0.5rem;
+    color: white;
+    display: none;
+    text-align: start;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 767px) {
+    .contenedor-superior{
+            width: 100%;
+            height: 5%;
+           
+
+        }
+.contenido-logo{
+width: auto;
+height: auto;
+display: flex;
+font-size: 12pt;
+padding: 0.5rem;
+border-radius: 10px;
+border: solid 3pt #107C31;     
+}
+.contenedores-inferiores{
+width: calc(100% - 0.1rem);
+height: calc(95% - 0.6rem);
+display: flex;
+border-radius: 4px;
+flex-direction: column;
+
+
+}
+#ct-izq{
+width: 100%;
+height: calc(95% - 0.5rem);
+flex-direction: column;
+
+}
+
+#ct-drc{
+width: 100%;
+height: 5%;
+flex-direction: column;
+
+
+}
+.draggable-mut, .draggable {
+width: 130px;
+height: 130px;
+position: absolute;
+cursor: pointer;
+z-index: 4;
+display: flex;
+align-items: center;
+text-align: center;
+transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
+border-radius: 10px;
+justify-content: center;
+flex-shrink: 1;
+
+
+}
+
+#separador {
+width: 100%;
+cursor: ew-resize;
+background-color: transparent;
+height: 0.5rem;
+position: relative;
+z-index: 1000;
+transition: all 0.5s ease;
+
+
+
+}
+
+#soltar-drc{
+flex-direction: column;
+}
+
+ #soltar-izq{
+        flex-direction: column;
+       }
+
+
+.contenido-prj{
+display: flex;
+flex-direction: column;
+grid-template-columns: none;
+align-items: center; /* Alinear elementos hijos al margen superior */          
+
+
+
+}
+
+#controls {
+
+display: none;
+
+}
+
+
+.column-button {
+display: none;
+opacity: 0;
+}
+
+.column-button.active {
+display: none;
+
+}
+
+.bot-grid{
+display: none;
+}
+
+.bot-grid.hover{
+display: none;
+}
+
+#draggable4{
+display: none;
+}
+
+.info-mas:hover{
+width: 40px;
+opacity: 100%;
+
+}
+
+
+
 }
     </style>
 </head>
 <body>
-  
+  <div class="macro-superior">
+    <div class="contenido-logo">
+    GOMET VERD ESTUDI<br>
+     ALWAYS WIPing (Working In Playing)
     </div>
+    </div>
+  <div class="circulos-esquinas" id="circ-1"></div>
+  <div class="circulos-esquinas" id="circ-2"></div>
+  <div class="circulos-esquinas" id="circ-3"></div>
+  <div class="circulos-esquinas" id="circ-4"></div>
+
+
+
     <div class="contenedores">
         <div class="contenedor-superior">
             <div class="contenedor-izquierdo" id="ct-arb">
@@ -644,47 +989,122 @@ text-decoration: none;
     </div>
     <div id="contenedor-derecho"></div>
     <div class="draggable-mut" id="draggable1" style="left: 1px;">
-        <div class="circle">ABOUT</div>
+        <div class="contenido-general" id="cont-gen-1">SERVICIOS</div>
 
     </div>
     <div class="draggable-mut" id="draggable2" style="left: 1.5px;">
-        <div class="contenido-prj">
-        <img src="delta_foto.jpg">
+        <div class="contenido-prj" style="--num-columns: 1;">
+                        <div id="controls">
+                 <div class="bot-grid">GRID</div> 
+                 <div class="conjunto-bot-grid">       
+                <button class="column-button active" data-columns="1">1</button>
+                <button class="column-button" data-columns="2">2</button>
+                <button class="column-button" data-columns="3">3</button>
+            </div>   
+              </div>
+            <div class="projecto-unidad">
+                <div class="info">
+                    <div class="info-nombre">CLAUR TILES</div>
+                    <div class="info-tag">BRANDING</div>
+                    <div class="info-mas">+ info</div>
+              </div>
+                <div class="little-desc">
+                    Diseño de la nueva identidad del estudio de moda 404 Studio y de la gráfica
+para su última colección “No me quedan lágrimas”, basada en el cine quinqui
+de los 80’s y presentada en la 080 Barcelona Fashion week.
         
-        <video loop autoplay muted>
-            <source src="POST 1 LOGO.mp4" type="video/mp4">
-            Tu navegador no soporta la etiqueta de video.
-        </video>
+                </div>
         <img src="DELTA_TABLAS_web.png">
+    </div>
+
+    <div class="projecto-unidad">
+        <div class="info">
+            <div class="info-nombre">CLAUR TILES</div>
+            <div class="info-tag">BRANDING</div>
+
+
+            <div class="info-mas">+ info</div>
+
+
+        </div>
+        <div class="little-desc">
+            Diseño de la nueva identidad de Claur Tiles.
+            Claur Tiles es un taller de fabricación de azulejos realizados a mano para
+            cada cliente, especializado en proyectos de interiorismo y arquitectura.
+        </div>
+        <video loop autoplay muted>
+        <source src="POST 1 LOGO.mp4" type="video/mp4">
+        Tu navegador no soporta la etiqueta de video.
+    </video>
+</div>
+
+<div class="projecto-unidad">
+    <div class="info">
+        <div class="info-nombre">CLAUR TILES</div>
+        <div class="info-tag">BRANDING</div>
+
+
+    </div>
+<img src="delta_foto.jpg">
+</div>
+
+<div class="projecto-unidad">
+    <div class="info">
+        <div class="info-nombre">CLAUR TILES</div>
+        <div class="info-tag">BRANDING</div>
+
+
+    </div>
+<img src="delta_foto.jpg">
+</div>
+
+<div class="projecto-unidad">
+    <div class="info">
+        <div class="info-nombre">CLAUR TILES</div>
+        <div class="info-tag">BRANDING</div>
+
+
+    </div>
+<img src="delta_foto.jpg">
+</div>
+
+<div class="projecto-unidad">
+    <div class="info">
+        <div class="info-nombre">CLAUR TILES</div>
+        <div class="info-tag">BRANDING</div>
+
+
+    </div>
+<img src="delta_foto.jpg">
+</div>
+       
+
+        
     </div>
     </div>
     <div class="draggable-mut" id="draggable3" style="left: 2px;">
-        <div class="cmyk-container base">
+        <div class="contenido-general" id="cont-gen-3">
             <div class="texto">Soy Manel Vila, diseñador gráfico graduado por la EASD (Escuela Arte Superior de Valencia).
                 Durante los tres últimos años he estado trabajando como freelance, con proyectos como los
                 que veréis a continuación. Además, he colaborado durante un año con Jotateam Studio.
                 Trabajo con comodidad en cualquier rama del diseño gráfico, pero me he especializado
                 principalmente en brandig y lettering.
-                Me considero una persona implicada y con capacidad a trabajo en equipo y bajo presión.</div>
-        <div class="naranja tamaño-completo">
-            <div class="cmyk-container circle">
-               
-                 <div class="azul1 tamaño-completo"></div>
+                Me considero una persona implicada y con capacidad a trabajo en equipo y bajo presión.
             </div>
         </div>
-    </div>
-    </div>
+      </div>
     <div class="draggable-mut" id="draggable4">
-        <div class="caja-nota">
+        <div class="contenido-general" id="cont-gen-4">
         <textarea class="nota" placeholder="Escribe aquí..."></textarea>
         <button class="guardar">Guardar Nota</button>
     </div>
-        <div class="cmyk-container base">
-       
-        <div class="verde tamaño-completo"></div>
-    </div>
+    
 </div>
-    <div class="draggable-mut" id="draggable5">SERVICES</div>
+    <div class="draggable-mut" id="draggable5">
+        <div class="contenido-general" id="cont-gen-5">
+            @GOMETVERDESTUDI        </div>
+
+    </div>
 
     <div class="regla regla-vertical regla-izquierda" id="regla-izquierda"></div>
 <div class="regla regla-vertical regla-derecha" id="regla-derecha"></div>
@@ -697,140 +1117,169 @@ text-decoration: none;
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
     <script src="matter.min.js""></script>
 
-   
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     
     <script>
+
+        
+
+$(document).ready(function(){
+      $(".info-mas").click(function() {
+        // Encuentra el contenedor proyecto-unidad y el div little-desc correspondiente
+        const proyectoUnidad = $(this).closest(".projecto-unidad");
+        const desc = proyectoUnidad.find(".little-desc");
+
+        // Verifica si el div little-desc está visible
+        if (desc.is(":visible")) {
+          desc.slideUp(500);        // Oculta el div si está visible
+          $(this).text("+ info");   // Cambia el texto a "+ info"
+        } else {
+          desc.slideDown(500);      // Muestra el div si está oculto
+          $(this).text("- info");   // Cambia el texto a "- info"
+        }
+      });
+    });
+
+// Función para mostrar el div deslizándose de izquierda a derecha con transición suave
+function slideInFromLeft(element, duration = 500) {
+    $(element).css({ display: 'flex', width: 0, left: 0 }).animate({ width: "75px" }, duration, "swing");
+}
+
+// Función para ocultar el div deslizándose de derecha a izquierda con transición suave
+function slideOutToRight(element, duration = 500) {
+    $(element).animate({ width: 0 }, duration, "swing", function() {
+        $(this).css("display", "none");
+    });
+}
+
+$(document).ready(function () {
+    $(".bot-grid").on("click", function () {
+        const $botGrid = $(this);
+        const $conjuntoBotGrid = $(".conjunto-bot-grid");
+
+        if ($botGrid.text() === "GRID") {
+            slideInFromLeft($conjuntoBotGrid);
+            $botGrid.text("X");
+            $botGrid.addClass("hover");
+        } else {
+            slideOutToRight($conjuntoBotGrid);
+            $botGrid.text("GRID");
+            $botGrid.removeClass("hover");
+        }
+    });
+});
+
+
 const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
-        const dropZones = document.querySelectorAll('.contendor-soltar');
-        const draggables = document.querySelectorAll('.draggable-mut');
-        const draggableMutBodies = new Map();
-        let isDragging = false;
-        let currentDraggingBody = null;
-        let cursorPosition = { x: 0, y: 0 };  // Guardar la posición del cursor o dedo
+const dropZones = document.querySelectorAll('.contendor-soltar');
+const draggables = document.querySelectorAll('.draggable-mut');
+const draggableMutBodies = new Map();
+let isDragging = false;
+let currentDraggingBody = null;
+let cursorPosition = { x: 0, y: 0 };
 
-        const { Engine, Render, World, Bodies, Body } = Matter;
-        const engine = Engine.create();
-        const world = engine.world;
+const { Engine, Render, World, Bodies, Body } = Matter;
+const engine = Engine.create();
+const world = engine.world;
 
-        const contDerecho = document.getElementById('contenedor-derecho');
+const contDerecho = document.getElementById('contenedor-derecho');
 
-        // Renderizado de Matter.js con formas transparentes
-        const render = Render.create({
-            element: contDerecho,
-            engine: engine,
-            options: {
-                width: contDerecho.clientWidth,
-                height: contDerecho.clientHeight,
-                wireframes: false,
-                background: 'transparent'
-            }
+// Renderizado de Matter.js con formas transparentes
+const render = Render.create({
+    element: contDerecho,
+    engine: engine,
+    options: {
+        width: contDerecho.clientWidth,
+        height: contDerecho.clientHeight,
+        wireframes: false,
+        background: 'transparent'
+    }
+});
+
+Render.run(render);
+
+function createWalls() {
+    const width = contDerecho.clientWidth;
+    const height = contDerecho.clientHeight;
+
+    const walls = [
+        Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
+        Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
+    ];
+
+    World.add(world, walls);
+}
+
+createWalls();
+
+window.addEventListener('resize', function() {
+    World.clear(world, false);
+    createWalls();
+    draggableMutBodies.forEach((body, element) => {
+        const elemRect = element.getBoundingClientRect();
+        Body.setPosition(body, {
+            x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
+            y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
         });
+    });
+});
 
-        Render.run(render);
+function esDispositivoTactil() {
+    return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+}
 
-        function createWalls() {
-            const width = contDerecho.clientWidth;
-            const height = contDerecho.clientHeight;
+const isTouchDevice = esDispositivoTactil();
 
-            const walls = [
-                Bodies.rectangle(width / 2, 0, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
-                Bodies.rectangle(width / 2, height, width, 4, { isStatic: true, render: { fillStyle: 'transparent' } }),
-                Bodies.rectangle(0, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } }),
-                Bodies.rectangle(width, height / 2, 4, height, { isStatic: true, render: { fillStyle: 'transparent' } })
-            ];
+draggables.forEach((draggable) => {
+    let dragTimeout;
+    let isMouseDown = false;
+    let draggableInstance;
+    let hasBeenReleased = false;
+    let releaseHandler;
 
-            World.add(world, walls);
-        }
+    addBody(draggable);
 
-        createWalls();
+    draggableInstance = Draggable.create(draggable, {
+        type: 'x,y',
+        zIndexBoost: true,
+        onPress: function (e) {
+            const isTouch = e.type === "touchstart";
+            cursorPosition.x = isTouch ? e.touches[0].clientX : e.clientX;
+            cursorPosition.y = isTouch ? e.touches[0].clientY : e.clientY;
+            const body = draggableMutBodies.get(draggable);
 
-        window.addEventListener('resize', function() {
-            World.clear(world, false);
-            createWalls();
-            // Actualizar la posición de los cuerpos al redimensionar
-            draggableMutBodies.forEach((body, element) => {
-                const elemRect = element.getBoundingClientRect();
-                Body.setPosition(body, {
-                    x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
-                    y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
-                });
-            });
-        });
+            hasBeenReleased = false;
+            isMouseDown = true;
+            isDragging = false;
 
-        function esDispositivoTactil() {
-            return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
-        }
+            releaseHandler = () => {
+                hasBeenReleased = true;
+                clearTimeout(dragTimeout);
+                draggableInstance.enable();
+                isMouseDown = false;
+                isDragging = false;
+                window.removeEventListener('mouseup', releaseHandler);
+                window.removeEventListener('touchend', releaseHandler);
+            };
 
-        const isTouchDevice = esDispositivoTactil();
+            window.addEventListener('mouseup', releaseHandler);
+            window.addEventListener('touchend', releaseHandler, { passive: false });
 
-        draggables.forEach((draggable) => {
-            let dragTimeout;
-            let isMouseDown = false;
-            let draggableInstance;
-            let hasBeenReleased = false;
-            let releaseHandler;
+            if (draggable.parentElement.classList.contains('contenedor-soltar')) {
+                draggableInstance.disable();
 
-            addBody(draggable);
-
-            // Inicialización de GSAP Draggable
-            draggableInstance = Draggable.create(draggable, {
-                type: 'x,y',
-                zIndexBoost: true,
-                onPress: function (e) {
-                    const isTouch = e.type === "touchstart";
-                    cursorPosition.x = isTouch ? e.touches[0].clientX : e.clientX;  // Guardar posición inicial del cursor
-                    cursorPosition.y = isTouch ? e.touches[0].clientY : e.clientY;
-                    const body = draggableMutBodies.get(draggable);
-
-                    hasBeenReleased = false;
-                    isMouseDown = true;
-                    isDragging = false;
-
-                    releaseHandler = () => {
-                        hasBeenReleased = true;
-                        clearTimeout(dragTimeout);
-                        draggableInstance.enable();
-                        isMouseDown = false;
-                        isDragging = false;
-                        window.removeEventListener('mouseup', releaseHandler);
-                        window.removeEventListener('touchend', releaseHandler);
-                    };
-
-                    window.addEventListener('mouseup', releaseHandler);
-                    window.addEventListener('touchend', releaseHandler, { passive: false });
-
-                    // Detectar si está dentro de una zona de soltado (contenedor-soltar)
-                    if (draggable.parentElement.classList.contains('contenedor-soltar')) {
-                        draggableInstance.disable(); // Deshabilitamos el Draggable
-
-                        dragTimeout = setTimeout(() => {
-                            if (!hasBeenReleased && isMouseDown) {
-                                // Mover el elemento al body
-                                document.body.appendChild(draggable);
-                                gsap.set(draggable, {
-                                    position: 'absolute',
-                                    x: cursorPosition.x - draggable.offsetWidth / 2,  // Centrar en el cursor
-                                    y: cursorPosition.y - draggable.offsetHeight / 2,
-                                    width: '200px',
-                                    height: '200px'
-                                });
-
-                                // Sincronizamos con Matter.js
-                                if (body) {
-                                    Body.setStatic(body, true);
-                                    Body.setAngle(body, body.angle);
-                                    currentDraggingBody = body;
-                                }
-
-                                isDragging = true;
-                                draggableInstance.enable();  // Reactivamos el Draggable
-                                draggableInstance.startDrag(e);
-                            }
-                        }, 300);
-                    } else {
+                dragTimeout = setTimeout(() => {
+                    if (!hasBeenReleased && isMouseDown) {
+                        document.body.appendChild(draggable);
                         gsap.set(draggable, {
-                            x: cursorPosition.x - draggable.offsetWidth / 2,  // Centrar en el cursor
-                            y: cursorPosition.y - draggable.offsetHeight / 2
+                            position: 'absolute',
+                            x: cursorPosition.x - draggable.offsetWidth / 2,
+                            y: cursorPosition.y - draggable.offsetHeight / 2,
+                            width: '200px',
+                            height: '200px'
                         });
 
                         if (body) {
@@ -840,234 +1289,240 @@ const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
                         }
 
                         isDragging = true;
-                    }
-                },
-                onDrag: function (e) {
-                    if (!isDragging) return;
-
-                    const isTouch = e.type === "touchmove";
-                    const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                    const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-                    const body = draggableMutBodies.get(draggable);
-
-                    gsap.set(draggable, {
-                        x: clientX - draggable.offsetWidth / 2,
-                        y: clientY - draggable.offsetHeight / 2
-                    });
-
-                    if (body) {
-                        Body.setPosition(body, {
-                            x: Math.min(Math.max(clientX, 0), contDerecho.clientWidth),
-                            y: Math.min(Math.max(clientY, 0), contDerecho.clientHeight)
-                        });
-                    }
-                },
-                onRelease: function (e) {
-                    clearTimeout(dragTimeout);  // Limpiar el temporizador cada vez
-                    isMouseDown = false;
-                    isDragging = false;
-
-                    const body = draggableMutBodies.get(draggable);
-
-                    if (body) {
-                        Body.setStatic(body, false);
-                        currentDraggingBody = null;
-                    }
-
-                    const elemRect = draggable.getBoundingClientRect();
-                    const dropZone = Array.from(dropZones).find(zone => {
-                        const zoneRect = zone.getBoundingClientRect();
-                        return isOverlapping(elemRect, zoneRect);
-                    });
-
-                    if (dropZone) {
-                        dropZone.appendChild(draggable);
-                        draggable.classList.replace('draggable-mut', 'hijo-de');
-
-                        // **Matar completamente Draggable** al convertir a hijo-de
-                        if (draggableInstance) {
-                            draggableInstance.kill();
-                            draggableInstance = null; // Eliminar referencia de la instancia
-                        }
-
-                        gsap.set(draggable, {
-                            position: 'relative',
-                            top: 'auto',
-                            left: 'auto',
-                            x: 0,
-                            y: 0,
-                            width: '100%',
-                            height: '100%',
-                            zIndex: '5'
-                        });
-
-                        removeBody(draggable);
-                        monitorClickTime(draggable);
-                    }
-
-                    window.removeEventListener('mouseup', releaseHandler);
-                    window.removeEventListener('touchend', releaseHandler);
-                }
-            })[0];
-        });
-
-        function monitorClickTime(element) {
-            let startTime, timer;
-            let cursorPos = { x: 0, y: 0 };
-            let offset = { x: 0, y: 0 }; // Desplazamiento inicial entre el centro del div y el cursor
-
-            const startHandler = (e) => {
-                const isTouch = e.type === 'touchstart';
-                cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
-                cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
-
-                // Obtener las dimensiones iniciales del elemento
-                const rect = element.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-
-                // Calcular el desplazamiento entre el centro del div y el cursor
-                offset.x = cursorPos.x - centerX;
-                offset.y = cursorPos.y - centerY;
-
-                startTime = Date.now();
-                timer = setTimeout(() => {
-                    const elapsedTime = Date.now() - startTime;
-                    if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
-                        // Cambio de clase a draggable-mut
-                        element.classList.replace('hijo-de', 'draggable-mut');
-
-                        // Mover el div al body para ser draggable de nuevo
-                        document.body.appendChild(element);
-
-                        // Obtener las dimensiones actuales del elemento
-                        const originalWidth = element.offsetWidth;
-                        const originalHeight = element.offsetHeight;
-
-                        // Centrar respecto al cursor en la posición actual, ajustando el desplazamiento
-                        gsap.set(element, {
-                            position: 'absolute',
-                            x: cursorPos.x - originalWidth / 2 + offset.x,
-                            y: cursorPos.y - originalHeight / 2 + offset.y
-                        });
-
-                        // Animación de cambio de tamaño con actualización constante de posición
-                        gsap.to(element, {
-                            duration: 0.2,  // Duración del cambio de tamaño
-                            width: '200px',  // Ancho original
-                            height: '200px',  // Altura original
-                            onUpdate: function() {
-                                // Mantener el div centrado respecto al cursor durante la transformación de tamaño
-                                const newWidth = element.offsetWidth;
-                                const newHeight = element.offsetHeight;
-
-                                gsap.set(element, {
-                                    x: cursorPos.x - newWidth / 2 + offset.x,
-                                    y: cursorPos.y - newHeight / 2 + offset.y
-                                });
-                            },
-                            onComplete: function() {
-                                // Asegurarse de que al final de la animación el div sigue centrado
-                                gsap.set(element, {
-                                    x: cursorPos.x - element.offsetWidth / 2 + offset.x,
-                                    y: cursorPos.y - element.offsetHeight / 2 + offset.y
-                                });
-
-                                // Reactivar Draggable inmediatamente sin requerir un nuevo "click"
-                                draggableInstance = Draggable.create(element, {
-                                    type: 'x,y',
-                                    zIndexBoost: true,
-                                    onPress: function(e) {
-                                        const isTouch = e.type === "touchstart";
-                                        const cx = isTouch ? e.touches[0].clientX : e.clientX;
-                                        const cy = isTouch ? e.touches[0].clientY : e.clientY;
-
-                                        // Volver a centrar el div en el cursor al iniciar el drag
-                                        gsap.set(element, {
-                                            x: cx - element.offsetWidth / 2 + offset.x,
-                                            y: cy - element.offsetHeight / 2 + offset.y
-                                        });
-                                    },
-                                    onDrag: function(e) {
-                                        const isTouch = e.type === "touchmove";
-                                        const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-                                        const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
-                                        // Mover el div con el cursor
-                                        gsap.set(element, {
-                                            x: clientX - element.offsetWidth / 2,
-                                            y: clientY - element.offsetHeight / 2
-                                        });
-                                    },
-                                    onRelease: function(e) {
-                                        const elemRect = element.getBoundingClientRect();
-                                        const dropZone = Array.from(dropZones).find(zone => {
-                                            const zoneRect = zone.getBoundingClientRect();
-                                            return isOverlapping(elemRect, zoneRect);
-                                        });
-
-                                        if (dropZone) {
-                                            dropZone.appendChild(element);
-                                            element.classList.replace('draggable-mut', 'hijo-de');
-
-                                            // Desactivar GSAP Draggable
-                                            draggableInstance.kill();
-                                            draggableInstance = null;
-
-                                            gsap.set(element, {
-                                                position: 'relative',
-                                                top: 'auto',
-                                                left: 'auto',
-                                                x: 0,
-                                                y: 0,
-                                                width: '100%',
-                                                height: '100%',
-                                                zIndex: '5'
-
-                                            });
-
-                                            removeBody(element);
-                                            monitorClickTime(element);  // Reiniciar el ciclo de click
-                                        }
-                                    }
-                                })[0];
-
-                                // Iniciar el drag inmediatamente sin esperar otro click
-                                draggableInstance.startDrag(e);
-                            }
-                        });
-
-                        // Crear un ciclo de actualización para mantener el div centrado mientras cambia de tamaño
-                        const updatePosition = () => {
-                            const newWidth = element.offsetWidth;
-                            const newHeight = element.offsetHeight;
-                            gsap.set(element, {
-                                x: cursorPos.x - newWidth / 2 + offset.x,
-                                y: cursorPos.y - newHeight / 2 + offset.y
-                            });
-                        };
-                        
-                        // Bucle constante de actualización hasta que finalice la transformación
-                        const intervalId = setInterval(updatePosition, 16); // 60 FPS
-
-                        setTimeout(() => clearInterval(intervalId), 200); // Parar el bucle tras la animación
+                        draggableInstance.enable();
+                        draggableInstance.startDrag(e);
                     }
                 }, 300);
-            };
+            } else {
+                gsap.set(draggable, {
+                    x: cursorPosition.x - draggable.offsetWidth / 2,
+                    y: cursorPosition.y - draggable.offsetHeight / 2
+                });
 
-            element.addEventListener('mousedown', startHandler);
-            element.addEventListener('touchstart', startHandler);
+                if (body) {
+                    Body.setStatic(body, true);
+                    Body.setAngle(body, body.angle);
+                    currentDraggingBody = body;
+                }
 
-            const endHandler = () => clearTimeout(timer);
-            element.addEventListener('mouseup', endHandler);
-            element.addEventListener('touchend', endHandler);
+                isDragging = true;
+            }
+        },
+        onDrag: function (e) {
+            if (!isDragging) return;
+
+            const isTouch = e.type === "touchmove";
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            const body = draggableMutBodies.get(draggable);
+
+            gsap.set(draggable, {
+                x: clientX - draggable.offsetWidth / 2,
+                y: clientY - draggable.offsetHeight / 2
+            });
+
+            if (body) {
+                Body.setPosition(body, {
+                    x: Math.min(Math.max(clientX, 0), contDerecho.clientWidth),
+                    y: Math.min(Math.max(clientY, 0), contDerecho.clientHeight)
+                });
+            }
+        },
+        onRelease: function (e) {
+            clearTimeout(dragTimeout);
+            isMouseDown = false;
+            isDragging = false;
+
+            const body = draggableMutBodies.get(draggable);
+            if (body) {
+                Body.setStatic(body, false);
+                currentDraggingBody = null;
+            }
+
+            const isTouch = e.type === "touchend";
+            const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
+
+            // Encontrar la zona de soltado en la que el cursor o dedo está dentro al soltar
+            const dropZone = Array.from(dropZones).find(zone => {
+                const zoneRect = zone.getBoundingClientRect();
+                return (
+                    clientX >= zoneRect.left &&
+                    clientX <= zoneRect.right &&
+                    clientY >= zoneRect.top &&
+                    clientY <= zoneRect.bottom
+                );
+            });
+
+            if (dropZone) {
+                dropZone.appendChild(draggable);
+                draggable.classList.replace('draggable-mut', 'hijo-de');
+
+                if (draggableInstance) {
+                    draggableInstance.kill();
+                    draggableInstance = null;
+                }
+
+                gsap.set(draggable, {
+                    position: 'relative',
+                    top: 'auto',
+                    left: 'auto',
+                    x: 0,
+                    y: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: '5',
+                    background: 'rgba(200, 198, 198, 0.368)',
+                    borderRadius: '10px',
+                    backdropFilter: 'blur(2px)',
+                    border: 'solid 1pt grey'
+                });
+
+                removeBody(draggable);
+                monitorClickTime(draggable);
+            }
+
+            window.removeEventListener('mouseup', releaseHandler);
+            window.removeEventListener('touchend', releaseHandler);
         }
+    })[0];
+});
 
-        function isOverlapping(rect1, rect2) {
-            return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
-        }
+function monitorClickTime(element) {
+    let startTime, timer;
+    let cursorPos = { x: 0, y: 0 };
+    let offset = { x: 0, y: 0 };
 
-        function addBody(element) {
+    const startHandler = (e) => {
+        const isTouch = e.type === 'touchstart';
+        cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
+        cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
+
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+
+        offset.x = cursorPos.x - centerX;
+        offset.y = cursorPos.y - centerY;
+
+        startTime = Date.now();
+        timer = setTimeout(() => {
+            const elapsedTime = Date.now() - startTime;
+            if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
+                element.classList.replace('hijo-de', 'draggable-mut');
+                document.body.appendChild(element);
+
+                const originalWidth = element.offsetWidth;
+                const originalHeight = element.offsetHeight;
+
+                gsap.set(element, {
+                    position: 'absolute',
+                    x: cursorPos.x - originalWidth / 2 + offset.x,
+                    y: cursorPos.y - originalHeight / 2 + offset.y
+                });
+
+                gsap.to(element, {
+                    duration: 0.2,
+                    width: '200px',
+                    height: '200px',
+                    background: '#107C31',
+                    borderRadius: '10px',
+                    backdropFilter: 'none',
+                    boxShadow: 'none',
+                    border: 'solid 1pt black',
+                    onUpdate: function() {
+                        const newWidth = element.offsetWidth;
+                        const newHeight = element.offsetHeight;
+
+                        gsap.set(element, {
+                            x: cursorPos.x - newWidth / 2 + offset.x,
+                            y: cursorPos.y - newHeight / 2 + offset.y
+                        });
+                    },
+                    onComplete: function() {
+                        gsap.set(element, {
+                            x: cursorPos.x - element.offsetWidth / 2 + offset.x,
+                            y: cursorPos.y - element.offsetHeight / 2 + offset.y
+                        });
+
+                        draggableInstance = Draggable.create(element, {
+                            type: 'x,y',
+                            zIndexBoost: true,
+                            onPress: function(e) {
+                                const isTouch = e.type === "touchstart";
+                                const cx = isTouch ? e.touches[0].clientX : e.clientX;
+                                const cy = isTouch ? e.touches[0].clientY : e.clientY;
+
+                                gsap.set(element, {
+                                    x: cx - element.offsetWidth / 2 + offset.x,
+                                    y: cy - element.offsetHeight / 2 + offset.y
+                                });
+                            },
+                            onDrag: function(e) {
+                                const isTouch = e.type === "touchmove";
+                                const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+                                const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+                                gsap.set(element, {
+                                    x: clientX - element.offsetWidth / 2,
+                                    y: clientY - element.offsetHeight / 2
+                                });
+                            },
+                            onRelease: function(e) {
+                                const elemRect = element.getBoundingClientRect();
+                                const dropZone = Array.from(dropZones).find(zone => {
+                                    const zoneRect = zone.getBoundingClientRect();
+                                    return isOverlapping(elemRect, zoneRect);
+                                });
+
+                                if (dropZone) {
+                                    dropZone.appendChild(element);
+                                    element.classList.replace('draggable-mut', 'hijo-de');
+
+                                    draggableInstance.kill();
+                                    draggableInstance = null;
+
+                                    gsap.set(element, {
+                                        position: 'relative',
+                                        top: 'auto',
+                                        left: 'auto',
+                                        x: 0,
+                                        y: 0,
+                                        width: '100%',
+                                        height: '100%',
+                                        zIndex: '5',
+                                        background: 'rgba(200, 198, 198, 0.368)',
+                                        borderRadius: '10px',
+                                        backdropFilter: 'blur(2px)',
+                                        border: 'solid 1pt grey'
+                                    });
+
+                                    removeBody(element);
+                                    monitorClickTime(element);
+                                }
+                            }
+                        })[0];
+
+                        draggableInstance.startDrag(e);
+                    }
+                });
+            }
+        }, 300);
+    };
+
+    element.addEventListener('mousedown', startHandler);
+    element.addEventListener('touchstart', startHandler, { passive: false });
+
+    const endHandler = () => clearTimeout(timer);
+    element.addEventListener('mouseup', endHandler);
+    element.addEventListener('touchend', endHandler);
+}
+
+function isOverlapping(rect1, rect2) {
+    return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
+}
+
+function addBody(element) {
     const elemRect = element.getBoundingClientRect();
     const body = Bodies.rectangle(
         elemRect.left + elemRect.width / 2,
@@ -1076,38 +1531,37 @@ const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
         elemRect.height,
         { 
             restitution: 0.5, 
-            render: { fillStyle: 'transparent', strokeStyle: 'transparent' }  // Hacer el cuerpo transparente
+            render: { fillStyle: 'transparent', strokeStyle: 'transparent' }
         }
     );
-            draggableMutBodies.set(element, body);
-            World.add(world, body);
+    draggableMutBodies.set(element, body);
+    World.add(world, body);
+}
+
+function removeBody(element) {
+    const body = draggableMutBodies.get(element);
+    if (body) {
+        World.remove(world, body);
+        draggableMutBodies.delete(element);
+    }
+}
+
+function update() {
+    Engine.update(engine);
+
+    draggableMutBodies.forEach((body, element) => {
+        if (!isDragging || body !== currentDraggingBody) {
+            const pos = body.position;
+            const angle = body.angle;
+
+            element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
         }
+    });
 
-        function removeBody(element) {
-            const body = draggableMutBodies.get(element);
-            if (body) {
-                World.remove(world, body);
-                draggableMutBodies.delete(element);
-            }
-        }
+    requestAnimationFrame(update);
+}
 
-        function update() {
-            Engine.update(engine);
-
-            draggableMutBodies.forEach((body, element) => {
-                if (!isDragging || body !== currentDraggingBody) {
-                    const pos = body.position;
-                    const angle = body.angle;
-
-                    element.style.transform = `translate(${pos.x - element.offsetWidth / 2}px, ${pos.y - element.offsetHeight / 2}px) rotate(${angle}rad)`;
-                }
-            });
-
-            requestAnimationFrame(update);
-        }
-
-        update();
-
+update();
 
 
 
@@ -1190,7 +1644,7 @@ function redimensionarVertical(e) {
     const newTopHeight = (mouseY / contenedoresRect2.height) * 100;
     const newBottomHeight = 100 - newTopHeight;
 
-    if (newTopHeight > 5 && newBottomHeight > 5) {
+    if (newTopHeight > 2.6 && newBottomHeight > 2.6) {
         contenedorSup.style.height = `${newTopHeight}%`;
         contenedorInf.style.height = `${newBottomHeight}%`;
     }
@@ -1206,47 +1660,6 @@ window.addEventListener('touchmove', redimensionarVertical, { passive: false });
 window.addEventListener('mouseup', detenerRedimensionamientoVertical);
 window.addEventListener('touchend', detenerRedimensionamientoVertical);
 
-// Generación de capas
-function generarCapas(contenedor, capas) {
-    capas.forEach(({ gradient, rotation, opacity }) => {
-        const layer = document.createElement('div');
-        layer.classList.add('layer');
-        layer.style.backgroundImage = gradient;
-        layer.style.transform = `rotate(${rotation})`;
-        layer.style.opacity = opacity;
-        contenedor.appendChild(layer);
-    });
-}
-
-const naranjaGradients = [
-    { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 53%, transparent 50%)', rotation: '0deg', opacity: '0%' },
-    { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 53%, transparent 58%)', rotation: '45deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
-];
-
-const azul1Gradients = [
-    { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 50%, transparent 50%)', rotation: '0deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 9%, transparent 58%)', rotation: '45deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 65%, transparent 60%)', rotation: '0deg', opacity: '0%' },
-    { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
-];
-
-const verdeGradients = [
-    { gradient: 'radial-gradient(circle, rgba(0, 255, 255, 1) 80%, transparent 70%)', rotation: '45deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(255, 0, 255, 1) 10%, transparent 70%)', rotation: '15deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(255, 255, 0, 1) 62%, transparent 60%)', rotation: '75deg', opacity: '100%' },
-    { gradient: 'radial-gradient(circle, rgba(0, 0, 0, 1) 50%, transparent 25%)', rotation: '45deg', opacity: '0%' }
-];
-
-const naranjaDiv = document.querySelector('.naranja');
-generarCapas(naranjaDiv, naranjaGradients);
-
-const azul1Div = document.querySelector('.azul1');
-generarCapas(azul1Div, azul1Gradients);
-
-const verdeDiv = document.querySelector('.verde');
-generarCapas(verdeDiv, verdeGradients);
 
 function actualizarReglas() {
     const alturaPantalla = window.innerHeight;
@@ -1291,6 +1704,64 @@ function actualizarReglas() {
     reglaDerecha.appendChild(crearSubdivisiones(alturaPantalla, true));
     reglaSuperior.appendChild(crearSubdivisiones(anchuraPantalla, false));
     reglaInferior.appendChild(crearSubdivisiones(anchuraPantalla, false));
+}
+
+window.addEventListener('load', actualizarReglas);
+window.addEventListener('resize', actualizarReglas);
+
+
+const buttons = document.querySelectorAll('.column-button');
+const container = document.querySelector('.contenido-prj');
+
+// Función para ocultar o mostrar los botones según el ancho de la pantalla
+function toggleButtonsVisibility() {
+  if (window.innerWidth < 767) {
+    buttons.forEach(button => {
+      button.style.display = 'none'; // Oculta los botones
+    });
+  } else {
+    buttons.forEach(button => {
+      button.style.display = 'flex'; // Muestra los botones
+    });
+  }
+}
+
+function adjustColumns(numColumns) {
+  container.style.setProperty('--num-columns', numColumns);
+
+  // Ajustar la clase activa y la opacidad de los botones
+  buttons.forEach(button => {
+    if (parseInt(button.dataset.columns) === numColumns) {
+      button.classList.add('active');
+    } else {
+      button.classList.remove('active');
+    }
+  });
+}
+
+// Añadir evento a cada botón
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    const numColumns = parseInt(button.dataset.columns);
+    adjustColumns(numColumns);
+  });
+});
+
+// Iniciar con una columna seleccionada
+adjustColumns(1);
+
+// Verificar el tamaño de la pantalla al cargar la página
+toggleButtonsVisibility();
+
+// Agregar un listener para ajustar los botones cuando se redimensiona la ventana
+window.addEventListener('resize', toggleButtonsVisibility);
+
+    
+    </script>
+    
+</body>
+</html>
+
 }
 
 window.addEventListener('load', actualizarReglas);
