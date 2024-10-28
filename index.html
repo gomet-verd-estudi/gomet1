@@ -1646,8 +1646,6 @@ function monitorClickTime(element) {
     const tolerance = 15; // Tolerancia ajustada para movimientos menores
 
     const startHandler = (e) => {
-        e.preventDefault(); // Evita el scrolling durante el toque
-
         const isTouch = e.type === 'touchstart';
         cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
@@ -1659,6 +1657,7 @@ function monitorClickTime(element) {
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
+                e.preventDefault(); // Evita el comportamiento solo si se activa el temporizador
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
 
@@ -1753,14 +1752,15 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
+        // Si el movimiento es mayor que la tolerancia, reiniciar el temporizador
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
     };
 
     element.addEventListener('mousedown', startHandler);
-    element.addEventListener('touchstart', startHandler, { passive: false });
-    element.addEventListener('touchmove', moveHandler, { passive: false });
+    element.addEventListener('touchstart', startHandler, { passive: true }); // Permitir el scroll en touchstart
+    element.addEventListener('touchmove', moveHandler, { passive: true }); // Permitir el scroll mientras se mueve el dedo
 
     const endHandler = () => clearTimeout(timer);
     element.addEventListener('mouseup', endHandler);
@@ -2207,3 +2207,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
 </body>
 </html>
+
