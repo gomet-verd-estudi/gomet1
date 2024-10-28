@@ -860,6 +860,13 @@ font-weight: bold;
     margin-bottom: 0.5rem;
 }
 
+.iconos-home{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    
+}
+
 @media (max-width: 767px) {
     .contenedor-superior{
             width: 100%;
@@ -875,7 +882,7 @@ font-size: 12pt;
 padding: 0.5rem;
 border-radius: 10px;
 border: solid 2.5pt #107C31;    
-font-weight: bold; 
+font-weight: bolder;
 }
 .contenedores-inferiores{
 width: calc(100% - 0.1rem);
@@ -931,6 +938,7 @@ transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
 border-radius: 10px;
 justify-content: center;
 flex-shrink: 1;
+border: solid 7pt #107C31;
 
 
 }
@@ -1090,7 +1098,10 @@ opacity: 100%;
         <div class="contenido-general" id="cont-gen-1">SERVICIOS</div>
 
     </div>
+    
+    
     <div class="draggable-mut" id="draggable2" style="left: 1.5px;">
+        <div class="iconos-home"><img src="icono_projects.svg"></div>
         <div class="contenido-prj" style="--num-columns: 1;">
                         <div id="controls">
                  <div class="bot-grid">GRID</div> 
@@ -2001,14 +2012,21 @@ function actualizarVisibilidadContenidoPrj() {
 
     draggables.forEach(draggable => {
         const contenidoPrj = draggable.querySelector('.contenido-prj');
+        const iconosHome = document.querySelector('.iconos-home'); // Selecciona el div .iconos-home
 
         if (contenidoPrj) {
             // Mostrar el contenido si tiene la clase 'hijo-de'
             if (draggable.classList.contains('hijo-de')) {
                 contenidoPrj.style.display = 'grid';
+                if (iconosHome) {
+                    iconosHome.style.display = 'none'; // Ocultar iconos-home
+                }
             } else {
                 // Ocultar el contenido si tiene la clase 'draggable-mut'
                 contenidoPrj.style.display = 'none';
+                if (iconosHome) {
+                    iconosHome.style.display = 'flex'; // Mostrar iconos-home
+                }
             }
         }
     });
@@ -2024,7 +2042,7 @@ function actualizarVisibilidadContenidoGeneral() {
         if (contenidoGeneral) {
             // Mostrar el contenido si tiene la clase 'hijo-de'
             if (draggable.classList.contains('hijo-de')) {
-                contenidoGeneral.style.display = 'block';
+                contenidoGeneral.style.display = 'grid';
             } else {
                 // Ocultar el contenido si tiene la clase 'draggable-mut'
                 contenidoGeneral.style.display = 'none';
@@ -2056,8 +2074,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-
     </script>
+    
+</body>
+</html>
+
     
 </body>
 </html>
