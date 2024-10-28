@@ -1642,34 +1642,28 @@ draggables.forEach((draggable) => {
 function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
-    let offset = { x: 0, y: 0 };
+    let initialTouchPos = { x: 0, y: 0 };
+    const tolerance = 10; // Tolerancia en px para movimientos menores
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
         cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
-
-        const rect = element.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
-
-        offset.x = cursorPos.x - centerX;
-        offset.y = cursorPos.y - centerY;
+        initialTouchPos = { ...cursorPos }; // Guardar posición inicial en táctil
 
         startTime = Date.now();
+        
+        // Temporizador de 0,3 segundos
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
 
-                const originalWidth = element.offsetWidth;
-                const originalHeight = element.offsetHeight;
-
                 gsap.set(element, {
                     position: 'absolute',
-                    x: cursorPos.x - originalWidth / 2 + offset.x,
-                    y: cursorPos.y - originalHeight / 2 + offset.y
+                    x: cursorPos.x,
+                    y: cursorPos.y
                 });
 
                 gsap.to(element, {
@@ -1681,21 +1675,7 @@ function monitorClickTime(element) {
                     backdropFilter: 'none',
                     boxShadow: 'none',
                     border: 'solid 10pt #107C31',
-                    onUpdate: function() {
-                        const newWidth = element.offsetWidth;
-                        const newHeight = element.offsetHeight;
-
-                        gsap.set(element, {
-                            x: cursorPos.x - newWidth / 2 + offset.x,
-                            y: cursorPos.y - newHeight / 2 + offset.y
-                        });
-                    },
                     onComplete: function() {
-                        gsap.set(element, {
-                            x: cursorPos.x - element.offsetWidth / 2 + offset.x,
-                            y: cursorPos.y - element.offsetHeight / 2 + offset.y
-                        });
-
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
                             zIndexBoost: true,
@@ -1703,21 +1683,13 @@ function monitorClickTime(element) {
                                 const isTouch = e.type === "touchstart";
                                 const cx = isTouch ? e.touches[0].clientX : e.clientX;
                                 const cy = isTouch ? e.touches[0].clientY : e.clientY;
-
-                                gsap.set(element, {
-                                    x: cx - element.offsetWidth / 2 + offset.x,
-                                    y: cy - element.offsetHeight / 2 + offset.y
-                                });
+                                gsap.set(element, { x: cx, y: cy });
                             },
                             onDrag: function(e) {
                                 const isTouch = e.type === "touchmove";
                                 const clientX = isTouch ? e.touches[0].clientX : e.clientX;
                                 const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-
-                                gsap.set(element, {
-                                    x: clientX - element.offsetWidth / 2,
-                                    y: clientY - element.offsetHeight / 2
-                                });
+                                gsap.set(element, { x: clientX, y: clientY });
                             },
                             onRelease: function(e) {
                                 const elemRect = element.getBoundingClientRect();
@@ -1753,7 +1725,6 @@ function monitorClickTime(element) {
                                 }
                             }
                         })[0];
-
                         draggableInstance.startDrag(e);
                     }
                 });
@@ -1761,13 +1732,26 @@ function monitorClickTime(element) {
         }, 300);
     };
 
+    const moveHandler = (e) => {
+        const isTouch = e.type === 'touchmove';
+        const currentX = isTouch ? e.touches[0].clientX : e.clientX;
+        const currentY = isTouch ? e.touches[0].clientY : e.clientY;
+
+        // Si el movimiento es mayor que la tolerancia, reiniciar el temporizador
+        if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
+            clearTimeout(timer); // Cancela el temporizador
+        }
+    };
+
     element.addEventListener('mousedown', startHandler);
     element.addEventListener('touchstart', startHandler, { passive: false });
+    element.addEventListener('touchmove', moveHandler, { passive: false });
 
     const endHandler = () => clearTimeout(timer);
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', endHandler);
 }
+
 
 function isOverlapping(rect1, rect2) {
     return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
