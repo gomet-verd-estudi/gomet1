@@ -112,7 +112,7 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
             flex-shrink: 1;
             overflow: hidden;
 background-color: #FBE83F;
-border: solid 10pt #107C31;
+border: solid 7pt #107C31;
 }
 #draggable2{
     justify-content: center;
@@ -982,8 +982,8 @@ display: none;
 
 }
 .draggable-mut, .draggable {
-width: 130px;
-height: 130px;
+width: 120px;
+height: 120px;
 position: absolute;
 cursor: pointer;
 z-index: 4;
@@ -994,7 +994,7 @@ transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
 border-radius: 10px;
 justify-content: center;
 flex-shrink: 1;
-border: solid 7pt #107C31;
+border: solid 5pt #107C31;
 
 
 }
@@ -1643,7 +1643,7 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 15; // Tolerancia ajustada para movimientos menores
+    const tolerance = 15;
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
@@ -1653,16 +1653,15 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
         
-        // Temporizador de 0.3 segundos para activar el arrastre
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
-                e.preventDefault(); // Evita el comportamiento solo si se activa el temporizador
+                e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
 
-                // Establecer tamaño según el ancho de la ventana
                 const size = window.innerWidth < 767 ? '120px' : '200px';
+                const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
 
                 gsap.set(element, {
                     position: 'absolute',
@@ -1674,13 +1673,12 @@ function monitorClickTime(element) {
                     borderRadius: '10px',
                     backdropFilter: 'none',
                     boxShadow: 'none',
-                    border: 'solid 10pt #107C31'
+                    border: `solid ${borderThickness} #107C31`
                 });
 
                 gsap.to(element, {
                     duration: 0.2,
                     onComplete: function() {
-                        // Crear instancia Draggable solo después de la animación
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
                             zIndexBoost: true,
@@ -1752,27 +1750,27 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
-        // Si el movimiento es mayor que la tolerancia, reiniciar el temporizador
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
     };
 
     element.addEventListener('mousedown', startHandler);
-    element.addEventListener('touchstart', startHandler, { passive: true }); // Permitir el scroll en touchstart
-    element.addEventListener('touchmove', moveHandler, { passive: true }); // Permitir el scroll mientras se mueve el dedo
+    element.addEventListener('touchstart', startHandler, { passive: true });
+    element.addEventListener('touchmove', moveHandler, { passive: true });
 
     const endHandler = () => clearTimeout(timer);
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', endHandler);
 
-    // Ajustar tamaño en tiempo real si la ventana cambia de tamaño
     window.addEventListener('resize', () => {
         if (element.classList.contains('draggable-mut')) {
             const size = window.innerWidth < 767 ? '120px' : '200px';
+            const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
             gsap.set(element, {
                 width: size,
-                height: size
+                height: size,
+                border: `solid ${borderThickness} #107C31`
             });
         }
     });
@@ -2207,4 +2205,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
 </body>
 </html>
-
