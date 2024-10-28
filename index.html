@@ -1643,42 +1643,49 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 10; // Tolerancia en px para movimientos menores
+    const tolerance = 15; // Tolerancia ajustada para movimientos menores
 
     const startHandler = (e) => {
+        e.preventDefault(); // Evita el scrolling durante el toque
+
         const isTouch = e.type === 'touchstart';
         cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
-        initialTouchPos = { ...cursorPos }; // Guardar posición inicial en táctil
+        initialTouchPos = { ...cursorPos };
 
         startTime = Date.now();
         
-        // Temporizador de 0,3 segundos
+        // Temporizador de 0.3 segundos para activar el arrastre
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
 
+                // Establecer tamaño según el ancho de la ventana
+                const size = window.innerWidth < 767 ? '120px' : '200px';
+
                 gsap.set(element, {
                     position: 'absolute',
                     x: cursorPos.x,
-                    y: cursorPos.y
-                });
-
-                gsap.to(element, {
-                    duration: 0.2,
-                    width: '200px',
-                    height: '200px',
+                    y: cursorPos.y,
+                    width: size,
+                    height: size,
                     background: '#FBE83F',
                     borderRadius: '10px',
                     backdropFilter: 'none',
                     boxShadow: 'none',
-                    border: 'solid 10pt #107C31',
+                    border: 'solid 10pt #107C31'
+                });
+
+                gsap.to(element, {
+                    duration: 0.2,
                     onComplete: function() {
+                        // Crear instancia Draggable solo después de la animación
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
                             zIndexBoost: true,
+                            minimumMovement: 10,
                             onPress: function(e) {
                                 const isTouch = e.type === "touchstart";
                                 const cx = isTouch ? e.touches[0].clientX : e.clientX;
@@ -1689,7 +1696,16 @@ function monitorClickTime(element) {
                                 const isTouch = e.type === "touchmove";
                                 const clientX = isTouch ? e.touches[0].clientX : e.clientX;
                                 const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-                                gsap.set(element, { x: clientX, y: clientY });
+
+                                const bodyRect = document.body.getBoundingClientRect();
+                                const elementRect = element.getBoundingClientRect();
+                                const limitedX = Math.max(bodyRect.left, Math.min(clientX, bodyRect.right - elementRect.width));
+                                const limitedY = Math.max(bodyRect.top, Math.min(clientY, bodyRect.bottom - elementRect.height));
+
+                                gsap.set(element, {
+                                    x: limitedX,
+                                    y: limitedY
+                                });
                             },
                             onRelease: function(e) {
                                 const elemRect = element.getBoundingClientRect();
@@ -1737,9 +1753,8 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
-        // Si el movimiento es mayor que la tolerancia, reiniciar el temporizador
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
-            clearTimeout(timer); // Cancela el temporizador
+            clearTimeout(timer);
         }
     };
 
@@ -1750,6 +1765,17 @@ function monitorClickTime(element) {
     const endHandler = () => clearTimeout(timer);
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', endHandler);
+
+    // Ajustar tamaño en tiempo real si la ventana cambia de tamaño
+    window.addEventListener('resize', () => {
+        if (element.classList.contains('draggable-mut')) {
+            const size = window.innerWidth < 767 ? '120px' : '200px';
+            gsap.set(element, {
+                width: size,
+                height: size
+            });
+        }
+    });
 }
 
 
