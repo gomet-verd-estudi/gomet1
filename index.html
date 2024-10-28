@@ -19,13 +19,13 @@
         }
 
          #ct-drc{
-            width: 30%;
+            width: 25%;
             height: 100%;
 
         }
 
         #ct-izq{
-            width: 70%;
+            width: 75%;
             height: 100%;
 
         }
@@ -228,7 +228,6 @@ flex-direction: row;
    
 .contenido-prj{
     display: grid;
-
     grid-template-columns: repeat(var(--num-columns), 1fr);
     align-items: start; /* Alinear elementos hijos al margen superior */          
       overflow-y: auto;
@@ -472,11 +471,11 @@ border-radius: 4px;
     border-radius: 10px;
     padding: 10px;
     font-size: 1em;
-    background-color: transparent;
     display: flex;
     color: white;
     font-family: Arial, Helvetica, sans-serif;
-    font-weight: bold;    box-sizing: border-box; /* Incluir borde y padding en el ancho total */
+    font-weight: bold;    
+    box-sizing: border-box; /* Incluir borde y padding en el ancho total */
     resize: none; /* Sin redimensionar */
 background-color: #107C31;
 font-family: sans-serif;
@@ -651,7 +650,8 @@ text-decoration: none;
     height: auto;
     display: flex;
     flex-direction: column;
-    transition: flex-basis 0.3s ease; /* Transición suave de ancho */
+    align-items: start;
+
 }
 .info{
     width: 100%;
@@ -817,6 +817,30 @@ transition: all 0.3s ease;
 
      }
 
+
+     .bot-list{
+        width: 21px;
+        height: 21px;  
+        display: flex;
+      gap: 5px; 
+      background-color: #107C31;
+align-items: center;
+border-radius: 11.5px;
+padding-left: 5px;
+padding-right: 5px;
+text-align: center;
+font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    color: white;
+    justify-content: center;
+align-items: center;
+transition: all 0.3s ease;
+ opacity: 50%;
+ backdrop-filter: blur(10px); /* Efecto cristal */
+
+     }
+
      .bot-grid.hover {
   width: 20px;
   transition: all 0.3s ease;
@@ -834,6 +858,31 @@ transition: all 0.3s ease;
         width: 40px;
         opacity: 100%;
      }
+
+
+
+
+     .bot-list.hover {
+  width: 20px;
+  transition: all 0.3s ease;
+  opacity: 50%;
+  backdrop-filter: blur(10px); /* Efecto cristal */
+}
+     .bot-list:hover{
+        width: 40px;
+        opacity: 100%;
+
+
+
+     }
+     .bot-list.hover:hover{
+        width: 40px;
+        opacity: 100%;
+     }
+
+
+
+
      .contenido-logo{
         width: auto;
         height: auto;
@@ -849,12 +898,10 @@ font-weight: bold;
     font-size: 10pt;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
-    max-width: 100%;
+    max-width: 50%;
     height: auto;
-    border-radius: 10px;
-    background-color: #107C31;
-    padding: 0.5rem;
-    color: white;
+    
+    color: #107C31;
     display: none;
     text-align: start;
     margin-bottom: 0.5rem;
@@ -867,6 +914,15 @@ font-weight: bold;
     
 }
 
+.botonera-grid{
+    display: flex;
+    gap: 0.3rem;
+}
+
+.prj-visual{
+    width: 100%;
+    height: auto;
+}
 @media (max-width: 767px) {
     .contenedor-superior{
             width: 100%;
@@ -979,7 +1035,7 @@ align-items: center; /* Alinear elementos hijos al margen superior */
 
 }
 
-#controls {
+.botonera-grid {
 
 display: none;
 
@@ -1041,6 +1097,20 @@ opacity: 100%;
 
 }
 
+
+
+.little-desc{
+    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    max-width: 100%;
+    height: auto;
+    
+    color: #107C31;
+    display: none;
+    text-align: start;
+    margin-bottom: 0.5rem;
+}
 }
     </style>
 </head>
@@ -1095,7 +1165,17 @@ opacity: 100%;
     </div>
     <div id="contenedor-derecho"></div>
     <div class="draggable-mut" id="draggable1" style="left: 1px;">
-        <div class="contenido-general" id="cont-gen-1">SERVICIOS</div>
+        <div class="contenido-general" id="cont-gen-1">
+            <div class="texto">
+                Art Direction Creative<br>
+                 Direction Editorial Exhibition<br>
+                 Design Packaging Identity<br>
+                 Web Design<br> 
+                 Environmental Design <br>
+                 Motion Graphics<br>
+                 Naming Strategy
+            </div>
+        </div>
 
     </div>
     
@@ -1103,12 +1183,16 @@ opacity: 100%;
     <div class="draggable-mut" id="draggable2" style="left: 1.5px;">
         <div class="iconos-home"><img src="icono_projects.svg"></div>
         <div class="contenido-prj" style="--num-columns: 1;">
+           
                         <div id="controls">
+                            <div class="bot-list">☰</div>
+                            <div class="botonera-grid">
                  <div class="bot-grid">GRID</div> 
                  <div class="conjunto-bot-grid">       
                 <button class="column-button active" data-columns="1">1</button>
                 <button class="column-button" data-columns="2">2</button>
                 <button class="column-button" data-columns="3">3</button>
+            </div>
             </div>   
               </div>
             <div class="projecto-unidad">
@@ -1123,7 +1207,7 @@ para su última colección “No me quedan lágrimas”, basada en el cine quinq
 de los 80’s y presentada en la 080 Barcelona Fashion week.
         
                 </div>
-        <img src="DELTA_TABLAS_web.png">
+                <div class="prj-visual"> <img src="DELTA_TABLAS_web.png"></div>
     </div>
 
     <div class="projecto-unidad">
@@ -1141,20 +1225,28 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
             Claur Tiles es un taller de fabricación de azulejos realizados a mano para
             cada cliente, especializado en proyectos de interiorismo y arquitectura.
         </div>
+        <div class="prj-visual">
         <video loop autoplay muted>
         <source src="POST 1 LOGO.mp4" type="video/mp4">
         Tu navegador no soporta la etiqueta de video.
     </video>
 </div>
+</div>
 
 <div class="projecto-unidad">
     <div class="info">
-        <div class="info-nombre">CLAUR TILES</div>
+        <div class="info-nombre">VINTAGE PALACE</div>
         <div class="info-tag">BRANDING</div>
+        <div class="info-mas">+ info</div>
 
 
     </div>
-<img src="delta_foto.jpg">
+    <div class="little-desc">
+        Diseño de la nueva identidad de Claur Tiles.
+        Claur Tiles es un taller de fabricación de azulejos realizados a mano para
+        cada cliente, especializado en proyectos de interiorismo y arquitectura.
+    </div>
+    <div class="prj-visual"><img src="delta_foto.jpg"></div>
 </div>
 
 <div class="projecto-unidad">
@@ -1164,7 +1256,7 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
 
 
     </div>
-<img src="delta_foto.jpg">
+    <div class="prj-visual"><img src="delta_foto.jpg"></div>
 </div>
 
 <div class="projecto-unidad">
@@ -1174,7 +1266,8 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
 
 
     </div>
-<img src="delta_foto.jpg">
+    <div class="prj-visual"><img src="delta_foto.jpg"></div>
+
 </div>
 
 <div class="projecto-unidad">
@@ -1184,7 +1277,7 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
 
 
     </div>
-<img src="delta_foto.jpg">
+    <div class="prj-visual"><img src="delta_foto.jpg"></div>
 </div>
        
 
@@ -1202,6 +1295,8 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
             </div>
         </div>
       </div>
+
+
     <div class="draggable-mut" id="draggable4">
         <div class="contenido-general" id="cont-gen-4">
         <textarea class="nota" placeholder="Escribe aquí..."></textarea>
@@ -1209,9 +1304,13 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
     </div>
     
 </div>
+
+
+
     <div class="draggable-mut" id="draggable5">
         <div class="contenido-general" id="cont-gen-5">
-            @GOMETVERDESTUDI        </div>
+            @GOMETVERDESTUDI   
+             </div>
 
     </div>
 
@@ -1231,7 +1330,27 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
     
     <script>
 
-        
+$(document).ready(function() {
+            $('.bot-list').on('click', function() {
+                if ($(this).text() === '☰') {
+                    // Slide up y cambiar texto a ▢
+                    $('.prj-visual').slideUp('slow');
+                    $(".contenido-prj").css("display", "flex");
+                    $(".contenido-prj").css("flex-direction", "column");
+
+                    $(this).text('▢');
+                } else {
+                    // Slide down y cambiar texto a ☰
+                    $('.prj-visual').slideDown('slow');
+                    $(".contenido-prj").css("display", "grid");
+                    $(this).text('☰');
+                }
+            });
+        });
+
+
+
+     
 
 $(document).ready(function(){
       $(".info-mas").click(function() {
@@ -1978,16 +2097,16 @@ function ajustarColumnasPorAncho() {
     const originalColumns = parseInt(document.querySelector('.column-button.active')?.dataset.columns) || 3; // Columnas configuradas por el usuario
 
     // Reducción de columnas
-    if (ancho < 500 && currentColumns > 1) {
+    if (ancho < 640 && currentColumns > 1) {
         contenidoPrj.style.setProperty('--num-columns', 1); // Forzar 1 columna si es menor de 500px
-    } else if (ancho < 700 && currentColumns > 2) {
+    } else if (ancho < 740 && currentColumns > 2) {
         contenidoPrj.style.setProperty('--num-columns', 2); // Forzar 2 columnas si es menor de 600px
     }
 
     // Ampliación de columnas si el ancho lo permite y no excede el número original configurado
-    if (ancho >= 500 && ancho < 600 && currentColumns === 1 && originalColumns > 1) {
+    if (ancho >= 640 && ancho < 600 && currentColumns === 1 && originalColumns > 1) {
         contenidoPrj.style.setProperty('--num-columns', 2); // Ampliar a 2 si el original es mayor
-    } else if (ancho >= 700 && currentColumns < originalColumns) {
+    } else if (ancho >= 740 && currentColumns < originalColumns) {
         contenidoPrj.style.setProperty('--num-columns', originalColumns); // Restaurar las columnas originales
     }
 }
@@ -2042,7 +2161,7 @@ function actualizarVisibilidadContenidoGeneral() {
         if (contenidoGeneral) {
             // Mostrar el contenido si tiene la clase 'hijo-de'
             if (draggable.classList.contains('hijo-de')) {
-                contenidoGeneral.style.display = 'grid';
+                contenidoGeneral.style.display = 'flex';
             } else {
                 // Ocultar el contenido si tiene la clase 'draggable-mut'
                 contenidoGeneral.style.display = 'none';
@@ -2075,10 +2194,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     </script>
-    
-</body>
-</html>
-
     
 </body>
 </html>
