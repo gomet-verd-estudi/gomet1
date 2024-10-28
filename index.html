@@ -314,10 +314,9 @@ flex-direction: row;
         .texto{
             color: #107C31;
             font-size: 13pt;
-           padding-right: 0.5rem;
             overflow-y: auto;
-            width: calc(100% - 1.5rem);
-            height: calc(100% - 1.5rem);
+            width: calc(100% - 1rem);
+            height: calc(100% - 1rem);
             overflow-x: hidden;
            
 
@@ -553,8 +552,8 @@ text-decoration: none;
 }
 
 .contenido-general{
-    width: calc(100% - 1.5rem);
-    height: calc(100% - 1.5rem);
+    width: calc(100% - 1rem);
+    height: calc(100% - 1rem);
     border-radius: 4px;
     display: flex;
     color: #107C31;
@@ -1041,7 +1040,7 @@ opacity: 100%;
   <div class="macro-superior">
     <div class="contenido-logo">
     GOMET VERD ESTUDI<br>
-     ALWAYS WIPing (Working In Playing)
+     ALWAYS WIPing (Working In Play)
     </div>
     </div>
   <div class="circulos-esquinas" id="circ-1"></div>
@@ -1338,6 +1337,15 @@ draggables.forEach((draggable) => {
     let draggableInstance;
     let hasBeenReleased = false;
     let releaseHandler;
+    let originalPosition = { x: 0, y: 0 };
+
+    // Guardar la posición original del draggable
+    gsap.set(draggable, {
+        onComplete: function() {
+            originalPosition.x = draggable.offsetLeft;
+            originalPosition.y = draggable.offsetTop;
+        }
+    });
 
     addBody(draggable);
 
@@ -1367,7 +1375,7 @@ draggables.forEach((draggable) => {
             window.addEventListener('mouseup', releaseHandler);
             window.addEventListener('touchend', releaseHandler, { passive: false });
 
-            if (draggable.parentElement.classList.contains('contenedor-soltar')) {
+            if (draggable.parentElement.classList.contains('contendor-soltar')) {
                 draggableInstance.disable();
 
                 dragTimeout = setTimeout(() => {
@@ -1442,18 +1450,24 @@ draggables.forEach((draggable) => {
             const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
             const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
 
-            // Encontrar la zona de soltado en la que el cursor o dedo está dentro al soltar
+            // Calcular el centro del div draggable-mut en lugar de la esquina superior izquierda
+            const draggableRect = draggable.getBoundingClientRect();
+            const centerX = draggableRect.left + draggableRect.width / 2;
+            const centerY = draggableRect.top + draggableRect.height / 2;
+
+            // Encontrar la zona de soltado que contiene el centro del draggable-mut
             const dropZone = Array.from(dropZones).find(zone => {
                 const zoneRect = zone.getBoundingClientRect();
                 return (
-                    clientX >= zoneRect.left &&
-                    clientX <= zoneRect.right &&
-                    clientY >= zoneRect.top &&
-                    clientY <= zoneRect.bottom
+                    centerX >= zoneRect.left &&
+                    centerX <= zoneRect.right &&
+                    centerY >= zoneRect.top &&
+                    centerY <= zoneRect.bottom
                 );
             });
 
             if (dropZone) {
+                // Si se encuentra una zona de soltado
                 dropZone.appendChild(draggable);
                 draggable.classList.replace('draggable-mut', 'hijo-de');
 
@@ -1474,11 +1488,19 @@ draggables.forEach((draggable) => {
                     background: 'rgba(200, 198, 198, 0.368)',
                     borderRadius: '10px',
                     backdropFilter: 'blur(2px)',
-                    border: 'solid 1pt grey'
+                    border: 'solid 1pt #107C31'
                 });
 
                 removeBody(draggable);
                 monitorClickTime(draggable);
+            } else {
+                // Si no se encuentra una zona de soltado, volver a la posición original
+                gsap.to(draggable, {
+                    x: originalPosition.x,
+                    y: originalPosition.y,
+                    duration: 0.5,
+                    ease: "power3.out"
+                });
             }
 
             window.removeEventListener('mouseup', releaseHandler);
@@ -1524,11 +1546,11 @@ function monitorClickTime(element) {
                     duration: 0.2,
                     width: '200px',
                     height: '200px',
-                    background: '#107C31',
+                    background: '#FBE83F',
                     borderRadius: '10px',
                     backdropFilter: 'none',
                     boxShadow: 'none',
-                    border: 'solid 1pt black',
+                    border: 'solid 10pt #107C31',
                     onUpdate: function() {
                         const newWidth = element.offsetWidth;
                         const newHeight = element.offsetHeight;
@@ -1661,7 +1683,6 @@ function update() {
 }
 
 update();
-
 
 
 
@@ -1932,6 +1953,106 @@ function medirDimensionesSoltar() {
 // Llamar a la función cada 500 ms para medir las dimensiones en tiempo real
 setInterval(medirDimensionesSoltar, 500);
 
+
+
+// Función para ajustar el número de columnas según el ancho de #draggable2
+function ajustarColumnasPorAncho() {
+    const draggable2 = document.getElementById('draggable2');
+    const contenidoPrj = document.querySelector('.contenido-prj');
+
+    if (!draggable2 || !contenidoPrj) return;
+
+    const ancho = draggable2.offsetWidth;
+    const currentColumns = parseInt(contenidoPrj.style.getPropertyValue('--num-columns')) || 3; // Columnas actuales
+    const originalColumns = parseInt(document.querySelector('.column-button.active')?.dataset.columns) || 3; // Columnas configuradas por el usuario
+
+    // Reducción de columnas
+    if (ancho < 500 && currentColumns > 1) {
+        contenidoPrj.style.setProperty('--num-columns', 1); // Forzar 1 columna si es menor de 500px
+    } else if (ancho < 700 && currentColumns > 2) {
+        contenidoPrj.style.setProperty('--num-columns', 2); // Forzar 2 columnas si es menor de 600px
+    }
+
+    // Ampliación de columnas si el ancho lo permite y no excede el número original configurado
+    if (ancho >= 500 && ancho < 600 && currentColumns === 1 && originalColumns > 1) {
+        contenidoPrj.style.setProperty('--num-columns', 2); // Ampliar a 2 si el original es mayor
+    } else if (ancho >= 700 && currentColumns < originalColumns) {
+        contenidoPrj.style.setProperty('--num-columns', originalColumns); // Restaurar las columnas originales
+    }
+}
+
+// Observer para monitorear cambios de tamaño en #draggable2
+const observer = new ResizeObserver(ajustarColumnasPorAncho);
+const draggable2 = document.getElementById('draggable2');
+
+if (draggable2) {
+    observer.observe(draggable2);
+}
+
+// Llamada inicial para ajustar las columnas al cargar la página
+ajustarColumnasPorAncho();
+
+
+
+
+// Función para actualizar la visibilidad de .contenido-prj en función de la clase del elemento
+function actualizarVisibilidadContenidoPrj() {
+    const draggables = document.querySelectorAll('.draggable-mut, .hijo-de');
+
+    draggables.forEach(draggable => {
+        const contenidoPrj = draggable.querySelector('.contenido-prj');
+
+        if (contenidoPrj) {
+            // Mostrar el contenido si tiene la clase 'hijo-de'
+            if (draggable.classList.contains('hijo-de')) {
+                contenidoPrj.style.display = 'grid';
+            } else {
+                // Ocultar el contenido si tiene la clase 'draggable-mut'
+                contenidoPrj.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Función para actualizar la visibilidad de .contenido-general en función de la clase del elemento
+function actualizarVisibilidadContenidoGeneral() {
+    const draggables = document.querySelectorAll('.draggable-mut, .hijo-de');
+
+    draggables.forEach(draggable => {
+        const contenidoGeneral = draggable.querySelector('.contenido-general');
+
+        if (contenidoGeneral) {
+            // Mostrar el contenido si tiene la clase 'hijo-de'
+            if (draggable.classList.contains('hijo-de')) {
+                contenidoGeneral.style.display = 'block';
+            } else {
+                // Ocultar el contenido si tiene la clase 'draggable-mut'
+                contenidoGeneral.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Observador de cambios de clase
+function iniciarObservadorDeClases() {
+    const draggables = document.querySelectorAll('.draggable-mut, .hijo-de');
+
+    draggables.forEach(draggable => {
+        const observer = new MutationObserver(() => {
+            actualizarVisibilidadContenidoPrj();
+            actualizarVisibilidadContenidoGeneral();
+        });
+
+        observer.observe(draggable, { attributes: true, attributeFilter: ['class'] });
+    });
+}
+
+// Inicializar la visibilidad al cargar la página y configurar el observador
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarVisibilidadContenidoPrj();
+    actualizarVisibilidadContenidoGeneral();
+    iniciarObservadorDeClases();
+});
 
 
 
