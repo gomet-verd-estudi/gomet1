@@ -17,7 +17,17 @@
             padding: 0;
             background-color: white;
         }
-
+        .puntero {
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+        pointer-events: none; /* Evita interferencia con eventos de arrastre */
+    }
          #ct-drc{
             width: 25%;
             height: 100%;
@@ -928,6 +938,9 @@ font-weight: bold;
     width: 100%;
     height: auto;
 }
+
+
+
 @media (max-width: 767px) {
     .contenedor-superior{
             width: 100%;
@@ -1170,7 +1183,12 @@ opacity: 100%;
     </div> 
     </div>
     <div id="contenedor-derecho"></div>
+
+
+
+
     <div class="draggable-mut" id="draggable1" style="left: 1px;">
+
         <div class="contenido-general" id="cont-gen-1">
             <div class="texto">
                 Art Direction Creative<br>
@@ -1422,6 +1440,9 @@ let isDragging = false;
 let currentDraggingBody = null;
 let cursorPosition = { x: 0, y: 0 };
 
+// Almacenamos los elementos que han cambiado de .hijo-de a .draggable-mut
+const unrestrictedElements = new Set();
+
 const { Engine, Render, World, Bodies, Body } = Matter;
 const engine = Engine.create();
 const world = engine.world;
@@ -1483,6 +1504,20 @@ draggables.forEach((draggable) => {
     let hasBeenReleased = false;
     let releaseHandler;
     let originalPosition = { x: 0, y: 0 };
+    let isFirstGrab = true; // Controla si es el primer agarre
+
+    // Observador para detectar cambios de clase
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (draggable.classList.contains('draggable-mut') && !draggable.classList.contains('hijo-de')) {
+                    unrestrictedElements.add(draggable); // Agregar a la lista sin límites
+                }
+            }
+        });
+    });
+
+    observer.observe(draggable, { attributes: true });
 
     // Guardar la posición original del draggable
     gsap.set(draggable, {
@@ -1506,6 +1541,12 @@ draggables.forEach((draggable) => {
             hasBeenReleased = false;
             isMouseDown = true;
             isDragging = false;
+
+            // Si es la primera vez que se agarra, establecemos el ángulo a 0
+            if (isFirstGrab && body) {
+                Body.setAngle(body, 0); // Establecer rotación a 0
+                isFirstGrab = false; // Cambiar a false para las siguientes agarradas
+            }
 
             releaseHandler = () => {
                 hasBeenReleased = true;
@@ -1568,18 +1609,33 @@ draggables.forEach((draggable) => {
             const clientY = isTouch ? e.touches[0].clientY : e.clientY;
             const body = draggableMutBodies.get(draggable);
 
+            // Permitir movimiento sin restricciones para todos los .draggable-mut
             gsap.set(draggable, {
                 x: clientX - draggable.offsetWidth / 2,
                 y: clientY - draggable.offsetHeight / 2
             });
 
             if (body) {
-                Body.setPosition(body, {
-                    x: Math.min(Math.max(clientX, 0), contDerecho.clientWidth),
-                    y: Math.min(Math.max(clientY, 0), contDerecho.clientHeight)
-                });
+                Body.setPosition(body, { x: clientX, y: clientY });
             }
         },
+
+        onDrag: function (e) {
+            if (!isDragging) return;
+
+            const isTouch = e.type === "touchmove";
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+            const body = draggableMutBodies.get(draggable);
+
+            gsap.set(draggable, {
+                x: clientX - draggable.offsetWidth / 2,
+                y: clientY - draggable.offsetHeight / 2
+            });
+
+        
+        },
+
         onRelease: function (e) {
             clearTimeout(dragTimeout);
             isMouseDown = false;
@@ -1595,12 +1651,11 @@ draggables.forEach((draggable) => {
             const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
             const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
 
-            // Calcular el centro del div draggable-mut en lugar de la esquina superior izquierda
+            // Calcular el centro del div draggable-mut
             const draggableRect = draggable.getBoundingClientRect();
             const centerX = draggableRect.left + draggableRect.width / 2;
             const centerY = draggableRect.top + draggableRect.height / 2;
 
-            // Encontrar la zona de soltado que contiene el centro del draggable-mut
             const dropZone = Array.from(dropZones).find(zone => {
                 const zoneRect = zone.getBoundingClientRect();
                 return (
@@ -1612,7 +1667,6 @@ draggables.forEach((draggable) => {
             });
 
             if (dropZone) {
-                // Si se encuentra una zona de soltado
                 dropZone.appendChild(draggable);
                 draggable.classList.replace('draggable-mut', 'hijo-de');
 
@@ -1651,8 +1705,82 @@ draggables.forEach((draggable) => {
             window.removeEventListener('mouseup', releaseHandler);
             window.removeEventListener('touchend', releaseHandler);
         }
+
     })[0];
 });
+
+
+
+function togglePunteroVisibility(element) {
+    // Crear o mostrar el `puntero` si el elemento tiene la clase `draggable-mut`
+    if (element.classList.contains('draggable-mut')) {
+        let puntero = element.querySelector('.puntero');
+        if (!puntero) {
+            puntero = document.createElement('div');
+            puntero.className = 'puntero';
+            element.appendChild(puntero);
+        }
+        puntero.style.display = 'block';
+    } 
+    // Ocultar o eliminar el `puntero` si el elemento tiene la clase `hijo-de`
+    else if (element.classList.contains('hijo-de')) {
+        const puntero = element.querySelector('.puntero');
+        if (puntero) {
+            puntero.remove(); // Eliminar `puntero` cuando cambia a `hijo-de`
+        }
+    }
+}
+
+// Modificar `monitorClickTime` para que controle el `puntero`
+function addPuntero(element) {
+        // Solo añade el `puntero` si el elemento tiene la clase `draggable-mut`
+        if (element.classList.contains('draggable-mut')) {
+            let puntero = element.querySelector('.puntero');
+            if (!puntero) {
+                puntero = document.createElement('div');
+                puntero.className = 'puntero';
+                element.appendChild(puntero);
+            }
+        }
+    }
+
+    function removePuntero(element) {
+        // Remueve el `puntero` si existe
+        const puntero = element.querySelector('.puntero');
+        if (puntero) {
+            puntero.remove();
+        }
+    }
+
+    function observeClassChanges(element) {
+        // Observa los cambios de clase del `element` para controlar el `puntero`
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === "attributes" && mutation.attributeName === "class") {
+                    if (element.classList.contains('draggable-mut')) {
+                        addPuntero(element);
+                    } else if (element.classList.contains('hijo-de')) {
+                        removePuntero(element);
+                    }
+                }
+            });
+        });
+        observer.observe(element, { attributes: true });
+    }
+
+    // Modificar `monitorClickTime` para que controle el `puntero` y use `MutationObserver`
+    function obtenerDropZoneBajoPuntero(puntero) {
+    const punteroRect = puntero.getBoundingClientRect();
+    return Array.from(dropZones).find(zone => {
+        const zoneRect = zone.getBoundingClientRect();
+        return (
+            punteroRect.left >= zoneRect.left &&
+            punteroRect.right <= zoneRect.right &&
+            punteroRect.top >= zoneRect.top &&
+            punteroRect.bottom <= zoneRect.bottom
+        );
+    });
+}
 
 function monitorClickTime(element) {
     let startTime, timer;
@@ -1667,7 +1795,7 @@ function monitorClickTime(element) {
         initialTouchPos = { ...cursorPos };
 
         startTime = Date.now();
-        
+
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
@@ -1678,10 +1806,11 @@ function monitorClickTime(element) {
                 const size = window.innerWidth < 767 ? '120px' : '200px';
                 const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
 
+                // Centramos el `draggable-mut` en el cursor
                 gsap.set(element, {
                     position: 'absolute',
-                    x: cursorPos.x,
-                    y: cursorPos.y,
+                    x: cursorPos.x - parseFloat(size) / 2,
+                    y: cursorPos.y - parseFloat(size) / 2,
                     width: size,
                     height: size,
                     background: '#FBE83F',
@@ -1690,6 +1819,8 @@ function monitorClickTime(element) {
                     boxShadow: 'none',
                     border: `solid ${borderThickness} #107C31`
                 });
+
+                addPuntero(element); // Añadir el puntero al cambiar a `draggable-mut`
 
                 gsap.to(element, {
                     duration: 0.2,
@@ -1702,7 +1833,10 @@ function monitorClickTime(element) {
                                 const isTouch = e.type === "touchstart";
                                 const cx = isTouch ? e.touches[0].clientX : e.clientX;
                                 const cy = isTouch ? e.touches[0].clientY : e.clientY;
-                                gsap.set(element, { x: cx, y: cy });
+                                gsap.set(element, { 
+                                    x: cx - element.offsetWidth / 2, 
+                                    y: cy - element.offsetHeight / 2 
+                                });
                             },
                             onDrag: function(e) {
                                 const isTouch = e.type === "touchmove";
@@ -1711,20 +1845,18 @@ function monitorClickTime(element) {
 
                                 const bodyRect = document.body.getBoundingClientRect();
                                 const elementRect = element.getBoundingClientRect();
-                                const limitedX = Math.max(bodyRect.left, Math.min(clientX, bodyRect.right - elementRect.width));
-                                const limitedY = Math.max(bodyRect.top, Math.min(clientY, bodyRect.bottom - elementRect.height));
+                                const limitedX = Math.max(bodyRect.left, Math.min(clientX, bodyRect.right));
+                                const limitedY = Math.max(bodyRect.top, Math.min(clientY, bodyRect.bottom));
 
                                 gsap.set(element, {
-                                    x: limitedX,
-                                    y: limitedY
+                                    x: limitedX - element.offsetWidth / 2,
+                                    y: limitedY - element.offsetHeight / 2
                                 });
                             },
                             onRelease: function(e) {
-                                const elemRect = element.getBoundingClientRect();
-                                const dropZone = Array.from(dropZones).find(zone => {
-                                    const zoneRect = zone.getBoundingClientRect();
-                                    return isOverlapping(elemRect, zoneRect);
-                                });
+                                // Solo en el momento de soltar verificamos el dropZone bajo el `puntero`
+                                const puntero = element.querySelector('.puntero');
+                                const dropZone = obtenerDropZoneBajoPuntero(puntero);
 
                                 if (dropZone) {
                                     dropZone.appendChild(element);
@@ -1749,7 +1881,15 @@ function monitorClickTime(element) {
                                     });
 
                                     removeBody(element);
-                                    monitorClickTime(element);
+                                    removePuntero(element); // Eliminar el puntero al cambiar a `hijo-de`
+                                } else {
+                                    // Si no hay zona de soltado debajo del puntero, vuelve a la posición original
+                                    gsap.to(element, {
+                                        x: initialTouchPos.x - element.offsetWidth / 2,
+                                        y: initialTouchPos.y - element.offsetHeight / 2,
+                                        duration: 0.5,
+                                        ease: "power3.out"
+                                    });
                                 }
                             }
                         })[0];
@@ -1758,7 +1898,9 @@ function monitorClickTime(element) {
                 });
             }
         }, 300);
-    };
+    
+    
+        };
 
     const moveHandler = (e) => {
         const isTouch = e.type === 'touchmove';
@@ -1871,7 +2013,7 @@ function redimensionarHorizontal(e) {
     const newLeftWidth = (mouseX / contenedoresRect.width) * 100;
     const newRightWidth = 100 - newLeftWidth;
 
-    if (newLeftWidth > 5 && newRightWidth > 5) {
+    if (newLeftWidth > 2.5 && newRightWidth > 2.5) {
         contenedorIzq.style.width = `${newLeftWidth}%`;
         contenedorDrc.style.width = `${newRightWidth}%`;
     }
@@ -1970,7 +2112,7 @@ function redimensionarVertical(e) {
     const newBottomHeight = (mouseY / contenedoresRect2.height) * 100;
     const newTopHeight = 100 - newBottomHeight;
 
-    if (newBottomHeight > 2.6 && newTopHeight > 2.6) {
+    if (newBottomHeight > 2.5 && newTopHeight > 2.5) {
         contenedorSup.style.height = `${newTopHeight}%`;
         contenedorInf.style.height = `${newBottomHeight}%`;
     }
@@ -2209,10 +2351,188 @@ function iniciarObservadorDeClases() {
 
 // Inicializar la visibilidad al cargar la página y configurar el observador
 document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.draggable-mut, .hijo-de').forEach((element) => {
+            addPuntero(element);
+            observeClassChanges(element); // Comienza a observar cambios de clase
+        });
     actualizarVisibilidadContenidoPrj();
     actualizarVisibilidadContenidoGeneral();
     iniciarObservadorDeClases();
 });
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const draggables = document.querySelectorAll('.draggable-mut, .hijo-de');
+    const dropZones = document.querySelectorAll('.contendor-soltar');
+
+    draggables.forEach(draggable => {
+        setupReduccionHandling(draggable);
+        observeClassAndParentChanges(draggable);
+    });
+
+    // Escucha el evento resize para ajustar la flex-direction
+    adjustFlexDirectionForAllDropZones();
+    window.addEventListener('resize', adjustFlexDirectionForAllDropZones);
+});
+
+// Función para crear y gestionar el div .reduccion
+function setupReduccionHandling(draggable) {
+    let reduccion = draggable.querySelector('.reduccion');
+    if (!reduccion) {
+        reduccion = document.createElement('div');
+        reduccion.className = 'reduccion';
+        draggable.appendChild(reduccion);
+
+        Object.assign(reduccion.style, {
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'none',
+            zIndex: '10',
+            display: 'none',
+            backgroundImage: 'linear-gradient(45deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)',
+            backgroundSize: '20px 20px',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#107C31',
+            fontSize: '18pt',
+            fontFamily: 'Arial, Helvetica, sans-serif',
+            fontWeight: 'bold',
+            backgroundColor: 'white',
+        });
+
+        const contenidoReducion = document.createElement('div');
+        contenidoReducion.className = 'contenido-reduccion';
+        reduccion.appendChild(contenidoReducion);
+
+        Object.assign(contenidoReducion.style, {
+            height: 'auto',
+            width: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'transform 0.3s ease',
+            padding: '0.5rem',
+            backgroundColor: 'white',
+            border: 'solid 5pt #107C31',
+            whiteSpace: 'nowrap',  // Evita que el texto se parta en varias líneas
+        });
+
+        const innerTextContainer = document.createElement('div');
+        innerTextContainer.style.display = 'inline-block';
+        contenidoReducion.appendChild(innerTextContainer);
+
+        updateContenidoReducionText(innerTextContainer, draggable);
+    }
+}
+
+// Función para actualizar el texto en el div .contenido-reduccion
+function updateContenidoReducionText(innerTextContainer, draggable) {
+    switch (draggable.id) {
+        case 'draggable1':
+            innerTextContainer.textContent = '⬆ SERVICES ⬇';
+            break;
+        case 'draggable2':
+            innerTextContainer.textContent = '⬆ WORKS ⬇';
+            break;
+        case 'draggable3':
+            innerTextContainer.textContent = '⬆ ABOUT ⬇';
+            break;
+        case 'draggable4':
+            innerTextContainer.textContent = '⬆ NOTES ⬇';
+            break;
+        case 'draggable5':
+            innerTextContainer.textContent = '⬆ CONTACT ⬇';
+            break;
+        default:
+            innerTextContainer.textContent = 'Texto por defecto para contenido-reduccion.';
+    }
+}
+
+// Función para observar cambios de clase y de contenedor en tiempo real
+function observeClassAndParentChanges(draggable) {
+    const reduccion = draggable.querySelector('.reduccion');
+    const contenidoReducion = reduccion.querySelector('.contenido-reduccion');
+
+    function updateReduccionVisibility() {
+        const isChild = draggable.classList.contains('hijo-de');
+        const dropZone = draggable.closest('.contendor-soltar');
+
+        if (isChild && dropZone) {
+            const { offsetWidth: width, offsetHeight: height } = dropZone;
+            const shouldShowReduccion = width <= 165 || height <= 80;
+
+            if (shouldShowReduccion) {
+                reduccion.style.display = 'flex';
+
+                if (width <= 165) {
+                    contenidoReducion.style.transform = 'rotate(90deg)';
+                    contenidoReducion.style.width = `${height}px`;
+                    contenidoReducion.style.height = 'auto';
+                } else {
+                    contenidoReducion.style.transform = 'rotate(0deg)';
+                    contenidoReducion.style.width = 'auto';
+                    contenidoReducion.style.height = 'auto';
+                }
+
+                reduccion.style.backgroundImage = width <= 165 ?
+                    'linear-gradient(135deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)'
+                    : 'linear-gradient(45deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)';
+
+            } else {
+                reduccion.style.display = 'none';
+            }
+        } else {
+            reduccion.style.display = 'none';
+        }
+    }
+
+    let resizeObserver;
+    function observeDropZone() {
+        const dropZone = draggable.closest('.contendor-soltar');
+        if (dropZone) {
+            resizeObserver = new ResizeObserver(updateReduccionVisibility);
+            resizeObserver.observe(dropZone);
+        }
+    }
+
+    const mutationObserver = new MutationObserver(() => {
+        updateReduccionVisibility();
+        if (resizeObserver) resizeObserver.disconnect();
+        observeDropZone();
+    });
+
+    mutationObserver.observe(draggable, { attributes: true, attributeFilter: ['class'], subtree: true });
+    updateReduccionVisibility();
+}
+
+// Función para ajustar la dirección de flex en todos los contenedores .contenedor-soltar
+function adjustFlexDirectionForAllDropZones() {
+    const dropZones = document.querySelectorAll('.contendor-soltar');
+
+    dropZones.forEach(dropZone => {
+        const isSmallScreen = window.innerWidth < 767;
+        const height = dropZone.offsetHeight;
+
+        if (isSmallScreen && height <= 80) {
+            dropZone.style.display = 'flex';
+            dropZone.style.flexDirection = 'row';
+        } else if (isSmallScreen && height > 80) {
+            dropZone.style.flexDirection = 'column';
+        } else {
+            dropZone.style.flexDirection = '';  // Reset para pantallas grandes
+        }
+    });
+}
+
+
 
 
 
