@@ -31,20 +31,26 @@
          #ct-drc{
             width: 25%;
             height: 100%;
+border: solid 1pt #107C31;
 
+border-radius: 10px;
         }
 
         #ct-izq{
             width: 75%;
             height: 100%;
+            border: solid 1pt #107C31;
 
+border-radius: 10px;
         }
 
         #ct-izq-2{
             width: 100%;
             height: 100%;
             margin-bottom: 0.5rem;
+            border: solid 1pt #107C31;
 
+border-radius: 10px;
         }
         #ct-arb{
             width: 100%;
@@ -73,7 +79,6 @@
             position: relative;
             overflow: hidden;
             display: flex;
-            border: solid 1pt #107C31;
             transition: background-color 0.5s ease, width 0.5s ease;
             align-items: center;
             justify-content: center;
@@ -159,27 +164,22 @@ border: solid 7pt #107C31;
             display: flex;
             border-radius: 4px;
             position: relative;
-margin-bottom: 0.10rem;
+overflow: hidden;
+border: solid 1pt #107C31;
 
+border-radius: 10px;
         }
         .contenedores-inferiores{
             width: 100%;
             height: calc(95% - 0.6rem);
                         display: flex;
-            border-radius: 4px;
+            border-radius: 10px;
 flex-direction: row;
+overflow: hidden;
 
         }
 
-        .contenedores-inferiores-2{
-            width: 100%;
-            height: 5%;
-                        display: none;
-            border-radius: 4px;
-flex-direction: row;
-
-
-        }
+    
         #separador {
     width: 0.5rem;
     cursor: ew-resize;
@@ -196,10 +196,7 @@ flex-direction: row;
 
 }
 
-#separador:hover {
-    background-color: #107C31;
 
-        }
 
 #separador-vertical {
     height: 0.5rem;
@@ -226,15 +223,7 @@ flex-direction: row;
     justify-content: center;
 
 }
-#separador-vertical:hover {
-    background-color: #107C31;
 
-        }
-
-        #separador-vertical-2:hover {
-    background-color: #107C31;
-
-        }
    
 .contenido-prj{
     display: grid;
@@ -938,16 +927,42 @@ font-weight: bold;
     width: 100%;
     height: auto;
 }
+.separador-mobile{
+    display: none;
+    width: 15%;
+    height: 40%;
+    border-radius: 10px;
+    background-color: #107C31;
+    opacity: 50%;
+}
 
+.contenedores-inferiores-2{
+            width: 100%;
+           height: 2.5%;
+                        display: flex;
+            border-radius: 4px;
+flex-direction: row;
+display: none;
 
+        }
 
 @media (max-width: 767px) {
     .contenedor-superior{
             width: 100%;
-            min-height: 5%;
+            min-height: 2.5%;
+            height: 2.5%;
            
 
         }
+
+        .separador-mobile{
+    display: flex;
+    width: 15%;
+    height: 40%;
+    border-radius: 10px;
+    background-color: #107C31;
+    opacity: 50%;
+}
 .contenido-logo{
 width: auto;
 height: auto;
@@ -960,37 +975,30 @@ font-weight: bolder;
 }
 .contenedores-inferiores{
 width: calc(100% - 0.1rem);
-max-height: 100%;
+height: calc(100% - 0.1rem);
 display: flex;
 border-radius: 4px;
 flex-direction: column;
-min-height: 5%;
-
-
+overflow: hidden;
 }
 
 
 .contenedores-inferiores-2{
             width: 100%;
-            min-height: 5%;
+           height: 2.5%;
                         display: flex;
             border-radius: 4px;
 flex-direction: row;
-
+display: flex;
         }
 #ct-izq{
 width: 100%;
-height: calc(95% - 0.5rem);
+min-height: 100%;
 flex-direction: column;
 
 }
 
-#ct-izq{
-width: 100%;
-height: 100%;
-flex-direction: column;
 
-}
 
 #ct-drc{
 width: 100%;
@@ -1000,8 +1008,8 @@ display: none;
 
 }
 .draggable-mut, .draggable {
-width: 120px;
-height: 120px;
+width: 150px;
+height: 150px;
 position: absolute;
 cursor: pointer;
 z-index: 4;
@@ -1088,7 +1096,7 @@ opacity: 100%;
 
 }
 #separador-vertical-2 {
-    min-height: 0.5rem;
+    min-height: 1rem;
     cursor: ns-resize;
     background-color: transparent;
     width: 100%;
@@ -1103,7 +1111,7 @@ opacity: 100%;
 }
 
 #separador-vertical {
-    min-height: 0.5rem;
+    min-height: 1rem;
     cursor: ns-resize;
     background-color: transparent;
     width: 100%;
@@ -1129,7 +1137,26 @@ opacity: 100%;
     display: none;
     text-align: start;
     margin-bottom: 0.5rem;
+
 }
+#draggable1{
+    display: none;
+}
+
+.int-separador-h{
+      display: none;
+       }
+
+       .int-separador-v{
+      display: none;
+       }
+
+       .contendor-soltar:hover{
+            background-color: transparent; /* Fondo blanco */
+            backdrop-filter: none;
+            border: solid 1.5pt #107C31;
+
+        }
 }
     </style>
 </head>
@@ -1154,7 +1181,9 @@ opacity: 100%;
             </div>
         </div>
         <div id="separador-vertical"> 
+            
             <div class="int-separador-v">▼▲</div>
+            <div class="separador-mobile"></div>
         </div>
         <div class="contenedores-inferiores-2">
             <div class="contenedor-izquierdo" id="ct-izq-2">
@@ -1164,6 +1193,7 @@ opacity: 100%;
             </div>
 
             <div id="separador-vertical-2"> 
+                <div class="separador-mobile"></div>
                 <div class="int-separador-v">▼▲</div>
             </div>
         
@@ -1171,7 +1201,10 @@ opacity: 100%;
             <div class="contenedor-izquierdo" id="ct-izq">
                 <div class="contendor-soltar" id="soltar-izq"></div>
             </div>
-            <div id="separador"><div class="int-separador-h">◀<br>▶</div></div> <!-- Nuevo div separador -->
+            <div id="separador">
+                <div class="separador-mobile"></div>
+                <div class="int-separador-h">◀<br>▶</div>
+            </div> <!-- Nuevo div separador -->
             <div class="contenedor-izquierdo" id="ct-drc">
                 <div class="contendor-soltar" id="soltar-drc"></div>
             </div>
@@ -1431,7 +1464,6 @@ $(document).ready(function () {
     });
 });
 
-
 const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
 const dropZones = document.querySelectorAll('.contendor-soltar');
 const draggables = document.querySelectorAll('.draggable-mut');
@@ -1620,21 +1652,7 @@ draggables.forEach((draggable) => {
             }
         },
 
-        onDrag: function (e) {
-            if (!isDragging) return;
-
-            const isTouch = e.type === "touchmove";
-            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
-            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
-            const body = draggableMutBodies.get(draggable);
-
-            gsap.set(draggable, {
-                x: clientX - draggable.offsetWidth / 2,
-                y: clientY - draggable.offsetHeight / 2
-            });
-
-        
-        },
+      
 
         onRelease: function (e) {
             clearTimeout(dragTimeout);
@@ -1980,9 +1998,6 @@ function update() {
 update();
 
 
-
-
-
 // Redimensionamiento Horizontal
 const separador = document.getElementById('separador');
 const contenedorIzq = document.getElementById('ct-izq');
@@ -2061,7 +2076,7 @@ function redimensionarVertical(e) {
     const newTopHeight = (mouseY / contenedoresRect2.height) * 100;
     const newBottomHeight = 100 - newTopHeight;
 
-    if (newTopHeight > 5 && newBottomHeight > 5) {
+    if (newTopHeight > 2.5 && newBottomHeight > 2.5) {
         contenedorSup.style.height = `${newTopHeight}%`;
         contenedorInf.style.height = `${newBottomHeight}%`;
     }
@@ -2402,7 +2417,7 @@ function setupReduccionHandling(draggable) {
             alignItems: 'center',
             justifyContent: 'center',
             color: '#107C31',
-            fontSize: '18pt',
+            fontSize: '15pt',
             fontFamily: 'Arial, Helvetica, sans-serif',
             fontWeight: 'bold',
             backgroundColor: 'white',
@@ -2516,6 +2531,8 @@ function observeClassAndParentChanges(draggable) {
 // Función para ajustar la dirección de flex en todos los contenedores .contenedor-soltar
 function adjustFlexDirectionForAllDropZones() {
     const dropZones = document.querySelectorAll('.contendor-soltar');
+    window.addEventListener('resize', adjustFlexDirectionForAllDropZones);
+    window.addEventListener('load', adjustFlexDirectionForAllDropZones);
 
     dropZones.forEach(dropZone => {
         const isSmallScreen = window.innerWidth < 767;
