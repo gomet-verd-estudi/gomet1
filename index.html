@@ -1891,7 +1891,7 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 20;  // Incrementamos la tolerancia a 20 para minimizar cancelaciones no intencionadas
+    const tolerance = 30;  // Incrementamos aún más la tolerancia para dispositivos táctiles
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
@@ -1901,6 +1901,7 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
 
+        // Activamos el temporizador solo después de un breve período de estabilidad
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 300 && element.classList.contains('hijo-de')) {
@@ -1932,7 +1933,7 @@ function monitorClickTime(element) {
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
                             zIndexBoost: true,
-                            minimumMovement: 10,
+                            minimumMovement: 15,  // Movimientos menores requieren menos precisión
                             onPress: function(e) {
                                 const isTouch = e.type === "touchstart";
                                 const cx = isTouch ? e.touches[0].clientX : e.clientX;
@@ -2007,6 +2008,7 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
+        // Cancelamos el temporizador solo si se supera la tolerancia en ambas direcciones
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
@@ -2015,8 +2017,8 @@ function monitorClickTime(element) {
     const endHandler = () => clearTimeout(timer);
 
     element.addEventListener('mousedown', startHandler);
-    element.addEventListener('touchstart', startHandler, { passive: false }); // Cambiado a passive: false
-    element.addEventListener('touchmove', moveHandler, { passive: false }); // Cambiado a passive: false
+    element.addEventListener('touchstart', startHandler, { passive: false }); // Configurado como passive: false
+    element.addEventListener('touchmove', moveHandler, { passive: false }); // Configurado como passive: false
     element.addEventListener('touchcancel', endHandler); // Añadido touchcancel
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', endHandler);
