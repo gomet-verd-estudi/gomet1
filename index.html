@@ -1891,7 +1891,7 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 50;  // Incrementamos aún más la tolerancia para dispositivos táctiles
+    const tolerance = 30;  // Incrementamos aún más la tolerancia para dispositivos táctiles
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
