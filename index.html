@@ -1891,7 +1891,7 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 10;
+    const tolerance = 20;  // Incrementamos la tolerancia a 20 para minimizar cancelaciones no intencionadas
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
@@ -1911,7 +1911,6 @@ function monitorClickTime(element) {
                 const size = window.innerWidth < 767 ? '120px' : '200px';
                 const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
 
-                // Centramos el `draggable-mut` en el cursor
                 gsap.set(element, {
                     position: 'absolute',
                     x: cursorPos.x - parseFloat(size) / 2,
@@ -1959,7 +1958,6 @@ function monitorClickTime(element) {
                                 });
                             },
                             onRelease: function(e) {
-                                // Solo en el momento de soltar verificamos el dropZone bajo el `puntero`
                                 const puntero = element.querySelector('.puntero');
                                 const dropZone = obtenerDropZoneBajoPuntero(puntero);
 
@@ -1986,9 +1984,8 @@ function monitorClickTime(element) {
                                     });
 
                                     removeBody(element);
-                                    removePuntero(element); // Eliminar el puntero al cambiar a `hijo-de`
+                                    removePuntero(element);
                                 } else {
-                                    // Si no hay zona de soltado debajo del puntero, vuelve a la posición original
                                     gsap.to(element, {
                                         x: initialTouchPos.x - element.offsetWidth / 2,
                                         y: initialTouchPos.y - element.offsetHeight / 2,
@@ -2003,9 +2000,7 @@ function monitorClickTime(element) {
                 });
             }
         }, 300);
-    
-    
-        };
+    };
 
     const moveHandler = (e) => {
         const isTouch = e.type === 'touchmove';
@@ -2017,11 +2012,12 @@ function monitorClickTime(element) {
         }
     };
 
-    element.addEventListener('mousedown', startHandler);
-    element.addEventListener('touchstart', startHandler, { passive: true });
-    element.addEventListener('touchmove', moveHandler, { passive: true });
-
     const endHandler = () => clearTimeout(timer);
+
+    element.addEventListener('mousedown', startHandler);
+    element.addEventListener('touchstart', startHandler, { passive: false }); // Cambiado a passive: false
+    element.addEventListener('touchmove', moveHandler, { passive: false }); // Cambiado a passive: false
+    element.addEventListener('touchcancel', endHandler); // Añadido touchcancel
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', endHandler);
 
@@ -2748,4 +2744,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
 </body>
 </html>
-
