@@ -134,7 +134,7 @@ border: solid 7pt #107C31;
 }
       
       img, video  {
-        max-width: 100%;
+        width: 100%;
             object-fit: contain;
             border-radius: 10px;
            
@@ -650,7 +650,6 @@ text-decoration: none;
     display: flex;
     flex-direction: column;
     align-items: start;
-
 }
 .info{
     width: 85%;
@@ -666,7 +665,7 @@ background-color: transparent;
     gap: 0.5rem;
     border-radius: 10px;
     transition: all 0.5s ease; /* Transición suave al cambiar tamaño */
-
+flex-wrap: nowrap;
 }
 
 
@@ -711,7 +710,7 @@ align-items: center;
     display: flex;
     padding-top: 0.2rem;
     padding-bottom: 0.1rem;
-justify-content: end;
+justify-content: center;
 padding-right: 0.5rem;
 background-color: #107C31;
 border-radius: 10px;
@@ -902,9 +901,10 @@ font-weight: bold;
     font-weight: bold;
     max-width: 100%;
     height: auto;
-    background-color: #107C31;
+    background-color: transparent;
+    border: #107C31 1.5pt solid;
     padding: 0.5rem;
-    color: white;
+    color: #107C31;
     display: none;
     text-align: start;
     margin-bottom: 0.5rem;
@@ -1134,13 +1134,11 @@ opacity: 100%;
     font-weight: bold;
     max-width: 100%;
     height: auto;
-    
-    color: white;
+    color: #107C31;
 
     display: none;
     text-align: start;
     margin-bottom: 0.5rem;
-
 }
 #draggable1{
     display: none;
@@ -1196,8 +1194,9 @@ opacity: 100%;
             </div>
 
             <div id="separador-vertical-2"> 
-                <div class="separador-mobile"></div>
+                
                 <div class="int-separador-v">▼▲</div>
+                <div class="separador-mobile"></div>
             </div>
         
         <div class="contenedores-inferiores">
@@ -1398,8 +1397,36 @@ $(document).ready(function() {
                     $(".contenido-prj").css("display", "flex");
                     $(".contenido-prj").css("flex-direction", "column");
                     $(".contenido-prj").css("gap", "0rem");
-                    $(".info").css("background-color", "#107C31"); 
+                    $(".info").css("background-color", "transparent"); 
+                    $(".info").css("border-radius", "10px"); 
+                    $(".info").css("justify-content", "space-between");
+                    $(".info-tag").css("background-color", "transparent"); 
+                    $(".info-nombre").css("background-color", "transparent"); 
+                    $(".info-tag").css("color", "#107C31"); 
+                    $(".info-nombre").css("color", "#107C31"); 
+                    $(".info-tag").css("width", "100%"); 
+                    $(".info-nombre").css("width", "100%"); 
+                    $(".info-mas").css("width", "100%");  
+                    $(".info").css("border", "solid 1.5pt #107C31");
                     $(".info").css("margin-bottom", "0.2rem");  
+                    $(".contenido-prj").css("margin-top", "4rem");
+                    $(".info").css("width", "calc(100% - 0.25rem)");  
+                    $(".info-mas").css("color", "#107C31");  
+                    $(".info-mas").css("background-color", "transparent");
+                    
+                    $(".info-nombre").css("justify-content", "start"); 
+                    $(".info-mas").css("justify-content", "end"); 
+
+                    $(".info-nombre").css("align-items", "start"); 
+                    $(".info-mas").css("align-items", "end"); 
+
+                    $(".info-nombre").css("text-align", "start"); 
+                    $(".info-mas").css("text-align", "end"); 
+
+                    $(".info-nombre").css("padding-left", "0.5rem"); 
+                    $(".info-mas").css("padding-right", "0.5rem");
+
+                    $(".little-desc").css("margin-bottom", "0.2rem");
 
                     $(this).text('▢');
                 } else {
@@ -1409,9 +1436,26 @@ $(document).ready(function() {
                     $(".info").css("background-color", "transparent"); 
                     $(".contenido-prj").css("gap", "0.5rem");
                     $(".info").css("margin-bottom", "0.5rem");  
-  
-
+                    $(".contenido-prj").css("margin-top", "0rem");
+                    $(".info").css("width", "80%"); 
+                    $(".info").css("border", "none");
+                    $(".info-tag").css("background-color", "#107C31"); 
+                    $(".info-nombre").css("background-color", "#107C31"); 
+                    $(".info-tag").css("color", "white"); 
+                    $(".info-nombre").css("color", "white"); 
+                    $(".info").css("border-radius", "10px"); 
                     $(this).text('☰');
+                    $(".info-mas").css("color", "white");  
+                    $(".info-mas").css("background-color", "#107C31"); 
+                    $(".info").css("justify-content", "start");
+
+                    $(".info-tag").css("width", "auto"); 
+                    $(".info-nombre").css("width", "auto"); 
+                    $(".info-mas").css("width", "40px"); 
+
+                    $(".info-nombre").css("justify-content", "center"); 
+                    $(".info-mas").css("justify-content", "center"); 
+                    $(".little-desc").css("margin-bottom", "0.5rem");
                 }
             });
         });
@@ -1477,6 +1521,9 @@ let cursorPosition = { x: 0, y: 0 };
 
 // Almacenamos los elementos que han cambiado de .hijo-de a .draggable-mut
 const unrestrictedElements = new Set();
+const recentlyConverted = new Set();  // Agregado previamente
+const permanentlyExcluded = new Set();  // Agregar esta línea
+
 
 const { Engine, Render, World, Bodies, Body } = Matter;
 const engine = Engine.create();
@@ -1498,6 +1545,17 @@ const render = Render.create({
 
 Render.run(render);
 
+function isVisible(element) {
+    return (
+        element.classList.contains('draggable-mut') &&
+        window.getComputedStyle(element).display !== 'none' &&
+        !recentlyConverted.has(element)  // Excluir si fue cambiado recientemente
+    );
+}
+
+
+
+
 function createWalls() {
     const width = contDerecho.clientWidth;
     const height = contDerecho.clientHeight;
@@ -1518,13 +1576,16 @@ window.addEventListener('resize', function() {
     World.clear(world, false);
     createWalls();
     draggableMutBodies.forEach((body, element) => {
-        const elemRect = element.getBoundingClientRect();
-        Body.setPosition(body, {
-            x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
-            y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
-        });
+        if (isVisible(element)) {  // Solo actualizar posición si el elemento es visible
+            const elemRect = element.getBoundingClientRect();
+            Body.setPosition(body, {
+                x: Math.min(Math.max(elemRect.left + elemRect.width / 2, 0), contDerecho.clientWidth),
+                y: Math.min(Math.max(elemRect.top + elemRect.height / 2, 0), contDerecho.clientHeight)
+            });
+        }
     });
 });
+
 
 function esDispositivoTactil() {
     return ('ontouchstart' in window || navigator.maxTouchPoints > 0);
@@ -1540,19 +1601,40 @@ draggables.forEach((draggable) => {
     let releaseHandler;
     let originalPosition = { x: 0, y: 0 };
     let isFirstGrab = true; // Controla si es el primer agarre
+    const permanentlyExcluded = new Set();
 
-    // Observador para detectar cambios de clase
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                if (draggable.classList.contains('draggable-mut') && !draggable.classList.contains('hijo-de')) {
-                    unrestrictedElements.add(draggable); // Agregar a la lista sin límites
-                }
+const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+        const element = mutation.target;
+
+        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+            if (element.classList.contains('draggable-mut') && !element.classList.contains('hijo-de')) {
+                permanentlyExcluded.add(element);  // Añadir a la lista de excluidos permanentemente
+                removeBody(element);  // Asegurarse de que no esté en Matter.js
+            } else if (!element.classList.contains('draggable-mut') && draggableMutBodies.has(element)) {
+                removeBody(element);  // Eliminar cuerpo si ya no es 'draggable-mut'
             }
-        });
+        } else if (mutation.attributeName === 'style') {
+            if (isVisible(element) && !draggableMutBodies.has(element) && !permanentlyExcluded.has(element)) {
+                addBody(element);
+            } else if (!isVisible(element) && draggableMutBodies.has(element)) {
+                removeBody(element);
+            }
+        }
     });
+});
 
-    observer.observe(draggable, { attributes: true });
+
+// Funciones para desconectar y reconectar el observador
+function pauseObserver() {
+    observer.disconnect();
+}
+
+function resumeObserver() {
+    draggables.forEach((draggable) => observer.observe(draggable, { attributes: true, attributeFilter: ['style', 'class'] }));
+}
+
+
 
     // Guardar la posición original del draggable
     gsap.set(draggable, {
@@ -1568,6 +1650,7 @@ draggables.forEach((draggable) => {
         type: 'x,y',
         zIndexBoost: true,
         onPress: function (e) {
+            pauseObserver();
             const isTouch = e.type === "touchstart";
             cursorPosition.x = isTouch ? e.touches[0].clientX : e.clientX;
             cursorPosition.y = isTouch ? e.touches[0].clientY : e.clientY;
@@ -1658,74 +1741,75 @@ draggables.forEach((draggable) => {
       
 
         onRelease: function (e) {
-            clearTimeout(dragTimeout);
-            isMouseDown = false;
-            isDragging = false;
+    clearTimeout(dragTimeout);
+    isMouseDown = false;
+    isDragging = false;
 
-            const body = draggableMutBodies.get(draggable);
-            if (body) {
-                Body.setStatic(body, false);
-                currentDraggingBody = null;
-            }
+    const body = draggableMutBodies.get(draggable);
+    if (body) {
+        Body.setStatic(body, false);
+        currentDraggingBody = null;
+    }
 
-            const isTouch = e.type === "touchend";
-            const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
-            const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
+    const isTouch = e.type === "touchend";
+    const clientX = isTouch ? e.changedTouches[0].clientX : e.clientX;
+    const clientY = isTouch ? e.changedTouches[0].clientY : e.clientY;
 
-            // Calcular el centro del div draggable-mut
-            const draggableRect = draggable.getBoundingClientRect();
-            const centerX = draggableRect.left + draggableRect.width / 2;
-            const centerY = draggableRect.top + draggableRect.height / 2;
+    const draggableRect = draggable.getBoundingClientRect();
+    const centerX = draggableRect.left + draggableRect.width / 2;
+    const centerY = draggableRect.top + draggableRect.height / 2;
 
-            const dropZone = Array.from(dropZones).find(zone => {
-                const zoneRect = zone.getBoundingClientRect();
-                return (
-                    centerX >= zoneRect.left &&
-                    centerX <= zoneRect.right &&
-                    centerY >= zoneRect.top &&
-                    centerY <= zoneRect.bottom
-                );
-            });
+    const dropZone = Array.from(dropZones).find(zone => {
+        const zoneRect = zone.getBoundingClientRect();
+        return (
+            centerX >= zoneRect.left &&
+            centerX <= zoneRect.right &&
+            centerY >= zoneRect.top &&
+            centerY <= zoneRect.bottom
+        );
+    });
 
-            if (dropZone) {
-                dropZone.appendChild(draggable);
-                draggable.classList.replace('draggable-mut', 'hijo-de');
+    if (dropZone) {
+        dropZone.appendChild(draggable);
+        draggable.classList.replace('draggable-mut', 'hijo-de');
 
-                if (draggableInstance) {
-                    draggableInstance.kill();
-                    draggableInstance = null;
-                }
-
-                gsap.set(draggable, {
-                    position: 'relative',
-                    top: 'auto',
-                    left: 'auto',
-                    x: 0,
-                    y: 0,
-                    width: '100%',
-                    height: '100%',
-                    zIndex: '5',
-                    background: 'rgba(200, 198, 198, 0.368)',
-                    borderRadius: '10px',
-                    backdropFilter: 'blur(2px)',
-                    border: 'solid 1pt #107C31'
-                });
-
-                removeBody(draggable);
-                monitorClickTime(draggable);
-            } else {
-                // Si no se encuentra una zona de soltado, volver a la posición original
-                gsap.to(draggable, {
-                    x: originalPosition.x,
-                    y: originalPosition.y,
-                    duration: 0.5,
-                    ease: "power3.out"
-                });
-            }
-
-            window.removeEventListener('mouseup', releaseHandler);
-            window.removeEventListener('touchend', releaseHandler);
+        if (draggableInstance) {
+            draggableInstance.kill();
+            draggableInstance = null;
         }
+
+        gsap.set(draggable, {
+            position: 'relative',
+            top: 'auto',
+            left: 'auto',
+            x: 0,
+            y: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: '5',
+            background: 'rgba(200, 198, 198, 0.368)',
+            borderRadius: '10px',
+            backdropFilter: 'blur(2px)',
+            border: 'solid 1pt #107C31'
+        });
+
+        removeBody(draggable);  // Quitar el cuerpo si ya no es 'draggable-mut'
+        monitorClickTime(draggable);
+    } else {
+        // Si no se encuentra una zona de soltado, volver a la posición original
+        gsap.to(draggable, {
+            x: originalPosition.x,
+            y: originalPosition.y,
+            duration: 0.5,
+            ease: "power3.out"
+        });
+        removeBody(draggable);  // Remover el cuerpo de Matter.js si no está en contendor-soltar
+    }
+
+    window.removeEventListener('mouseup', releaseHandler);
+    window.removeEventListener('touchend', releaseHandler);
+}
+
 
     })[0];
 });
@@ -1960,20 +2044,24 @@ function isOverlapping(rect1, rect2) {
 }
 
 function addBody(element) {
-    const elemRect = element.getBoundingClientRect();
-    const body = Bodies.rectangle(
-        elemRect.left + elemRect.width / 2,
-        elemRect.top + elemRect.height / 2,
-        elemRect.width,
-        elemRect.height,
-        { 
-            restitution: 0.5, 
-            render: { fillStyle: 'transparent', strokeStyle: 'transparent' }
-        }
-    );
-    draggableMutBodies.set(element, body);
-    World.add(world, body);
+    if (isVisible(element)) {
+        const elemRect = element.getBoundingClientRect();
+        const body = Bodies.rectangle(
+            elemRect.left + elemRect.width / 2,
+            elemRect.top + elemRect.height / 2,
+            elemRect.width,
+            elemRect.height,
+            { 
+                restitution: 0.5, 
+                render: { fillStyle: 'transparent', strokeStyle: 'transparent' }
+            }
+        );
+        draggableMutBodies.set(element, body);
+        World.add(world, body);
+    }
 }
+
+
 
 function removeBody(element) {
     const body = draggableMutBodies.get(element);
@@ -1987,7 +2075,7 @@ function update() {
     Engine.update(engine);
 
     draggableMutBodies.forEach((body, element) => {
-        if (!isDragging || body !== currentDraggingBody) {
+        if (isVisible(element) && !permanentlyExcluded.has(element) && (!isDragging || body !== currentDraggingBody)) {
             const pos = body.position;
             const angle = body.angle;
 
@@ -1997,6 +2085,9 @@ function update() {
 
     requestAnimationFrame(update);
 }
+
+
+
 
 update();
 
@@ -2531,11 +2622,9 @@ function observeClassAndParentChanges(draggable) {
     updateReduccionVisibility();
 }
 
-// Función para ajustar la dirección de flex en todos los contenedores .contenedor-soltar
+// Función para ajustar la dirección de flex en todos los contenedores .contendor-soltar
 function adjustFlexDirectionForAllDropZones() {
     const dropZones = document.querySelectorAll('.contendor-soltar');
-    window.addEventListener('resize', adjustFlexDirectionForAllDropZones);
-    window.addEventListener('load', adjustFlexDirectionForAllDropZones);
 
     dropZones.forEach(dropZone => {
         const isSmallScreen = window.innerWidth < 767;
@@ -2552,6 +2641,105 @@ function adjustFlexDirectionForAllDropZones() {
     });
 }
 
+// Observador para monitorear cambios de tamaño en cada contenedor .contendor-soltar
+function observeDropZones() {
+    const dropZones = document.querySelectorAll('.contendor-soltar');
+    const observer = new ResizeObserver(adjustFlexDirectionForAllDropZones);
+
+    dropZones.forEach(dropZone => observer.observe(dropZone));
+}
+
+// Inicializar la observación y ajustar flex en carga y cambio de tamaño de ventana
+document.addEventListener('DOMContentLoaded', () => {
+    adjustFlexDirectionForAllDropZones();
+    observeDropZones();
+    window.addEventListener('resize', adjustFlexDirectionForAllDropZones);
+});
+// Función para mover elementos entre soltar-drc y soltar-izq-2 según el ancho de pantalla
+function transferChildElements() {
+    const containerRight = document.getElementById('soltar-drc');
+    const containerLeft = document.getElementById('soltar-izq-2');
+    const isSmallScreen = window.innerWidth <= 767;
+
+    if (isSmallScreen) {
+        // Mover hijos de #soltar-drc a #soltar-izq-2 si la pantalla es pequeña
+        Array.from(containerRight.children).forEach(child => {
+            if (child.classList.contains('hijo-de')) {
+                containerLeft.appendChild(child);
+                updateReduccionVisibility(child); // Actualizar visibilidad al mover
+            }
+        });
+    } else {
+        // Mover hijos de #soltar-izq-2 de vuelta a #soltar-drc si la pantalla es grande
+        Array.from(containerLeft.children).forEach(child => {
+            if (child.classList.contains('hijo-de')) {
+                containerRight.appendChild(child);
+                updateReduccionVisibility(child); // Actualizar visibilidad al mover
+            }
+        });
+    }
+}
+
+// Función para ajustar la visibilidad de .reduccion basado en el tamaño del contenedor
+function updateReduccionVisibility(element) {
+    const dropZone = element.closest('.contendor-soltar');
+    const reduccion = element.querySelector('.reduccion');
+    const contenidoReducion = reduccion.querySelector('.contenido-reduccion');
+
+    if (dropZone) {
+        const { offsetWidth: width, offsetHeight: height } = dropZone;
+        const shouldShowReduccion = width <= 165 || height <= 80;
+
+        if (shouldShowReduccion) {
+            reduccion.style.display = 'flex';
+
+            if (width <= 165) {
+                contenidoReducion.style.transform = 'rotate(90deg)';
+                contenidoReducion.style.width = `${height}px`;
+                contenidoReducion.style.height = 'auto';
+            } else {
+                contenidoReducion.style.transform = 'rotate(0deg)';
+                contenidoReducion.style.width = 'auto';
+                contenidoReducion.style.height = 'auto';
+            }
+
+            reduccion.style.backgroundImage = width <= 165 ?
+                'linear-gradient(135deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)'
+                : 'linear-gradient(45deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)';
+
+        } else {
+            reduccion.style.display = 'none';
+        }
+    } else {
+        reduccion.style.display = 'none';
+    }
+}
+
+// Monitorea el tamaño del contenedor y ajusta la visibilidad de la reducción en tiempo real
+function monitorDropZoneResize(dropZone) {
+    const observer = new ResizeObserver(() => {
+        Array.from(dropZone.children).forEach(child => {
+            if (child.classList.contains('hijo-de')) {
+                updateReduccionVisibility(child);
+            }
+        });
+    });
+    observer.observe(dropZone);
+}
+
+// Escuchar cambios en el tamaño de la ventana y en el contenedor para ajustar visibilidad del `div` reducción
+window.addEventListener('resize', transferChildElements);
+
+// Llamada inicial para ajustar los elementos y visibilidad según el tamaño de pantalla actual
+document.addEventListener('DOMContentLoaded', () => {
+    transferChildElements();
+
+    // Observa los cambios en el tamaño de `soltar-izq-2`
+    const containerLeft = document.getElementById('soltar-izq-2');
+    if (containerLeft) {
+        monitorDropZoneResize(containerLeft);
+    }
+});
 
 
 
