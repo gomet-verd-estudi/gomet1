@@ -949,8 +949,8 @@ display: none;
 @media (max-width: 767px) {
     .contenedor-superior{
             width: 100%;
-            min-height: 2.5%;
-            height: 2.5%;
+            min-height: 3.5%;
+            height: 3.5%;
            
 
         }
@@ -988,7 +988,7 @@ overflow: hidden;
 
 .contenedores-inferiores-2{
             width: 100%;
-           height: 2.5%;
+           height: 3.5%;
                         display: flex;
             border-radius: 4px;
 flex-direction: row;
@@ -1891,7 +1891,7 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 15;
+    const tolerance = 10;
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
@@ -2122,7 +2122,7 @@ function redimensionarHorizontal(e) {
     const newLeftWidth = (mouseX / contenedoresRect.width) * 100;
     const newRightWidth = 100 - newLeftWidth;
 
-    if (newLeftWidth > 2.5 && newRightWidth > 2.5) {
+    if (newLeftWidth > 3.5 && newRightWidth > 3.5) {
         contenedorIzq.style.width = `${newLeftWidth}%`;
         contenedorDrc.style.width = `${newRightWidth}%`;
     }
@@ -2170,7 +2170,7 @@ function redimensionarVertical(e) {
     const newTopHeight = (mouseY / contenedoresRect2.height) * 100;
     const newBottomHeight = 100 - newTopHeight;
 
-    if (newTopHeight > 2.5 && newBottomHeight > 2.5) {
+    if (newTopHeight > 3.5 && newBottomHeight > 3.5) {
         contenedorSup.style.height = `${newTopHeight}%`;
         contenedorInf.style.height = `${newBottomHeight}%`;
     }
@@ -2221,7 +2221,7 @@ function redimensionarVertical(e) {
     const newBottomHeight = (mouseY / contenedoresRect2.height) * 100;
     const newTopHeight = 100 - newBottomHeight;
 
-    if (newBottomHeight > 2.5 && newTopHeight > 2.5) {
+    if (newBottomHeight > 3.5 && newTopHeight > 3.5) {
         contenedorSup.style.height = `${newTopHeight}%`;
         contenedorInf.style.height = `${newBottomHeight}%`;
     }
@@ -2748,3 +2748,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
 </body>
 </html>
+
