@@ -1904,7 +1904,7 @@ function monitorClickTime(element) {
         // Activamos el temporizador solo después de un breve período de estabilidad
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 150 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -2000,7 +2000,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 150);
+        }, 180);
     };
 
     const moveHandler = (e) => {
