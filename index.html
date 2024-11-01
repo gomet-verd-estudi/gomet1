@@ -1891,7 +1891,7 @@ function monitorClickTime(element) {
     let startTime, timer;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 70;  // Incrementamos aún más la tolerancia para dispositivos táctiles
+    const tolerance = 50;  // Incrementamos aún más la tolerancia para dispositivos táctiles
 
     const startHandler = (e) => {
         const isTouch = e.type === 'touchstart';
@@ -1904,7 +1904,7 @@ function monitorClickTime(element) {
         // Activamos el temporizador solo después de un breve período de estabilidad
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 200 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 150 && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -2000,7 +2000,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 200);
+        }, 150);
     };
 
     const moveHandler = (e) => {
