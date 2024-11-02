@@ -1892,7 +1892,7 @@ function monitorClickTime(element) {
     let isScrolling = false;  // Flag para indicar si se está haciendo scroll
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 50;  // Tolerancia para dispositivos táctiles
+    const tolerance = 70;  // Tolerancia para dispositivos táctiles
 
     // Manejar el inicio del temporizador
     const startHandler = (e) => {
@@ -1908,7 +1908,7 @@ function monitorClickTime(element) {
         // Iniciar el temporizador solo si el usuario no está desplazando
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 190 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -2004,7 +2004,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 190);
+        }, 180);
     };
 
     const moveHandler = (e) => {
