@@ -1703,7 +1703,7 @@ function resumeObserver() {
                         draggableInstance.enable();
                         draggableInstance.startDrag(e);
                     }
-                }, 180);
+                }, 150);
             } else {
                 gsap.set(draggable, {
                     x: cursorPosition.x - draggable.offsetWidth / 2,
@@ -1887,6 +1887,8 @@ function addPuntero(element) {
     });
 }
 
+// File: dragAndDropHandler.js
+
 function monitorClickTime(element) {
     let startTime, timer;
     let isScrolling = false;  // Flag para indicar si se está haciendo scroll
@@ -1905,17 +1907,19 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
 
-        // Iniciar el temporizador solo si el usuario no está desplazando
+        // Reducimos el tiempo del temporizador a 100 ms para mejorar la respuesta
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 150 && element.classList.contains('hijo-de')) {  // Reducimos el tiempo de espera
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
 
+                // Configuración optimizada para GSAP
                 const size = window.innerWidth < 767 ? '120px' : '200px';
                 const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
 
+                // Aplicamos GSAP sin demoras adicionales
                 gsap.set(element, {
                     position: 'absolute',
                     x: cursorPos.x - parseFloat(size) / 2,
@@ -1931,8 +1935,9 @@ function monitorClickTime(element) {
 
                 addPuntero(element);  // Añadir el puntero al cambiar a `draggable-mut`
 
+                // Iniciamos GSAP inmediatamente con una duración más corta
                 gsap.to(element, {
-                    duration: 0.19,
+                    duration: 0.1,  // Reducimos la duración de la animación
                     onComplete: function() {
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
@@ -1994,7 +1999,7 @@ function monitorClickTime(element) {
                                     gsap.to(element, {
                                         x: initialTouchPos.x - element.offsetWidth / 2,
                                         y: initialTouchPos.y - element.offsetHeight / 2,
-                                        duration: 0.5,
+                                        duration: 0.3,  // Reducimos la duración para que sea más ágil
                                         ease: "power3.out"
                                     });
                                 }
@@ -2004,7 +2009,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 180);
+        }, 150);  // Temporizador más corto
     };
 
     const moveHandler = (e) => {
@@ -2012,7 +2017,6 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
-        // Cancelamos el temporizador solo si se supera la tolerancia en ambas direcciones
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
@@ -2024,7 +2028,7 @@ function monitorClickTime(element) {
     element.querySelectorAll('.hijo-de *').forEach((child) => {
         child.addEventListener('scroll', () => {
             isScrolling = true;
-            clearTimeout(timer); // Cancelamos el temporizador mientras se hace scroll
+            clearTimeout(timer);
         });
     });
 
@@ -2035,7 +2039,7 @@ function monitorClickTime(element) {
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', () => {
         endHandler();
-        isScrolling = false; // Restablecemos el estado de scroll al terminar
+        isScrolling = false;  // Restablecemos el estado de scroll al terminar
     });
 
     window.addEventListener('resize', () => {
