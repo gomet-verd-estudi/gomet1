@@ -121,7 +121,7 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
             display: flex;
             align-items: center;
             text-align: center;
-            transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
+            transition: height 0.18s ease, width 0.18s ease, background-color 0.5s ease;
             border-radius: 10px;
             justify-content: center;
             flex-shrink: 1;
@@ -1019,7 +1019,7 @@ z-index: 4;
 display: flex;
 align-items: center;
 text-align: center;
-transition: height 0.3s ease, width 0.3s ease, background-color 0.5s ease;
+transition: height 0.18s ease, width 0.18s ease, background-color 0.5s ease;
 border-radius: 10px;
 justify-content: center;
 flex-shrink: 1;
@@ -1703,7 +1703,7 @@ function resumeObserver() {
                         draggableInstance.enable();
                         draggableInstance.startDrag(e);
                     }
-                }, 300);
+                }, 180);
             } else {
                 gsap.set(draggable, {
                     x: cursorPosition.x - draggable.offsetWidth / 2,
@@ -1800,7 +1800,7 @@ function resumeObserver() {
         gsap.to(draggable, {
             x: originalPosition.x,
             y: originalPosition.y,
-            duration: 0.5,
+            duration: 0.3,
             ease: "power3.out"
         });
         removeBody(draggable);  // Remover el cuerpo de Matter.js si no está en contendor-soltar
@@ -1892,7 +1892,7 @@ function monitorClickTime(element) {
     let isScrolling = false;  // Flag para indicar si se está haciendo scroll
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 70;  // Tolerancia para dispositivos táctiles
+    const tolerance = 80;  // Tolerancia para dispositivos táctiles
 
     // Manejar el inicio del temporizador
     const startHandler = (e) => {
@@ -1932,7 +1932,7 @@ function monitorClickTime(element) {
                 addPuntero(element);  // Añadir el puntero al cambiar a `draggable-mut`
 
                 gsap.to(element, {
-                    duration: 0.2,
+                    duration: 0.19,
                     onComplete: function() {
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
