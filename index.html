@@ -1889,11 +1889,15 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let startTime, timer;
+    let isScrolling = false;  // Flag para indicar si se está haciendo scroll
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 50;  // Incrementamos aún más la tolerancia para dispositivos táctiles
+    const tolerance = 50;  // Tolerancia para dispositivos táctiles
 
+    // Manejar el inicio del temporizador
     const startHandler = (e) => {
+        if (isScrolling) return;  // No iniciar el temporizador si se está haciendo scroll
+
         const isTouch = e.type === 'touchstart';
         cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         cursorPos.y = isTouch ? e.touches[0].clientY : e.clientY;
@@ -1901,10 +1905,10 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
 
-        // Activamos el temporizador solo después de un breve período de estabilidad
+        // Iniciar el temporizador solo si el usuario no está desplazando
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 190 && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -1925,7 +1929,7 @@ function monitorClickTime(element) {
                     border: `solid ${borderThickness} #107C31`
                 });
 
-                addPuntero(element); // Añadir el puntero al cambiar a `draggable-mut`
+                addPuntero(element);  // Añadir el puntero al cambiar a `draggable-mut`
 
                 gsap.to(element, {
                     duration: 0.2,
@@ -1933,7 +1937,7 @@ function monitorClickTime(element) {
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
                             zIndexBoost: true,
-                            minimumMovement: 15,  // Movimientos menores requieren menos precisión
+                            minimumMovement: 15,
                             onPress: function(e) {
                                 const isTouch = e.type === "touchstart";
                                 const cx = isTouch ? e.touches[0].clientX : e.clientX;
@@ -2000,7 +2004,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 180);
+        }, 190);
     };
 
     const moveHandler = (e) => {
@@ -2016,12 +2020,23 @@ function monitorClickTime(element) {
 
     const endHandler = () => clearTimeout(timer);
 
+    // Añadir evento de scroll a todos los hijos de 'hijo-de'
+    element.querySelectorAll('.hijo-de *').forEach((child) => {
+        child.addEventListener('scroll', () => {
+            isScrolling = true;
+            clearTimeout(timer); // Cancelamos el temporizador mientras se hace scroll
+        });
+    });
+
     element.addEventListener('mousedown', startHandler);
-    element.addEventListener('touchstart', startHandler, { passive: false }); // Configurado como passive: false
-    element.addEventListener('touchmove', moveHandler, { passive: false }); // Configurado como passive: false
-    element.addEventListener('touchcancel', endHandler); // Añadido touchcancel
+    element.addEventListener('touchstart', startHandler, { passive: false });
+    element.addEventListener('touchmove', moveHandler, { passive: false });
+    element.addEventListener('touchcancel', endHandler);
     element.addEventListener('mouseup', endHandler);
-    element.addEventListener('touchend', endHandler);
+    element.addEventListener('touchend', () => {
+        endHandler();
+        isScrolling = false; // Restablecemos el estado de scroll al terminar
+    });
 
     window.addEventListener('resize', () => {
         if (element.classList.contains('draggable-mut')) {
@@ -2035,6 +2050,7 @@ function monitorClickTime(element) {
         }
     });
 }
+
 
 
 function isOverlapping(rect1, rect2) {
