@@ -1889,10 +1889,11 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let startTime, timer;
-    let isScrolling = false;  // Flag para indicar si se está haciendo scroll
+    let isScrolling = false;  // Indica si se está haciendo scroll
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 70;  // Tolerancia para dispositivos táctiles
+    const tolerance = 50;  // Tolerancia para dispositivos táctiles
+    let scrollEndTimeout;  // Timeout para esperar al fin del scroll
 
     // Manejar el inicio del temporizador
     const startHandler = (e) => {
@@ -1908,7 +1909,7 @@ function monitorClickTime(element) {
         // Iniciar el temporizador solo si el usuario no está desplazando
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 190 && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -2004,7 +2005,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 180);
+        }, 190);
     };
 
     const moveHandler = (e) => {
@@ -2025,6 +2026,12 @@ function monitorClickTime(element) {
         child.addEventListener('scroll', () => {
             isScrolling = true;
             clearTimeout(timer); // Cancelamos el temporizador mientras se hace scroll
+            clearTimeout(scrollEndTimeout);  // Limpiamos el timeout previo si existe
+
+            // Esperar un momento después de terminar el scroll antes de restablecer isScrolling
+            scrollEndTimeout = setTimeout(() => {
+                isScrolling = false;  // Restablecer estado después del scroll
+            }, 150);  // Esperar 150ms tras el último evento de scroll
         });
     });
 
@@ -2035,7 +2042,8 @@ function monitorClickTime(element) {
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', () => {
         endHandler();
-        isScrolling = false; // Restablecemos el estado de scroll al terminar
+        clearTimeout(scrollEndTimeout); // Limpiar timeout de scroll al tocar
+        scrollEndTimeout = setTimeout(() => isScrolling = false, 150);  // Reset después de 150ms sin scroll
     });
 
     window.addEventListener('resize', () => {
@@ -2050,6 +2058,7 @@ function monitorClickTime(element) {
         }
     });
 }
+
 
 
 
