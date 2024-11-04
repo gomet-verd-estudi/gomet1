@@ -1603,6 +1603,7 @@ function esDispositivoTactil() {
 
 const isTouchDevice = esDispositivoTactil();
 
+
 draggables.forEach((draggable) => {
     let dragTimeout;
     let isMouseDown = false;
@@ -1899,12 +1900,11 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let startTime, timer;
-    let isScrolling = false;  // Flag para indicar si se está haciendo scroll
+    let isScrolling = false;  // Flag para indicar si se está haciendo scroll en táctiles
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
     const tolerance = 80;  // Tolerancia para dispositivos táctiles
 
-    // Manejar el inicio del temporizador
     const startHandler = (e) => {
         if (isScrolling) return;  // No iniciar el temporizador si se está haciendo scroll
 
@@ -1915,7 +1915,7 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
 
-        // Iniciar el temporizador solo si el usuario no está desplazando
+        // Iniciar el temporizador solo si no está desplazando en dispositivos táctiles
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
             if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
@@ -1939,7 +1939,7 @@ function monitorClickTime(element) {
                     border: `solid ${borderThickness} #107C31`
                 });
 
-                addPuntero(element);  // Añadir el puntero al cambiar a `draggable-mut`
+                addPuntero(element);
 
                 gsap.to(element, {
                     duration: 0.19,
@@ -2022,7 +2022,6 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
-        // Cancelamos el temporizador solo si se supera la tolerancia en ambas direcciones
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
@@ -2030,13 +2029,15 @@ function monitorClickTime(element) {
 
     const endHandler = () => clearTimeout(timer);
 
-    // Añadir evento de scroll a todos los hijos de 'hijo-de'
-    element.querySelectorAll('.hijo-de *').forEach((child) => {
-        child.addEventListener('scroll', () => {
-            isScrolling = true;
-            clearTimeout(timer); // Cancelamos el temporizador mientras se hace scroll
+    // Escuchar eventos de scroll solo en dispositivos táctiles
+    if (isTouchDevice) {
+        element.querySelectorAll('.hijo-de *').forEach((child) => {
+            child.addEventListener('scroll', () => {
+                isScrolling = true;
+                clearTimeout(timer); // Cancelar el temporizador mientras se hace scroll
+            });
         });
-    });
+    }
 
     element.addEventListener('mousedown', startHandler);
     element.addEventListener('touchstart', startHandler, { passive: false });
@@ -2045,7 +2046,7 @@ function monitorClickTime(element) {
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', () => {
         endHandler();
-        isScrolling = false; // Restablecemos el estado de scroll al terminar
+        isScrolling = false; // Restablecer el estado de scroll al terminar
     });
 
     window.addEventListener('resize', () => {
