@@ -1714,7 +1714,7 @@ function resumeObserver() {
                         draggableInstance.enable();
                         draggableInstance.startDrag(e);
                     }
-                }, 190);
+                }, 200);
             } else {
                 gsap.set(draggable, {
                     x: cursorPosition.x - draggable.offsetWidth / 2,
@@ -1918,7 +1918,7 @@ function monitorClickTime(element) {
         // Iniciar el temporizador solo si no está desplazando en dispositivos táctiles
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 180 && element.classList.contains('hijo-de')) {
+            if (elapsedTime > 200 && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -2014,7 +2014,7 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 180);
+        }, 200);
     };
 
     const moveHandler = (e) => {
