@@ -1399,6 +1399,26 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
     
     <script>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 $(document).ready(function() {
             $('.bot-list').on('click', function() {
                 if ($(this).text() === '☰') {
@@ -1520,6 +1540,9 @@ $(document).ready(function () {
         }
     });
 });
+
+
+
 
 const contIzquierdos = document.querySelectorAll('.contenedor-izquierdo');
 const dropZones = document.querySelectorAll('.contendor-soltar');
@@ -1714,7 +1737,7 @@ function resumeObserver() {
                         draggableInstance.enable();
                         draggableInstance.startDrag(e);
                     }
-                }, 200);
+                }, 230);
             } else {
                 gsap.set(draggable, {
                     x: cursorPosition.x - draggable.offsetWidth / 2,
@@ -1900,13 +1923,19 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let startTime, timer;
-    let isScrolling = false;  // Flag para indicar si se está haciendo scroll en táctiles
+    let isScrolling = false;
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 80;  // Tolerancia para dispositivos táctiles
+    const tolerance = 80;
+    const clickHoldThreshold = 230; // Minimum hold time to trigger click actions
+
+    // Check if device is touch-capable
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
     const startHandler = (e) => {
-        if (isScrolling) return;  // No iniciar el temporizador si se está haciendo scroll
+        if (!isTouchDevice && e.buttons !== 1) return; // Ignore superficial clicks on desktop
+
+        if (isScrolling) return;
 
         const isTouch = e.type === 'touchstart';
         cursorPos.x = isTouch ? e.touches[0].clientX : e.clientX;
@@ -1915,10 +1944,10 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
 
-        // Iniciar el temporizador solo si no está desplazando en dispositivos táctiles
+        // Initiate a timer to determine a "click and hold" action
         timer = setTimeout(() => {
             const elapsedTime = Date.now() - startTime;
-            if (elapsedTime > 200 && element.classList.contains('hijo-de')) {
+            if (elapsedTime >= clickHoldThreshold && element.classList.contains('hijo-de')) {
                 e.preventDefault();
                 element.classList.replace('hijo-de', 'draggable-mut');
                 document.body.appendChild(element);
@@ -1934,8 +1963,6 @@ function monitorClickTime(element) {
                     height: size,
                     background: '#FBE83F',
                     borderRadius: '10px',
-                    backdropFilter: 'none',
-                    boxShadow: 'none',
                     border: `solid ${borderThickness} #107C31`
                 });
 
@@ -1943,22 +1970,20 @@ function monitorClickTime(element) {
 
                 gsap.to(element, {
                     duration: 0.19,
-                    onComplete: function() {
+                    onComplete: function () {
                         draggableInstance = Draggable.create(element, {
                             type: 'x,y',
                             zIndexBoost: true,
                             minimumMovement: 15,
-                            onPress: function(e) {
-                                const isTouch = e.type === "touchstart";
+                            onPress: function (e) {
                                 const cx = isTouch ? e.touches[0].clientX : e.clientX;
                                 const cy = isTouch ? e.touches[0].clientY : e.clientY;
-                                gsap.set(element, { 
-                                    x: cx - element.offsetWidth / 2, 
-                                    y: cy - element.offsetHeight / 2 
+                                gsap.set(element, {
+                                    x: cx - element.offsetWidth / 2,
+                                    y: cy - element.offsetHeight / 2
                                 });
                             },
-                            onDrag: function(e) {
-                                const isTouch = e.type === "touchmove";
+                            onDrag: function (e) {
                                 const clientX = isTouch ? e.touches[0].clientX : e.clientX;
                                 const clientY = isTouch ? e.touches[0].clientY : e.clientY;
 
@@ -1972,7 +1997,7 @@ function monitorClickTime(element) {
                                     y: limitedY - element.offsetHeight / 2
                                 });
                             },
-                            onRelease: function(e) {
+                            onRelease: function () {
                                 const puntero = element.querySelector('.puntero');
                                 const dropZone = obtenerDropZoneBajoPuntero(puntero);
 
@@ -1991,10 +2016,8 @@ function monitorClickTime(element) {
                                         y: 0,
                                         width: '100%',
                                         height: '100%',
-                                        zIndex: '5',
                                         background: 'rgba(200, 198, 198, 0.368)',
                                         borderRadius: '10px',
-                                        backdropFilter: 'blur(2px)',
                                         border: 'solid 1pt grey'
                                     });
 
@@ -2014,13 +2037,12 @@ function monitorClickTime(element) {
                     }
                 });
             }
-        }, 200);
+        }, clickHoldThreshold);
     };
 
     const moveHandler = (e) => {
-        const isTouch = e.type === 'touchmove';
-        const currentX = isTouch ? e.touches[0].clientX : e.clientX;
-        const currentY = isTouch ? e.touches[0].clientY : e.clientY;
+        const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const currentY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
 
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
@@ -2029,16 +2051,6 @@ function monitorClickTime(element) {
 
     const endHandler = () => clearTimeout(timer);
 
-    // Escuchar eventos de scroll solo en dispositivos táctiles
-    if (isTouchDevice) {
-        element.querySelectorAll('.hijo-de *').forEach((child) => {
-            child.addEventListener('scroll', () => {
-                isScrolling = true;
-                clearTimeout(timer); // Cancelar el temporizador mientras se hace scroll
-            });
-        });
-    }
-
     element.addEventListener('mousedown', startHandler);
     element.addEventListener('touchstart', startHandler, { passive: false });
     element.addEventListener('touchmove', moveHandler, { passive: false });
@@ -2046,7 +2058,7 @@ function monitorClickTime(element) {
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', () => {
         endHandler();
-        isScrolling = false; // Restablecer el estado de scroll al terminar
+        isScrolling = false;
     });
 
     window.addEventListener('resize', () => {
@@ -2765,6 +2777,11 @@ document.addEventListener('DOMContentLoaded', () => {
         monitorDropZoneResize(containerLeft);
     }
 });
+
+
+
+
+
 
 
 
