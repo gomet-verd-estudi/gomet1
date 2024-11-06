@@ -20,7 +20,7 @@
         .puntero {
         width: 10px;
         height: 10px;
-        background-color: red;
+        background-color: transparent;
         position: absolute;
         top: 50%;
         left: 50%;
@@ -127,7 +127,7 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
             flex-shrink: 1;
             overflow: hidden;
 background-color: #FBE83F;
-border: solid 7pt #107C31;
+
 }
 #draggable2{
     justify-content: center;
@@ -918,6 +918,13 @@ font-weight: bold;
     
 }
 
+
+.iconos-home-2{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    
+}
 .botonera-grid{
     display: flex;
     gap: 0.3rem;
@@ -1025,7 +1032,7 @@ transition: height 0.18s ease, width 0.2s ease, background-color 0.5s ease;
 border-radius: 10px;
 justify-content: center;
 flex-shrink: 1;
-border: solid 5pt #107C31;
+
 
 
 }
@@ -1233,6 +1240,7 @@ padding: 0;
 
 
     <div class="draggable-mut" id="draggable1" style="left: 1px;">
+        <div class="iconos-home-2"><img src="icono_cabeza.svg"></div>
 
         <div class="contenido-general" id="cont-gen-1">
             <div class="texto">
@@ -1354,6 +1362,8 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
     </div>
     </div>
     <div class="draggable-mut" id="draggable3" style="left: 2px;">
+        <div class="iconos-home-2"><img src="icono_cabeza.svg"></div>
+
         <div class="contenido-general" id="cont-gen-3">
             <div class="texto">Soy Manel Vila, diseñador gráfico graduado por la EASD (Escuela Arte Superior de Valencia).
                 Durante los tres últimos años he estado trabajando como freelance, con proyectos como los
@@ -1377,6 +1387,8 @@ de los 80’s y presentada en la 080 Barcelona Fashion week.
 
 
     <div class="draggable-mut" id="draggable5">
+        <div class="iconos-home-2"><img src="icono_cabeza.svg"></div>
+
         <div class="contenido-general" id="cont-gen-5">
             @GOMETVERDESTUDI   
              </div>
@@ -1939,7 +1951,6 @@ function monitorClickTime(element) {
                     borderRadius: '10px',
                     backdropFilter: 'none',
                     boxShadow: 'none',
-                    border: `solid ${borderThickness} #107C31`
                 });
 
                 addPuntero(element);  // Añadir el puntero al cambiar a `draggable-mut`
@@ -2061,7 +2072,6 @@ function monitorClickTime(element) {
             gsap.set(element, {
                 width: size,
                 height: size,
-                border: `solid ${borderThickness} #107C31`
             });
         }
     });
@@ -2428,32 +2438,41 @@ ajustarColumnasPorAncho();
 
 
 
-
-// Función para actualizar la visibilidad de .contenido-prj en función de la clase del elemento
+// Función para actualizar la visibilidad de .contenido-prj y de sus iconos-home e iconos-home-2 asociados
 function actualizarVisibilidadContenidoPrj() {
     const draggables = document.querySelectorAll('.draggable-mut, .hijo-de');
 
     draggables.forEach(draggable => {
-        const contenidoPrj = draggable.querySelector('.contenido-prj');
-        const iconosHome = document.querySelector('.iconos-home'); // Selecciona el div .iconos-home
+        const contenidoPrj = draggable.querySelector('.contenido-prj'); // Selecciona el contenido específico
+        const contenidoPrj2 = draggable.querySelector('.contenido-general'); // Selecciona otro contenido específico
+        const iconoHome = draggable.querySelector('.iconos-home'); // Selecciona el icono-home dentro del draggable
+        const iconoHome2 = draggable.querySelector('.iconos-home-2'); // Selecciona el icono-home-2 dentro del draggable
 
-        if (contenidoPrj) {
-            // Mostrar el contenido si tiene la clase 'hijo-de'
+        // Control de visibilidad para contenidoPrj e iconoHome
+        if (contenidoPrj && iconoHome) {
             if (draggable.classList.contains('hijo-de')) {
-                contenidoPrj.style.display = 'grid';
-                if (iconosHome) {
-                    iconosHome.style.display = 'none'; // Ocultar iconos-home
-                }
+                contenidoPrj.style.display = 'grid'; // Mostrar contenido cuando tiene clase 'hijo-de'
+                iconoHome.style.display = 'none';    // Ocultar icono-home correspondiente
             } else {
-                // Ocultar el contenido si tiene la clase 'draggable-mut'
-                contenidoPrj.style.display = 'none';
-                if (iconosHome) {
-                    iconosHome.style.display = 'flex'; // Mostrar iconos-home
-                }
+                contenidoPrj.style.display = 'none'; // Ocultar contenido
+                iconoHome.style.display = 'flex';    // Mostrar icono-home correspondiente
+            }
+        }
+
+        // Control de visibilidad para contenidoPrj2 e iconoHome2
+        if (contenidoPrj2 && iconoHome2) {
+            if (draggable.classList.contains('hijo-de')) {
+                contenidoPrj2.style.display = 'flex'; // Mostrar contenido cuando tiene clase 'hijo-de'
+                iconoHome2.style.display = 'none';    // Ocultar icono-home-2 correspondiente
+            } else {
+                contenidoPrj2.style.display = 'none'; // Ocultar contenido
+                iconoHome2.style.display = 'flex';    // Mostrar icono-home-2 correspondiente
             }
         }
     });
 }
+
+
 
 // Función para actualizar la visibilidad de .contenido-general en función de la clase del elemento
 function actualizarVisibilidadContenidoGeneral() {
