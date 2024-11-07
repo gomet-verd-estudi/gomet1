@@ -2043,6 +2043,9 @@ function monitorClickTime(element) {
 
                                     removeBody(element);
                                     removePuntero(element);
+
+                                    // Asegurarse de reconfigurar los detectores de scroll en el nuevo contenedor
+                                    attachGlobalScrollListeners();
                                 } else {
                                     gsap.to(element, {
                                         x: initialTouchPos.x - element.offsetWidth / 2,
@@ -2077,7 +2080,10 @@ function monitorClickTime(element) {
     };
 
     // Función para configurar los eventos de scroll en todos los `hijo-de`
-    function attachScrollListeners() {
+    function attachGlobalScrollListeners() {
+        // Reinicia `isScrolling` y configura un evento de `scroll` en todos los elementos `hijo-de`
+        isScrolling = false;
+
         const hijosDe = document.querySelectorAll('.hijo-de'); // Selecciona todos los elementos con clase `hijo-de`
         hijosDe.forEach((hijo) => {
             hijo.addEventListener('scroll', () => {
@@ -2088,8 +2094,13 @@ function monitorClickTime(element) {
     }
 
     // Observador para monitorear cambios de clase y estructura en el contenedor `soltar`
-    const observer = new MutationObserver(() => {
-        attachScrollListeners();  // Vuelve a aplicar los listeners de scroll en caso de cambio
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            // Reaplicar listeners si cambia la clase o estructura del contenedor
+            if (mutation.type === "attributes" || mutation.type === "childList") {
+                attachGlobalScrollListeners();  // Vuelve a aplicar los listeners de scroll
+            }
+        });
     });
 
     // Observa el contenedor `soltar` que contiene los `hijo-de` para detectar cambios
@@ -2120,7 +2131,7 @@ function monitorClickTime(element) {
     });
 
     // Configura los listeners de scroll inicialmente
-    attachScrollListeners();
+    attachGlobalScrollListeners();
 }
 
 
