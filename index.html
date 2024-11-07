@@ -2043,9 +2043,6 @@ function monitorClickTime(element) {
 
                                     removeBody(element);
                                     removePuntero(element);
-
-                                    // Asegurarse de reconfigurar los detectores de scroll en el nuevo contenedor
-                                    attachGlobalScrollListeners();
                                 } else {
                                     gsap.to(element, {
                                         x: initialTouchPos.x - element.offsetWidth / 2,
@@ -2080,10 +2077,7 @@ function monitorClickTime(element) {
     };
 
     // Función para configurar los eventos de scroll en todos los `hijo-de`
-    function attachGlobalScrollListeners() {
-        // Reinicia `isScrolling` y configura un evento de `scroll` en todos los elementos `hijo-de`
-        isScrolling = false;
-
+    function attachScrollListeners() {
         const hijosDe = document.querySelectorAll('.hijo-de'); // Selecciona todos los elementos con clase `hijo-de`
         hijosDe.forEach((hijo) => {
             hijo.addEventListener('scroll', () => {
@@ -2094,13 +2088,8 @@ function monitorClickTime(element) {
     }
 
     // Observador para monitorear cambios de clase y estructura en el contenedor `soltar`
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            // Reaplicar listeners si cambia la clase o estructura del contenedor
-            if (mutation.type === "attributes" || mutation.type === "childList") {
-                attachGlobalScrollListeners();  // Vuelve a aplicar los listeners de scroll
-            }
-        });
+    const observer = new MutationObserver(() => {
+        attachScrollListeners();  // Vuelve a aplicar los listeners de scroll en caso de cambio
     });
 
     // Observa el contenedor `soltar` que contiene los `hijo-de` para detectar cambios
@@ -2131,7 +2120,7 @@ function monitorClickTime(element) {
     });
 
     // Configura los listeners de scroll inicialmente
-    attachGlobalScrollListeners();
+    attachScrollListeners();
 }
 
 
@@ -2832,12 +2821,25 @@ function resetHijoDeElements() {
 }
 
 // Función para resetear solo los elementos con clase "hijo-de" a "draggable-mut"
+// Función para ajustar el tamaño de los elementos en función del ancho de la pantalla
+function updateElementSize() {
+    const newSize = window.innerWidth < 767 ? '150px' : '200px';
+    document.querySelectorAll('.draggable-mut').forEach(element => {
+        element.style.width = newSize;
+        element.style.height = newSize;
+    });
+}
+
+// Función para resetear solo los elementos con clase "hijo-de" a "draggable-mut"
 function resetHijoDeElements() {
     const hijosDeElements = document.querySelectorAll('.hijo-de');
 
     hijosDeElements.forEach(element => {
         // Cambiar clase de "hijo-de" a "draggable-mut"
         element.classList.replace('hijo-de', 'draggable-mut');
+
+        // Ajustar tamaño inicial según el ancho de la pantalla
+        const newSize = window.innerWidth < 767 ? '150px' : '200px';
 
         // Centrar el elemento en el contenedor actual antes de moverlo al body
         const parentRect = element.parentElement.getBoundingClientRect();
@@ -2847,10 +2849,10 @@ function resetHijoDeElements() {
         // Configurar estilo inicial y mover al body
         gsap.set(element, {
             position: 'absolute',
-            width: '200px',
-            height: '200px',
-            x: centerX - 100,
-            y: centerY - 100,
+            width: newSize,
+            height: newSize,
+            x: centerX - parseInt(newSize) / 2,
+            y: centerY - parseInt(newSize) / 2,
             background: '#FBE83F',
             borderRadius: '10px',
             backdropFilter: 'none',
@@ -2873,7 +2875,13 @@ function resetHijoDeElements() {
         // Desactivar drag-and-drop para elementos hijo-de y configurar eventos
         initDraggable(element, body);
     });
+
+    // Ajustar tamaño al cargar la página
+    updateElementSize();
 }
+
+// Evento para ajustar tamaño en tiempo real
+window.addEventListener('resize', updateElementSize);
 
 // Función para inicializar Draggable y agregar funcionalidades de arrastre y temporizador
 function initDraggable(element, body) {
@@ -2990,8 +2998,10 @@ document.getElementById('demoler').addEventListener('click', function() {
 
 
 $(document).ready(function () {
-    
+    // Llamada inicial para establecer el tamaño correcto al cargar la página
+    updateElementSize();
 });
+
     </script>
     
 </body>
