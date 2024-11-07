@@ -2820,6 +2820,24 @@ function resetHijoDeElements() {
     });
 }
 
+// Función para ajustar el tamaño de los elementos en función del ancho de la pantalla
+function updateElementSize() {
+    const newSize = window.innerWidth < 767 ? '150px' : '200px';
+    document.querySelectorAll('.draggable-mut').forEach(element => {
+        element.style.width = newSize;
+        element.style.height = newSize;
+    });
+}
+
+// Función para ajustar el tamaño de los elementos en función del ancho de la pantalla
+function updateElementSize() {
+    const newSize = window.innerWidth < 767 ? '150px' : '200px';
+    document.querySelectorAll('.draggable-mut').forEach(element => {
+        element.style.width = newSize;
+        element.style.height = newSize;
+    });
+}
+
 // Función para resetear solo los elementos con clase "hijo-de" a "draggable-mut"
 function resetHijoDeElements() {
     const hijosDeElements = document.querySelectorAll('.hijo-de');
@@ -2827,6 +2845,9 @@ function resetHijoDeElements() {
     hijosDeElements.forEach(element => {
         // Cambiar clase de "hijo-de" a "draggable-mut"
         element.classList.replace('hijo-de', 'draggable-mut');
+
+        // Ajustar tamaño inicial según el ancho de la pantalla
+        const newSize = window.innerWidth < 767 ? '150px' : '200px';
 
         // Centrar el elemento en el contenedor actual antes de moverlo al body
         const parentRect = element.parentElement.getBoundingClientRect();
@@ -2836,10 +2857,10 @@ function resetHijoDeElements() {
         // Configurar estilo inicial y mover al body
         gsap.set(element, {
             position: 'absolute',
-            width: '200px',
-            height: '200px',
-            x: centerX - 100,
-            y: centerY - 100,
+            width: newSize,
+            height: newSize,
+            x: centerX - parseInt(newSize) / 2,
+            y: centerY - parseInt(newSize) / 2,
             background: '#FBE83F',
             borderRadius: '10px',
             backdropFilter: 'none',
@@ -2862,16 +2883,20 @@ function resetHijoDeElements() {
         // Desactivar drag-and-drop para elementos hijo-de y configurar eventos
         initDraggable(element, body);
     });
+
+    // Ajustar tamaño al cargar la página
+    updateElementSize();
 }
+
+// Evento para ajustar tamaño en tiempo real
+window.addEventListener('resize', updateElementSize);
 
 // Función para inicializar Draggable y agregar funcionalidades de arrastre y temporizador
 function initDraggable(element, body) {
-    // Verificar si ya existe una instancia de Draggable y eliminarla si es necesario
     if (element.draggableInstance) {
         element.draggableInstance.kill();
     }
 
-    // Crear nueva instancia de Draggable
     element.draggableInstance = Draggable.create(element, {
         type: 'x,y',
         zIndexBoost: true,
@@ -2972,13 +2997,35 @@ function observeClassChanges(element) {
     observer.observe(element, { attributes: true, attributeFilter: ['class'] });
 }
 
+// Función para cancelar el temporizador en caso de scroll en cualquier hijo de .hijo-de
+function cancelTimerOnScroll() {
+    const hijosDeElements = document.querySelectorAll('.hijo-de');
+
+    hijosDeElements.forEach(hijo => {
+        // Agrega un evento de scroll a cada elemento hijo y sus descendientes
+        hijo.addEventListener('scroll', function() {
+            clearTimeout(timer); // Cancelar el temporizador en cualquier scroll dentro de .hijo-de
+        }, { capture: true, passive: true }); // Usa captura para escuchar eventos en cualquier nivel de descendencia
+    });
+}
+
 // Evento de clic en el botón "Demoler" para resetear los elementos y activar todas las funcionalidades
 document.getElementById('demoler').addEventListener('click', function() {
     resetHijoDeElements();
+    cancelTimerOnScroll(); // Cancelar temporizador si se hace scroll tras resetear
 });
 
 
 $(document).ready(function () {
+    // Llamada inicial para establecer el tamaño correcto al cargar la página
+    updateElementSize();
+});
+
+    </script>
+    
+</body>
+</html>
+ady(function () {
     
 });
     </script>
