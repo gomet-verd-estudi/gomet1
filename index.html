@@ -31,6 +31,8 @@
             font-family: Arial, Helvetica, sans-serif;
             cursor: pointer;
             z-index: 90000;
+            font-size: 10pt;
+
         }
         .puntero {
         width: 10px;
@@ -223,7 +225,7 @@ overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-
+color: transparent;
 }
 
 #separador-vertical-2 {
@@ -331,7 +333,7 @@ overflow: hidden;
             width: calc(100% - 1rem);
             height: calc(100% - 1rem);
             overflow-x: hidden;
-            -webkit-text-stroke: 0.3px black; /* Trazo de 1px de grosor en negro */
+            -webkit-text-stroke: 0.3pt black; /* Trazo de 1px de grosor en negro */
 
 text-align: start;        }
 
@@ -446,7 +448,9 @@ color: white;
 opacity: 0;
 text-align: center;
 text-justify: center;
-border-radius: 4px;
+border-radius: 10px;
+border: solid 0.5pt black;
+-webkit-text-stroke: 0.5pt black; /* Trazo de 1px de grosor en negro */
 
        }
 
@@ -464,9 +468,13 @@ color: white;
 opacity: 0;
 text-align: center;
 text-justify: center;
-border-radius: 4px;
+border-radius: 10px;
+border: solid 0.5pt black;
+-webkit-text-stroke: 0.5pt black; /* Trazo de 1px de grosor en negro */
 
        }
+
+
        .int-separador-v:hover{
         opacity: 100%;
 
@@ -1160,6 +1168,7 @@ padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #4DA77D;
 
 }
 
@@ -1199,7 +1208,7 @@ padding: 0;
     </style>
 </head>
 <body>
-    <div id="demoler">Demolish</div>
+    <div id="demoler">DEMOLISH</div>
 
   <div class="macro-superior">
     <div class="contenido-logo">
@@ -1223,7 +1232,7 @@ padding: 0;
         <div id="separador-vertical"> 
             
             <div class="int-separador-v">▼▲</div>
-            <div class="separador-mobile"></div>
+            ▼ <div class="separador-mobile"></div>▲
         </div>
         <div class="contenedores-inferiores-2">
             <div class="contenedor-izquierdo" id="ct-izq-2">
@@ -2953,7 +2962,96 @@ document.getElementById('demoler').addEventListener('click', function() {
 });
 
 
+$(document).ready(function () {
 
+    document.addEventListener('DOMContentLoaded', () => {
+    // Bandera para identificar desplazamiento táctil
+    let isTouchScrolling = false; 
+
+    // Duración original del temporizador en ms
+    const timerDuration = 250; 
+
+    // Función para monitorear el desplazamiento en dispositivos táctiles
+    function monitorTouchScroll(element) {
+        const startHandler = (e) => {
+            if (isTouchScrolling) return; // Evita reactivaciones mientras hay scroll
+            isTouchScrolling = true;
+            clearTimeout(element.timer); // Desactiva el temporizador mientras hace scroll
+
+            // Restablecer isTouchScrolling tras detenerse el scroll
+            setTimeout(() => (isTouchScrolling = false), timerDuration);
+        };
+
+        // Agrega eventos de desplazamiento solo en dispositivos táctiles
+        element.addEventListener('touchstart', startHandler, { passive: true });
+        element.addEventListener('touchmove', startHandler, { passive: true });
+    }
+
+    // Configura el temporizador en cada elemento sin activarlo en desplazamiento táctil
+    function setupMonitorClickTime(element) {
+        let startTime, timer;
+
+        const startHandler = (e) => {
+            if (isTouchScrolling) return; // Evita el temporizador si hay desplazamiento táctil
+            startTime = Date.now();
+
+            timer = setTimeout(() => {
+                if (!isTouchScrolling && element.classList.contains('hijo-de')) {
+                    element.classList.replace('hijo-de', 'draggable-mut');
+                    resetElementPosition(element);
+                }
+            }, timerDuration);
+        };
+
+        const endHandler = () => {
+            clearTimeout(timer);
+            isTouchScrolling = false; // Reiniciar el estado de desplazamiento al finalizar
+        };
+
+        element.addEventListener('mousedown', startHandler);
+        element.addEventListener('touchstart', startHandler, { passive: false });
+        element.addEventListener('mouseup', endHandler);
+        element.addEventListener('touchend', endHandler);
+    }
+
+    // Función para restaurar posición y estilo tras resetear el temporizador
+    function resetElementPosition(element) {
+        gsap.set(element, {
+            position: 'absolute',
+            width: '200px',
+            height: '200px',
+            background: '#FBE83F',
+            borderRadius: '10px',
+            x: 0,
+            y: 0,
+        });
+        document.body.appendChild(element);
+    }
+
+    // Observa cambios de clase para agregar o quitar la funcionalidad de monitoreo
+    function observeClassChanges(element) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                if (mutation.type === "attributes" && mutation.attributeName === "class") {
+                    if (element.classList.contains('hijo-de')) {
+                        monitorTouchScroll(element);
+                    }
+                    setupMonitorClickTime(element);
+                }
+            });
+        });
+        observer.observe(element, { attributes: true });
+    }
+
+    // Selecciona todos los elementos con las clases 'hijo-de' o 'draggable-mut' y aplica las funciones
+    const hijosDeElements = document.querySelectorAll('.hijo-de, .draggable-mut');
+    hijosDeElements.forEach((element) => {
+        monitorTouchScroll(element);  // Monitorea desplazamiento táctil en cada elemento
+        setupMonitorClickTime(element);  // Configura temporizador en cada elemento
+        observeClassChanges(element); // Observa cambios de clase en cada elemento
+    });
+});
+});
     </script>
     
 </body>
