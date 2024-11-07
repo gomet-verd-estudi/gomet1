@@ -17,6 +17,21 @@
             padding: 0;
             background-color: white;
         }
+
+        #demoler {
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 0.3rem;
+            background-color: #4DA77D; /* Verde similar a otros divs */
+            border: solid 0.5pt black;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+            cursor: pointer;
+            z-index: 90000;
+        }
         .puntero {
         width: 10px;
         height: 10px;
@@ -31,7 +46,7 @@
          #ct-drc{
             width: 25%;
             height: 100%;
-border: solid 1pt #107C31;
+border: solid 1pt #4DA77D;
 
 border-radius: 10px;
         }
@@ -39,7 +54,7 @@ border-radius: 10px;
         #ct-izq{
             width: 75%;
             height: 100%;
-            border: solid 1pt #107C31;
+            border: solid 1pt #4DA77D;
 
 border-radius: 10px;
         }
@@ -48,7 +63,7 @@ border-radius: 10px;
             width: 100%;
             height: 100%;
             margin-bottom: 0.5rem;
-            border: solid 1pt #107C31;
+            border: solid 1pt #4DA77D;
 
 border-radius: 10px;
         }
@@ -88,11 +103,11 @@ border-radius: 10px;
             border-radius: 10px;
             background-color: transparent; /* Fondo blanco */
             background-image: linear-gradient(45deg, 
-            #107C31 2%, 
+            #4DA77D 2%, 
                                   transparent 2%, 
                                   transparent 50%, 
-                                  #107C31 50%, 
-                                  #107C31 5%, 
+                                  #4DA77D 50%, 
+                                  #4DA77D 5%, 
                                   transparent 55%, 
                                   transparent 100%);
 background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
@@ -101,7 +116,7 @@ background-size: 10px 10px; /* Cambiar el tamaño para líneas más finas */
         .contendor-soltar:hover{
             background-color: rgba(190, 189, 189, 0.377); /* Fondo blanco */
             backdrop-filter: blur(5px);
-            border: solid 1.5pt #107C31;
+            border: solid 1.5pt #4DA77D;
 
         }
 
@@ -165,7 +180,7 @@ background-color: #FBE83F;
             border-radius: 4px;
             position: relative;
 overflow: hidden;
-border: solid 1pt #107C31;
+border: solid 1pt #4DA77D;
 
 border-radius: 10px;
         }
@@ -310,13 +325,13 @@ overflow: hidden;
             height: 100%;
         }
         .texto{
-            color: #107C31;
-            font-size: 13pt;
+            color: #4DA77D;
+            font-size: 16pt;
             overflow-y: auto;
             width: calc(100% - 1rem);
             height: calc(100% - 1rem);
             overflow-x: hidden;
-           
+            -webkit-text-stroke: 0.3px black; /* Trazo de 1px de grosor en negro */
 
 text-align: start;        }
 
@@ -392,7 +407,7 @@ text-align: start;        }
             width: 100%;
             height: 100%;
             display: flex;
-            border: solid, 0.5pt #107C31;
+            border: solid, 0.5pt #4DA77D;
             align-items: center;
             justify-content: center;
         }
@@ -401,14 +416,14 @@ text-align: start;        }
             width: 100%;
             height: 100%;
             display: flex;
-            border: solid, 0.5pt #107C31;
+            border: solid, 0.5pt #4DA77D;
             
             align-items: center;
             justify-content: center;
         }
 
         .texto-regla {
-            color: #107C31;
+            color: #4DA77D;
             font-size: 8pt;
             display: flex;
             position: relative;
@@ -422,7 +437,7 @@ text-align: start;        }
             height: 300%;
             position: absolute;
             z-index: 1001;
-background-color: #107C31; 
+background-color: #4DA77D; 
 transition: all 0.5s ease;
 display: flex;
 align-items: center;
@@ -440,7 +455,7 @@ border-radius: 4px;
             height: 100%;
             position: absolute;
             z-index: 10001;
-background-color: #107C31; 
+background-color: #4DA77D; 
 transition: all 0.5s ease;
 display: flex;
 align-items: center;
@@ -476,7 +491,7 @@ border-radius: 4px;
     font-weight: bold;    
     box-sizing: border-box; /* Incluir borde y padding en el ancho total */
     resize: none; /* Sin redimensionar */
-background-color: #107C31;
+background-color: #4DA77D;
 font-family: sans-serif;
 }
 
@@ -490,7 +505,7 @@ height: 100%;
 .guardar {
     width: auto;
     background-color:transparent;
-    color: #107C31;
+    color: #4DA77D;
     border: none;
     border-radius: 4px;
     padding: 4px;
@@ -554,7 +569,7 @@ text-decoration: none;
     height: calc(100% - 1rem);
     border-radius: 4px;
     display: flex;
-    color: #107C31;
+    color: #4DA77D;
 
 
 }
@@ -606,7 +621,7 @@ text-decoration: none;
     height: 1.5rem;
     width: auto;
     position: absolute;
-    color: #107C31;
+    color: #4DA77D;
    width: 100%;
    height: 100%;
     text-align: center;
@@ -620,7 +635,7 @@ text-decoration: none;
 .circulos-esquinas{
     width: 1rem;
     height: 1rem;
-    border: 0.5pt solid #107C31;
+    border: 0.5pt solid #4DA77D;
     border-radius: 50%;
     position: absolute;
     background-color: white;
@@ -676,13 +691,13 @@ flex-wrap: nowrap;
     padding-top: 0.2rem;
     padding-bottom: 0.1rem;    
     padding-left: 0.5rem;
-    background-color: #107C31;
+    background-color: #4DA77D;
     border-radius: 10px;
     padding-right: 0.5rem;
     text-align: center;
 justify-content: center;
 align-items: center;
-
+border: black solid 0.5pt;
 }
 
 .info-tag{
@@ -693,13 +708,14 @@ align-items: center;
     padding-bottom: 0.1rem;
 justify-content: end;
 padding-right: 0.5rem;
-background-color: #107C31;
+background-color: #4DA77D;
 border-radius: 10px;
 padding-left: 0.5rem;
 text-align: center;
 justify-content: center;
 align-items: center;
 
+border: black solid 0.5pt;
 
 
 }
@@ -712,7 +728,7 @@ align-items: center;
     padding-bottom: 0.1rem;
 justify-content: center;
 padding-right: 0.5rem;
-background-color: #107C31;
+background-color: #4DA77D;
 border-radius: 10px;
 padding-left: 0.5rem;
 text-align: center;
@@ -720,6 +736,7 @@ justify-content: center;
 align-items: center;
 transition: all 0.3s ease; /* Transición suave de ancho */
 opacity: 50%;
+border: black solid 0.5pt;
 
 }
 
@@ -761,7 +778,7 @@ opacity: 100%;
     .column-button.active {
       opacity: 1;
       background-color: white;
-      color: #107C31;
+      color: #4DA77D;
       border: none;
       width: 40px;
       text-align: center;
@@ -778,7 +795,7 @@ opacity: 100%;
         height: 21px;  
         display: none;
       gap: 5px; 
-      background-color: #107C31;
+      background-color: #4DA77D;
 align-items: center;
 border-radius: 11.5px;
 padding-left: 5px;
@@ -787,6 +804,7 @@ text-align: center;
 opacity: 50%;
 backdrop-filter: blur(10px); /* Efecto cristal */
 transition: all 0.3s ease;
+border: black solid 0.5pt;
 
      }
 
@@ -800,7 +818,7 @@ transition: all 0.3s ease;
         height: 21px;  
         display: flex;
       gap: 5px; 
-      background-color: #107C31;
+      background-color: #4DA77D;
 align-items: center;
 border-radius: 11.5px;
 padding-left: 5px;
@@ -815,6 +833,7 @@ align-items: center;
 transition: all 0.3s ease;
  opacity: 50%;
  backdrop-filter: blur(10px); /* Efecto cristal */
+ border: black solid 0.5pt;
 
      }
 
@@ -824,7 +843,7 @@ transition: all 0.3s ease;
         height: 21px;  
         display: flex;
       gap: 5px; 
-      background-color: #107C31;
+      background-color: #4DA77D;
 align-items: center;
 border-radius: 11.5px;
 padding-left: 5px;
@@ -839,6 +858,7 @@ align-items: center;
 transition: all 0.3s ease;
  opacity: 50%;
  backdrop-filter: blur(10px); /* Efecto cristal */
+ border: black solid 0.5pt;
 
      }
 
@@ -891,7 +911,7 @@ transition: all 0.3s ease;
         font-size: 13pt;
         padding: 0.5rem;
         border-radius: 10px;
-border: solid 3pt #107C31;     
+border: solid 3pt #4DA77D;     
 font-weight: bold; 
 
      }
@@ -902,9 +922,9 @@ font-weight: bold;
     max-width: 100%;
     height: auto;
     background-color: transparent;
-    border: #107C31 1.5pt solid;
+    border: #4DA77D 1.5pt solid;
     padding: 0.5rem;
-    color: #107C31;
+    color: #4DA77D;
     display: none;
     text-align: start;
     margin-bottom: 0.5rem;
@@ -939,7 +959,7 @@ font-weight: bold;
     width: 15%;
     height: 40%;
     border-radius: 10px;
-    background-color: #107C31;
+    background-color: #4DA77D;
     opacity: 50%;
 }
 
@@ -970,7 +990,7 @@ display: none;
     width: 15%;
     height: 40%;
     border-radius: 10px;
-    background-color: #107C31;
+    background-color: #4DA77D;
     opacity: 50%;
 }
 .contenido-logo{
@@ -980,7 +1000,7 @@ display: flex;
 font-size: 12pt;
 padding: 0.5rem;
 border-radius: 10px;
-border: solid 2.5pt #107C31;    
+border: solid 2.5pt #4DA77D;    
 font-weight: bolder;
 }
 .contenedores-inferiores{
@@ -990,7 +1010,7 @@ display: flex;
 border-radius: 10px;
 flex-direction: column;
 overflow: hidden;
-border: solid 1pt #107C31;
+border: solid 1pt #4DA77D;
 
 }
 
@@ -1151,7 +1171,7 @@ padding: 0;
     font-weight: bold;
     max-width: 100%;
     height: auto;
-    color: #107C31;
+    color: #4DA77D;
 
     display: none;
     text-align: start;
@@ -1172,13 +1192,15 @@ padding: 0;
        .contendor-soltar:hover{
             background-color: transparent; /* Fondo blanco */
             backdrop-filter: none;
-            border: solid 0pt #107C31;
+            border: solid 0pt #4DA77D;
 
         }
 }
     </style>
 </head>
 <body>
+    <div id="demoler">Demolish</div>
+
   <div class="macro-superior">
     <div class="contenido-logo">
     GOMET VERD ESTUDI<br>
@@ -1424,16 +1446,16 @@ $(document).ready(function() {
                     $(".info").css("justify-content", "space-between");
                     $(".info-tag").css("background-color", "transparent"); 
                     $(".info-nombre").css("background-color", "transparent"); 
-                    $(".info-tag").css("color", "#107C31"); 
-                    $(".info-nombre").css("color", "#107C31"); 
+                    $(".info-tag").css("color", "#4DA77D"); 
+                    $(".info-nombre").css("color", "#4DA77D"); 
                     $(".info-tag").css("width", "100%"); 
                     $(".info-nombre").css("width", "100%"); 
                     $(".info-mas").css("width", "100%");  
-                    $(".info").css("border", "solid 1.5pt #107C31");
+                    $(".info").css("border", "solid 1.5pt #4DA77D");
                     $(".info").css("margin-bottom", "0.2rem");  
                     $(".contenido-prj").css("margin-top", "4rem");
                     $(".info").css("width", "calc(100% - 0.25rem)");  
-                    $(".info-mas").css("color", "#107C31");  
+                    $(".info-mas").css("color", "#4DA77D");  
                     $(".info-mas").css("background-color", "transparent");
                     
                     $(".info-nombre").css("justify-content", "start"); 
@@ -1461,14 +1483,14 @@ $(document).ready(function() {
                     $(".contenido-prj").css("margin-top", "0rem");
                     $(".info").css("width", "80%"); 
                     $(".info").css("border", "none");
-                    $(".info-tag").css("background-color", "#107C31"); 
-                    $(".info-nombre").css("background-color", "#107C31"); 
+                    $(".info-tag").css("background-color", "#4DA77D"); 
+                    $(".info-nombre").css("background-color", "#4DA77D"); 
                     $(".info-tag").css("color", "white"); 
                     $(".info-nombre").css("color", "white"); 
                     $(".info").css("border-radius", "10px"); 
                     $(this).text('☰');
                     $(".info-mas").css("color", "white");  
-                    $(".info-mas").css("background-color", "#107C31"); 
+                    $(".info-mas").css("background-color", "#4DA77D"); 
                     $(".info").css("justify-content", "start");
 
                     $(".info-tag").css("width", "auto"); 
@@ -1812,7 +1834,7 @@ function resumeObserver() {
             background: 'rgba(200, 198, 198, 0.368)',
             borderRadius: '10px',
             backdropFilter: 'blur(2px)',
-            border: 'solid 1pt #107C31'
+            border: 'solid 1pt #4DA77D'
         });
 
         removeBody(draggable);  // Quitar el cuerpo si ya no es 'draggable-mut'
@@ -2555,11 +2577,11 @@ function setupReduccionHandling(draggable) {
             pointerEvents: 'none',
             zIndex: '10',
             display: 'none',
-            backgroundImage: 'linear-gradient(45deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)',
+            backgroundImage: 'linear-gradient(45deg, #4DA77D 25%, transparent 25%, transparent 50%, #4DA77D 50%, #4DA77D 75%, transparent 75%)',
             backgroundSize: '20px 20px',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#107C31',
+            color: '#4DA77D',
             fontSize: '15pt',
             fontFamily: 'Arial, Helvetica, sans-serif',
             fontWeight: 'bold',
@@ -2579,7 +2601,7 @@ function setupReduccionHandling(draggable) {
             transition: 'transform 0.3s ease',
             padding: '0.5rem',
             backgroundColor: 'white',
-            border: 'solid 5pt #107C31',
+            border: 'solid 5pt #4DA77D',
             whiteSpace: 'nowrap',  // Evita que el texto se parta en varias líneas
         });
 
@@ -2641,8 +2663,8 @@ function observeClassAndParentChanges(draggable) {
                 }
 
                 reduccion.style.backgroundImage = width <= 165 ?
-                    'linear-gradient(135deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)'
-                    : 'linear-gradient(45deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)';
+                    'linear-gradient(135deg, #4DA77D 25%, transparent 25%, transparent 50%, #4DA77D 50%, #4DA77D 75%, transparent 75%)'
+                    : 'linear-gradient(45deg, #4DA77D 25%, transparent 25%, transparent 50%, #4DA77D 50%, #4DA77D 75%, transparent 75%)';
 
             } else {
                 reduccion.style.display = 'none';
@@ -2729,67 +2751,206 @@ function transferChildElements() {
     }
 }
 
-// Función para ajustar la visibilidad de .reduccion basado en el tamaño del contenedor
-function updateReduccionVisibility(element) {
-    const dropZone = element.closest('.contendor-soltar');
-    const reduccion = element.querySelector('.reduccion');
-    const contenidoReducion = reduccion.querySelector('.contenido-reduccion');
+// Función para resetear solo los elementos con clase "hijo-de" a "draggable-mut"
+function resetHijoDeElements() {
+    const hijosDeElements = document.querySelectorAll('.hijo-de');
 
-    if (dropZone) {
-        const { offsetWidth: width, offsetHeight: height } = dropZone;
-        const shouldShowReduccion = width <= 165 || height <= 80;
+    hijosDeElements.forEach(element => {
+        // Cambiar clase de "hijo-de" a "draggable-mut"
+        element.classList.replace('hijo-de', 'draggable-mut');
 
-        if (shouldShowReduccion) {
-            reduccion.style.display = 'flex';
+        // Centrar el elemento en el contenedor actual antes de moverlo al body
+        const parentRect = element.parentElement.getBoundingClientRect();
+        const centerX = parentRect.left + parentRect.width / 2;
+        const centerY = parentRect.top + parentRect.height / 2;
 
-            if (width <= 165) {
-                contenidoReducion.style.transform = 'rotate(90deg)';
-                contenidoReducion.style.width = `${height}px`;
-                contenidoReducion.style.height = 'auto';
-            } else {
-                contenidoReducion.style.transform = 'rotate(0deg)';
-                contenidoReducion.style.width = 'auto';
-                contenidoReducion.style.height = 'auto';
-            }
+        // Configurar estilo inicial y mover al body
+        gsap.set(element, {
+            position: 'absolute',
+            width: '200px',
+            height: '200px',
+            x: centerX - 100,
+            y: centerY - 100,
+            background: '#FBE83F',
+            borderRadius: '10px',
+            backdropFilter: 'none',
+            boxShadow: 'none'
+        });
+        document.body.appendChild(element);
 
-            reduccion.style.backgroundImage = width <= 165 ?
-                'linear-gradient(135deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)'
-                : 'linear-gradient(45deg, #107C31 25%, transparent 25%, transparent 50%, #107C31 50%, #107C31 75%, transparent 75%)';
+        // Remover cuerpos previos de Matter.js y crear uno nuevo
+        removeBody(element);
+        const body = Bodies.rectangle(
+            centerX,
+            centerY,
+            element.offsetWidth,
+            element.offsetHeight,
+            { restitution: 0.5, render: { fillStyle: 'transparent' } }
+        );
+        World.add(world, body);
+        draggableMutBodies.set(element, body);
 
-        } else {
-            reduccion.style.display = 'none';
-        }
-    } else {
-        reduccion.style.display = 'none';
-    }
+        // Desactivar drag-and-drop para elementos hijo-de y configurar eventos
+        initDraggable(element, body);
+    });
 }
 
-// Monitorea el tamaño del contenedor y ajusta la visibilidad de la reducción en tiempo real
-function monitorDropZoneResize(dropZone) {
-    const observer = new ResizeObserver(() => {
-        Array.from(dropZone.children).forEach(child => {
-            if (child.classList.contains('hijo-de')) {
-                updateReduccionVisibility(child);
+// Función para resetear solo los elementos con clase "hijo-de" a "draggable-mut"
+function resetHijoDeElements() {
+    const hijosDeElements = document.querySelectorAll('.hijo-de');
+
+    hijosDeElements.forEach(element => {
+        // Cambiar clase de "hijo-de" a "draggable-mut"
+        element.classList.replace('hijo-de', 'draggable-mut');
+
+        // Centrar el elemento en el contenedor actual antes de moverlo al body
+        const parentRect = element.parentElement.getBoundingClientRect();
+        const centerX = parentRect.left + parentRect.width / 2;
+        const centerY = parentRect.top + parentRect.height / 2;
+
+        // Configurar estilo inicial y mover al body
+        gsap.set(element, {
+            position: 'absolute',
+            width: '200px',
+            height: '200px',
+            x: centerX - 100,
+            y: centerY - 100,
+            background: '#FBE83F',
+            borderRadius: '10px',
+            backdropFilter: 'none',
+            boxShadow: 'none'
+        });
+        document.body.appendChild(element);
+
+        // Remover cuerpos previos de Matter.js y crear uno nuevo
+        removeBody(element);
+        const body = Bodies.rectangle(
+            centerX,
+            centerY,
+            element.offsetWidth,
+            element.offsetHeight,
+            { restitution: 0.5, render: { fillStyle: 'transparent' } }
+        );
+        World.add(world, body);
+        draggableMutBodies.set(element, body);
+
+        // Desactivar drag-and-drop para elementos hijo-de y configurar eventos
+        initDraggable(element, body);
+    });
+}
+
+// Función para inicializar Draggable y agregar funcionalidades de arrastre y temporizador
+function initDraggable(element, body) {
+    // Verificar si ya existe una instancia de Draggable y eliminarla si es necesario
+    if (element.draggableInstance) {
+        element.draggableInstance.kill();
+    }
+
+    // Crear nueva instancia de Draggable
+    element.draggableInstance = Draggable.create(element, {
+        type: 'x,y',
+        zIndexBoost: true,
+        onPress: function(e) {
+            if (element.classList.contains('hijo-de')) return;  // Desactiva arrastre en "hijo-de"
+
+            const isTouch = e.type === "touchstart";
+            const pressX = isTouch ? e.touches[0].clientX : e.clientX;
+            const pressY = isTouch ? e.touches[0].clientY : e.clientY;
+
+            gsap.set(element, {
+                x: pressX - element.offsetWidth / 2,
+                y: pressY - element.offsetHeight / 2
+            });
+            Body.setStatic(body, true);
+            currentDraggingBody = body;
+            isDragging = true;
+        },
+        onDrag: function(e) {
+            if (element.classList.contains('hijo-de')) return;  // Desactiva arrastre en "hijo-de"
+
+            const isTouch = e.type === "touchmove";
+            const clientX = isTouch ? e.touches[0].clientX : e.clientX;
+            const clientY = isTouch ? e.touches[0].clientY : e.clientY;
+
+            gsap.set(element, {
+                x: clientX - element.offsetWidth / 2,
+                y: clientY - element.offsetHeight / 2
+            });
+            Body.setPosition(body, { x: clientX, y: clientY });
+        },
+        onRelease: function(e) {
+            if (element.classList.contains('hijo-de')) return;  // Desactiva arrastre en "hijo-de"
+
+            isDragging = false;
+            Body.setStatic(body, false);
+            currentDraggingBody = null;
+
+            const dropZone = Array.from(dropZones).find(zone => {
+                const zoneRect = zone.getBoundingClientRect();
+                const elementRect = element.getBoundingClientRect();
+                return (
+                    elementRect.left >= zoneRect.left &&
+                    elementRect.right <= zoneRect.right &&
+                    elementRect.top >= zoneRect.top &&
+                    elementRect.bottom <= zoneRect.bottom
+                );
+            });
+
+            if (dropZone) {
+                element.classList.replace('draggable-mut', 'hijo-de');
+                dropZone.appendChild(element);
+
+                gsap.set(element, {
+                    position: 'relative',
+                    top: 'auto',
+                    left: 'auto',
+                    x: 0,
+                    y: 0,
+                    width: '100%',
+                    height: '100%',
+                    zIndex: '5',
+                    background: 'rgba(200, 198, 198, 0.368)',
+                    borderRadius: '10px',
+                    backdropFilter: 'blur(2px)',
+                    border: 'solid 1pt #4DA77D'
+                });
+
+                removeBody(element);
+                element.draggableInstance.kill();  // Eliminar drag-and-drop de "hijo-de"
+            } else {
+                gsap.to(element, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.3,
+                    ease: "power3.out"
+                });
+            }
+        }
+    })[0];
+
+    // Reactivar observadores de cambios de clase y temporizador
+    observeClassChanges(element);
+    monitorClickTime(element);  // Reactivar temporizador
+}
+
+// Función para observar cambios de clase y ajustar drag-and-drop
+function observeClassChanges(element) {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach(mutation => {
+            if (mutation.type === "attributes" && mutation.attributeName === "class") {
+                if (element.classList.contains('draggable-mut')) {
+                    initDraggable(element, draggableMutBodies.get(element));
+                }
             }
         });
     });
-    observer.observe(dropZone);
+    observer.observe(element, { attributes: true, attributeFilter: ['class'] });
 }
 
-// Escuchar cambios en el tamaño de la ventana y en el contenedor para ajustar visibilidad del `div` reducción
-window.addEventListener('resize', transferChildElements);
-
-// Llamada inicial para ajustar los elementos y visibilidad según el tamaño de pantalla actual
-document.addEventListener('DOMContentLoaded', () => {
-    transferChildElements();
-
-    // Observa los cambios en el tamaño de `soltar-izq-2`
-    const containerLeft = document.getElementById('soltar-izq-2');
-    if (containerLeft) {
-        monitorDropZoneResize(containerLeft);
-    }
+// Evento de clic en el botón "Demoler" para resetear los elementos y activar todas las funcionalidades
+document.getElementById('demoler').addEventListener('click', function() {
+    resetHijoDeElements();
 });
-
 
 
 
