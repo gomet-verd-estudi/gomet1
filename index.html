@@ -1970,7 +1970,6 @@ function monitorClickTime(element) {
                 document.body.appendChild(element);
 
                 const size = window.innerWidth < 767 ? '120px' : '200px';
-                const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
 
                 gsap.set(element, {
                     position: 'absolute',
@@ -2008,7 +2007,6 @@ function monitorClickTime(element) {
                                 const clientY = isTouch ? e.touches[0].clientY : e.clientY;
 
                                 const bodyRect = document.body.getBoundingClientRect();
-                                const elementRect = element.getBoundingClientRect();
                                 const limitedX = Math.max(bodyRect.left, Math.min(clientX, bodyRect.right));
                                 const limitedY = Math.max(bodyRect.top, Math.min(clientY, bodyRect.bottom));
 
@@ -2078,14 +2076,29 @@ function monitorClickTime(element) {
         isScrolling = false; // Restablecemos el estado de scroll al finalizar
     };
 
-    // Agregar eventos para manejar el scroll en los elementos hijos
-    element.querySelectorAll('.hijo-de *').forEach((child) => {
-        child.addEventListener('scroll', () => {
-            isScrolling = true;
-            clearTimeout(timer); // Cancelar el temporizador mientras se hace scroll
+    // Función para configurar los eventos de scroll en todos los `hijo-de`
+    function attachScrollListeners() {
+        const hijosDe = document.querySelectorAll('.hijo-de'); // Selecciona todos los elementos con clase `hijo-de`
+        hijosDe.forEach((hijo) => {
+            hijo.addEventListener('scroll', () => {
+                isScrolling = true;
+                clearTimeout(timer); // Cancela el temporizador durante el scroll en cualquiera de los hijos
+            }, true); // Usa captura para interceptar el scroll en cualquier elemento interno
         });
+    }
+
+    // Observador para monitorear cambios de clase y estructura en el contenedor `soltar`
+    const observer = new MutationObserver(() => {
+        attachScrollListeners();  // Vuelve a aplicar los listeners de scroll en caso de cambio
     });
 
+    // Observa el contenedor `soltar` que contiene los `hijo-de` para detectar cambios
+    const soltarContainer = document.querySelector('#contenedor-derecho'); // Cambia al contenedor adecuado
+    if (soltarContainer) {
+        observer.observe(soltarContainer, { attributes: true, childList: true, subtree: true });
+    }
+
+    // Eventos principales para manejar el temporizador
     element.addEventListener('mousedown', startHandler);
     element.addEventListener('touchstart', startHandler, { passive: false });
     element.addEventListener('touchmove', moveHandler, { passive: false });
@@ -2093,20 +2106,23 @@ function monitorClickTime(element) {
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', () => {
         endHandler();
-        isScrolling = false; // Restablecer el estado de scroll
+        isScrolling = false; // Restablece el estado de scroll
     });
 
     window.addEventListener('resize', () => {
         if (element.classList.contains('draggable-mut')) {
             const size = window.innerWidth < 767 ? '120px' : '200px';
-            const borderThickness = window.innerWidth < 767 ? '5pt' : '7pt';
             gsap.set(element, {
                 width: size,
                 height: size,
             });
         }
     });
+
+    // Configura los listeners de scroll inicialmente
+    attachScrollListeners();
 }
+
 
 
 
@@ -2963,94 +2979,7 @@ document.getElementById('demoler').addEventListener('click', function() {
 
 
 $(document).ready(function () {
-
-    document.addEventListener('DOMContentLoaded', () => {
-    // Bandera para identificar desplazamiento táctil
-    let isTouchScrolling = false; 
-
-    // Duración original del temporizador en ms
-    const timerDuration = 250; 
-
-    // Función para monitorear el desplazamiento en dispositivos táctiles
-    function monitorTouchScroll(element) {
-        const startHandler = (e) => {
-            if (isTouchScrolling) return; // Evita reactivaciones mientras hay scroll
-            isTouchScrolling = true;
-            clearTimeout(element.timer); // Desactiva el temporizador mientras hace scroll
-
-            // Restablecer isTouchScrolling tras detenerse el scroll
-            setTimeout(() => (isTouchScrolling = false), timerDuration);
-        };
-
-        // Agrega eventos de desplazamiento solo en dispositivos táctiles
-        element.addEventListener('touchstart', startHandler, { passive: true });
-        element.addEventListener('touchmove', startHandler, { passive: true });
-    }
-
-    // Configura el temporizador en cada elemento sin activarlo en desplazamiento táctil
-    function setupMonitorClickTime(element) {
-        let startTime, timer;
-
-        const startHandler = (e) => {
-            if (isTouchScrolling) return; // Evita el temporizador si hay desplazamiento táctil
-            startTime = Date.now();
-
-            timer = setTimeout(() => {
-                if (!isTouchScrolling && element.classList.contains('hijo-de')) {
-                    element.classList.replace('hijo-de', 'draggable-mut');
-                    resetElementPosition(element);
-                }
-            }, timerDuration);
-        };
-
-        const endHandler = () => {
-            clearTimeout(timer);
-            isTouchScrolling = false; // Reiniciar el estado de desplazamiento al finalizar
-        };
-
-        element.addEventListener('mousedown', startHandler);
-        element.addEventListener('touchstart', startHandler, { passive: false });
-        element.addEventListener('mouseup', endHandler);
-        element.addEventListener('touchend', endHandler);
-    }
-
-    // Función para restaurar posición y estilo tras resetear el temporizador
-    function resetElementPosition(element) {
-        gsap.set(element, {
-            position: 'absolute',
-            width: '200px',
-            height: '200px',
-            background: '#FBE83F',
-            borderRadius: '10px',
-            x: 0,
-            y: 0,
-        });
-        document.body.appendChild(element);
-    }
-
-    // Observa cambios de clase para agregar o quitar la funcionalidad de monitoreo
-    function observeClassChanges(element) {
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach(mutation => {
-                if (mutation.type === "attributes" && mutation.attributeName === "class") {
-                    if (element.classList.contains('hijo-de')) {
-                        monitorTouchScroll(element);
-                    }
-                    setupMonitorClickTime(element);
-                }
-            });
-        });
-        observer.observe(element, { attributes: true });
-    }
-
-    // Selecciona todos los elementos con las clases 'hijo-de' o 'draggable-mut' y aplica las funciones
-    const hijosDeElements = document.querySelectorAll('.hijo-de, .draggable-mut');
-    hijosDeElements.forEach((element) => {
-        monitorTouchScroll(element);  // Monitorea desplazamiento táctil en cada elemento
-        setupMonitorClickTime(element);  // Configura temporizador en cada elemento
-        observeClassChanges(element); // Observa cambios de clase en cada elemento
-    });
-});
+    
 });
     </script>
     
