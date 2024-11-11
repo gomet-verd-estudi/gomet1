@@ -1945,7 +1945,7 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let startTime, timer;
-    let isScrolling = false; // Indica si se está haciendo scroll
+    let isScrolling = false;  // Indica si se está haciendo scroll
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
     const tolerance = 80; // Tolerancia para dispositivos táctiles
@@ -2041,6 +2041,9 @@ function monitorClickTime(element) {
 
                                     removeBody(element);
                                     removePuntero(element);
+
+                                    // Volver a añadir listeners de scroll para los `hijo-de`
+                                    attachScrollListeners();
                                 } else {
                                     gsap.to(element, {
                                         x: initialTouchPos.x - element.offsetWidth / 2,
@@ -2063,7 +2066,7 @@ function monitorClickTime(element) {
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
-        // Cancela el temporizador si se detecta un movimiento significativo
+        // Cancelar el temporizador si se detecta un movimiento significativo
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
@@ -2074,7 +2077,7 @@ function monitorClickTime(element) {
         isScrolling = false; // Restablece el estado de scroll al finalizar
     };
 
-    // Configura los eventos de scroll en todos los `hijo-de`
+    // Función para configurar los eventos de scroll en todos los `hijo-de`
     function attachScrollListeners() {
         const hijosDe = document.querySelectorAll('.hijo-de');
         hijosDe.forEach((hijo) => {
@@ -2086,8 +2089,15 @@ function monitorClickTime(element) {
     }
 
     // Observador para monitorear cambios de clase y estructura en el contenedor `soltar`
-    const observer = new MutationObserver(() => {
-        attachScrollListeners(); // Reaplica los listeners de scroll en caso de cambio
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (mutation.target.classList.contains('hijo-de')) {
+                    attachScrollListeners();
+                    clearTimeout(timer); // Cancela cualquier temporizador activo
+                }
+            }
+        });
     });
 
     // Observa el contenedor `contenedor-derecho` que contiene los `hijo-de` para detectar cambios
@@ -2117,6 +2127,16 @@ function monitorClickTime(element) {
             });
         }
     });
+
+    // Evento adicional para el botón `demoler`, asegurando que el temporizador se cancele
+    const demolerButton = document.getElementById('demoler');
+    if (demolerButton) {
+        demolerButton.addEventListener('click', () => {
+            clearTimeout(timer); // Cancela el temporizador al hacer clic en `demoler`
+            isScrolling = false;
+            attachScrollListeners(); // Reaplica los listeners de scroll
+        });
+    }
 
     // Configura los listeners de scroll inicialmente
     attachScrollListeners();
@@ -3024,5 +3044,6 @@ $(document).ready(function () {
     
 </body>
 </html>
+
 
 
