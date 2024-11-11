@@ -1940,6 +1940,53 @@ function addPuntero(element) {
     });
 }
 
+// Observador de scroll en cada elemento 'hijo-de'
+function attachScrollListeners() {
+    const hijosDe = document.querySelectorAll('.hijo-de');
+    hijosDe.forEach((hijo) => {
+        hijo.addEventListener('scroll', () => {
+            isScrolling = true;
+            clearTimeout(timer); // Cancela el temporizador si se hace scroll en `hijo-de`
+        }, true); // Captura el scroll en todos los hijos
+    });
+}
+
+// Observador de cambio de clase y estructura en el contenedor `contenedor-derecho`
+function observeClassChanges(element) {
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (mutation.target.classList.contains('hijo-de')) {
+                    attachScrollListeners(); // Reasigna listeners de scroll si cambia a `hijo-de`
+                    clearTimeout(timer); // Cancela temporizador si es `hijo-de`
+                }
+            }
+        });
+    });
+    observer.observe(element, { attributes: true });
+}
+
+// Observador y reset del botón "Demoler"
+const demolerButton = document.getElementById('demoler');
+if (demolerButton) {
+    demolerButton.addEventListener('click', () => {
+        clearTimeout(timer); // Cancela el temporizador en `demoler`
+        isScrolling = false;
+        attachScrollListeners(); // Reaplica los listeners de scroll
+    });
+}
+
+// Ejemplo de integración de los observadores
+document.addEventListener('DOMContentLoaded', () => {
+    const contenedorDerecho = document.getElementById('contenedor-derecho');
+    if (contenedorDerecho) {
+        // Observar cambios en hijos `hijo-de`
+        observeClassChanges(contenedorDerecho);
+    }
+
+    // Configuración inicial del scroll
+    attachScrollListeners();
+});
 
 
 
