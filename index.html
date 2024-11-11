@@ -1513,6 +1513,46 @@ $(document).ready(function() {
             });
         });
 
+// Agrega esta función antes del código existente para que administre el temporizador en 'hijo-de'
+function manageScrollBehaviorInHijoDe() {
+    let timer;  // Variable para controlar el temporizador global
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'class') {
+                const target = mutation.target;
+                if (target.classList.contains('hijo-de')) {
+                    attachScrollListeners(target);  // Asigna el listener si el elemento es hijo-de
+                }
+            }
+        });
+    });
+
+    // Llama a esta función para desactivar temporizador en scroll
+    function attachScrollListeners(element) {
+        element.addEventListener('scroll', (event) => {
+            event.stopPropagation();
+            clearTimeout(timer);  // Cancela el temporizador mientras se hace scroll
+        }, true);
+    }
+
+    // Inicia el observador de mutaciones para actualizar la clase 'hijo-de'
+    const contenedorDerecho = document.getElementById('contenedor-derecho');
+    if (contenedorDerecho) {
+        observer.observe(contenedorDerecho, { attributes: true, subtree: true, attributeFilter: ['class'] });
+    }
+
+    // Reinicia temporizador y listeners en 'hijo-de' tras clic en 'demoler'
+    const demolerButton = document.getElementById('demoler');
+    if (demolerButton) {
+        demolerButton.addEventListener('click', () => {
+            clearTimeout(timer); // Cancela el temporizador en demoler
+            document.querySelectorAll('.hijo-de').forEach(attachScrollListeners);
+        });
+    }
+}
+
+// Llama a la función para aplicar los ajustes sin modificar el código original
+manageScrollBehaviorInHijoDe();
 
 
      
@@ -1940,53 +1980,6 @@ function addPuntero(element) {
     });
 }
 
-// Observador de scroll en cada elemento 'hijo-de'
-function attachScrollListeners() {
-    const hijosDe = document.querySelectorAll('.hijo-de');
-    hijosDe.forEach((hijo) => {
-        hijo.addEventListener('scroll', () => {
-            isScrolling = true;
-            clearTimeout(timer); // Cancela el temporizador si se hace scroll en `hijo-de`
-        }, true); // Captura el scroll en todos los hijos
-    });
-}
-
-// Observador de cambio de clase y estructura en el contenedor `contenedor-derecho`
-function observeClassChanges(element) {
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                if (mutation.target.classList.contains('hijo-de')) {
-                    attachScrollListeners(); // Reasigna listeners de scroll si cambia a `hijo-de`
-                    clearTimeout(timer); // Cancela temporizador si es `hijo-de`
-                }
-            }
-        });
-    });
-    observer.observe(element, { attributes: true });
-}
-
-// Observador y reset del botón "Demoler"
-const demolerButton = document.getElementById('demoler');
-if (demolerButton) {
-    demolerButton.addEventListener('click', () => {
-        clearTimeout(timer); // Cancela el temporizador en `demoler`
-        isScrolling = false;
-        attachScrollListeners(); // Reaplica los listeners de scroll
-    });
-}
-
-// Ejemplo de integración de los observadores
-document.addEventListener('DOMContentLoaded', () => {
-    const contenedorDerecho = document.getElementById('contenedor-derecho');
-    if (contenedorDerecho) {
-        // Observar cambios en hijos `hijo-de`
-        observeClassChanges(contenedorDerecho);
-    }
-
-    // Configuración inicial del scroll
-    attachScrollListeners();
-});
 
 
 
@@ -3091,6 +3084,7 @@ $(document).ready(function () {
     
 </body>
 </html>
+
 
 
 
