@@ -1942,16 +1942,17 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let startTime, timer;
-    let isScrolling = false; // Flag para indicar si se está haciendo scroll
+    let isScrolling = false;  // Flag para indicar si se está haciendo scroll
     let cursorPos = { x: 0, y: 0 };
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 80; // Tolerancia para dispositivos táctiles
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const timerDuration = isTouchDevice ? 150 : 250; // Duración del temporizador
+    const tolerance = 80;  // Tolerancia para dispositivos táctiles
 
-    // Manejar el inicio del temporizador
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const timerDuration = 190;  // Duración de 0.19 segundos para activar el temporizador
+
+    // Función para manejar el inicio del temporizador
     const startHandler = (e) => {
-        // No iniciar el temporizador si se está haciendo scroll
+        // Bloquea el temporizador si se está haciendo scroll
         if (isScrolling) return;
 
         const isTouch = e.type === 'touchstart';
@@ -1961,7 +1962,7 @@ function monitorClickTime(element) {
 
         startTime = Date.now();
 
-        // Iniciar el temporizador solo si no hay scroll activo
+        // Activa el temporizador solo si no hay scroll activo y el elemento tiene clase `hijo-de`
         timer = setTimeout(() => {
             if (!isScrolling && element.classList.contains('hijo-de')) {
                 e.preventDefault();
@@ -2059,48 +2060,50 @@ function monitorClickTime(element) {
         }, timerDuration);
     };
 
+    // Manejador para cancelar el temporizador durante el movimiento (scroll)
     const moveHandler = (e) => {
         const isTouch = e.type === 'touchmove';
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
         const currentY = isTouch ? e.touches[0].clientY : e.clientY;
 
-        // Cancelamos el temporizador si se detecta un movimiento significativo
         if (Math.abs(currentX - initialTouchPos.x) > tolerance || Math.abs(currentY - initialTouchPos.y) > tolerance) {
             clearTimeout(timer);
         }
     };
 
+    // Finalización del temporizador y restablecimiento de `isScrolling`
     const endHandler = () => {
         clearTimeout(timer);
+        isScrolling = false;
     };
 
-    // Función para configurar los eventos de scroll en todos los `hijo-de`
+    // Función para configurar eventos de scroll en todos los `hijo-de`
     function attachScrollListeners() {
-        const hijosDe = document.querySelectorAll('.hijo-de'); // Selecciona todos los elementos con clase `hijo-de`
+        const hijosDe = document.querySelectorAll('.hijo-de');
         hijosDe.forEach((hijo) => {
             hijo.addEventListener('scroll', () => {
                 isScrolling = true;
-                clearTimeout(timer); // Cancela el temporizador durante el scroll en cualquiera de los hijos
-            }, true); // Usa captura para interceptar el scroll en cualquier elemento interno
+                clearTimeout(timer); // Cancela cualquier temporizador en curso durante el scroll
+                setTimeout(() => isScrolling = false, 100); // Restablece el flag después de que termina el scroll
+            }, true); // Usa captura para interceptar el scroll en elementos internos
         });
     }
 
-    // Observador para monitorear cambios de clase y estructura en el contenedor `soltar`
+    // Observador para detectar cambios de clase en `hijo-de` y `draggable-mut`
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
-            if (mutation.target.classList.contains('draggable-mut') || mutation.target.classList.contains('hijo-de')) {
-                attachScrollListeners();  // Vuelve a aplicar los listeners de scroll en caso de cambio de clase
+            if (mutation.target.classList.contains('hijo-de') || mutation.target.classList.contains('draggable-mut')) {
+                attachScrollListeners();  // Reaplica listeners de scroll en caso de cambio de clase
             }
         });
     });
 
-    // Observa el contenedor `soltar` que contiene los `hijo-de` para detectar cambios
-    const soltarContainer = document.querySelector('#contenedor-derecho'); // Cambia al contenedor adecuado
+    const soltarContainer = document.querySelector('#contenedor-derecho');
     if (soltarContainer) {
         observer.observe(soltarContainer, { attributes: true, childList: true, subtree: true });
     }
 
-    // Eventos principales para manejar el temporizador
+    // Eventos principales para manejar el temporizador y el scroll
     element.addEventListener('mousedown', startHandler);
     element.addEventListener('touchstart', startHandler, { passive: false });
     element.addEventListener('touchmove', moveHandler, { passive: false });
@@ -2108,7 +2111,7 @@ function monitorClickTime(element) {
     element.addEventListener('mouseup', endHandler);
     element.addEventListener('touchend', () => {
         endHandler();
-        isScrolling = false; // Restablece el estado de scroll
+        isScrolling = false; // Restablece el flag `isScrolling`
     });
 
     window.addEventListener('resize', () => {
@@ -2121,7 +2124,7 @@ function monitorClickTime(element) {
         }
     });
 
-    // Configura los listeners de scroll inicialmente
+    // Configura los listeners de scroll al iniciar
     attachScrollListeners();
 }
 
