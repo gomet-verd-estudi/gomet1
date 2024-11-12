@@ -1942,19 +1942,23 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let timer;
-    let isScrolling = false;  // Flag para indicar si se está haciendo scroll
+    let isScrolling = false;  // Indicador de scroll activo
+    let isTimerActivated = false;  // Controla si el temporizador puede activarse
     let initialTouchPos = { x: 0, y: 0 };
-    const tolerance = 80;  // Tolerancia para dispositivos táctiles
-    const timerDuration = 190;  // Duración de 0.19 segundos para activar el temporizador
+    const tolerance = 80;  // Tolerancia para el desplazamiento en dispositivos táctiles
+    const timerDuration = 190;  // Duración para activar el temporizador
 
-    // Función para iniciar el temporizador, se cancela si hay scroll
+    // Iniciar el temporizador solo en un nuevo "agarrar" del elemento
     const startHandler = (e) => {
-        if (isScrolling) return;  // Bloquea el temporizador si hay scroll
+        // Bloquear el temporizador si el scroll está activo o si no está permitido activarlo
+        if (isScrolling || isTimerActivated) return;
+
         const isTouch = e.type === 'touchstart';
         initialTouchPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         initialTouchPos.y = isTouch ? e.touches[0].clientY : e.clientY;
+        isTimerActivated = true;  // Permitir que el temporizador se active en este intento
 
-        // Activa el temporizador sólo si no se detecta scroll
+        // Activar el temporizador solo si el elemento está en `hijo-de`
         timer = setTimeout(() => {
             if (!isScrolling && element.classList.contains('hijo-de')) {
                 e.preventDefault();
@@ -2052,7 +2056,7 @@ function monitorClickTime(element) {
         }, timerDuration);
     };
 
-    // Cancela el temporizador si se detecta movimiento mayor a la tolerancia
+    // Manejar el movimiento para cancelar el temporizador si hay desplazamiento (scroll)
     const moveHandler = (e) => {
         const isTouch = e.type === 'touchmove';
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
@@ -2063,25 +2067,29 @@ function monitorClickTime(element) {
         }
     };
 
-    // Restablece el flag de scroll después de detener el temporizador
+    // Restablecer flags y cancelar el temporizador cuando se suelta
     const endHandler = () => {
         clearTimeout(timer);
         isScrolling = false;
+        isTimerActivated = false;  // Permitir activar el temporizador en el próximo "agarrar"
     };
 
-    // Función para gestionar el evento de scroll en los elementos `hijo-de`
+    // Maneja el scroll en `hijo-de` para desactivar el temporizador sin permitir su activación
+    function handleScroll() {
+        isScrolling = true;
+        clearTimeout(timer);  // Cancela cualquier temporizador en curso durante el scroll
+        setTimeout(() => isScrolling = false, 100); // Restablece el flag después de terminar el scroll
+    }
+
+    // Asigna el evento de scroll a los elementos `hijo-de`
     function attachScrollListeners() {
         const hijosDe = document.querySelectorAll('.hijo-de');
         hijosDe.forEach((hijo) => {
-            hijo.addEventListener('scroll', () => {
-                isScrolling = true;
-                clearTimeout(timer); // Detiene cualquier temporizador activo durante el scroll
-                setTimeout(() => isScrolling = false, 100); // Restablece el flag después del scroll
-            }, true); // Usa captura para interceptar el scroll en los elementos internos
+            hijo.addEventListener('scroll', handleScroll, true); // Usa captura para interceptar el scroll en elementos internos
         });
     }
 
-    // Observa cambios en clase para reaplicar scroll listeners cuando cambia a `hijo-de`
+    // Observador para detectar cambios de clase y volver a aplicar listeners de scroll si cambia a `hijo-de`
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.target.classList.contains('hijo-de') || mutation.target.classList.contains('draggable-mut')) {
@@ -2101,10 +2109,7 @@ function monitorClickTime(element) {
     element.addEventListener('touchmove', moveHandler, { passive: false });
     element.addEventListener('touchcancel', endHandler);
     element.addEventListener('mouseup', endHandler);
-    element.addEventListener('touchend', () => {
-        endHandler();
-        isScrolling = false;
-    });
+    element.addEventListener('touchend', endHandler);
 
     window.addEventListener('resize', () => {
         if (element.classList.contains('draggable-mut')) {
