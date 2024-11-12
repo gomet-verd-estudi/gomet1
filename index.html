@@ -1942,8 +1942,8 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let timer;
-    let isScrolling = false;  // Indicador de scroll activo
-    let isTimerActivated = false;  // Controla si el temporizador puede activarse
+    let isScrolling = false;  // Indicador para el estado de scroll
+    let isTimerAllowed = true;  // Controla si el temporizador puede activarse
     let initialTouchPos = { x: 0, y: 0 };
     const tolerance = 80;  // Tolerancia para el desplazamiento en dispositivos táctiles
     const timerDuration = 190;  // Duración para activar el temporizador
@@ -1951,12 +1951,13 @@ function monitorClickTime(element) {
     // Iniciar el temporizador solo en un nuevo "agarrar" del elemento
     const startHandler = (e) => {
         // Bloquear el temporizador si el scroll está activo o si no está permitido activarlo
-        if (isScrolling || isTimerActivated) return;
+        if (!isTimerAllowed || isScrolling) return;
 
         const isTouch = e.type === 'touchstart';
         initialTouchPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         initialTouchPos.y = isTouch ? e.touches[0].clientY : e.clientY;
-        isTimerActivated = true;  // Permitir que el temporizador se active en este intento
+
+        isTimerAllowed = false;  // Solo permitir el temporizador en este intento de "agarrar"
 
         // Activar el temporizador solo si el elemento está en `hijo-de`
         timer = setTimeout(() => {
@@ -2071,13 +2072,13 @@ function monitorClickTime(element) {
     const endHandler = () => {
         clearTimeout(timer);
         isScrolling = false;
-        isTimerActivated = false;  // Permitir activar el temporizador en el próximo "agarrar"
     };
 
-    // Maneja el scroll en `hijo-de` para desactivar el temporizador sin permitir su activación
+    // Maneja el scroll en `hijo-de` para desactivar el temporizador y bloquear su reactivación hasta un nuevo "agarrar"
     function handleScroll() {
         isScrolling = true;
-        clearTimeout(timer);  // Cancela cualquier temporizador en curso durante el scroll
+        isTimerAllowed = false;  // Bloquea el temporizador hasta un nuevo "agarrar"
+        clearTimeout(timer);  // Cancela cualquier temporizador activo durante el scroll
         setTimeout(() => isScrolling = false, 100); // Restablece el flag después de terminar el scroll
     }
 
