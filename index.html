@@ -1942,24 +1942,25 @@ function addPuntero(element) {
 
 function monitorClickTime(element) {
     let timer;
-    let isScrolling = false;  // Indicador para el estado de scroll
-    let isTimerAllowed = true;  // Controla si el temporizador puede activarse
+    let isScrolling = false;  // Flag para indicar si se está haciendo scroll
+    let canActivateTimer = true;  // Controla si el temporizador puede activarse en un nuevo intento
     let initialTouchPos = { x: 0, y: 0 };
     const tolerance = 80;  // Tolerancia para el desplazamiento en dispositivos táctiles
     const timerDuration = 190;  // Duración para activar el temporizador
 
-    // Iniciar el temporizador solo en un nuevo "agarrar" del elemento
+    // Función para iniciar el temporizador en un nuevo intento de "agarrar"
     const startHandler = (e) => {
-        // Bloquear el temporizador si el scroll está activo o si no está permitido activarlo
-        if (!isTimerAllowed || isScrolling) return;
+        // Bloquear el temporizador si se detecta scroll o si no se permite activar
+        if (isScrolling || !canActivateTimer) return;
 
+        // Actualizamos la posición inicial del toque
         const isTouch = e.type === 'touchstart';
         initialTouchPos.x = isTouch ? e.touches[0].clientX : e.clientX;
         initialTouchPos.y = isTouch ? e.touches[0].clientY : e.clientY;
 
-        isTimerAllowed = false;  // Solo permitir el temporizador en este intento de "agarrar"
+        // Configuramos la activación del temporizador y bloqueamos futuras activaciones
+        canActivateTimer = false;
 
-        // Activar el temporizador solo si el elemento está en `hijo-de`
         timer = setTimeout(() => {
             if (!isScrolling && element.classList.contains('hijo-de')) {
                 e.preventDefault();
@@ -2057,7 +2058,7 @@ function monitorClickTime(element) {
         }, timerDuration);
     };
 
-    // Manejar el movimiento para cancelar el temporizador si hay desplazamiento (scroll)
+    // Maneja el desplazamiento para cancelar el temporizador si hay desplazamiento
     const moveHandler = (e) => {
         const isTouch = e.type === 'touchmove';
         const currentX = isTouch ? e.touches[0].clientX : e.clientX;
@@ -2068,16 +2069,17 @@ function monitorClickTime(element) {
         }
     };
 
-    // Restablecer flags y cancelar el temporizador cuando se suelta
+    // Restablece el temporizador y estado cuando se suelta el elemento
     const endHandler = () => {
         clearTimeout(timer);
         isScrolling = false;
+        canActivateTimer = true;  // Permite activar el temporizador en el próximo intento
     };
 
-    // Maneja el scroll en `hijo-de` para desactivar el temporizador y bloquear su reactivación hasta un nuevo "agarrar"
+    // Maneja el scroll en `hijo-de`, cancela el temporizador y bloquea su activación hasta el próximo "agarrar"
     function handleScroll() {
         isScrolling = true;
-        isTimerAllowed = false;  // Bloquea el temporizador hasta un nuevo "agarrar"
+        canActivateTimer = false;  // Bloquea el temporizador hasta un nuevo "agarrar"
         clearTimeout(timer);  // Cancela cualquier temporizador activo durante el scroll
         setTimeout(() => isScrolling = false, 100); // Restablece el flag después de terminar el scroll
     }
@@ -3029,3 +3031,4 @@ $(document).ready(function () {
     
 </body>
 </html>
+
