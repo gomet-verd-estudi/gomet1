@@ -3,14 +3,10 @@
  * --------------------------------
  * Todo lo que se lee en la web, menos los proyectos (data/projects.json).
  * Después de editar: `node tools/build.mjs`.
- *
- * Los textos en japonés son las etiquetas de un manual de montaje: no hace falta traducirlas.
  */
 
 export const STUDIO = {
   name: 'Gomet Verd Estudi',
-  short: 'GVE',
-  jp: 'ゴメット・ベルド・エストゥディ',
   site: 'https://gometverdestudi.com',
   email: 'gometverdestudi@gmail.com',
   phone: '+34 684 450 515',
@@ -19,34 +15,14 @@ export const STUDIO = {
   instagram: 'https://www.instagram.com/gometverdestudi/',
   instagramLabel: '@gometverdestudi',
   cities: 'Valencia · Barcelona',
-  edition: 'Edición 2026',
   motto: 'ALWAYS WIPing',
   mottoLong: 'Working In Play',
   tagline: 'Estudio independiente de branding y dirección de arte entre Valencia y Barcelona.',
-  desc: 'Gomet Verd Estudi es un estudio independiente de branding y dirección de arte en Valencia y Barcelona. Identidades para moda independiente, música y cultura, montadas paso a paso y jugando.'
+  desc: 'Gomet Verd Estudi es un estudio independiente de branding y dirección de arte en Valencia y Barcelona. Construimos marcas como edificios: de abajo arriba, en ocho fases y con una validación en cada capa.'
 };
 
-/* Piezas sueltas del estudio (servicios). Salen en la matriz de piezas «B» de la portada y en la hoja de pedido. */
-export const PARTS = [
-  { code: 'B1', name: 'Identidad corporativa', jp: 'ロゴ', shape: 'circle' },
-  { code: 'B2', name: 'Dirección de arte', jp: 'アートディレクション', shape: 'pill' },
-  { code: 'B3', name: 'Packaging', jp: 'パッケージ', shape: 'square' },
-  { code: 'B4', name: 'Diseño editorial', jp: '編集', shape: 'pill' },
-  { code: 'B5', name: 'Lettering', jp: 'レタリング', shape: 'circle' },
-  { code: 'B6', name: 'Cartelería', jp: 'ポスター', shape: 'square' },
-  { code: 'B7', name: 'Redes sociales', jp: 'SNS', shape: 'pill' },
-  { code: 'B8', name: '3D', jp: '立体', shape: 'circle' },
-  { code: 'B9', name: 'Títulos y créditos', jp: 'タイトル', shape: 'pill' },
-  { code: 'B10', name: 'Web', jp: 'ウェブ', shape: 'square' }
-];
-
-/* Avisos del interior de la tapa: el humor de los manuales, con la estrategia del estudio dentro. */
-export const WARNINGS = [
-  'Contiene piezas pequeñas de gran carácter.',
-  'No apto para marcas sin ganas de jugar.',
-  'Puede provocar ganas irrefrenables de cambiar de logo.',
-  'Lee las instrucciones antes de empezar. O sáltatelas: también es parte del juego.'
-];
+/* Lo que se puede encargar al estudio (el «programa» de piezas). Sale en el formulario de contacto. */
+export const SERVICES = ['Identidad corporativa', 'Dirección de arte', 'Packaging', 'Diseño editorial', 'Lettering', 'Cartelería', 'Redes sociales', '3D', 'Títulos y créditos', 'Web'];
 
 /*
  * EL MÉTODO GOMET — una marca se construye como un edificio.
@@ -237,19 +213,18 @@ export const CREW = {
   }
 };
 
-/* Ficha técnica del estudio (仕様). */
+/* Ficha técnica del estudio. */
 export const SPECS = [
-  ['Modelo', 'Gomet Verd Estudi (GVE)'],
+  ['Estudio', 'Gomet Verd Estudi (GVE)'],
   ['Tipo', 'Estudio independiente de branding y dirección de arte'],
   ['Ubicación', 'Valencia · Barcelona'],
   ['Especialidad', 'Moda independiente, música y cultura'],
   ['Método', 'Una marca se construye como un edificio: ocho fases en cuatro actos'],
   ['Modo de trabajo', 'ALWAYS WIPing — Working In Play'],
   ['Piezas incluidas', 'Identidad, dirección de arte, packaging, editorial, lettering, cartelería, redes, 3D, títulos y web'],
-  ['Edad recomendada', 'Cualquier marca con algo que contar']
 ];
 
-/* よくある質問 — preguntas frecuentes, como al final de un manual. */
+/* Preguntas frecuentes. */
 export const FAQ = [
   ['¿Cuánto dura un proyecto?', 'Depende del programa de piezas. Lo fijamos en el workshop y tenéis el calendario desde el primer día.'],
   ['¿Qué necesitáis de nosotros?', 'Tiempo para el workshop, una persona que decida y respuestas en los plazos pactados.'],
@@ -274,10 +249,3 @@ export const ORDER = {
 };
 
 export const CLIENTS = ['Vintage Palace', '404 Studio', 'Claur Tiles', 'Bernal', 'D’Matinada', 'Orbis Vacui', 'Leo Rizzi', 'Kaniche Pedigree Hot Dogs'];
-
-/* Gomets de la hoja de pegatinas (se pueden despegar y pegar por toda la web). */
-export const STICKERS = [
-  { t: '¡Bien hecho!', c: 'g' }, { t: 'WIP', c: 'g' }, { t: 'GVE', c: 'k' }, { t: '遊', c: 'g' },
-  { t: 'Hola', c: 'y' }, { t: 'VLC', c: 'k' }, { t: 'BCN', c: 'k' }, { t: '+1', c: 'g' },
-  { t: '★', c: 'y' }, { t: 'OK', c: 'g' }, { t: 'カチッ', c: 'r' }, { t: '♡', c: 'g' }
-];

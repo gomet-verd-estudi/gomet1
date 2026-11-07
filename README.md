@@ -2,31 +2,30 @@
 
 Web de **Gomet Verd Estudi**, estudio independiente de branding y dirección de arte entre Valencia y Barcelona.
 
-La web entera es un manual de montaje: el folleto que viene dentro de la cápsula de un huevo sorpresa, dibujado como unas instrucciones japonesas. Papel fino, tinta negra, trama de puntos y una sola tinta plana, el verde del gomet.
+Una marca se construye como un edificio. La web lo enseña: en la portada, el edificio se levanta capa a capa mientras se hace scroll, una fase del método en cada capa y un gomet verde en cada validación. La estética (blanco, grises, Archivo, títulos entre corchetes y axonometrías de línea) y los dibujos salen de la presentación «Método» de Figma.
 
 Es una web estática: sin servidor, sin base de datos y sin dependencias.
 
-## Recorrido
+## Páginas
 
 | Ruta | Qué es |
 |---|---|
-| `index.html` | **La tapa**: al hacer scroll el huevo se abre (gira, se abre por la línea, sale la cápsula, se abre y se despliegan las instrucciones). Dentro: *Gracias por abrir este huevo* y los avisos (A) la serie completa de modelos, «¡Colecciónalos todos!»; (B) las piezas sueltas (servicios) en una matriz de maqueta; (C) el método en ocho iconos: una marca se construye como un edificio; (D) la hoja de gomets, que se despegan y se pegan por la página; (E) la hoja de pedido |
-| `about/` | **Manual del estudio**: quiénes somos, especificaciones y precauciones. Después, **el método Gomet** en láminas con la estética de la presentación «Método» de Figma: una marca se construye como un edificio. La fachada primero (lo que suele pasar), el edificio explotado que se monta capa a capa al hacer scroll, las ocho fases (workshop, estrategia, concepto, sistema, aplicaciones, artes finales, entrega y mantenimiento), fases y validaciones, criterio (la viga de celosía entre técnica y creatividad), curaduría, evidencia, ALWAYS WIPing, resultado, quién construye, preguntas frecuentes y el primer paso. Cada validación es un gomet verde |
-| `modelos/<slug>/` | **Hoja de montaje** de cada proyecto: contenido de la cápsula (servicios), herramientas (equipo), figura 1 (modelo terminado), los pasos (galería con visor) y «¡Modelo terminado!» |
-| `404.html` | «Falta una pieza» |
+| `index.html` | **Portada**: el edificio en obra. A la izquierda pasan las ocho fases (workshop, estrategia, concepto, sistema, aplicaciones, artes finales, entrega y mantenimiento); a la derecha, el plano en fantasma se va construyendo con el scroll y cada validación se marca con un gomet verde. Debajo, una selección de obras, el criterio (la viga de celosía entre técnica y creatividad) y el estudio |
+| `metodo/` | El método completo en láminas: lo que suele pasar (la fachada primero), el edificio, las ocho fases, fases y validaciones, criterio, curaduría, evidencia, resultado y preguntas frecuentes |
+| `obras/`, `obras/<slug>/` | Todos los proyectos y la ficha de cada uno: programa de piezas, gremios, imágenes con visor y «¿Construimos la vuestra?» |
+| `estudio/` | Quiénes somos, ficha del estudio, ALWAYS WIPing, ecosistema, cómo nos organizamos, clientes y gremios |
+| `contacto/` | El primer paso: un formulario que se envía ya escrito desde el correo o el WhatsApp de quien lo rellena (la web no guarda datos). `contacto/?obra=claur-tiles` llega con la obra de referencia marcada |
+| `404.html` | «Esta página no está en el plano» |
 
 ## Cambiar contenido
 
-1. Textos del estudio, el método (fases, actos, capas, criterio, preguntas), avisos, piezas, hoja de pedido y gomets: `data/site.mjs`.
-2. Proyectos (textos, servicios, equipo, portada y pasos): `data/projects.json`. Salen de los proyectos de Gomet Verd Estudi del portfolio de Manel Vila; sus medios están en `media/<slug>/`.
-3. Dibujos: `tools/figures.mjs` (huevo, pictogramas y el recorte y rotulado de las láminas). Los dibujos del método y el logotipo están en `assets/figma/`, exportados en SVG de la presentación «Método» de Figma; si cambian allí, vuelve a exportarlos con el mismo nombre. Estilos: `assets/css/gve.css`. Interacción: `assets/js/gve.js`.
-4. Regenera las páginas: `node tools/build.mjs` (Node 18 o superior).
+1. Textos: `data/site.mjs` (estudio, servicios, el método con sus fases, actos y capas, criterio, preguntas, contacto).
+2. Proyectos (textos, servicios, equipo, portada e imágenes): `data/projects.json`. Sus medios están en `media/<slug>/`.
+3. Dibujos: `assets/figma/` guarda los SVG exportados de la presentación «Método» (edificio, fases, fachada y logotipo). `tools/figures.mjs` los recorta, los rotula y los agrupa por capas para animarlos. Si cambian en Figma, vuelve a exportarlos con el mismo nombre.
+4. Estilos: `assets/css/gve.css`. Interacción: `assets/js/gve.js`.
+5. Regenera las páginas: `node tools/build.mjs` (Node 18 o superior).
 
-`index.html`, `about/`, `modelos/`, `404.html`, `sitemap.xml` y `robots.txt` se generan: no los edites a mano.
-
-## Hoja de pedido
-
-Quien la rellena la envía desde su propio correo o su WhatsApp, ya escrita: la web no guarda datos. Correo, teléfono y tramos de presupuesto: `STUDIO` y `ORDER` en `data/site.mjs`. Para llegar con un proyecto de referencia marcado: `/?m=claur-tiles#pedido` (lo usan los botones «Pedir un modelo como este»).
+`index.html`, `metodo/`, `obras/`, `estudio/`, `contacto/`, `404.html`, `sitemap.xml` y `robots.txt` se generan: no los edites a mano.
 
 ## Publicar
 
