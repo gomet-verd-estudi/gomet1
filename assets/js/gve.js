@@ -43,7 +43,7 @@
     const rail = $$('.rail-i', obra), railVals = $$('.rail-v', obra);
     const ACT = ['', 'e', 'e', 'd', 'd', 'c', 'c', 'c', 'm', 'm'];
     const DROP = [0, 40, 0, 140, 140, 140, 140, 140, 90]; // cuánto cae cada capa (unidades del dibujo)
-    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    const ease = (t) => { const c = 1.35; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }; // cae y rebota al encajar
     let cur = ph.map(() => 0), target = ph.map(() => 0), running = false, lastActive = -1;
 
     // La línea de lectura: a media pantalla en escritorio; bajo el dibujo fijo en móvil
@@ -65,7 +65,7 @@
     function paint() {
       ph.forEach((g, k) => {
         const e = ease(cur[k]);
-        g.style.opacity = e.toFixed(3);
+        g.style.opacity = clamp(cur[k] * 2.2).toFixed(3);
         g.style.transform = DROP[k + 1] ? `translateY(${(-(1 - e) * DROP[k + 1]).toFixed(1)}px)` : '';
       });
     }
@@ -183,7 +183,10 @@
   const form = $('#order');
   if (form) {
     const note = $('#order-note');
-    const ref = new URLSearchParams(location.search).get('obra');
+    const params = new URLSearchParams(location.search);
+    const pz = params.get('pieza');
+    if (pz) $$('input[name="parts"]', form).forEach((x) => { if (x.value === pz) x.checked = true; });
+    const ref = params.get('obra');
     if (ref) {
       const nice = ref.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
       form.elements.ref.value = nice;

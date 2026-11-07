@@ -19,7 +19,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS } from '../data/site.mjs';
-import { LOGO, obraSVG, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON } from './figures.mjs';
+import { LOGO, obraSVG, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, WORKER, piece, PIECE_COLORS } from './figures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PROJECTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects.json'), 'utf8'));
@@ -31,7 +31,11 @@ const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').r
 const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
 
 /* ---------- piezas comunes con la estética de la presentación ---------- */
-const head = (title, no, tag) => `<header class="pl-head"><p class="pl-title">[${esc(title)}]</p><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span></header>`;
+const chips = (cols = ['red', 'blue', 'yellow', 'white']) => `<span class="chips" aria-hidden="true">${cols.map((c) => `<i class="ch-${c}"></i>`).join('')}</span>`;
+const head = (title, no, tag) => `<header class="pl-head"><p class="pl-title">[${esc(title)}]</p><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${chips()}</header>`;
+/* el color de cada capa del edificio (y de cada fase) */
+const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
+const bubble = (text, cls = '') => `<div class="mascot ${cls}">${WORKER}<p class="bubble">${text}</p></div>`;
 const gve = '<div class="gve" aria-hidden="true"><i>G</i><i>V</i><i>E</i></div>';
 const gomet = '<span class="pl-gomet" aria-hidden="true"></span>';
 const rows = (list) => `<dl class="pl-rows">${list.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
@@ -61,13 +65,17 @@ function header(r, current) {
 
 function footer(r, current) {
   return `<footer class="ft">
-  ${current === 'contacto' ? '' : `<div class="ft-cta wrap">
-    ${head('Empezamos', '01', 'El primer paso')}
+  ${current === 'contacto' ? '' : `<div class="band"><div class="ft-cta wrap">
     <div class="ft-cta-row">
-      <p class="ft-big">${esc(START.head)}</p>
-      <a class="btn" href="${r}contacto/">Empezar un proyecto ${ICON.arrow}</a>
+      <div>
+        <p class="band-k">[Empezamos] · 01 · El primer paso</p>
+        <p class="ft-big">${esc(START.head)}</p>
+        <a class="btn btn-light" href="${r}contacto/">Empezar un proyecto ${ICON.arrow}</a>
+      </div>
+      ${bubble('¿Empezamos por el terreno?', 'mascot-band')}
     </div>
-  </div>`}
+    <ol class="seq" aria-label="Así se construye: de los cimientos a las llaves">${[2, 3, 4, 6].map((k, i) => `<li><span class="seq-n">${i + 1}</span>${phaseIcon(k, `${PHASES[k].n} ${PHASES[k].key}`)}<span class="seq-k">${esc(PHASES[k].layer)}</span></li>`).join('')}</ol>
+  </div></div>`}
   <div class="ft-grid wrap">
     <div class="ft-logo">${LOGO}</div>
     <div><p class="lbl">Contacto</p><ul>
@@ -91,7 +99,7 @@ function footer(r, current) {
 </footer>`;
 }
 
-function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.jpg', jsonld = null, defs = '' }) {
+function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.jpg', jsonld = null, defs = FASES_DEFS }) {
   const url = `${STUDIO.site}/${rel}`;
   const ld = jsonld || {
     '@context': 'https://schema.org', '@type': 'ProfessionalService', '@id': `${STUDIO.site}/#studio`,
@@ -163,11 +171,12 @@ function galleryMedia(g, r, alt) {
     : `<source src="${r + g.mp4}" type="video/mp4">`;
   return `${img}<video class="g-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1">${srcs}</video>`;
 }
+const CYCLE = ['red', 'blue', 'yellow', 'white'];
 const card = (p, r) => `
     <li><a class="card" href="${r}obras/${p.slug}/">
       ${coverMedia(p, r, { cls: 'card-media' })}
-      <span class="card-meta"><span class="card-n">${p.n}</span><span class="card-tag">${esc(p.tag)}</span></span>
-      <span class="card-name">${esc(p.name)}</span>
+      <span class="card-bar"><span class="card-n">${p.n}</span><span class="card-name">${esc(p.name)}</span></span>
+      <span class="card-meta"><span class="card-tag">${esc(p.tag)}</span>${chips(p.services.map((_, k) => CYCLE[k % 4]))}</span>
       <span class="card-plantas">${p.services.length} ${p.services.length === 1 ? 'planta' : 'plantas'} · ${esc(p.services.slice(0, 3).join(', '))}${p.services.length > 3 ? '…' : ''}</span>
     </a></li>`;
 
@@ -185,7 +194,7 @@ function home() {
   const r = '';
   const rail = PHASES.map((x, k) => `<li class="rail-i" data-k="${k + 1}"><button type="button" data-go="${k + 1}" aria-label="Ir a la fase ${x.n}: ${esc(x.key)}"><span class="rail-n">${x.n}</span><span class="rail-k">${esc(x.key)}</span></button>${typeof x.val === 'number' ? `<span class="rail-v" data-v="${x.val}" aria-hidden="true"></span>` : ''}</li>`).join('');
   const steps = PHASES.map((x, k) => `
-    <li class="step" data-step="${k + 1}" id="fase-${x.n}">
+    <li class="step c-${PHASE_COLOR[k]}" data-step="${k + 1}" id="fase-${x.n}">
       <p class="step-act">${esc(x.act)}</p>
       ${head(x.key, x.n, x.layer)}
       <h2 class="step-h">${esc(x.head)}</h2>
@@ -211,6 +220,7 @@ function home() {
       <p class="lead">${esc(INTRO.sub)}</p>
       <p class="step-p">${STUDIO.name} es un estudio independiente de branding y dirección de arte entre Valencia y Barcelona. Construimos cada marca de abajo arriba, en ocho fases y cuatro actos, y ninguna capa se levanta sin vuestro visto bueno.</p>
       <div class="ctas"><a class="btn" href="#fase-01">Ver cómo se construye ${ICON.down}</a><a class="btn btn-ghost" href="contacto/">Empezar un proyecto</a></div>
+      ${bubble('Baja despacio: lo levantamos capa a capa.', 'mascot-hero')}
     </li>${steps}
     <li class="step step-end" data-step="9">
       ${head('Resultado', '00', 'Cada marca, única')}
@@ -220,6 +230,14 @@ function home() {
       <div class="ctas"><a class="btn" href="obras/">Ver las obras ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método, lámina a lámina</a></div>
     </li>
   </ol>
+</section>
+
+<section class="sec sec-cat" id="piezas">
+  <div class="wrap">
+    ${head('Piezas', '00', 'El programa')}
+    <div class="sec-intro"><h2 class="h2">Las piezas con las que construimos</h2><p>Cada marca tiene su programa: las piezas que necesita, dimensionadas desde el principio para que el alcance no cambie a mitad de obra. Combinadlas como queráis.</p></div>
+    <ol class="catalog">${SERVICES.map((sv, k) => `<li class="cat"><a href="contacto/?pieza=${encodeURIComponent(sv)}"><span class="cat-n">${pad(k + 1)}</span><span class="cat-fig">${piece(sv)}</span><span class="cat-bar"><b>${esc(sv)}</b></span>${chips(PIECE_COLORS[sv])}</a></li>`).join('')}</ol>
+  </div>
 </section>
 
 <section class="sec" id="obras">
@@ -334,7 +352,7 @@ function metodo() {
   return page({
     title: 'Método · Gomet Verd Estudi',
     desc: 'Cómo trabajamos: una marca se construye como un edificio. Ocho fases en cuatro actos, del workshop al mantenimiento, con una validación en cada capa.',
-    rel: 'metodo/', r, body, cls: 'is-metodo', current: 'metodo', defs: FASES_DEFS
+    rel: 'metodo/', r, body, cls: 'is-metodo', current: 'metodo'
   });
 }
 
@@ -501,11 +519,11 @@ function contacto() {
     </form>
     <aside class="contact-side">
       ${rows([['Qué necesitamos', START.need], ['Email', STUDIO.email], ['Teléfono y WhatsApp', STUDIO.phone], ['Instagram', STUDIO.instagramLabel], ['Dónde', STUDIO.cities], ['Respuesta', ORDER.reply]])}
-      <div class="contact-ph">${phaseIcon(0, 'El terreno: el workshop es la primera fase')}<p class="lbl">01 Workshop · El terreno</p></div>
+      ${bubble('Lo primero: pisar el terreno juntos.', 'mascot-side')}
     </aside>
   </div>
 </section>`;
-  return page({ title: 'Contacto · Gomet Verd Estudi', desc: `${START.head}. Contadnos vuestro proyecto: ${STUDIO.email} · ${STUDIO.phone}.`, rel: 'contacto/', r, body, cls: 'is-contacto', current: 'contacto', defs: FASES_DEFS });
+  return page({ title: 'Contacto · Gomet Verd Estudi', desc: `${START.head}. Contadnos vuestro proyecto: ${STUDIO.email} · ${STUDIO.phone}.`, rel: 'contacto/', r, body, cls: 'is-contacto', current: 'contacto' });
 }
 
 function notFound() {
@@ -514,6 +532,7 @@ function notFound() {
     ${head('404', '00', 'Fuera de plano')}
     <h1 class="display">Esta página no está en el plano.</h1>
     <p class="lead">Puede que la hayamos movido de planta. Vuelve a la portada y empieza por los cimientos.</p>
+    ${bubble('Esta planta todavía no está construida.', 'mascot-side')}
     <p><a class="btn" href="/">Volver a la portada ${ICON.arrow}</a></p>
   </div></section>`;
   return page({ title: 'Fuera de plano · Gomet Verd Estudi', desc: STUDIO.desc, rel: '404', r, body, cls: 'is-404' });
