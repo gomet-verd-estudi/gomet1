@@ -128,7 +128,7 @@
   /* ---------- 3. colecciónalos todos ---------- */
   const SEEN = 'gve-seen';
   const seen = new Set(store.get(SEEN, []));
-  const m = location.pathname.match(/\/modelos\/([^/]+)\/?$/);
+  const m = location.pathname.match(/\/modelos\/([^/]+)\/(?:index\.html)?$/);
   if (m) { seen.add(m[1]); store.set(SEEN, [...seen]); }
   const cards = $$('.card[data-slug]');
   if (cards.length) {
