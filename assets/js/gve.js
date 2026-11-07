@@ -283,6 +283,33 @@
     if (un) un.addEventListener('click', () => { placed = []; save(); render(); });
   }
 
+  /* ---------- 8. láminas del método ---------- */
+  // En móvil, los dibujos anchos se recortan al edificio (la leyenda va debajo, en texto)
+  const narrow = matchMedia('(max-width: 640px)');
+  const fitViewBox = () => $$('svg[data-vb-narrow]').forEach((svg) => {
+    if (!svg.dataset.vbWide) svg.dataset.vbWide = svg.getAttribute('viewBox');
+    svg.setAttribute('viewBox', narrow.matches ? svg.dataset.vbNarrow : svg.dataset.vbWide);
+  });
+  fitViewBox();
+  if (narrow.addEventListener) narrow.addEventListener('change', fitViewBox);
+  // El edificio se monta de abajo arriba: una capa, su gomet de validación, la siguiente capa…
+  const building = $('.plate-building');
+  if (building) {
+    const seq = [];
+    const layers = $$('.ed-layer', building), vals = $$('.ed-val', building);
+    layers.forEach((l, k) => { seq.push(l); if (vals[k]) seq.push(vals[k]); });
+    const showAll = () => seq.forEach((el) => el.classList.add('on'));
+    if (reduce || !('IntersectionObserver' in window)) showAll();
+    else {
+      const io = new IntersectionObserver((es) => {
+        if (!es.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        seq.forEach((el, k) => setTimeout(() => el.classList.add('on'), 250 + k * 280));
+      }, { threshold: .35 });
+      io.observe($('.edificio', building));
+    }
+  }
+
   /* ---------- 6. visor ---------- */
   const data = $('#lb-data');
   const lb = $('#lb');

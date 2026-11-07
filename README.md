@@ -10,16 +10,16 @@ Es una web estática: sin servidor, sin base de datos y sin dependencias.
 
 | Ruta | Qué es |
 |---|---|
-| `index.html` | **La tapa**: al hacer scroll el huevo se abre (gira, se abre por la línea, sale la cápsula, se abre y se despliegan las instrucciones). Dentro: *Gracias por abrir este huevo* y los avisos (A) la serie completa de modelos, «¡Colecciónalos todos!»; (B) las piezas sueltas (servicios) en una matriz de maqueta; (C) el método en siete pasos; (D) la hoja de gomets, que se despegan y se pegan por la página; (E) la hoja de pedido |
-| `about/` | **Manual del estudio**: quiénes somos, especificaciones, precauciones, **el método Gomet** paso a paso (qué pones tú y qué sale de cada paso), las reglas del juego (ALWAYS WIPing: Working In Play), «¿Crees que algo no funciona?» y fabricante |
+| `index.html` | **La tapa**: al hacer scroll el huevo se abre (gira, se abre por la línea, sale la cápsula, se abre y se despliegan las instrucciones). Dentro: *Gracias por abrir este huevo* y los avisos (A) la serie completa de modelos, «¡Colecciónalos todos!»; (B) las piezas sueltas (servicios) en una matriz de maqueta; (C) el método en ocho iconos: una marca se construye como un edificio; (D) la hoja de gomets, que se despegan y se pegan por la página; (E) la hoja de pedido |
+| `about/` | **Manual del estudio**: quiénes somos, especificaciones y precauciones. Después, **el método Gomet** en láminas con la estética de la presentación «Método» de Figma: una marca se construye como un edificio. La fachada primero (lo que suele pasar), el edificio explotado que se monta capa a capa al hacer scroll, las ocho fases (workshop, estrategia, concepto, sistema, aplicaciones, artes finales, entrega y mantenimiento), fases y validaciones, criterio (la viga de celosía entre técnica y creatividad), curaduría, evidencia, ALWAYS WIPing, resultado, quién construye, preguntas frecuentes y el primer paso. Cada validación es un gomet verde |
 | `modelos/<slug>/` | **Hoja de montaje** de cada proyecto: contenido de la cápsula (servicios), herramientas (equipo), figura 1 (modelo terminado), los pasos (galería con visor) y «¡Modelo terminado!» |
 | `404.html` | «Falta una pieza» |
 
 ## Cambiar contenido
 
-1. Textos del estudio, método, avisos, piezas, hoja de pedido y gomets: `data/site.mjs`.
+1. Textos del estudio, el método (fases, actos, capas, criterio, preguntas), avisos, piezas, hoja de pedido y gomets: `data/site.mjs`.
 2. Proyectos (textos, servicios, equipo, portada y pasos): `data/projects.json`. Salen de los proyectos de Gomet Verd Estudi del portfolio de Manel Vila; sus medios están en `media/<slug>/`.
-3. Dibujos (huevo, pasos del método, pictogramas): `tools/figures.mjs`. Estilos: `assets/css/gve.css`. Interacción: `assets/js/gve.js`.
+3. Dibujos: `tools/figures.mjs` (huevo, pictogramas y el recorte y rotulado de las láminas). Los dibujos del método y el logotipo están en `assets/figma/`, exportados en SVG de la presentación «Método» de Figma; si cambian allí, vuelve a exportarlos con el mismo nombre. Estilos: `assets/css/gve.css`. Interacción: `assets/js/gve.js`.
 4. Regenera las páginas: `node tools/build.mjs` (Node 18 o superior).
 
 `index.html`, `about/`, `modelos/`, `404.html`, `sitemap.xml` y `robots.txt` se generan: no los edites a mano.

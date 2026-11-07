@@ -14,8 +14,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { STUDIO, PARTS, WARNINGS, METHOD, RULES, SPECS, TROUBLE, ORDER, CLIENTS, STICKERS } from '../data/site.mjs';
-import { eggHero, stepFigure, FIG_DEFS, ICON, barcode } from './figures.mjs';
+import { STUDIO, PARTS, WARNINGS, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, STICKERS } from '../data/site.mjs';
+import { eggHero, ICON, barcode, LOGO, FASES_DEFS, phaseIcon, timeline, edificio, fachada, truss } from './figures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PROJECTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects.json'), 'utf8'));
@@ -35,7 +35,7 @@ function header(r, current) {
   const link = (href, label, key) => `<a href="${href}"${current === key ? ' aria-current="page"' : ''}>${label}</a>`;
   return `<a class="skip" href="#main">Saltar al contenido</a>
 <header class="top">
-  <a class="brand" href="${r || './'}" aria-label="${STUDIO.name}, inicio"><span class="dot" aria-hidden="true"></span><span class="brand-name">Gomet Verd Estudi</span></a>
+  <a class="brand" href="${r || './'}" aria-label="${STUDIO.name}, inicio"><span class="dot" aria-hidden="true"></span>${LOGO}</a>
   <span class="top-jp" aria-hidden="true"><span lang="ja">組立説明書</span> · Instrucciones de montaje</span>
   <nav class="top-nav" aria-label="Principal">
     ${link(`${r}#modelos`, 'Modelos', 'models')}
@@ -59,8 +59,7 @@ function footer(r) {
 <footer class="back" id="contacto">
   <div class="back-grid">
     <div class="back-brand">
-      <span class="dot dot-xl" aria-hidden="true"></span>
-      <p class="back-name">Gomet Verd Estudi</p>
+      <p class="back-name"><span class="visually-hidden">Gomet Verd Estudi</span>${LOGO}</p>
       <p class="back-jp" lang="ja">${STUDIO.jp}</p>
       <p class="back-tag">${STUDIO.tagline}</p>
     </div>
@@ -99,7 +98,7 @@ function footer(r) {
 </footer>`;
 }
 
-function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.jpg', jsonld = null }) {
+function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.jpg', jsonld = null, defs = '' }) {
   const url = `${STUDIO.site}/${rel}`;
   const ld = jsonld || {
     '@context': 'https://schema.org', '@type': 'ProfessionalService', '@id': `${STUDIO.site}/#studio`,
@@ -114,6 +113,7 @@ function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.j
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>document.documentElement.classList.add('js')</script>
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
@@ -136,7 +136,7 @@ function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.j
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
 <body class="${cls}">
-${FIG_DEFS}
+${defs}
 ${header(r, current)}
 <main id="main">
 ${body}
@@ -190,12 +190,12 @@ function home() {
 
   const parts = PARTS.map((x) => `<li class="part part-${x.shape}"><button type="button" data-part="${esc(x.name)}" aria-label="Añadir ${esc(x.name)} a la hoja de pedido"><span class="part-code">${x.code}</span><span class="part-name">${esc(x.name)}</span><span class="part-jp" lang="ja">${x.jp}</span></button></li>`).join('');
 
-  const steps = METHOD.map((s) => `
-    <li class="mini-step">
-      <span class="num">${s.n}</span>
-      ${stepFigure(s.fig, `Paso ${s.n}: ${s.title}`)}
-      <span class="mini-t">${esc(s.title)}</span>
-      <span class="mini-s"><span lang="ja">${s.jp}</span> · ${esc(s.name)}</span>
+  const steps = PHASES.map((x) => `
+    <li class="mini-step${typeof x.val === 'number' ? ' has-val' : ''}">
+      <span class="mini-n mono">${x.n}</span>
+      ${phaseIcon(x.icon, `${x.layer}: fase ${x.n}`)}
+      <span class="mini-t">${esc(x.key)}</span>
+      <span class="mini-s">[${esc(x.layer)}]</span>
     </li>`).join('');
 
   const stickers = STICKERS.map((s, i) => `<li><button type="button" class="gomet gomet-${s.c}" data-i="${i}" aria-label="Despegar el gomet ${esc(s.t)}"><span${/[぀-ヿ一-鿿]/.test(s.t) ? ' lang="ja"' : ''}>${esc(s.t)}</span></button></li>`).join('');
@@ -229,14 +229,14 @@ function home() {
     <div class="inside-text">
       <h2 class="h-xl">Gracias por abrir este huevo.</h2>
       <p class="lead">${STUDIO.name} es un estudio independiente de branding y dirección de arte entre Valencia y Barcelona. Montamos identidades para marcas que tienen algo que contar, sobre todo de moda independiente, música y cultura.</p>
-      <p>Cada proyecto empieza con una conversación y acaba siendo un juego compartido con quien nos lo encarga: mezclamos estrategia, narrativa y exploración visual hasta llegar a algo que se pueda ver, tocar o poner en movimiento. <a href="about/#metodo">Así se monta →</a></p>
+      <p>Cada proyecto empieza con una conversación y se construye como un edificio: de abajo arriba, capa a capa y con quien nos lo encarga, hasta llegar a algo que se pueda ver, tocar o poner en movimiento. <a href="about/#metodo">Así se monta →</a></p>
     </div>
     <aside class="contents" aria-label="Contenido">
       <p class="lbl"><span lang="ja">内容物</span> · Contenido del huevo</p>
       <ul>
         <li><b>${N}</b> modelos montados <span>A</span></li>
         <li><b>${PARTS.length}</b> piezas sueltas <span>B</span></li>
-        <li><b>1</b> método en ${METHOD.length} pasos <span>C</span></li>
+        <li><b>1</b> edificio en ${PHASES.length} fases <span>C</span></li>
         <li><b>${STICKERS.length}</b> gomets para pegar <span>D</span></li>
         <li><b>1</b> hoja de pedido <span>E</span></li>
       </ul>
@@ -287,11 +287,12 @@ ${fold('Cortar por la línea', '切り取り線')}
 ${fold()}
 
 <section class="sheet" id="como">
-  ${bar('C', '組み立て方', 'Cómo se monta')}
+  ${bar('C', '組み立て方', 'Cómo se monta', `<span class="bar-r mono">${PHASES.length} fases · ${ACTS.length} actos</span>`)}
   <div class="sec-head">
-    <h2 class="h-xl">El método Gomet, en siete pasos</h2>
-    <p>Del huevo cerrado al gomet verde. <a href="about/#metodo">Leer el manual completo →</a></p>
+    <h2 class="h-xl">${esc(INTRO.title)}</h2>
+    <p>${esc(INTRO.sub)} Del terreno a las llaves, y un gomet verde en cada validación. <a href="about/#metodo">Ver las láminas del método →</a></p>
   </div>
+  <ol class="mini-acts" aria-hidden="true">${ACTS.map((a) => `<li style="--n:${a.phases.length > 2 ? (+a.phases.slice(3) - +a.phases.slice(0, 2) + 1) : 1}">${a.k}</li>`).join('')}</ol>
   <ol class="mini-steps">${steps}</ol>
 </section>
 
@@ -349,7 +350,7 @@ ${fold('Recortar y enviar', '切り取り線')}
 
   return page({
     title: 'Gomet Verd Estudi — Branding y dirección de arte en Valencia y Barcelona',
-    desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home'
+    desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home', defs: FASES_DEFS
   });
 }
 
@@ -358,23 +359,26 @@ ${fold('Recortar y enviar', '切り取り線')}
    ======================================================================== */
 function about() {
   const r = '../';
-  const steps = METHOD.map((s) => `
-    <li class="step" id="paso-${s.n}">
-      <div class="step-head">
-        <span class="num num-xl">${s.n}</span>
-        <div>
-          <p class="step-jp" lang="ja">${s.jp}</p>
-          <h3 class="step-t">${esc(s.title)}</h3>
-          <p class="step-name">${esc(s.name)}</p>
-        </div>
-      </div>
-      <div class="step-fig">${stepFigure(s.fig, `Paso ${s.n}: ${s.title}`)}<span class="fig-no mono">図${s.n}</span></div>
-      <p class="step-text">${esc(s.text)}</p>
-      <dl class="step-io">
-        <div><dt>Pones tú</dt><dd>${esc(s.you)}</dd></div>
-        <div><dt>Sale de aquí</dt><dd>${esc(s.out)}</dd></div>
-      </dl>
-    </li>`).join('');
+  /* Una lámina con la estética de la presentación «Método»: blanco, grises, título entre corchetes. */
+  const rows = (list) => `<dl class="pl-rows">${list.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
+  const plate = ({ title, no, tag, body, foot = '', pg = '', cls = '' }) => `
+    <article class="plate ${cls}">
+      <div class="pl-gve" aria-hidden="true"><i>G</i><i>V</i><i>E</i></div>
+      <header class="pl-head"><p class="pl-title">[${esc(title)}]</p><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span></header>
+      ${body}
+      <footer class="pl-foot"><span class="pl-pg mono">${pg}</span><span>${foot}</span></footer>
+    </article>`;
+  const gomet = `<span class="pl-gomet" aria-hidden="true"></span>`;
+  const valNote = (v) => typeof v === 'number' ? `${gomet}Validación ${pad(v)}` : v ? esc(v) : 'El punto de partida';
+
+  const phases = PHASES.map((x, k) => plate({
+    cls: 'plate-phase', title: x.key, no: x.n, tag: x.layer, pg: pad(k + 4),
+    body: `<div class="ph-top"><p class="ph-act mono">${esc(x.act)}</p>${phaseIcon(x.icon, `${x.layer}: dibujo de la fase ${x.n}`)}</div>
+      <h4 class="pl-h">${esc(x.head)}</h4><p class="pl-p">${esc(x.text)}</p>${rows(x.rows)}`,
+    foot: valNote(x.val)
+  })).join('');
+
+  const legend = (items) => `<ol class="fig-legend">${items.map((x) => `<li>${x}</li>`).join('')}</ol>`;
 
   const body = `
 <section class="sheet manual-head">
@@ -384,7 +388,7 @@ function about() {
       <h1 class="h-xxl">Manual del estudio</h1>
       <p class="lead">Gracias por elegir ${STUDIO.name}. Lee este manual antes de empezar y guárdalo: te va a hacer falta.</p>
       <p>Somos un estudio independiente de branding y dirección de arte entre Valencia y Barcelona. Nos gustan las marcas que tienen algo que contar: nuestro trabajo consiste en encontrar ese algo y darle forma, en una identidad, un universo visual, un sistema que funcione igual de bien en un cartel que en una pantalla.</p>
-      <p>Trabajamos sobre todo para moda independiente, música y cultura: un estudio de moda que desfila en la 080 Barcelona Fashion Week, un taller de azulejos hechos a mano, un estudio creativo, una promotora cultural, un grupo que estrena disco. Acompañamos cada proyecto de principio a fin, de la primera idea a la última aplicación.</p>
+      <p>Trabajamos sobre todo para moda independiente, música y cultura. Y siempre igual: <a href="#metodo">construimos cada marca como un edificio</a>, de abajo arriba, con quien nos la encarga.</p>
     </div>
     <div class="specs">
       <p class="lbl"><span lang="ja">仕様</span> · Especificaciones</p>
@@ -400,67 +404,120 @@ function about() {
 ${fold()}
 
 <section class="sheet method" id="metodo">
-  ${bar('C', '組み立て方', 'El método Gomet', `<span class="bar-r mono">${METHOD.length} pasos</span>`)}
-  <div class="sec-head sec-head-wide">
-    <h2 class="h-xxl">Cómo se monta<br>una marca</h2>
-    <div>
-      <p class="lead">Siete pasos, del huevo cerrado al gomet verde.</p>
-      <p>Un gomet es una pegatina redonda: la que te ponían en el cole cuando algo estaba bien hecho. Nuestro método es eso mismo convertido en proceso. Empieza escuchando, ordena las piezas, encuentra el hilo, juega y monta, y no se da por terminado hasta que cada pieza encaja y se puede pegar el gomet.</p>
-      <p>No es una cadena de montaje: los pasos se repiten, se giran y a veces se saltan. Lo que no cambia es que se juega en equipo con quien nos lo encarga.</p>
+  ${bar('C', '組み立て方', 'El método Gomet', `<span class="bar-r mono">${PHASES.length} fases · ${ACTS.length} actos</span>`)}
+  <p class="plates-note mono"><span lang="ja">図面</span> · Láminas del método. Cada gomet verde es una validación con vosotros.</p>
+
+  <article class="plate plate-cover">
+    <span class="reg reg-tl" aria-hidden="true"></span><span class="reg reg-tr" aria-hidden="true"></span><span class="reg reg-bl" aria-hidden="true"></span><span class="reg reg-br" aria-hidden="true"></span>
+    <header class="pl-head"><p class="pl-title">[Método]</p><span class="pl-no">00</span><span class="pl-tag">Cómo trabajamos</span></header>
+    <div class="cover-plate-body">
+      <h2 class="pl-display">${esc(INTRO.title)}</h2>
+      <p class="pl-lead">${esc(INTRO.sub)}</p>
     </div>
-  </div>
-  <ol class="steps">${steps}</ol>
+    <div class="cover-plate-logo">${LOGO}</div>
+  </article>
+
+  ${plate({
+    title: 'Método', no: '00', tag: 'Lo que suele pasar', pg: '02', cls: 'plate-wide',
+    body: `<div class="pl-body"><div class="pl-text"><h3 class="pl-h">${esc(INTRO.problem.head)}</h3><p class="pl-p">${esc(INTRO.problem.text)}</p>${rows(INTRO.problem.rows)}</div>
+      <figure class="pl-fig">${fachada(INTRO.problem.labels)}${legend(INTRO.problem.labels.map((l) => `[${esc(l)}]`))}</figure></div>`,
+    foot: 'Empezar por la fachada sale caro'
+  })}
+
+  ${plate({
+    title: 'Método', no: '00', tag: 'El edificio', pg: '03', cls: 'plate-wide plate-building',
+    body: `<div class="pl-body"><div class="pl-text"><h3 class="pl-h">${esc(INTRO.building.head)}</h3><p class="pl-p">${esc(INTRO.building.text)}</p>${rows(ACTS.map((a) => [a.k, a.t]))}</div>
+      <figure class="pl-fig">${edificio(LAYERS)}${legend(LAYERS.map((l) => `<b>[${esc(l.k)}]</b> ${esc(l.ph)}`))}</figure></div>`,
+    foot: `${gomet}Cada gomet verde es una validación con vosotros`
+  })}
+
+  <div class="phase-grid">${phases}</div>
+
+  ${plate({
+    title: 'Método', no: '00', tag: 'Fases y validaciones', pg: '12', cls: 'plate-wide',
+    body: `<h3 class="pl-h">Nada avanza sin vuestro visto bueno</h3>
+      <p class="pl-p pl-p-wide">Cada fase termina con una validación conjunta y la siguiente se apoya en ella. Así siempre sabéis en qué punto de la obra estamos y nadie tiene que deshacer lo que ya estaba bien.</p>
+      <div class="timeline-wrap">${timeline(PHASES, ACTS)}</div>`,
+    foot: `${gomet}Cada gomet verde es una validación con vosotros`
+  })}
 </section>
 
 ${fold()}
 
-<section class="sheet rules">
-  ${bar('C+', '遊びのルール', 'Las reglas del juego')}
+<section class="sheet criterio" id="criterio">
+  ${bar('C+', '基準', 'Criterio')}
+  ${plate({
+    title: 'Criterio', no: '00', tag: 'Técnica y creatividad', pg: '13', cls: 'plate-wide',
+    body: `<div class="pl-body pl-body-top"><div class="pl-text"><h3 class="pl-h">${esc(CRITERIA.head)}</h3><p class="pl-p">${esc(CRITERIA.text)}</p></div>${rows(CRITERIA.rows)}</div>
+      <div class="cruce">
+        <p class="pl-sub">[Cruce] ${esc(CRITERIA.truss.head)}</p>
+        <p class="pl-p pl-p-wide">${esc(CRITERIA.truss.text)}</p>
+        <div class="truss-grid">
+          <span class="truss-side mono">Técnico</span><ol class="truss-row truss-tech">${CRITERIA.truss.tech.map((x, k) => `<li><span class="mono">${pad(k + 1)}</span>${esc(x)}</li>`).join('')}</ol>
+          <span></span><div class="truss-svg">${truss(8)}</div>
+          <span class="truss-side mono">Creativo</span><ol class="truss-row truss-crea">${CRITERIA.truss.crea.map((x, k) => `<li><span class="mono">${pad(k + 1)}</span>${esc(x)}</li>`).join('')}</ol>
+        </div>
+      </div>`,
+    foot: `${gomet}Cada vertical marcada es una validación con vosotros`
+  })}
+  <div class="plate-pair">
+    ${plate({ title: 'Curaduría', no: '00', tag: 'Abrir y elegir', pg: '14', body: `<h3 class="pl-h">${esc(FILTERS.curate.head)}</h3><p class="pl-p">${esc(FILTERS.curate.text)}</p>${rows(FILTERS.curate.rows)}` })}
+    ${plate({ title: 'Evidencia', no: '00', tag: 'Nada por impulso', pg: '15', body: `<h3 class="pl-h">${esc(FILTERS.proof.head)}</h3><p class="pl-p">${esc(FILTERS.proof.text)}</p>${rows(FILTERS.proof.rows)}` })}
+  </div>
   <div class="wip">
     <p class="wip-big"><span>ALWAYS</span> <span class="wip-g">WIP</span><span>ing</span></p>
     <p class="wip-s"><b>W</b>orking <b>I</b>n <b>P</b>lay · <span lang="ja">遊びながら作る</span></p>
   </div>
-  <ol class="rules-list">${RULES.map((x, i) => `<li><span class="mono">${pad(i + 1)}</span><b>${esc(x.k)}</b><span>${esc(x.t)}</span></li>`).join('')}</ol>
-</section>
-
-${fold()}
-
-<section class="sheet trouble">
-  ${bar('?', '故障かな？と思ったら', 'Solución de problemas')}
-  <div class="sec-head"><h2 class="h-xl">¿Crees que algo no funciona?</h2><p>Antes de llamar al servicio técnico, revisa esta tabla.</p></div>
-  <div class="table-wrap">
-    <table class="tt">
-      <thead><tr><th scope="col">Síntoma</th><th scope="col">Causa probable</th><th scope="col">Solución</th></tr></thead>
-      <tbody>${TROUBLE.map(([a, b, c]) => `<tr><td data-l="Síntoma">${esc(a)}</td><td data-l="Causa probable">${esc(b)}</td><td data-l="Solución">${esc(c)}</td></tr>`).join('')}</tbody>
-    </table>
-  </div>
+  ${plate({ title: 'Resultado', no: '00', tag: 'Cada marca, única', pg: '16', cls: 'plate-wide',
+    body: `<div class="pl-body pl-body-top"><div class="pl-text"><h3 class="pl-h">${esc(FILTERS.result.head)}</h3><p class="pl-p">${esc(FILTERS.result.text)}</p></div>${rows(FILTERS.result.rows)}</div>` })}
 </section>
 
 ${fold()}
 
 <section class="sheet crew">
-  ${bar('F', '製造元', 'Fabricante')}
+  ${bar('F', '製造元', 'Quién construye')}
+  <div class="plate-pair">
+    ${plate({ title: 'Ecosistema', no: '00', tag: 'Quién construye', pg: '17', body: `<h3 class="pl-h">${esc(CREW.head)}</h3><p class="pl-p">${esc(CREW.text)}</p>${rows(CREW.rows)}` })}
+    ${plate({ title: 'Juntos', no: '00', tag: 'Cómo nos organizamos', pg: '18', body: `<h3 class="pl-h">${esc(CREW.together.head)}</h3><p class="pl-p">${esc(CREW.together.text)}</p>${rows(CREW.together.rows)}` })}
+  </div>
   <div class="crew-grid">
     <div>
       <p class="lbl">Han confiado en el estudio</p>
       <ul class="tags">${CLIENTS.map((c) => `<li>${esc(c)}</li>`).join('')}</ul>
     </div>
     <div>
-      <p class="lbl">Montado con</p>
-      <p>Fotografía, 3D y estudios amigos: ${[...new Set(PROJECTS.flatMap((p) => (p.team.match(/@[\w.]+/g) || [])))].map((h) => `<span class="mono">${esc(h.replace(/\.$/, ''))}</span>`).join(', ')}.</p>
+      <p class="lbl">Gremios con los que hemos construido</p>
+      <p>${[...new Set(PROJECTS.flatMap((p) => (p.team.match(/@[\w.]+/g) || [])))].map((h) => `<span class="mono">${esc(h.replace(/\.$/, ''))}</span>`).join(', ')}.</p>
       <p class="mono small">Gomet Verd Estudi · <a href="https://manelvila.com/">Manel Vila</a>, diseño gráfico y dirección de arte</p>
     </div>
-    <div class="crew-cta">
-      <p class="h-l">¿Tienes un modelo en mente?</p>
-      <a class="btn" href="../#pedido">Rellenar la hoja de pedido ${ICON.arrow}</a>
-    </div>
   </div>
+</section>
+
+${fold()}
+
+<section class="sheet faq">
+  ${bar('?', 'よくある質問', 'Preguntas frecuentes')}
+  <div class="sec-head"><h2 class="h-xl">Lo que casi todo el mundo nos pregunta</h2><p>Antes de llamar al servicio técnico, revisa esta tabla.</p></div>
+  <div class="table-wrap">
+    <table class="tt tt-2">
+      <thead><tr><th scope="col">Pregunta</th><th scope="col">Respuesta</th></tr></thead>
+      <tbody>${FAQ.map(([q, a]) => `<tr><td data-l="Pregunta">${esc(q)}</td><td data-l="Respuesta">${esc(a)}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>
+</section>
+
+<section class="sheet start">
+  ${plate({ title: 'Empezamos', no: '01', tag: 'El primer paso', pg: '19', cls: 'plate-wide plate-start',
+    body: `<div class="pl-body pl-body-top"><div class="pl-text"><h3 class="pl-h pl-h-xl">${esc(START.head)}</h3><p class="pl-p">${esc(START.text)}</p>
+      <a class="btn" href="../#pedido">Rellenar la hoja de pedido ${ICON.arrow}</a></div>
+      ${rows([['Qué necesitamos', START.need], ['Contacto', `${STUDIO.email} · ${STUDIO.phone} · ${STUDIO.instagramLabel}`]])}</div>`,
+    foot: `${gomet}El primer gomet lo ponemos juntos` })}
 </section>`;
 
   return page({
     title: 'Manual del estudio y método Gomet · Gomet Verd Estudi',
-    desc: 'Quiénes somos y cómo trabajamos: el método Gomet en siete pasos, de la conversación al gomet verde. Branding y dirección de arte en Valencia y Barcelona.',
-    rel: 'about/', r, body, cls: 'is-about', current: 'about'
+    desc: 'Cómo trabajamos: una marca se construye como un edificio. Ocho fases en cuatro actos, del workshop al mantenimiento, con una validación en cada capa. Branding en Valencia y Barcelona.',
+    rel: 'about/', r, body, cls: 'is-about', current: 'about', defs: FASES_DEFS
   });
 }
 

@@ -4,6 +4,10 @@
  * Todos son SVG en línea: pesan casi nada y se ven nítidos a cualquier tamaño.
  */
 
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 const S = 'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"';
 
 /* ---------- el huevo de la portada (lo anima assets/js/gve.js al hacer scroll) ---------- */
@@ -71,73 +75,69 @@ export function eggHero() {
 </svg>`;
 }
 
-/* ---------- dibujos de los siete pasos del método ---------- */
-const FIG = {
-  talk: `
-    <path d="M86,64 C110,64 124,96 124,118 C124,140 108,152 86,152 C64,152 48,140 48,118 C48,96 62,64 86,64 Z" ${S}/>
-    <circle cx="104" cy="92" r="9" class="gomet-fill"/>
-    <path d="M136,18 H212 A18,18 0 0 1 212,54 H158 L140,70 L144,54 H136 A18,18 0 0 1 136,18 Z" ${S}/>
-    <circle cx="160" cy="36" r="2.6" fill="currentColor"/><circle cx="174" cy="36" r="2.6" fill="currentColor"/><circle cx="188" cy="36" r="2.6" fill="currentColor"/>
-    <path d="M22,22 H66 A14,14 0 0 1 66,50 H52 L48,62 L40,50 H22 A14,14 0 0 1 22,22 Z" ${S}/>
-    <text x="44" y="42" text-anchor="middle" class="fig-t">?</text>
-    <path d="M150,96 q12,-6 24,0 M150,112 q16,-8 32,0 M150,128 q20,-10 40,0" ${S} opacity=".55"/>`,
-  parts: `
-    <rect x="16" y="16" width="208" height="128" rx="12" ${S}/>
-    <path d="M16,80 H224 M120,16 V144" ${S} stroke-width="3"/>
-    <circle cx="66" cy="48" r="18" class="paper" ${S}/><text x="66" y="53" text-anchor="middle" class="fig-s">A</text>
-    <rect x="150" y="32" width="44" height="32" rx="4" class="paper" ${S}/><text x="172" y="53" text-anchor="middle" class="fig-s">B</text>
-    <rect x="40" y="98" width="54" height="26" rx="13" class="paper" ${S}/><text x="67" y="116" text-anchor="middle" class="fig-s">C</text>
-    <path d="M172,96 L196,128 H148 Z" class="paper" ${S}/><text x="172" y="123" text-anchor="middle" class="fig-s">D</text>
-    <path d="M66,66 V80 M172,64 V80 M67,98 V80 M172,96 V80" ${S}/>`,
-  thread: `
-    <path d="M22,128 C44,60 70,140 96,92 S130,26 150,64 S188,128 214,40" ${S} stroke-dasharray="2 7"/>
-    <circle cx="22" cy="128" r="5" class="paper" ${S}/><circle cx="58" cy="104" r="5" class="paper" ${S}/>
-    <circle cx="96" cy="92" r="5" class="paper" ${S}/><circle cx="126" cy="40" r="5" class="paper" ${S}/>
-    <circle cx="150" cy="64" r="5" class="paper" ${S}/><circle cx="184" cy="104" r="5" class="paper" ${S}/>
-    <circle cx="214" cy="40" r="13" class="gomet-fill"/><circle cx="214" cy="40" r="13" ${S} stroke-width="1.5"/>
-    <path d="M200,140 H226 M213,128 V152" ${S} opacity=".4"/>`,
-  play: `
-    <path d="M120,40 L160,60 L160,104 L120,124 L80,104 L80,60 Z M80,60 L120,80 L160,60 M120,80 V124" ${S}/>
-    <path d="M120,80 L160,60 L160,104 L120,124 Z" fill="url(#ftone)" stroke="none"/>
-    <path d="M60,40 C78,16 112,8 140,16" ${S} marker-end="url(#fah)"/>
-    <path d="M184,124 C170,148 134,156 106,148" ${S} marker-end="url(#fah)"/>
-    <circle cx="206" cy="52" r="12" class="gomet-fill"/><circle cx="206" cy="52" r="12" ${S} stroke-width="1.5"/>
-    <path d="M186,40 l-8,-6 M184,58 l-10,2 M196,72 l-6,8" ${S} opacity=".6"/>
-    <path d="M30,96 L48,128 H12 Z" ${S}/>
-    <text x="40" y="78" class="fig-t">?!</text>`,
-  build: `
-    <rect x="124" y="36" width="92" height="92" ${S}/>
-    <path d="M170,36 V128 M124,82 H216" ${S}/>
-    <rect x="124" y="36" width="46" height="46" fill="url(#ftone)" stroke="none"/>
-    <rect x="170" y="82" width="46" height="46" fill="url(#ftone)" stroke="none"/>
-    <rect x="124" y="82" width="46" height="46" class="gomet-fill" opacity=".9"/>
-    <rect x="124" y="82" width="46" height="46" ${S}/>
-    <rect x="22" y="22" width="46" height="46" rx="2" ${S} transform="rotate(-12 45 45)"/>
-    <path d="M62,64 C96,70 118,40 188,50" ${S} stroke-dasharray="5 5" marker-end="url(#fah)"/>
-    <path d="M20,120 H96 M20,134 H72" ${S} opacity=".4"/>`,
-  click: `
-    <path d="M24,56 H104 V72 A10,10 0 0 1 104,92 V108 H24 Z" class="paper" ${S}/>
-    <path d="M216,56 H122 V72 A10,10 0 0 0 122,92 V108 H216 Z" ${S}/>
-    <path d="M122,56 H216 V108 H122 V92 A10,10 0 0 0 122,72 Z" fill="url(#ftone)" stroke="none"/>
-    <path d="M113,40 V24 M96,44 L86,30 M130,44 L140,30 M113,124 V140 M96,120 L86,134 M130,120 L140,134" ${S}/>
-    <text x="164" y="30" class="fig-k">カチッ</text>`,
-  gomet: `
-    <rect x="70" y="20" width="110" height="128" rx="3" ${S} transform="rotate(4 125 84)"/>
-    <path d="M90,52 H150 M90,70 H160 M90,88 H140" ${S} opacity=".45" transform="rotate(4 125 84)"/>
-    <circle cx="150" cy="118" r="17" class="gomet-fill"/><circle cx="150" cy="118" r="17" ${S} stroke-width="1.5"/>
-    <path d="M142,118 l6,6 l11,-12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M28,30 C40,70 90,110 126,116" ${S} stroke-dasharray="5 5" marker-end="url(#fah)"/>
-    <circle cx="26" cy="24" r="9" ${S}/><circle cx="46" cy="16" r="6" ${S} opacity=".5"/>
-    <path d="M196,96 l10,-6 M198,116 h12 M194,136 l9,7" ${S}/>`
-};
-export function stepFigure(key, label) {
-  return `<svg class="fig" viewBox="0 0 240 160" role="img" aria-label="${label}">${FIG[key]}</svg>`;
+/* ---------- láminas del método (dibujos exportados de la presentación «Método» en Figma) ----------
+ * Los SVG de assets/figma/ son los dibujos tal cual salen de Figma. Aquí solo se recortan, se rotulan
+ * y cada círculo de validación se convierte en un gomet verde. */
+const FIGDIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../assets/figma');
+const readFig = (f) => fs.readFileSync(path.join(FIGDIR, f), 'utf8');
+const pathsOf = (svg) => svg.match(/<path [^>]*\/>/g);
+/* círculo blanco con check → gomet verde (clases .val y .val-k en gve.css) */
+const gomets = (svg) => svg.replace(/(<path d="[^"]+" fill="white" stroke="#1B1B1B")(\/>\s*<path )(d="[^"]+" stroke="#1B1B1B" stroke-width="1.4")/g, '$1 class="val"$2class="val-k" $3');
+const range = (a, b) => Array.from({ length: b - a + 1 }, (_, k) => a + k);
+const t = (x, y, cls, s, anchor = 'start') => `<text x="${x}" y="${y}" class="${cls}"${anchor !== 'start' ? ` text-anchor="${anchor}"` : ''}>${s}</text>`;
+
+/* El logotipo del estudio (casco incluido), en el color del texto. */
+export const LOGO = readFig('logo-gve.svg').replace('<svg ', '<svg class="logo" role="img" aria-label="Gomet Verd Estudi · ALWAYS WIPing [Working In Play]" ');
+
+/* La línea de fases se dibuja una vez por página y se reutiliza (<use>) para cada icono. */
+export const FASES_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><g id="fig-fases" fill="none">${gomets(pathsOf(readFig('fases.svg')).join(''))}</g></defs></svg>`;
+const PHASE_X = [150, 381.4, 612.9, 844.3, 1075.7, 1307.2, 1538.6, 1770];
+export function phaseIcon(i, label) {
+  return `<svg class="ph-icon" fill="none" viewBox="${PHASE_X[i] - 112} 594 224 172" role="img" aria-label="${label}"><use href="#fig-fases"/></svg>`;
 }
-/* Trama y punta de flecha que comparten los dibujos de los pasos: una sola vez por página. */
-export const FIG_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-  <pattern id="ftone" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1" fill="#151515"/></pattern>
-  <marker id="fah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#151515"/></marker>
-</defs></svg>`;
+/* Fases y validaciones: la obra entera en una línea. */
+export function timeline(phases, acts) {
+  const actX = [[50, 481.4], [512.9, 944.3], [975.7, 1638.6], [1670, 1870]];
+  const a = acts.map((x, k) => t((actX[k][0] + actX[k][1]) / 2, 556, 'svg-k', x.k.toUpperCase(), 'middle')).join('');
+  const p = phases.map((x, k) => t(PHASE_X[k], 906, 'svg-p', `${x.n} ${x.key}`, 'middle') + t(PHASE_X[k], 932, 'svg-s', `[${x.layer}]`, 'middle')).join('');
+  return `<svg class="timeline" fill="none" viewBox="30 520 1860 430" role="img" aria-label="Las ocho fases en cuatro actos, con una validación entre cada fase y la siguiente"><use href="#fig-fases"/>${a}${p}</svg>`;
+}
+
+/* El edificio explotado: se monta capa a capa (assets/js/gve.js). Índices = orden de los trazos en edificio.svg. */
+export function edificio(layers) {
+  const p = gomets(pathsOf(readFig('edificio.svg')).join('\n')).split('\n');
+  const pick = (idx) => idx.map((i) => p[i]).join('');
+  const parts = [
+    { art: range(1, 5), lead: [71, 72] }, { art: range(6, 9), lead: [73, 74] }, { art: range(10, 22), lead: [75, 76] },
+    { art: range(23, 34), lead: [77, 78] }, { art: range(35, 46), lead: [79, 80] }, { art: range(47, 56), lead: [81, 82] }
+  ];
+  const lab = [...layers].reverse(); // de abajo arriba, como se construye
+  const g = parts.map((x, k) => `<g class="ed-layer" data-k="${k}"><g class="ed-art">${pick(x.art)}</g>${pick(x.lead)}${t(1376, lab[k].y + 7, 'svg-k', `[${lab[k].k.toUpperCase()}]`)}${t(1376, lab[k].y + 33, 'svg-p', lab[k].ph)}</g>`).join('');
+  const v = [[57, 58], [59, 60], [61, 62], [63, 64], [65, 66]].map((x, k) => `<g class="ed-val" data-k="${k}">${pick(x)}</g>`).join('');
+  const acts = pick(range(67, 70)) + t(826, 453, 'svg-k', 'CONSTRUIR', 'end') + t(826, 756, 'svg-k', 'DEFINIR', 'end') + t(826, 966, 'svg-k', 'ENTENDER', 'end') + t(666, 654, 'svg-k', 'MANTENER', 'end') + t(666, 680, 'svg-p', '08 Mantenimiento', 'end');
+  return `<svg class="edificio" fill="none" viewBox="470 286 1400 760" data-vb-narrow="880 286 380 760" role="img" aria-labelledby="ed-t"><title id="ed-t">El edificio de una marca, de abajo arriba: solar, cimientos, estructura, plantas, instalaciones y remates, y llaves. Entre cada capa, un gomet verde: una validación conjunta.</title>${pick([0])}<g class="ed-acts">${acts}</g>${g}${v}</svg>`;
+}
+
+/* Lo que suele pasar: la fachada primero, sin cimientos. */
+export function fachada(labels) {
+  const p = pathsOf(readFig('fachada.svg')).join('');
+  const ys = [563, 667, 841];
+  return `<svg class="fachada" fill="none" viewBox="580 370 1340 700" role="img" aria-label="Una marca que empieza por la fachada: plantas que no encajan y sin cimientos">${p}${labels.map((l, k) => t(1612, ys[k], 'svg-k', `[${l.toUpperCase()}]`)).join('')}</svg>`;
+}
+
+/* Viga de celosía: técnica arriba, creatividad abajo, unidas por triángulos; un gomet en cada vertical validada. */
+export function truss(n = 8) {
+  const W = 1600, H = 120, bw = W / n, y0 = 20, y1 = 100;
+  let s = `<path d="M0 ${y0}H${W}M0 ${y1}H${W}" stroke="#1B1B1B" stroke-width="1.6"/><path d="M0 ${y0 - 10}H${W}M0 ${y1 + 10}H${W}" stroke="#D4D4D1" stroke-width="1"/>`;
+  for (let k = 0; k < n; k++) {
+    const x = k * bw;
+    s += `<path d="M${x} ${k % 2 ? y0 : y1}L${x + bw} ${k % 2 ? y1 : y0}" stroke="#1B1B1B" stroke-width="1.1"/>`;
+    s += `<path d="M${x} ${y0}L${x + bw / 2} ${y1}L${x + bw} ${y0}" stroke="#B3B3B1" stroke-width=".8"/>`;
+  }
+  for (let k = 0; k <= n; k++) s += `<path d="M${k * bw} ${y0}V${y1}" stroke="#1B1B1B" stroke-width="${k >= 2 && k <= 6 ? 2.2 : 1.1}"/>`;
+  for (let k = 2; k <= 6; k++) s += `<circle cx="${k * bw}" cy="${(y0 + y1) / 2}" r="11" class="val"/><path d="M${k * bw - 4.6} ${(y0 + y1) / 2 + .3}L${k * bw - 1.4} ${(y0 + y1) / 2 + 3.7}L${k * bw + 4.8} ${(y0 + y1) / 2 - 3.7}" class="val-k" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+  return `<svg class="truss" fill="none" viewBox="-2 0 ${W + 4} ${H}" preserveAspectRatio="none" aria-hidden="true">${s}</svg>`;
+}
 
 /* ---------- pictogramas ---------- */
 export const ICON = {
