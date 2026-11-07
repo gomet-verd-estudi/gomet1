@@ -249,3 +249,72 @@ export const ORDER = {
 };
 
 export const CLIENTS = ['Vintage Palace', '404 Studio', 'Claur Tiles', 'Bernal', 'D’Matinada', 'Orbis Vacui', 'Leo Rizzi', 'Kaniche Pedigree Hot Dogs'];
+
+/* Lo que veréis: las láminas de entregables de la presentación «Método», con sus diagramas. */
+export const VEREIS = {
+  brief: {
+    ph: 'Fase 01, Workshop: el terreno', note: 'Lo recibiréis tras el workshop',
+    head: 'Después del workshop recibiréis el brief',
+    text: 'Un documento breve que recoge lo que nos contasteis y lo convierte en un punto de partida compartido. Lo revisamos juntos y lo firmamos antes de seguir.',
+    rows: [
+      ['Vuestro contexto', 'Quiénes sois, qué hacéis y en qué mercado competís, contado con vuestras palabras.'],
+      ['El problema', 'Lo que hoy le impide a vuestra marca crecer o diferenciarse, dicho en una frase.'],
+      ['Los objetivos', 'Lo que tiene que conseguir el proyecto y cómo sabremos que lo ha conseguido.'],
+      ['El programa', 'La lista de piezas que vamos a construir, para que el alcance esté claro desde el principio.'],
+      ['El calendario', 'Las fechas de cada fase y de cada validación.']
+    ]
+  },
+  oportunidad: {
+    ph: 'Fase 02, Estrategia: el solar', note: 'Lo veréis en el documento estratégico',
+    head: 'El hallazgo que lo ordena todo',
+    text: 'Al terminar la investigación os presentaremos la oportunidad: una verdad de vuestro mercado que nadie está aprovechando y que vuestra marca puede ocupar. Es la conclusión que guía todo lo demás.',
+    cols: [['Lo que hemos visto', 'Qué está pasando en vuestro mercado, con datos y observación.'], ['Lo que proponemos', 'La postura que debería tomar vuestra marca ante eso.'], ['Lo que cambia', 'Cómo esa postura guiará cada decisión a partir de ahí.']]
+  },
+  target: {
+    ph: 'Fase 02, Estrategia: el solar', note: 'Lo veréis en el documento estratégico',
+    head: 'Os mostraremos a quién sirve vuestra marca',
+    text: 'No en forma de perfiles inventados, sino en tres círculos: quién la compra y la usa, quién le da reputación y quién la recomienda.',
+    table: [
+      ['Primario', 'Quien compra y usa vuestro producto de forma habitual.', 'Es a quien escuchamos primero: cada decisión se mide contra él.'],
+      ['Secundario', 'Quien se acerca por afinidad con lo que representáis.', 'Aporta visibilidad y reputación a vuestra marca.'],
+      ['Terciario', 'Quien recomienda: expertos, medios, tiendas o profesionales.', 'Su opinión abre la puerta a los demás.']
+    ],
+    need: 'Para cada uno describimos qué necesita resolver con vuestra marca. Así las decisiones de diseño dejan de ser una cuestión de gusto.'
+  },
+  competencia: {
+    ph: 'Fase 02, Estrategia: el solar', note: 'Lo veréis en el documento estratégico',
+    head: 'Veréis dónde está vuestro hueco en el mercado',
+    text: 'Situamos a vuestros competidores y a marcas de referencia de otros sectores en un mapa. El espacio que nadie ocupa es donde os propondremos construir.',
+    take: 'Un análisis de cada marca estudiada: lo que conviene copiar, lo que conviene adaptar y lo que conviene evitar.'
+  },
+  idea: {
+    ph: 'Fase 03, Concepto: los cimientos', note: 'Lo veréis en la presentación de concepto',
+    head: 'La idea madre',
+    steps: [['Realidad observada', 'Lo que vemos en vuestro mercado.'], ['Insight de mercado', 'Lo que significa.'], ['Insight de marca', 'La postura de vuestra marca.'], ['Territorio', 'El espacio creativo.'], ['Concepto', 'La frase de la que sale todo.']],
+    text: 'Os mostraremos el camino completo hasta el concepto, paso a paso, para que entendáis por qué es ese y no otro.',
+    unique: 'Lo que vuestra marca ofrece y nadie más, en una frase'
+  },
+  pilares: {
+    ph: 'Fase 04, Sistema: la estructura', note: 'Lo veréis en el sistema de identidad',
+    head: 'Los cuatro pilares que diseñaremos para vuestra marca',
+    items: [
+      ['Tipografía', 'Una familia con carácter para los titulares y otra de servicio para textos, precios y datos.'],
+      ['Retícula', 'El orden que compartirán todas vuestras piezas, de la más pequeña a la más grande.'],
+      ['Color', 'Una paleta con jerarquía: qué color manda, cuál acompaña y cuál aparece solo como acento.'],
+      ['Imagen', 'Cómo se fotografía, se ilustra y se retoca vuestra marca: luz, encuadre y tratamiento.']
+    ]
+  },
+  plantas: {
+    ph: 'Fase 05, Aplicaciones: las plantas', note: 'Lo veréis en las aplicaciones',
+    head: 'Cada pieza, pensada para su sitio',
+    text: 'Diseñaremos cada pieza de vuestro programa sabiendo qué tiene que conseguir, a quién sirve y qué pilares usa. Por ejemplo:',
+    table: [
+      ['Papelería', 'Presentar la marca en formatos pequeños.', 'Clientes y proveedores.', 'Tipografía y color.'],
+      ['Packaging', 'Destacar en el lineal y proteger el producto.', 'Quien compra.', 'Los cuatro.'],
+      ['Espacio y señalética', 'Leerse a distancia, de día y de noche.', 'Quien pasa por la calle.', 'Tipografía y color.'],
+      ['Web', 'Informar y vender en pocos pasos.', 'Todos los públicos.', 'Retícula e imagen.'],
+      ['Redes sociales', 'Publicar a menudo sin perder coherencia.', 'Clientes y seguidores.', 'Plantillas y registros.'],
+      ['Editorial y campañas', 'Contar la historia con profundidad.', 'Prensa y prescriptores.', 'Los cuatro.']
+    ]
+  }
+};

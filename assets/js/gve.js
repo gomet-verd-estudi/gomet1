@@ -32,19 +32,13 @@
   fitViewBox();
   addEventListener('resize', fitViewBox);
 
-  /* ---------- 2. la obra ---------- */
+  /* ---------- 2. la obra: el avance de cada fase llega al motor (assets/js/obra.js) ---------- */
   const obra = $('.obra');
   if (obra) {
     const steps = $$('.step', obra);
-    const svg = $('.obra-svg', obra);
     const stage = $('.obra-stage', obra);
-    const ph = $$('.ph', svg).sort((a, b) => a.dataset.ph - b.dataset.ph); // fases 1–8
-    const vals = $$('.v', svg).sort((a, b) => a.dataset.v - b.dataset.v); // validaciones 1–5
     const rail = $$('.rail-i', obra), railVals = $$('.rail-v', obra);
-    const ACT = ['', 'e', 'e', 'd', 'd', 'c', 'c', 'c', 'm', 'm'];
-    const DROP = [0, 40, 0, 140, 140, 140, 140, 140, 90]; // cuánto cae cada capa (unidades del dibujo)
-    const ease = (t) => { const c = 1.35; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); }; // cae y rebota al encajar
-    let cur = ph.map(() => 0), target = ph.map(() => 0), running = false, lastActive = -1;
+    let cur = Array(9).fill(0), target = Array(9).fill(0), running = false, lastActive = -1, act = 0;
 
     // La línea de lectura: a media pantalla en escritorio; bajo el dibujo fijo en móvil
     const readLine = () => {
@@ -56,47 +50,39 @@
       const y = readLine();
       for (let i = 0; i < steps.length; i++) {
         const r = steps[i].getBoundingClientRect();
-        if (y < r.top) return i === 0 ? 0 : i;
+        if (y < r.top) return i;
         if (y < r.bottom) return i + (y - r.top) / r.height;
       }
       return steps.length;
     };
-
-    function paint() {
-      ph.forEach((g, k) => {
-        const e = ease(cur[k]);
-        g.style.opacity = clamp(cur[k] * 2.2).toFixed(3);
-        g.style.transform = DROP[k + 1] ? `translateY(${(-(1 - e) * DROP[k + 1]).toFixed(1)}px)` : '';
-      });
-    }
+    const send = () => { if (window.GVE_OBRA) window.GVE_OBRA.set(cur, act); };
     function frame() {
       let moving = false;
       cur = cur.map((c, k) => {
         const d = target[k] - c;
-        if (Math.abs(d) > 0.002) { moving = true; return c + d * 0.22; }
+        if (Math.abs(d) > 0.001) { moving = true; return c + d * 0.16; }
         return target[k];
       });
-      paint();
+      send();
       running = moving;
       if (moving) requestAnimationFrame(frame);
     }
     function update() {
       const s = reduce ? steps.length : position();
-      target = ph.map((_, k) => clamp((s - (k + 1) + 0.15) / 0.5));
-      vals.forEach((v, j) => v.classList.toggle('on', s >= j + 2 + 0.45));
-      railVals.forEach((v) => v.classList.toggle('on', s >= +v.dataset.v + 1 + 0.45));
+      // la fase k se construye mientras su texto pasa por la línea de lectura
+      for (let k = 1; k <= 8; k++) target[k] = clamp((s - k + 0.25) / 0.85);
+      railVals.forEach((v) => v.classList.toggle('on', s >= +v.dataset.v + 1 + 0.6));
       const active = clamp(Math.floor(s), 0, steps.length - 1);
+      act = active >= 1 && active <= 8 ? active : 0;
       if (active !== lastActive) {
         lastActive = active;
         steps.forEach((st, i) => st.classList.toggle('is-active', i === active));
-        ph.forEach((g, k) => g.classList.toggle('now', k + 1 === active));
-        svg.dataset.act = ACT[active] || '';
       }
       rail.forEach((li, k) => {
         li.classList.toggle('now', k + 1 === active);
-        li.classList.toggle('done', s >= k + 1 + 0.45);
+        li.classList.toggle('done', s >= k + 1 + 0.6);
       });
-      if (reduce) { cur = target.slice(); paint(); return; }
+      if (reduce) { cur = target.slice(); send(); return; }
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
     obra.classList.add('is-live');
@@ -104,13 +90,14 @@
     const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } };
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll);
+    addEventListener('load', () => { update(); send(); });
     update();
 
     // El riel: saltar a una fase
     $$('[data-go]', obra).forEach((b) => b.addEventListener('click', () => {
       const st = steps[+b.dataset.go];
       const r = st.getBoundingClientRect();
-      scrollTo({ top: scrollY + r.top - readLine() + r.height * 0.4, behavior: reduce ? 'auto' : 'smooth' });
+      scrollTo({ top: scrollY + r.top - readLine() + r.height * 0.6, behavior: reduce ? 'auto' : 'smooth' });
     }));
   }
 

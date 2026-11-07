@@ -18,8 +18,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS } from '../data/site.mjs';
-import { LOGO, obraSVG, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, WORKER, piece, PIECE_COLORS } from './figures.mjs';
+import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS } from '../data/site.mjs';
+import { LOGO, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, piece } from './figures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PROJECTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects.json'), 'utf8'));
@@ -31,11 +31,9 @@ const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').r
 const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
 
 /* ---------- piezas comunes con la estética de la presentación ---------- */
-const chips = (cols = ['red', 'blue', 'yellow', 'white']) => `<span class="chips" aria-hidden="true">${cols.map((c) => `<i class="ch-${c}"></i>`).join('')}</span>`;
-const head = (title, no, tag) => `<header class="pl-head"><p class="pl-title">[${esc(title)}]</p><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${chips()}</header>`;
+const head = (title, no, tag) => `<header class="pl-head"><p class="pl-title">[${esc(title)}]</p><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span></header>`;
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
-const bubble = (text, cls = '') => `<div class="mascot ${cls}">${WORKER}<p class="bubble">${text}</p></div>`;
 const gve = '<div class="gve" aria-hidden="true"><i>G</i><i>V</i><i>E</i></div>';
 const gomet = '<span class="pl-gomet" aria-hidden="true"></span>';
 const rows = (list) => `<dl class="pl-rows">${list.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
@@ -72,7 +70,6 @@ function footer(r, current) {
         <p class="ft-big">${esc(START.head)}</p>
         <a class="btn btn-light" href="${r}contacto/">Empezar un proyecto ${ICON.arrow}</a>
       </div>
-      ${bubble('¿Empezamos por el terreno?', 'mascot-band')}
     </div>
     <ol class="seq" aria-label="Así se construye: de los cimientos a las llaves">${[2, 3, 4, 6].map((k, i) => `<li><span class="seq-n">${i + 1}</span>${phaseIcon(k, `${PHASES[k].n} ${PHASES[k].key}`)}<span class="seq-k">${esc(PHASES[k].layer)}</span></li>`).join('')}</ol>
   </div></div>`}
@@ -99,7 +96,7 @@ function footer(r, current) {
 </footer>`;
 }
 
-function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.jpg', jsonld = null, defs = FASES_DEFS }) {
+function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.jpg', jsonld = null, defs = FASES_DEFS, scripts = '' }) {
   const url = `${STUDIO.site}/${rel}`;
   const ld = jsonld || {
     '@context': 'https://schema.org', '@type': 'ProfessionalService', '@id': `${STUDIO.site}/#studio`,
@@ -149,7 +146,7 @@ ${footer(r, current)}
   <button class="lb-p" type="button" aria-label="Anterior">${ICON.back}</button>
   <button class="lb-n" type="button" aria-label="Siguiente">${ICON.arrow}</button>
 </dialog>
-<script src="${r}assets/js/gve.js?v=${VERSION}" defer></script>
+${scripts}<script src="${r}assets/js/gve.js?v=${VERSION}" defer></script>
 </body>
 </html>
 `;
@@ -171,12 +168,11 @@ function galleryMedia(g, r, alt) {
     : `<source src="${r + g.mp4}" type="video/mp4">`;
   return `${img}<video class="g-video" muted loop playsinline preload="none" aria-hidden="true" tabindex="-1">${srcs}</video>`;
 }
-const CYCLE = ['red', 'blue', 'yellow', 'white'];
 const card = (p, r) => `
     <li><a class="card" href="${r}obras/${p.slug}/">
       ${coverMedia(p, r, { cls: 'card-media' })}
-      <span class="card-bar"><span class="card-n">${p.n}</span><span class="card-name">${esc(p.name)}</span></span>
-      <span class="card-meta"><span class="card-tag">${esc(p.tag)}</span>${chips(p.services.map((_, k) => CYCLE[k % 4]))}</span>
+      <span class="card-meta"><span class="card-n">${p.n}</span><span class="card-tag">${esc(p.tag)}</span></span>
+      <span class="card-name">${esc(p.name)}</span>
       <span class="card-plantas">${p.services.length} ${p.services.length === 1 ? 'planta' : 'plantas'} · ${esc(p.services.slice(0, 3).join(', '))}${p.services.length > 3 ? '…' : ''}</span>
     </a></li>`;
 
@@ -207,7 +203,7 @@ function home() {
 <section class="obra" id="obra" aria-label="Cómo se construye una marca">
   <div class="obra-stage">
     ${gve}
-    <figure class="obra-fig">${obraSVG(LAYERS)}</figure>
+    <figure class="obra-fig"><svg class="obra-svg" viewBox="-460 -330 1180 640" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg></figure>
     <div class="obra-rail">
       <ol class="rail">${rail}</ol>
       <p class="obra-cap">${gomet}Cada gomet verde es una validación con vosotros</p>
@@ -220,7 +216,6 @@ function home() {
       <p class="lead">${esc(INTRO.sub)}</p>
       <p class="step-p">${STUDIO.name} es un estudio independiente de branding y dirección de arte entre Valencia y Barcelona. Construimos cada marca de abajo arriba, en ocho fases y cuatro actos, y ninguna capa se levanta sin vuestro visto bueno.</p>
       <div class="ctas"><a class="btn" href="#fase-01">Ver cómo se construye ${ICON.down}</a><a class="btn btn-ghost" href="contacto/">Empezar un proyecto</a></div>
-      ${bubble('Baja despacio: lo levantamos capa a capa.', 'mascot-hero')}
     </li>${steps}
     <li class="step step-end" data-step="9">
       ${head('Resultado', '00', 'Cada marca, única')}
@@ -236,7 +231,7 @@ function home() {
   <div class="wrap">
     ${head('Piezas', '00', 'El programa')}
     <div class="sec-intro"><h2 class="h2">Las piezas con las que construimos</h2><p>Cada marca tiene su programa: las piezas que necesita, dimensionadas desde el principio para que el alcance no cambie a mitad de obra. Combinadlas como queráis.</p></div>
-    <ol class="catalog">${SERVICES.map((sv, k) => `<li class="cat"><a href="contacto/?pieza=${encodeURIComponent(sv)}"><span class="cat-n">${pad(k + 1)}</span><span class="cat-fig">${piece(sv)}</span><span class="cat-bar"><b>${esc(sv)}</b></span>${chips(PIECE_COLORS[sv])}</a></li>`).join('')}</ol>
+    <ol class="catalog">${SERVICES.map((sv, k) => `<li class="cat"><a href="contacto/?pieza=${encodeURIComponent(sv)}"><span class="cat-n">${pad(k + 1)}</span><span class="cat-fig">${piece(sv)}</span><span class="cat-name">${esc(sv)}</span></a></li>`).join('')}</ol>
   </div>
 </section>
 
@@ -273,7 +268,61 @@ function home() {
   </div>
 </section>`;
 
-  return page({ title: `${STUDIO.name} · Branding y dirección de arte en Valencia y Barcelona`, desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home' });
+  return page({ title: `${STUDIO.name} · Branding y dirección de arte en Valencia y Barcelona`, desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home', scripts: `<script src="assets/js/obra.js?v=${VERSION}" defer></script>\n` });
+}
+
+/* ========================================================================
+   LO QUE VERÉIS — las láminas de entregables de la presentación, con sus diagramas
+   ======================================================================== */
+const tbl = (headRow, body) => `<div class="tbl-wrap"><table class="tbl"><thead><tr>${headRow.map((h) => `<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${body.map((r) => `<tr>${r.map((c, i) => i ? `<td>${esc(c)}</td>` : `<th scope="row">${esc(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+const vfoot = (v) => `<span>${esc(v.ph)}</span><span>${esc(v.note)}</span>`;
+function targetSVG() {
+  const e = (rx, ry, cls) => `<ellipse cx="220" cy="104" rx="${rx}" ry="${ry}" class="${cls}"/>`;
+  const t = (y, s) => `<text x="220" y="${y}" text-anchor="middle" class="d-k">${s}</text>`;
+  return `<svg class="diag target" viewBox="0 0 440 210" role="img" aria-label="Tres círculos: primario, secundario y terciario">${e(208, 92, 'd-dash')}${e(146, 64, 'd-line')}${e(78, 34, 'd-fill')}${t(31, 'TERCIARIO')}${t(61, 'SECUNDARIO')}${t(108, 'PRIMARIO')}</svg>`;
+}
+function compSVG() {
+  const pill = (x, y, s, dark = false) => { const w = s.length * 8.2 + 26; return `<g class="${dark ? 'd-pill dark' : 'd-pill'}"><rect x="${x - w / 2}" y="${y - 12}" width="${w}" height="24" rx="12"/><text x="${x}" y="${y + 4}" text-anchor="middle">${s}</text></g>`; };
+  const comp = [[150, 70], [320, 110], [110, 245], [200, 300], [300, 280], [140, 160], [360, 60], [420, 95]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" class="d-dot"/>`).join('');
+  const refs = [[430, 40], [330, 140], [465, 140]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="6" class="d-ref"/>`).join('');
+  return `<svg class="diag comp" viewBox="0 0 540 350" role="img" aria-label="Mapa de competencia: el espacio libre, accesible y emocional, es donde construir vuestra marca">
+    <rect x="270" y="175" width="240" height="150" class="d-free"/><text x="500" y="314" text-anchor="end" class="d-k">[EL ESPACIO LIBRE]</text>
+    <path d="M270 25V325M30 175H510" class="d-axis"/>
+    ${comp}${refs}
+    <circle cx="38" cy="14" r="5" class="d-dot"/><text x="50" y="18" class="d-s">Competidores</text><circle cx="148" cy="14" r="5" class="d-ref"/><text x="160" y="18" class="d-s">Referentes</text>
+    ${pill(270, 25, 'EXCLUSIVO')}${pill(270, 325, 'ACCESIBLE')}${pill(66, 175, 'FUNCIONAL')}${pill(474, 175, 'EMOCIONAL')}
+    <circle cx="410" cy="262" r="7" class="val"/>${pill(410, 290, 'VUESTRA MARCA', true)}
+  </svg>`;
+}
+function gridSVG() {
+  let s = '';
+  for (let i = 0; i <= 6; i++) s += `<path d="M${10 + i * 20} 10V130M10 ${10 + i * 20}H130" class="d-line"/>`;
+  return `<svg class="diag grid" viewBox="0 0 140 140" aria-hidden="true"><rect x="10" y="10" width="120" height="120" class="d-frame"/><rect x="30" y="30" width="40" height="40" class="d-cell"/>${s}</svg>`;
+}
+function vereis() {
+  const v = VEREIS;
+  const pil = v.pilares.items;
+  return `
+<section class="sec" id="vereis">
+  <div class="wrap">
+    ${head('Lo que veréis', '00', 'Entregables')}
+    <div class="sec-intro"><h2 class="h2">Lo que recibís en cada fase</h2><p>Cada fase termina con un documento que podéis ver, discutir y validar. Estas son las láminas de la presentación del método, con lo que encontraréis en cada una.</p></div>
+    ${plate({ title: 'Brief', no: '01', tag: 'Lo que veréis', cls: 'plate-grey', body: `<div class="pl-body pl-body-top"><div class="pl-text"><h3 class="pl-h">${esc(v.brief.head)}</h3><p class="pl-p">${esc(v.brief.text)}</p></div>${rows(v.brief.rows)}</div>`, foot: vfoot(v.brief) })}
+    ${plate({ title: 'Oportunidad', no: '02', tag: 'Lo que veréis', cls: 'plate-grey', body: `<p class="statement">${esc(v.oportunidad.head)}</p><p class="pl-p pl-p-wide">${esc(v.oportunidad.text)}</p><div class="cols3">${v.oportunidad.cols.map(([k, x]) => `<div><p class="lbl">${esc(k)}</p><p>${esc(x)}</p></div>`).join('')}</div>`, foot: vfoot(v.oportunidad) })}
+    <div class="plate-pair">
+      ${plate({ title: 'Target', no: '02', tag: 'Lo que veréis', cls: 'plate-grey', body: `<h3 class="pl-h">${esc(v.target.head)}</h3><p class="pl-p">${esc(v.target.text)}</p>${targetSVG()}${tbl(['Círculo', 'Quién suele ser', 'Por qué importa'], v.target.table)}<p class="lbl" style="margin-top:18px">Lo que necesita cada círculo</p><p>${esc(v.target.need)}</p>`, foot: vfoot(v.target) })}
+      ${plate({ title: 'Competencia', no: '02', tag: 'Lo que veréis', cls: 'plate-grey', body: `<h3 class="pl-h">${esc(v.competencia.head)}</h3><p class="pl-p">${esc(v.competencia.text)}</p>${compSVG()}<p class="lbl" style="margin-top:18px">Qué os llevaréis</p><p>${esc(v.competencia.take)}</p>`, foot: vfoot(v.competencia) })}
+    </div>
+    ${plate({ title: 'Concepto', no: '03', tag: 'Lo que veréis', cls: 'plate-grey', body: `<p class="statement">${esc(v.idea.head)}</p><ol class="steps5">${v.idea.steps.map(([k, x], i) => `<li><span class="lbl">${pad(i + 1)}</span><b>${esc(k)}</b><span>${esc(x)}</span></li>`).join('')}</ol><div class="pl-body pl-body-top"><p class="pl-p">${esc(v.idea.text)}</p><div><p class="lbl">Propuesta única</p><p class="pl-h">${esc(v.idea.unique)}</p></div></div>`, foot: vfoot(v.idea) })}
+    ${plate({ title: 'Pilares', no: '04', tag: 'Lo que veréis', cls: 'plate-grey', body: `<h3 class="pl-h">${esc(v.pilares.head)}</h3><div class="pillars">
+      <div><p class="lbl">${pil[0][0]}</p><p class="aa">Aa</p><p class="pl-h">Principal y secundaria</p><p>${esc(pil[0][1])}</p></div>
+      <div><p class="lbl">${pil[1][0]}</p><div class="pil-fig">${gridSVG()}</div><p>${esc(pil[1][1])}</p></div>
+      <div><p class="lbl">${pil[2][0]}</p><div class="swatches">${[['Principal', 'sw-ink'], ['Secundario', 'sw-blue'], ['Acento', 'sw-red'], ['Neutro', 'sw-neutral']].map(([n, c]) => `<span><i class="${c}"></i>${n}</span>`).join('')}</div><p>${esc(pil[2][1])}</p></div>
+      <div><p class="lbl">${pil[3][0]}</p><div class="pil-fig pil-img">${piece('3D')}</div><p>${esc(pil[3][1])}</p></div>
+    </div>`, foot: vfoot(v.pilares) })}
+    ${plate({ title: 'Plantas', no: '05', tag: 'Lo que veréis', cls: 'plate-grey', body: `<h3 class="pl-h">${esc(v.plantas.head)}</h3><p class="pl-p">${esc(v.plantas.text)}</p>${tbl(['Pieza', 'Qué tiene que conseguir', 'Para quién', 'Pilares que usa'], v.plantas.table)}`, foot: vfoot(v.plantas) })}
+  </div>
+</section>`;
 }
 
 /* ========================================================================
@@ -323,6 +372,8 @@ function metodo() {
     })}
   </div>
 </section>
+
+${vereis()}
 
 <section class="sec">
   <div class="wrap">
@@ -519,7 +570,7 @@ function contacto() {
     </form>
     <aside class="contact-side">
       ${rows([['Qué necesitamos', START.need], ['Email', STUDIO.email], ['Teléfono y WhatsApp', STUDIO.phone], ['Instagram', STUDIO.instagramLabel], ['Dónde', STUDIO.cities], ['Respuesta', ORDER.reply]])}
-      ${bubble('Lo primero: pisar el terreno juntos.', 'mascot-side')}
+
     </aside>
   </div>
 </section>`;
@@ -532,7 +583,7 @@ function notFound() {
     ${head('404', '00', 'Fuera de plano')}
     <h1 class="display">Esta página no está en el plano.</h1>
     <p class="lead">Puede que la hayamos movido de planta. Vuelve a la portada y empieza por los cimientos.</p>
-    ${bubble('Esta planta todavía no está construida.', 'mascot-side')}
+
     <p><a class="btn" href="/">Volver a la portada ${ICON.arrow}</a></p>
   </div></section>`;
   return page({ title: 'Fuera de plano · Gomet Verd Estudi', desc: STUDIO.desc, rel: '404', r, body, cls: 'is-404' });
