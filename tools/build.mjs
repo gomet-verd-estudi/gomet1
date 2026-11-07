@@ -107,7 +107,7 @@ function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.j
     description: STUDIO.desc, sameAs: [STUDIO.instagram], slogan: `${STUDIO.motto} (${STUDIO.mottoLong})`,
     areaServed: [{ '@type': 'City', name: 'Valencia' }, { '@type': 'City', name: 'Barcelona' }],
     knowsAbout: ['Branding', 'Identidad corporativa', 'Dirección de arte', 'Packaging', 'Diseño editorial', 'Lettering', 'Cartelería'],
-    founder: { '@type': 'Person', name: 'Manel Vila', url: 'https://manelvila.com/' }
+    member: { '@type': 'Person', name: 'Manel Vila', url: 'https://manelvila.com/' }
   };
   return `<!doctype html>
 <html lang="es">
