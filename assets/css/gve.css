@@ -464,6 +464,100 @@ p { margin: 0 0 1em; }
   .pillars { grid-template-columns: minmax(0, 1fr); }
 }
 
+
+/* ==========================================================================
+   BRANDING GOMET (presentaciones de estrategia de marca): un solo gris frío, el del logotipo,
+   sobre blanco. Titulares condensados en gris entre corchetes, número en círculo + etiqueta en caja
+   + subetiqueta en píldora, entradillas en mayúsculas entre filetes, separadores a sangre en gris.
+   ========================================================================== */
+:root {
+  --brand: #A6A6AB; --brand-d: #8E8E94;
+  --ink: #3A3A3F; --ink-2: #5C5C62; --ink-3: #828288; --ink-4: #A6A6AB;
+  --line: #D5D5D9; --line-2: #E8E8EB; --grey-bg: #F2F2F4; --bg-alt: #F2F2F4;
+}
+body { color: var(--ink-2); }
+.hd { background: rgba(255, 255, 255, .95); }
+.hd-logo { color: var(--brand); }
+.hd-nav { color: var(--ink-2); }
+.hd-nav a:hover, .hd-nav a[aria-current] { text-decoration-color: var(--brand); }
+.hd-cta { border-color: var(--brand); border-radius: 999px; color: var(--ink-2); }
+.hd-cta:hover { background: var(--brand); border-color: var(--brand); }
+
+/* titulares */
+.display { color: var(--brand); font-weight: 500; font-stretch: 75%; letter-spacing: -.02em; }
+.h2, .step-h, .pl-h, .card-name, .cat-name, .ft-big, .obra-nav b, .faq summary { color: var(--ink-2); }
+.h2 { font-weight: 500; }
+.pl-title { color: var(--brand); font-weight: 500; font-stretch: 75%; }
+.statement { color: var(--brand); }
+.lead { color: var(--ink-3); }
+
+/* cabecera de lámina: (01) ETIQUETA (píldora) y debajo [Título] */
+.pl-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+.pl-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pl-no { width: 26px; height: 26px; margin: 0; font-size: .66rem; border-color: var(--brand); color: var(--brand-d); }
+.pl-tag { margin: 0; padding: 4px 10px; font-size: .64rem; border-color: var(--brand); color: var(--brand-d); }
+.pl-pill { padding: 4px 12px; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-d); border: 1px solid var(--brand); border-radius: 999px; }
+.step.is-active .pl-no { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+.intro-tags, .sec-tags { margin-bottom: 22px; }
+/* entradillas en mayúsculas entre filetes */
+.sec-intro p, .pl-p-wide { text-transform: uppercase; font-weight: 500; font-size: .9rem; line-height: 1.5; letter-spacing: .01em; color: var(--brand-d); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 0; max-width: none; }
+
+/* botones en píldora */
+.btn { border-radius: 999px; background: var(--brand); border-color: var(--brand); color: #fff; padding: 13px 22px; }
+.btn:hover { background: var(--ink-2); border-color: var(--ink-2); }
+.btn-ghost { background: transparent; color: var(--ink-2); border-color: var(--brand); }
+.btn-ghost:hover { background: var(--brand); color: #fff; border-color: var(--brand); }
+.link { color: var(--ink-2); }
+.tags li, .gremios span { border-color: var(--brand); border-radius: 999px; color: var(--ink-2); }
+
+/* separador a sangre */
+.divider { background: var(--brand); color: #fff; padding-block: clamp(56px, 9vw, 140px) clamp(24px, 3vw, 40px); }
+.dv-title { margin: 0; font-weight: 500; font-stretch: 75%; font-size: clamp(3.6rem, 11vw, 10rem); line-height: .82; letter-spacing: -.03em; display: flex; align-items: flex-start; gap: 14px; }
+.dv-no { flex: none; width: 32px; height: 32px; border: 1.5px solid #fff; border-radius: 50%; display: grid; place-items: center; font-size: .78rem; letter-spacing: 0; margin-top: .3em; }
+.divider + .sec { border-top: 0; }
+
+/* tablas: banda de cabecera gris, filas con filete */
+.tbl thead th { background: var(--grey-bg); color: var(--brand-d); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; padding: 10px 12px; border-bottom: 0; }
+.tbl th, .tbl td { padding: 12px 12px 12px 12px; }
+.tbl tbody th { color: var(--brand-d); text-transform: uppercase; font-size: .78rem; letter-spacing: .04em; font-weight: 600; }
+
+/* láminas */
+.plate { border-color: var(--line-2); }
+.plate-grey { background: var(--grey-bg); }
+.gve i { border-color: var(--brand); color: var(--brand-d); border-radius: 2px; }
+.pl-rows dt { color: var(--brand-d); font-weight: 600; }
+.pl-rows dd { color: var(--ink-2); }
+.diag .d-pill rect { stroke: var(--brand); }
+.diag .d-pill text { fill: var(--brand-d); }
+.diag .d-pill.dark rect { fill: var(--brand); stroke: var(--brand); }
+.diag .d-fill { fill: var(--line); }
+
+/* pie: banda gris de la marca y fila de contacto */
+.band { background: var(--brand); }
+.band-k { color: rgba(255, 255, 255, .8); }
+.band .ft-big { font-stretch: 75%; }
+.band .btn-light { background: #fff; color: var(--ink-2); border-color: #fff; }
+.seq li { border-radius: 0; }
+.seq li:not(:last-child)::after { color: #fff; }
+.ft-row { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 24px; padding-block: 14px; border-top: 1px solid var(--brand); font-size: .76rem; letter-spacing: .04em; color: var(--brand-d); }
+.ft-row a { text-decoration: none; }
+.ft-row a:hover { color: var(--ink-2); }
+.ft-logo { color: var(--brand); }
+.ft-grid .lbl { color: var(--brand-d); }
+
+/* la obra con los grises de la marca */
+.obra-svg .grid { stroke: #E4E4E8; }
+.obra-svg .ground { fill: #FBFBFC; }
+.obra-svg .ghost { stroke: #C6C6CC; }
+.obra-svg .lab-t { fill: var(--brand-d); }
+.obra-svg .lead { stroke: var(--brand); }
+.rail-i::before { background: var(--brand-d); }
+.rail-i.now .rail-k, .rail-i.now .rail-n { color: var(--ink-2); }
+.step-act, .card-meta, .cat-n, .crumb { color: var(--brand-d); }
+.cat a:hover { background: var(--grey-bg); }
+.card:hover .card-name { text-decoration-color: var(--brand); }
+
 /* ==========================================================================
    ADAPTACIÓN
    ========================================================================== */
@@ -508,6 +602,8 @@ p { margin: 0 0 1em; }
 }
 @media (max-width: 640px) {
   body { font-size: 16px; }
+  .dv-no { width: 26px; height: 26px; font-size: .66rem; }
+  .ft-row { justify-content: flex-start; }
   .catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .seq { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 24px; }
   .seq li:nth-child(2)::after { display: none; }

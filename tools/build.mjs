@@ -31,7 +31,10 @@ const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').r
 const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
 
 /* ---------- piezas comunes con la estética de la presentación ---------- */
-const head = (title, no, tag) => `<header class="pl-head"><p class="pl-title">[${esc(title)}]</p><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span></header>`;
+const head = (title, no, tag, pill = '') => `<header class="pl-head"><div class="pl-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div><p class="pl-title">[${esc(title)}]</p></header>`;
+/* separador de sección a sangre, en el gris de la marca, como en las presentaciones */
+const tags = (no, tag, pill = '') => `<div class="pl-tags sec-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div>`;
+const divider = (title, no) => `<div class="divider" aria-hidden="true"><div class="wrap"><p class="dv-title">[${esc(title)}]<span class="dv-no">${no}</span></p></div></div>`;
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
 const gve = '<div class="gve" aria-hidden="true"><i>G</i><i>V</i><i>E</i></div>';
@@ -92,6 +95,7 @@ function footer(r, current) {
       <li><a href="${r}contacto/">Contacto</a></li>
     </ul></div>
   </div>
+  <div class="ft-row wrap"><a href="${STUDIO.instagram}" rel="me noopener" target="_blank">${STUDIO.instagramLabel.toUpperCase()}</a><a href="tel:${STUDIO.phoneHref}">${STUDIO.phone}</a><a href="mailto:${STUDIO.email}">${STUDIO.email.toUpperCase()}</a></div>
   <div class="ft-bottom wrap"><span>© 2026 ${STUDIO.name}</span><span>${gomet}Cada gomet verde es una validación con vosotros</span></div>
 </footer>`;
 }
@@ -211,8 +215,8 @@ function home() {
   </div>
   <ol class="obra-steps">
     <li class="step step-intro" data-step="0">
-      ${head('Método', '00', 'Cómo trabajamos')}
-      <h1 class="display">${esc(INTRO.title)}</h1>
+      <div class="pl-tags intro-tags"><span class="pl-no">00</span><span class="pl-tag">Método</span><span class="pl-pill">Cómo trabajamos</span></div>
+      <h1 class="display">[${esc(INTRO.title)}.]</h1>
       <p class="lead">${esc(INTRO.sub)}</p>
       <p class="step-p">${STUDIO.name} es un estudio independiente de branding y dirección de arte entre Valencia y Barcelona. Construimos cada marca de abajo arriba, en ocho fases y cuatro actos, y ninguna capa se levanta sin vuestro visto bueno.</p>
       <div class="ctas"><a class="btn" href="#fase-01">Ver cómo se construye ${ICON.down}</a><a class="btn btn-ghost" href="contacto/">Empezar un proyecto</a></div>
@@ -227,26 +231,29 @@ function home() {
   </ol>
 </section>
 
+${divider('Piezas', '01')}
 <section class="sec sec-cat" id="piezas">
   <div class="wrap">
-    ${head('Piezas', '00', 'El programa')}
+    ${tags('01', 'Piezas', 'El programa')}
     <div class="sec-intro"><h2 class="h2">Las piezas con las que construimos</h2><p>Cada marca tiene su programa: las piezas que necesita, dimensionadas desde el principio para que el alcance no cambie a mitad de obra. Combinadlas como queráis.</p></div>
     <ol class="catalog">${SERVICES.map((sv, k) => `<li class="cat"><a href="contacto/?pieza=${encodeURIComponent(sv)}"><span class="cat-n">${pad(k + 1)}</span><span class="cat-fig">${piece(sv)}</span><span class="cat-name">${esc(sv)}</span></a></li>`).join('')}</ol>
   </div>
 </section>
 
+${divider('Obras', '02')}
 <section class="sec" id="obras">
   <div class="wrap">
-    ${head('Obras', '00', 'Proyectos construidos')}
+    ${tags('02', 'Obras', 'Proyectos construidos')}
     <div class="sec-intro"><h2 class="h2">Marcas que ya están en pie</h2><p>Identidades y universos visuales para moda independiente, música y cultura. Cada obra con su programa de piezas, de los cimientos a las llaves.</p></div>
     <ul class="cards">${PROJECTS.slice(0, 6).map((p) => card(p, r)).join('')}</ul>
     <p class="more"><a class="btn btn-ghost" href="obras/">Ver las ${N} obras ${ICON.arrow}</a></p>
   </div>
 </section>
 
-<section class="sec sec-alt" id="criterio">
+${divider('Criterio', '03')}
+<section class="sec" id="criterio">
   <div class="wrap">
-    ${head('Criterio', '00', 'Técnica y creatividad')}
+    ${tags('03', 'Criterio', 'Técnica y creatividad')}
     <div class="sec-intro"><h2 class="h2">${esc(CRITERIA.head)}</h2><p>${esc(CRITERIA.truss.text)}</p></div>
     <div class="truss-wrap reveal">${trussBlock()}</div>
     <div class="trio">${CRITERIA.rows.map(([k, v]) => `<div><p class="lbl">${esc(k)}</p><p>${esc(v)}</p></div>`).join('')}</div>
@@ -256,7 +263,7 @@ function home() {
 <section class="sec" id="estudio">
   <div class="wrap two">
     <div>
-      ${head('Estudio', '00', 'Quién construye')}
+      ${head('Estudio', '04', 'Quién construye')}
       <h2 class="h2">${esc(CREW.head)}</h2>
       <p>${STUDIO.tagline} Trabajamos sobre todo para moda independiente, música y cultura. ${esc(CREW.text)}</p>
       <p><a class="link" href="estudio/">Conocer el estudio ${ICON.arrow}</a></p>
@@ -290,7 +297,7 @@ function compSVG() {
     <path d="M270 25V325M30 175H510" class="d-axis"/>
     ${comp}${refs}
     <circle cx="38" cy="14" r="5" class="d-dot"/><text x="50" y="18" class="d-s">Competidores</text><circle cx="148" cy="14" r="5" class="d-ref"/><text x="160" y="18" class="d-s">Referentes</text>
-    ${pill(270, 25, 'EXCLUSIVO')}${pill(270, 325, 'ACCESIBLE')}${pill(66, 175, 'FUNCIONAL')}${pill(474, 175, 'EMOCIONAL')}
+    ${pill(270, 25, 'EXCLUSIVO', true)}${pill(270, 325, 'ACCESIBLE', true)}${pill(66, 175, 'FUNCIONAL', true)}${pill(474, 175, 'EMOCIONAL', true)}
     <circle cx="410" cy="262" r="7" class="val"/>${pill(410, 290, 'VUESTRA MARCA', true)}
   </svg>`;
 }
@@ -305,7 +312,7 @@ function vereis() {
   return `
 <section class="sec" id="vereis">
   <div class="wrap">
-    ${head('Lo que veréis', '00', 'Entregables')}
+    ${tags('02', 'Lo que veréis', 'Entregables')}
     <div class="sec-intro"><h2 class="h2">Lo que recibís en cada fase</h2><p>Cada fase termina con un documento que podéis ver, discutir y validar. Estas son las láminas de la presentación del método, con lo que encontraréis en cada una.</p></div>
     ${plate({ title: 'Brief', no: '01', tag: 'Lo que veréis', cls: 'plate-grey', body: `<div class="pl-body pl-body-top"><div class="pl-text"><h3 class="pl-h">${esc(v.brief.head)}</h3><p class="pl-p">${esc(v.brief.text)}</p></div>${rows(v.brief.rows)}</div>`, foot: vfoot(v.brief) })}
     ${plate({ title: 'Oportunidad', no: '02', tag: 'Lo que veréis', cls: 'plate-grey', body: `<p class="statement">${esc(v.oportunidad.head)}</p><p class="pl-p pl-p-wide">${esc(v.oportunidad.text)}</p><div class="cols3">${v.oportunidad.cols.map(([k, x]) => `<div><p class="lbl">${esc(k)}</p><p>${esc(x)}</p></div>`).join('')}</div>`, foot: vfoot(v.oportunidad) })}
@@ -373,7 +380,9 @@ function metodo() {
   </div>
 </section>
 
+${divider('Lo que veréis', '02')}
 ${vereis()}
+${divider('Criterio', '03')}
 
 <section class="sec">
   <div class="wrap">
@@ -392,9 +401,10 @@ ${vereis()}
   </div>
 </section>
 
-<section class="sec sec-alt" id="preguntas">
+${divider('Preguntas', '04')}
+<section class="sec" id="preguntas">
   <div class="wrap">
-    ${head('Preguntas', '00', 'Lo que suele preguntarse')}
+    ${tags('04', 'Preguntas', 'Lo que suele preguntarse')}
     <h2 class="h2">Lo que casi todo el mundo nos pregunta</h2>
     <div class="faq">${FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('')}</div>
   </div>
