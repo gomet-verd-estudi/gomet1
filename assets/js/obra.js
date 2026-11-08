@@ -51,9 +51,11 @@
   /* ---------- primitivas ---------- */
   // Caja: tapa y dos laterales visibles. h y extensión se recalculan cada fotograma.
   // Dibujo a línea, a una tinta: cada caja son tres caras con el fondo del papel (o una tinta muy clara) y su trazo
+  // Como en los manuales japoneses: líneas interiores finas y el contorno exterior de cada pieza algo más grueso.
+  // El contorno va debajo, con trazo grueso; las caras lo tapan por dentro y solo asoma por fuera.
   function boxNode(cls) {
     const g = el('g', { class: 'bx ' + cls });
-    return { g, l: el('path', { class: 'f fl' }, g), r: el('path', { class: 'f fr' }, g), t: el('path', { class: 'f ft' }, g) };
+    return { g, o: el('path', { class: 'o' }, g), l: el('path', { class: 'f fl' }, g), r: el('path', { class: 'f fr' }, g), t: el('path', { class: 'f ft' }, g) };
   }
   function drawBox(n, x, y, z, w, d, h) {
     if (h <= 0.002 || w <= 0.002 || d <= 0.002) { n.g.style.display = 'none'; return; }
@@ -61,6 +63,7 @@
     n.t.setAttribute('d', poly([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)]));
     n.l.setAttribute('d', poly([P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h)]));
     n.r.setAttribute('d', poly([P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h)]));
+    n.o.setAttribute('d', poly([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y, z), P(x + w, y + d, z), P(x, y + d, z), P(x, y + d, z + h)]));
   }
   // Caja que crece hacia arriba desde su base dentro de la ventana [a, b] de su fase
   function rise(ph, a, b, x, y, z, w, d, h, cls) {
@@ -215,8 +218,17 @@
     [['M-4.2 0.6L4.2 0.6L4.2 -0.6L-4.2 -0.6Z', 'p-red'], ['M-2.6 -0.6L-0.7 -10.6L0.7 -10.6L2.6 -0.6Z', 'p-red'], ['M-1.9 -4.2L1.9 -4.2L1.5 -6.4L-1.5 -6.4Z', 'p-paper']].forEach(([d, c]) => el('path', { d, class: 'pf ' + c }, g));
     return g;
   };
-  const cones = [cone(-1, W + 1.6), cone(W + 1.7, -0.9)];
-  add(() => { const on = onSite() > 0.5; cones.forEach((c) => { c.style.display = on ? '' : 'none'; }); }, [2, 7]);
+  // contorno exterior: una copia de la figura debajo, con trazo grueso (la propiedad --pw pasa a la copia)
+  let uid = 0;
+  const outline = (g) => {
+    g.id = 'fig-' + (uid++);
+    const u = document.createElementNS(NS, 'use');
+    u.setAttribute('href', '#' + g.id); u.setAttribute('class', 'under');
+    g.parentNode.insertBefore(u, g);
+    return u;
+  };
+  const cones = [cone(-1, W + 1.6), cone(W + 1.7, -0.9)].map((g) => [g, outline(g)]);
+  add(() => { const on = onSite() > 0.5; cones.forEach((pair) => pair.forEach((c) => { c.style.display = on ? '' : 'none'; })); }, [2, 7]);
 
   /* ---------- personitas, como en los folletos japoneses de montaje ---------- */
   // Figuras planas con los pies en un punto del suelo: el color va desajustado y el trazo negro encima.
@@ -249,9 +261,9 @@
     const [px, py] = P(at[0], at[1], 0);
     const g = el('g', { class: 'ppl', transform: `translate(${px.toFixed(1)} ${py.toFixed(1)})${sc !== 1 ? ` scale(${sc})` : ''}` });
     parts.forEach(([d, c, key = 1]) => el('path', { d, class: 'pf ' + c + (key ? '' : ' nk') }, g));
-    return { g, site };
+    return { g, u: outline(g), site };
   });
-  add(() => { const on = onSite() > 0.5; folk.forEach((f) => { if (f.site) f.g.style.display = on ? '' : 'none'; }); }, [2, 7]);
+  add(() => { const on = onSite() > 0.5; folk.forEach((f) => { if (f.site) { f.g.style.display = on ? '' : 'none'; f.u.style.display = f.g.style.display; } }); }, [2, 7]);
   // vecinos delante de la obra
   [[11.2, 11.4, 1.5, 1.4, 1.1]].forEach(([x, y, w, d, h]) => rise(1, 0.5, 0.85, x, y, 0, w, d, h, 'c-white city'));
 
