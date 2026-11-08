@@ -1031,7 +1031,7 @@ p { margin-bottom: .7em; }
 .obra .op-get { line-height: 1.05; }
 .obra .op-note { line-height: 1.15; }
 .obra .op-hint { margin-top: 12px; }
-#metodo { scroll-snap-align: start; } /* al salir de la obra, la siguiente parada es el método */
+#piezas { scroll-snap-align: start; } /* al salir de la obra, la siguiente parada es el catálogo */
 @media (max-width: 900px) {
   .obra .obra-svg { height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd)); }
   .obra .op { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; gap: 0; padding: 2vh 0 calc(44px + 2vh); }
@@ -1095,6 +1095,40 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .metodo-intro { padding-bottom: 0; }
 @media (max-width: 900px) {
   .obra .obra-svg { margin-bottom: 0; }
+}
+
+/* ==========================================================================
+   EL MÉTODO EN LAS LÁMINAS — todo el contenido del método vive en las láminas de la obra.
+   Arriba, el título; en el hueco central, a la izquierda el texto de la fase y lo que veréis,
+   a la derecha el detalle; en medio, la plancha verde; abajo, titular, piezas y validación.
+   ========================================================================== */
+.obra .op { height: auto; min-height: calc(100vh - var(--hd)); min-height: calc(100svh - var(--hd)); grid-template-rows: auto auto 1fr auto; }
+.obra .op-mid-l { grid-column: 1 / 4; grid-row: 3; align-self: center; display: flex; flex-direction: column; gap: 18px; padding: 2vh 0; }
+.obra .op-mid-r { grid-column: 10 / -1; grid-row: 3; align-self: center; padding: 2vh 0; }
+.obra .op-h { grid-column: 1 / 6; grid-row: 4; }
+.obra .op-spec { grid-column: 6 / 9; grid-row: 4; display: flex; flex-direction: column; gap: 8px; }
+.obra .op-spec2 { grid-column: 9 / -1; grid-row: 4; display: flex; flex-direction: column; gap: 8px; }
+.obra .op-h, .obra .op-spec, .obra .op-spec2 { align-self: stretch; margin: 0; padding-top: 14px; border-top: 1px solid var(--g); }
+.obra .op-k { margin: 0 0 4px; font-size: .64rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--g); }
+.obra .op-text { margin: 0; font-size: .98rem; line-height: 1.22; font-weight: 500; color: var(--g); }
+.obra .op-text b { font-weight: 800; }
+.obra .op-rows { margin: 0; display: grid; gap: 14px; }
+.obra .op-rows dt { margin: 0 0 3px; font-size: .64rem; font-weight: 800; letter-spacing: .2em; text-transform: uppercase; color: var(--g); }
+.obra .op-rows dd { margin: 0; font-size: .95rem; line-height: 1.2; font-weight: 500; color: var(--g); }
+.obra .op-faq dt { font-size: 1rem; letter-spacing: 0; text-transform: none; line-height: 1.1; }
+.obra .op-see ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.obra .op-see li { font-size: .98rem; font-weight: 800; line-height: 1.1; color: var(--g); }
+.obra .op-spec .op-parts, .obra .op-spec .op-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.obra .op-spec2 .op-val, .obra .op-spec .op-val { font-size: .82rem; }
+.obra .op-hint { margin-top: 4px; }
+.obra .op-end .ctas { margin: 0; }
+@media (max-width: 900px) {
+  .obra .op { display: flex; flex-direction: column; padding-bottom: calc(44px + 4vh); }
+  .obra .op-h { margin-top: calc((100svh - var(--hd)) * .6 - 96px); }
+  .obra .op-mid-l, .obra .op-mid-r, .obra .op-spec, .obra .op-spec2 { padding: 0; margin-top: 16px; }
+  .obra .op-spec, .obra .op-spec2 { border-top: 0; padding-top: 0; }
+  .obra .op-text, .obra .op-rows dd { font-size: .95rem; }
+  .obra .op-spec2 .op-val { display: flex; }
 }
 
 @media (prefers-reduced-motion: reduce) {

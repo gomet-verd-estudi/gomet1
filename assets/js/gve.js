@@ -67,8 +67,8 @@
     function update() {
       measure(); snap();
       let s = 0;
-      for (let k = 1; k <= 8; k++) { target[k] = clamp(pr[k] * 1.04); s += pr[k]; }
-      s += pr[9] || 0;
+      for (let k = 1; k <= 8; k++) target[k] = clamp(pr[k] * 1.04);
+      for (let i = 1; i < N; i++) s += pr[i];
       railVals.forEach((v) => v.classList.toggle('on', pr[+v.dataset.v + 1] >= 0.97));
       const active = clamp(Math.round(s), 0, N - 1);
       act = active >= 1 && active <= 8 ? active : 0;
@@ -110,26 +110,28 @@
     const topOf = (k) => scrollY + panels[k].getBoundingClientRect().top - hdH();
     const go = (k) => (reduce ? scrollTo(0, topOf(k)) : glide(topOf(k)));
     if (fine && !reduce) {
-      const nearest = () => { let best = 0, bd = Infinity; panels.forEach((p, i) => { const d = Math.abs(p.getBoundingClientRect().top - hdH()); if (d < bd) { bd = d; best = i; } }); return best; };
+      // lámina en curso: la última cuyo borde de arriba ya ha llegado a la cabecera
+      const current = () => { let c = 0; panels.forEach((p, i) => { if (p.getBoundingClientRect().top <= hdH() + 4) c = i; }); return c; };
       let lastWheel = 0;
       addEventListener('wheel', (e) => {
         if (!html.classList.contains('snap') && !gliding) return; // fuera de la obra, scroll normal
         const now = performance.now(), fresh = now - lastWheel > 170; lastWheel = now;
         if (gliding) { e.preventDefault(); return; }
-        const dir = Math.sign(e.deltaY), i = nearest();
+        const dir = Math.sign(e.deltaY);
         if (!dir) return;
-        // por arriba, scroll normal; por abajo, desde la última lámina, un deslizamiento hasta el método
-        if (dir < 0 && i === 0) return;
-        if (dir > 0 && i === N - 1) {
-          const next = $('#metodo');
-          if (!next) return;
-          e.preventDefault();
-          if (fresh) glide(scrollY + next.getBoundingClientRect().top - hdH(), 1100);
-          return;
-        }
+        const i = current(), r = panels[i].getBoundingClientRect(), page = (innerHeight - hdH()) * 0.85;
+        if (dir < 0 && i === 0 && r.top >= hdH() - 4) return; // por arriba, scroll normal
         e.preventDefault();
         if (!fresh) return; // la inercia del gesto anterior no cuenta como un gesto nuevo
-        glide(topOf(i + dir));
+        if (dir > 0) {
+          if (r.bottom > innerHeight + 6) return glide(scrollY + Math.min(r.bottom - innerHeight, page), 900); // lámina más alta que la pantalla: se lee a tramos
+          if (i < N - 1) return glide(topOf(i + 1));
+          const next = $('#piezas');
+          if (next) glide(scrollY + next.getBoundingClientRect().top - hdH(), 1100);
+        } else {
+          if (r.top < hdH() - 6) return glide(scrollY - Math.min(hdH() - r.top, page), 900);
+          glide(topOf(i - 1));
+        }
       }, { passive: false });
     }
     $$('[data-go]', obra).forEach((b) => b.addEventListener('click', () => go(+b.dataset.go)));
