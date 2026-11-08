@@ -998,6 +998,52 @@ body { font-size: 18px; font-weight: 500; }
   .obra .obra-rail { padding: 8px var(--gut) 10px; }
 }
 
+/* ==========================================================================
+   LÁMINAS — cada fase es una pantalla: el título grande arriba, la plancha verde en el hueco
+   del centro y los textos abajo. El scroll se para en cada lámina, justo cuando acaba su fase.
+   Gris mucho más claro e interlínea apretada.
+   ========================================================================== */
+:root { --g: #C4C4C8; --g0: #E4E1DA; }
+html { scroll-padding-top: var(--hd); }
+html.snap { scroll-snap-type: y mandatory; }
+body { line-height: 1.22; }
+p { margin-bottom: .7em; }
+.btn { color: #fff; }
+.btn-ghost { color: var(--g); }
+.obra .op { scroll-snap-align: start; scroll-snap-stop: always; height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); min-height: 0;
+  display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .65fr); grid-template-rows: auto 1fr auto; gap: 0 5vw; align-items: start;
+  padding: 2.4vh 0 calc(64px + 3vh); }
+.obra .op-l, .obra .op-r { display: contents; }
+.obra .op-l > .op-top { grid-column: 1; grid-row: 1; }
+.obra .op-l > .op-bot { grid-column: 1; grid-row: 3; }
+.obra .op-r > .op-top { grid-column: 2; grid-row: 1; justify-self: end; text-align: right; }
+.obra .op-r > .op-bot { grid-column: 2; grid-row: 3; display: flex; flex-direction: column; gap: 14px; }
+.obra .op-meta { margin: 0 0 6px; font-size: .82rem; }
+.obra .op-title { font-size: clamp(4rem, 10.5vw, 11rem); line-height: .8; }
+.obra .op-display { font-size: clamp(2.8rem, 5.6vw, 6rem); line-height: .82; max-width: 15em; }
+.obra .jp-head { margin-bottom: 4px; }
+.obra .banner { margin-bottom: 10px; }
+.obra .op-h { margin: 0 0 .35em; line-height: .98; }
+.obra .op-short { margin: 0; line-height: 1.12; }
+.obra .op-count { line-height: .8; }
+.obra .op-parts, .obra .op-list { gap: 4px; }
+.obra .op-parts li, .obra .op-list li { line-height: 1.05; }
+.obra .op-get { line-height: 1.05; }
+.obra .op-note { line-height: 1.15; }
+.obra .op-hint { margin-top: 12px; }
+#piezas { scroll-snap-align: start; }
+@media (max-width: 900px) {
+  .obra .obra-svg { height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd)); }
+  .obra .op { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; gap: 0; padding: 2vh 0 calc(44px + 2vh); }
+  .obra .op-r > .op-top { display: none; }
+  .obra .op-r > .op-bot { grid-column: 1; grid-row: 4; gap: 8px; margin-top: 10px; }
+  .obra .op-title { font-size: clamp(2.8rem, 13vw, 4.4rem); }
+  .obra .op-display { font-size: clamp(2.2rem, 10vw, 3.2rem); }
+  .obra .op-h { font-size: 1.3rem; }
+  .obra .op-short { font-size: 1rem; }
+  .obra .op-note { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

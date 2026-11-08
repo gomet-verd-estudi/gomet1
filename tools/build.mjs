@@ -202,8 +202,8 @@ function home() {
           <div class="op-bot"><p class="op-h">${esc(x.head)}</p><p class="op-short">${esc(SYNTH[k].short)}</p></div>
         </div>
         <div class="op-r">
-          <div class="op-top">${count(x.n)}${parts(PARTS[k])}</div>
-          <div class="op-bot"><p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}</div>
+          <div class="op-top">${count(x.n)}</div>
+          <div class="op-bot">${parts(PARTS[k])}<p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}</div>
         </div>
       </article>`;
 
@@ -217,8 +217,8 @@ function home() {
           <div class="op-bot"><p class="op-short">${esc(INTRO.sub)}</p><p class="op-hint">${ICON.down}Desliza para construir</p></div>
         </div>
         <div class="op-r">
-          <div class="op-top">${count('00')}${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}</div>
-          <div class="op-bot"><div class="op-note"><p class="op-note-h"><span lang="ja">注意</span> Atención</p><p>${gomet}Cada gomet verde es una validación con vosotros: nada avanza sin vuestro visto bueno.</p></div></div>
+          <div class="op-top">${count('00')}</div>
+          <div class="op-bot">${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}<div class="op-note"><p class="op-note-h"><span lang="ja">注意</span> Atención</p><p>${gomet}Cada gomet verde es una validación con vosotros: nada avanza sin vuestro visto bueno.</p></div></div>
         </div>
       </article>${PHASES.map(panel).join('')}
       <article class="op op-end" data-p="9">
@@ -227,8 +227,8 @@ function home() {
           <div class="op-bot"><p class="op-h">${esc(FILTERS.result.head)}</p><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método</a></div></div>
         </div>
         <div class="op-r">
-          <div class="op-top"><p class="stamp" aria-hidden="true"><span lang="ja">完成</span><small>Terminado</small></p>${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}</div>
-          <div class="op-bot"><p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
+          <div class="op-top"><p class="stamp" aria-hidden="true"><span lang="ja">完成</span><small>Terminado</small></p></div>
+          <div class="op-bot">${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}<p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
         </div>
       </article>
     </div>

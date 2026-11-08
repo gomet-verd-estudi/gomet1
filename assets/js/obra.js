@@ -359,13 +359,10 @@
   function frameView() {
     const r = svg.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) return;
-    let cx = r.width / 2, half = r.width / 2 - 12, y0 = 12, y1 = r.height - 12;
-    if (!narrow() && stage) {
-      const rail = stage.querySelector('.obra-rail');
-      half = Math.min(half, r.width * 0.36);
-      y0 = Math.max(24, r.height * 0.05);
-      if (rail) y1 = Math.min(y1, rail.getBoundingClientRect().top - r.top - 20);
-    }
+    // franja del dibujo: entre los títulos (arriba) y los textos (abajo); puede pisarlos un poco, como un sello
+    let cx = r.width / 2, half = r.width / 2 - 12;
+    let y0 = r.height * (narrow() ? 0.15 : 0.17), y1 = r.height * (narrow() ? 0.6 : 0.75);
+    if (!narrow()) half = Math.min(half, r.width * 0.34);
     const bw = BOX.x1 - BOX.x0, bh = BOX.y1 - BOX.y0;
     const k = Math.max(0.05, Math.min((2 * half) / bw, (y1 - y0) / bh));
     const mx = (BOX.x0 + BOX.x1) / 2, my = (BOX.y0 + BOX.y1) / 2, cy = (y0 + y1) / 2;
