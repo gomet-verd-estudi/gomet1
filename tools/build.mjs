@@ -18,7 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS, SYNTH } from '../data/site.mjs';
+import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS, SYNTH, PARTS } from '../data/site.mjs';
 import { LOGO, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, piece } from './figures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -34,10 +34,10 @@ const slug = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').rep
 const head = (title, no, tag, pill = '') => `<header class="pl-head"><div class="pl-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div><p class="pl-title">[${esc(title)}]</p></header>`;
 /* separador de sección a sangre, en el gris de la marca, como en las presentaciones */
 const tags = (no, tag, pill = '') => `<div class="pl-tags sec-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div>`;
-const divider = (title, no) => `<div class="divider" aria-hidden="true"><div class="wrap"><p class="dv-title">[${esc(title)}]<span class="dv-no">${no}</span></p></div></div>`;
+const divider = () => ''; // la web minimal separa las secciones con aire y un filete, sin bandas
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
-const gve = '<div class="gve" aria-hidden="true"><i>G</i><i>V</i><i>E</i></div>';
+const gve = '';
 const gomet = '<span class="pl-gomet" aria-hidden="true"></span>';
 const rows = (list) => `<dl class="pl-rows">${list.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
 const valNote = (v) => typeof v === 'number' ? `${gomet}Validación ${pad(v)}` : v ? esc(v) : 'El punto de partida';
@@ -66,16 +66,11 @@ function header(r, current) {
 
 function footer(r, current) {
   return `<footer class="ft">
-  ${current === 'contacto' ? '' : `<div class="band"><div class="ft-cta wrap">
-    <div class="ft-cta-row">
-      <div>
-        <p class="band-k">[Empezamos] · 01 · El primer paso</p>
-        <p class="ft-big">${esc(START.head)}</p>
-        <a class="btn btn-light" href="${r}contacto/">Empezar un proyecto ${ICON.arrow}</a>
-      </div>
-    </div>
-    <ol class="seq" aria-label="Así se construye: de los cimientos a las llaves">${[2, 3, 4, 6].map((k, i) => `<li><span class="seq-n">${i + 1}</span>${phaseIcon(k, `${PHASES[k].n} ${PHASES[k].key}`)}<span class="seq-k">${esc(PHASES[k].layer)}</span></li>`).join('')}</ol>
-  </div></div>`}
+  ${current === 'contacto' ? '' : `<div class="ft-cta wrap">
+    <p class="lbl">Empezamos</p>
+    <p class="ft-big">[${esc(START.head)}.]</p>
+    <a class="btn" href="${r}contacto/">Empezar un proyecto ${ICON.arrow}</a>
+  </div>`}
   <div class="ft-grid wrap">
     <div class="ft-logo">${LOGO}</div>
     <div><p class="lbl">Contacto</p><ul>
@@ -95,7 +90,6 @@ function footer(r, current) {
       <li><a href="${r}contacto/">Contacto</a></li>
     </ul></div>
   </div>
-  <div class="ft-row wrap"><a href="${STUDIO.instagram}" rel="me noopener" target="_blank">${STUDIO.instagramLabel.toUpperCase()}</a><a href="tel:${STUDIO.phoneHref}">${STUDIO.phone}</a><a href="mailto:${STUDIO.email}">${STUDIO.email.toUpperCase()}</a></div>
   <div class="ft-bottom wrap"><span>© 2026 ${STUDIO.name}</span><span>${gomet}Cada gomet verde es una validación con vosotros</span></div>
 </footer>`;
 }
@@ -193,40 +187,51 @@ const trussBlock = () => `
 function home() {
   const r = '';
   const rail = PHASES.map((x, k) => `<li class="rail-i" data-k="${k + 1}"><button type="button" data-go="${k + 1}" aria-label="Ir a la fase ${x.n}: ${esc(x.key)}"><span class="rail-n">${x.n}</span><span class="rail-k">${esc(x.key)}</span></button>${typeof x.val === 'number' ? `<span class="rail-v" data-v="${x.val}" aria-hidden="true"></span>` : ''}</li>`).join('');
-  // Paneles de la obra: la síntesis de cada fase, integrada en el dibujo a pantalla completa
+  // La obra a pantalla completa: el dibujo, centrado y entero; a su izquierda el relato de cada fase
+  // y a su derecha la ficha técnica (número, piezas señaladas en el dibujo, lo que recibís, la validación)
+  const parts = (list) => `<ol class="op-parts" aria-label="Señalado en el dibujo">${list.map((p, i) => `<li data-i="${i}"><span class="mk-n" aria-hidden="true">${i + 1}</span>${esc(p)}</li>`).join('')}</ol>`;
+  const list = (items) => `<ul class="op-list">${items.map((t) => `<li>${t}</li>`).join('')}</ul>`;
+  const count = (n, of = '08') => `<p class="op-count" aria-hidden="true">${n}<span>/${of}</span></p>`;
   const panel = (x, k) => `
       <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}">
-        <div class="pl-tags"><span class="pl-no">${x.n}</span><span class="pl-tag">${esc(x.act)}</span><span class="pl-pill">${esc(x.layer)}</span></div>
-        <p class="op-title">[${esc(x.key)}]</p>
-        <h2 class="op-h">${esc(x.head)}</h2>
-        <p class="op-short">${esc(SYNTH[k].short)}</p>
-        <p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>
-        ${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}
+        <div class="op-l">
+          <div class="op-top"><p class="op-meta">${esc(x.act)} <i>/</i> ${esc(x.layer)}</p><h2 class="op-title">[${esc(x.key)}]</h2></div>
+          <div class="op-bot"><p class="op-h">${esc(x.head)}</p><p class="op-short">${esc(SYNTH[k].short)}</p></div>
+        </div>
+        <div class="op-r">
+          <div class="op-top">${count(x.n)}${parts(PARTS[k])}</div>
+          <div class="op-bot"><p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}</div>
+        </div>
       </article>`;
 
   const body = `
 <section class="obra" id="obra" aria-label="Cómo se construye una marca" style="--n:10">
   <div class="obra-stage">
-    <svg class="obra-svg" viewBox="-460 -330 1180 640" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
-    ${gve}
+    <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0">
-        <div class="pl-tags"><span class="pl-no">00</span><span class="pl-tag">Método</span><span class="pl-pill">Cómo trabajamos</span></div>
-        <h1 class="op-display">[${esc(INTRO.title)}.]</h1>
-        <p class="op-short">${esc(INTRO.sub)} Ocho fases, cuatro actos y un gomet verde en cada validación.</p>
-        <p class="op-hint">${ICON.down}Desliza para construir</p>
+        <div class="op-l">
+          <div class="op-top"><p class="op-meta">Método <i>/</i> Cómo trabajamos</p><h1 class="op-display">[${esc(INTRO.title)}.]</h1></div>
+          <div class="op-bot"><p class="op-short">${esc(INTRO.sub)}</p><p class="op-hint">${ICON.down}Desliza para construir</p></div>
+        </div>
+        <div class="op-r">
+          <div class="op-top">${count('00')}${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}</div>
+          <div class="op-bot"><p class="op-val">${gomet}Cada gomet verde es una validación con vosotros</p></div>
+        </div>
       </article>${PHASES.map(panel).join('')}
       <article class="op op-end" data-p="9">
-        <div class="pl-tags"><span class="pl-no">09</span><span class="pl-tag">Resultado</span><span class="pl-pill">Cada marca, única</span></div>
-        <p class="op-title">[Llave en mano.]</p>
-        <h2 class="op-h">${esc(FILTERS.result.head)}</h2>
-        <p class="op-short">Seguimos el mismo orden en cada proyecto para que el resultado pueda ser distinto: una marca que solo podría ser vuestra.</p>
-        <div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método completo</a></div>
+        <div class="op-l">
+          <div class="op-top"><p class="op-meta">Resultado <i>/</i> Cada marca, única</p><h2 class="op-title">[Llave en mano.]</h2></div>
+          <div class="op-bot"><p class="op-h">${esc(FILTERS.result.head)}</p><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método</a></div></div>
+        </div>
+        <div class="op-r">
+          <div class="op-top">${count('08')}${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}</div>
+          <div class="op-bot"><p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
+        </div>
       </article>
     </div>
     <div class="obra-rail">
       <ol class="rail">${rail}</ol>
-      <p class="obra-cap">${gomet}Cada gomet verde es una validación con vosotros</p>
     </div>
   </div>
 </section>

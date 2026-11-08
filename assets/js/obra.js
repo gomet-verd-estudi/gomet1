@@ -66,7 +66,7 @@
   }
 
   /* ---------- 1 · el terreno: la ciudad que estudiamos ---------- */
-  const G0 = -6, G1 = 14;
+  const G0 = -3, G1 = 13;     // un terreno justo: la obra y su entorno inmediato, sin nada que se salga
   let grid = '';
   for (let i = G0; i <= G1; i += 1) grid += open([P(i, G0, 0), P(i, G1, 0)]) + open([P(G0, i, 0), P(G1, i, 0)]);
   el('path', { class: 'ground', d: poly([P(G0, G0, 0), P(G1, G0, 0), P(G1, G1, 0), P(G0, G1, 0)]) });
@@ -75,7 +75,7 @@
   const ghost = [P(0, 0, 0), P(W, 0, 0), P(W, W, 0), P(0, W, 0)];
   el('path', { class: 'ghost', d: poly(ghost) + poly([P(0, 0, TOP), P(W, 0, TOP), P(W, W, TOP), P(0, W, TOP)]) + open([P(W, 0, 0), P(W, 0, TOP)]) + open([P(W, W, 0), P(W, W, TOP)]) + open([P(0, W, 0), P(0, W, TOP)]) + open([P(0, 0, 0), P(0, 0, TOP)]) });
   // edificios vecinos de fondo (crecen desde el suelo)
-  const city = [[-5, -5, 2.4, 2, 3.4], [-1.5, -5.5, 2, 2, 5.2], [3, -5, 2.2, 2.4, 2.2], [10, -5, 2.6, 2.2, 4.4], [-5.5, 0.5, 2, 2.6, 2.6], [10.5, 1, 2, 2, 1.6]];
+  const city = [[-2.8, -2.8, 1.8, 1.8, 3.2], [1.5, -2.9, 2.2, 1.8, 4.6], [5, -2.7, 1.6, 1.6, 2.2], [9.6, -2.6, 2.4, 2, 3.6], [-2.9, 2.5, 1.8, 2.4, 2.2]];
   city.forEach(([x, y, w, d, h], i) => rise(1, 0.2 + i * 0.07, 0.6 + i * 0.07, x, y, 0, w, d, h, 'c-white city'));
 
   /* ---------- 2 · el solar: el hueco que nadie ocupa ---------- */
@@ -191,7 +191,7 @@
     el('circle', { class: 'head', cx: hx.toFixed(1), cy: hy.toFixed(1), r: 3.6 });
   });
   // vecinos delante de la obra
-  [[12, 12, 1.6, 1.4, 1.2]].forEach(([x, y, w, d, h]) => rise(1, 0.5, 0.85, x, y, 0, w, d, h, 'c-white city'));
+  [[11.2, 11.4, 1.5, 1.4, 1.1]].forEach(([x, y, w, d, h]) => rise(1, 0.5, 0.85, x, y, 0, w, d, h, 'c-white city'));
 
   /* ---------- la grúa: crece con el edificio y se desmonta al terminar ---------- */
   const MX = 11.2, MY = 2.2;
@@ -230,72 +230,88 @@
     return { ph, g };
   });
 
-  /* ---------- rótulos de cada fase, como en la presentación ---------- */
-  const LABELS = {
-    1: [['Competencia', [-0.5, -5.5, 5.2]], ['Sector', [10, -5, 4.4]], ['Público', [10.4, 5.6, 1]]],
-    2: [['Programa', [W + 0.5, -0.5, 0.9]], ['Espacio en el mercado', [W, W * 0.6, 0]]],
-    3: [['Concepto', [W, W * 0.5, F]]],
-    4: [['Tipografía', [0.7, 0.7, TOP - T]], ['Retícula', [W - 0.7, 0.7, TOP - T]], ['Color', [W - 0.35, W - 0.35, 4]], ['Imagen', [W - 0.35, W - 0.35, 1.2]]],
-    5: [['Redes sociales', [W, 4, F + 4 * S - T]], ['Packaging', [W, 4, F + 3 * S - T]], ['Web', [W, 4, F + 2 * S - T]], ['Papelería', [W, 4, F + S - T]]],
-    6: [['Remates', [W, 0.1, TOP + 0.4]], ['Instalaciones', [5.35, 1.95, TOP + 0.9]], ['Imprenta', [11.6, 4.6, 0.35]], ['Pantalla', [12.2, 8.2, 0.35]], ['Fabricante', [9.6, 11.4, 0.35]]],
-    7: [['Llaves', [12.2, 9.8, 0.05]], ['Libro del edificio', [10, 11, 0.28]]],
-    8: [['Ampliaciones', [W, 0, TOP + 2.3]], ['Revisiones', [W + 0.6, 3, 5]], ['Ajustes', [W + 0.6, 5.1, 2]]]
+  /* ---------- cotas: lo que se señala en cada fase, numerado como en la ficha de la derecha ---------- */
+  // Mismo orden que PARTS (data/site.mjs): el número n del dibujo es el elemento n de la lista
+  const MARKS = {
+    1: [[2.6, -2, 4.6], [10.8, -1.6, 3.6], [10.36, 5.56, 1]],                                   // competencia, sector, público
+    2: [[W + 0.5, -0.5, 0.9], [W, W * 0.6, 0]],                                                   // programa, espacio en el mercado
+    3: [[2, W, F], [W, 3, F]],                                                                    // fundamentos, concepto raíz
+    4: [[0.7, 0.7, TOP - T], [W - 0.7, 0.7, TOP - T], [W - 0.35, W - 0.35, 4], [W - 0.35, W - 0.35, 1.2]], // tipografía, retícula, color, imagen
+    5: [[W, 4, F + S - T], [W, 4, F + 2 * S - T], [W, 4, F + 3 * S - T], [W, 4, F + 4 * S - T]], // papelería, web, packaging, redes
+    6: [[W, 0.1, TOP + 0.4], [5.35, 1.95, TOP + 0.9], [11.6, 4.6, 0.35], [12.2, 8.2, 0.35], [9.6, 11.4, 0.35]], // remates, instalaciones, imprenta, pantalla, fabricante
+    7: [[12.2, 9.8, 0.05], [10, 11, 0.28]],                                                       // llaves, libro del edificio
+    8: [[W + 0.6, 3, 5], [W + 0.6, 5.1, 2], [W, 0, TOP + 2.3]]                                    // revisiones, ajustes, ampliaciones
   };
-  let COLX = 0;
-  const labelGroups = {};
-  function buildLabels(bounds) {
-    labelsG.textContent = '';
-    COLX = P(14, -1, 0)[0] + 34;
-    Object.entries(LABELS).forEach(([ph, list]) => {
-      const g = el('g', { class: 'lab', 'data-ph': ph }, labelsG);
-      const placed = list.map(([txt, a]) => ({ txt, p: P(...a) })).sort((m, n) => m.p[1] - n.p[1]);
-      for (let i = 1; i < placed.length; i++) placed[i].y = Math.max(placed[i].p[1], (placed[i - 1].y ?? placed[i - 1].p[1]) + 26);
-      placed.forEach((m) => {
-        const y = m.y ?? m.p[1];
-        el('path', { class: 'lead', d: `M${m.p[0].toFixed(1)} ${m.p[1].toFixed(1)}L${(COLX - 12).toFixed(1)} ${y.toFixed(1)}L${COLX - 4} ${y.toFixed(1)}` }, g);
-        el('circle', { class: 'lead-dot', cx: m.p[0].toFixed(1), cy: m.p[1].toFixed(1), r: 2.6 }, g);
-        const t = el('text', { x: COLX, y: (y + 4).toFixed(1), class: 'lab-t' }, g);
-        t.textContent = `[${m.txt.toUpperCase()}]`;
-      });
-      labelGroups[ph] = g;
+  const markGroups = {}, marks = [];
+  Object.entries(MARKS).forEach(([ph, list]) => {
+    const g = el('g', { class: 'lab', 'data-ph': ph }, labelsG);
+    markGroups[ph] = list.map(([x, y, z], i) => {
+      const [cx, cy] = P(x, y, z);
+      const m = el('g', { class: 'mk', 'data-i': i }, g);
+      m.dataset.x = cx; m.dataset.y = cy;
+      el('circle', { r: 9 }, m);
+      const t = el('text', { y: 3.6, 'text-anchor': 'middle' }, m);
+      t.textContent = i + 1;
+      marks.push(m);
+      return m;
     });
-  }
+  });
+  // Al pasar por un nombre de la ficha, su número se destaca en el dibujo
+  document.querySelectorAll('.op[data-p]').forEach((op) => {
+    const list = markGroups[op.dataset.p];
+    if (!list) return;
+    op.querySelectorAll('.op-parts li').forEach((li, i) => {
+      const on = (v) => () => { if (list[i]) list[i].classList.toggle('hi', v); li.classList.toggle('hi', v); };
+      li.addEventListener('pointerenter', on(true));
+      li.addEventListener('pointerleave', on(false));
+    });
+  });
 
-  /* ---------- encuadre ---------- */
-  function bounds() {
-    const xs = [], ys = [];
-    const add2 = (x, y, z) => { const [a, b] = P(x, y, z); xs.push(a); ys.push(b); };
-    [[G0, G0], [G1, G0], [G1, G1], [G0, G1]].forEach(([x, y]) => add2(x, y, 0));
-    add2(MX, MY, 11.6); add2(0, 0, TOP + 2.4);
-    return { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
-  }
-  const B = bounds();
-  buildLabels(B);
+  /* ---------- encuadre: la obra entera, centrada, sin cortes ---------- */
   const narrow = () => innerWidth <= 900;
-  // Encuadre: la obra llena la pantalla. En escritorio el edificio y sus rótulos ocupan el 60 % derecho
-  // (a la izquierda va el texto de cada fase); en móvil, el edificio centrado en la mitad de arriba.
+  // Caja de la obra en todas sus fases (la grúa sube y se desmonta, el andamio y la ampliación aparecen al final)
+  function measure() {
+    let b = null;
+    for (let s = 0; s <= 9.01; s += 0.25) {
+      for (let k = 1; k <= 8; k++) L[k] = clamp((s - k + 0.05) / 0.72);
+      items.forEach((fn) => fn());
+      const r = scene.getBBox();
+      b = b ? { x0: Math.min(b.x0, r.x), y0: Math.min(b.y0, r.y), x1: Math.max(b.x1, r.x + r.width), y1: Math.max(b.y1, r.y + r.height) }
+        : { x0: r.x, y0: r.y, x1: r.x + r.width, y1: r.y + r.height };
+    }
+    for (let k = 1; k <= 8; k++) L[k] = 0;
+    const m = 14; // aire para trazos y gomets
+    return { x0: b.x0 - m, y0: b.y0 - m, x1: b.x1 + m, y1: b.y1 + m };
+  }
+  const BOX = measure();
+  const stage = svg.closest('.obra-stage');
+  // Zona libre para el dibujo: en escritorio, entre la columna del relato y la de la ficha, y por encima
+  // de la línea de fases, siempre centrada en la pantalla; en móvil, el hueco superior.
   function frameView() {
     const r = svg.getBoundingClientRect();
-    if (r.width < 2 || r.height < 2) return; // aún sin medidas: lo encuadra el ResizeObserver
-    // En escritorio la línea de fases ocupa el pie de la pantalla: el edificio se encuadra por encima
-    const rail = document.querySelector('.obra-rail');
-    const pad = !narrow() && rail ? rail.offsetHeight + 20 : 0;
-    const eh = Math.max(1, r.height - pad);
-    const ar = r.width / eh;
-    const [L0] = P(-4, 10, 0), [R0] = P(14, -1, 0);
-    const top = Math.min(P(MX, MY, 11.8)[1], P(0, 0, TOP + 2.6)[1]) - 24, bottom = P(12.5, 12.5, 0)[1] + 18;
-    let x0, x1, y0 = top, y1 = bottom;
-    if (narrow()) { x0 = L0 + 40; x1 = R0 + 10; }
-    else { x1 = COLX + 230; x0 = x1 - (x1 - L0) / 0.6; }
-    let w = x1 - x0, h = y1 - y0;
-    if (w / h < ar) { const nw = h * ar; x0 -= narrow() ? (nw - w) / 2 : (nw - w); w = nw; }
-    else { const nh = w / ar; y0 -= (nh - h) * 0.55; h = nh; }
-    h *= r.height / eh;
-    svg.setAttribute('viewBox', `${x0.toFixed(0)} ${y0.toFixed(0)} ${w.toFixed(0)} ${h.toFixed(0)}`);
+    if (r.width < 2 || r.height < 2) return;
+    let cx = r.width / 2, half = r.width / 2 - 12, y0 = 12, y1 = r.height - 12;
+    if (!narrow() && stage) {
+      const L1 = stage.querySelector('.op-l'), R1 = stage.querySelector('.op-r'), rail = stage.querySelector('.obra-rail');
+      const gap = Math.max(20, r.width * 0.02);
+      if (L1 && R1) half = Math.min(cx - (L1.getBoundingClientRect().right - r.left), (R1.getBoundingClientRect().left - r.left) - cx) - gap;
+      if (L1) y0 = L1.getBoundingClientRect().top - r.top;
+      if (rail) y1 = rail.getBoundingClientRect().top - r.top - 24;
+    }
+    const bw = BOX.x1 - BOX.x0, bh = BOX.y1 - BOX.y0;
+    const k = Math.max(0.05, Math.min((2 * half) / bw, (y1 - y0) / bh));
+    const mx = (BOX.x0 + BOX.x1) / 2, my = (BOX.y0 + BOX.y1) / 2, cy = (y0 + y1) / 2;
+    const vx = mx - cx / k, vy = my - cy / k;
+    svg.setAttribute('viewBox', `${vx.toFixed(1)} ${vy.toFixed(1)} ${(r.width / k).toFixed(1)} ${(r.height / k).toFixed(1)}`);
+    // las cotas mantienen su tamaño en pantalla, sea cual sea la escala del dibujo
+    const ms = (narrow() ? 0.85 : 1) / k;
+    marks.forEach((m) => m.setAttribute('transform', `translate(${(+m.dataset.x).toFixed(1)} ${(+m.dataset.y).toFixed(1)}) scale(${ms.toFixed(3)})`));
+    svg.style.setProperty('--k', k.toFixed(3));
   }
   frameView();
-  if ('ResizeObserver' in window) new ResizeObserver(frameView).observe(svg);
+  if ('ResizeObserver' in window) { const ro = new ResizeObserver(frameView); ro.observe(svg); if (stage) ro.observe(stage); }
   else addEventListener('resize', frameView);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(frameView);
 
   /* ---------- pintar ---------- */
   let active = -1;
@@ -309,7 +325,7 @@
       paint();
       if (act !== active) {
         active = act;
-        Object.entries(labelGroups).forEach(([ph, g]) => g.classList.toggle('on', +ph === act));
+        labelsG.querySelectorAll('.lab').forEach((g) => g.classList.toggle('on', +g.dataset.ph === act));
       }
     }
   };

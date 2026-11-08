@@ -59,8 +59,8 @@
     }
     function update() {
       const s = position(); // con movimiento reducido el edificio salta de fase en fase, sin animar
-      for (let k = 1; k <= 8; k++) target[k] = clamp((s - k + 0.35) / 0.85);
-      railVals.forEach((v) => v.classList.toggle('on', s >= +v.dataset.v + 1 + 0.5));
+      for (let k = 1; k <= 8; k++) target[k] = clamp((s - k + 0.05) / 0.72);
+      railVals.forEach((v) => v.classList.toggle('on', s >= +v.dataset.v + 1 + 0.65));
       const active = clamp(Math.floor(s), 0, N - 1);
       act = active >= 1 && active <= 8 ? active : 0;
       if (active !== lastActive) {
@@ -70,7 +70,7 @@
       }
       rail.forEach((li, k) => {
         li.classList.toggle('now', k + 1 === active);
-        li.classList.toggle('done', s >= k + 1 + 0.5);
+        li.classList.toggle('done', s >= k + 1 + 0.65);
       });
       if (reduce) { cur = target.slice(); send(); return; }
       if (!running) { running = true; requestAnimationFrame(frame); }

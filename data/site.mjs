@@ -330,3 +330,15 @@ export const SYNTH = [
   { short: 'La marca pasa a ser vuestra: archivos fuente, licencias y el manual para no estropearla.', get: 'Llave en mano' },
   { short: 'Revisamos, ajustamos y ampliamos sobre la misma estructura mientras la marca crece.', get: 'Acompañamiento durante el tiempo necesario' }
 ];
+
+/* Lo que se señala en el dibujo en cada fase: cada nombre lleva su número en la obra */
+export const PARTS = [
+  ['Competencia', 'Sector', 'Público'],
+  ['Programa', 'Espacio en el mercado'],
+  ['Fundamentos', 'Concepto raíz'],
+  ['Tipografía', 'Retícula', 'Color', 'Imagen'],
+  ['Papelería', 'Web', 'Packaging', 'Redes sociales'],
+  ['Remates', 'Instalaciones', 'Imprenta', 'Pantalla', 'Fabricante'],
+  ['Llaves', 'Libro del edificio'],
+  ['Revisiones', 'Ajustes', 'Ampliaciones']
+];
