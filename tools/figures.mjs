@@ -170,30 +170,49 @@ export const ICON = {
 };
 
 /* ---------- El capataz: la mascota del estudio ----------
-   Al estilo de las mascotas de empresa japonesas de los años 60: línea gruesa y uniforme a una tinta,
-   cabeza grande y redonda, sonrisa abierta. Casco con un gomet de emblema, mono con peto y tirantes,
-   guantes grandes y botas. Tira de una cuerda con las dos manos por encima de la cabeza: al hacer scroll,
-   recoge cuerda mano sobre mano y arrastra la página. Los brazos van en grupos para animarlos. */
-const tube = (d, cls = '') => `<path class="m-tube ${cls}" d="${d}"/><path class="m-tube-in ${cls}" d="${d}"/>`;
-export const MASCOT = `<svg class="mascot-svg" viewBox="0 0 120 172" aria-hidden="true" focusable="false">
-  <line class="m-rope-in" x1="60" y1="-2" x2="60" y2="52"/>
-  <g class="m-body">
-    <g class="m-legs">${tube('M51 132 L45 156')}${tube('M69 132 L77 155')}
-      <path class="m-boot" d="M33 152 h14 q6 0 6 6 v4 h-23 q-2 -10 3 -10z"/><path class="m-boot" d="M74 151 h12 q8 0 8 7 v4 h-21 q-3 -11 1 -11z"/></g>
-    <path class="m-suit" d="M43 101 Q60 94 77 101 L81 135 Q60 142 39 135 Z"/>
-    <path class="m-line" d="M51 107 h18 v14 h-18 z M51 107 L47 100.5 M69 107 L73 100.5 M56 112 h8 M60 129 v10"/>
-    <circle class="m-ink" cx="53" cy="109" r="1.5"/><circle class="m-ink" cx="67" cy="109" r="1.5"/>
-    <path class="m-line m-ear" d="M44 85 q-6 1 -4 7 q2 3 6 1 M76 85 q6 1 4 7 q-2 3 -6 1"/>
-    <circle class="m-face" cx="60" cy="86" r="17"/>
-    <path class="m-line" d="M50 82 q3 -2.5 6 0 M64 82 q3 -2.5 6 0"/>
-    <circle class="m-ink" cx="53" cy="88" r="2.2"/><circle class="m-ink" cx="67" cy="88" r="2.2"/>
-    <path class="m-mouth" d="M51 93 Q60 104 69 93 Q60 96 51 93 Z"/>
-    <circle class="m-line" cx="47.5" cy="94" r="2.8"/><circle class="m-line" cx="72.5" cy="94" r="2.8"/>
-    <path class="m-hat" d="M41 79 Q41 58 60 57 Q79 58 79 79 Z"/>
-    <path class="m-hat" d="M35 79 Q60 73 85 79 Q87 83.5 82.5 83.5 Q60 79.5 37.5 83.5 Q33 83.5 35 79 Z"/>
-    <path class="m-line" d="M60 57.5 V77"/>
-    <circle class="m-dot" cx="51" cy="69" r="4.2"/>
-    <g class="m-arm m-arm-l">${tube('M45 102 L29 84')}<g class="m-fore m-fore-l">${tube('M29 84 L57 49')}<circle class="m-glove" cx="60" cy="46" r="7.5"/><path class="m-line" d="M54.5 51.5 q5.5 3 11 0"/></g></g>
-    <g class="m-arm m-arm-r">${tube('M75 102 L91 82')}<g class="m-fore m-fore-r">${tube('M91 82 L63 33')}<circle class="m-glove" cx="60" cy="30" r="7.5"/><path class="m-line" d="M54.5 35.5 q5.5 3 11 0"/></g></g>
+   Dibujado al estilo de las mascotas de empresa japonesas de los 60 (línea gruesa y uniforme a una tinta,
+   cabeza grande y redonda, ojos ovalados macizos, sonrisa enorme, pose en diagonal llena de energía).
+   Casco con el gomet de emblema, tenugui al cuello, mono con peto y tirantes, guantes y botas.
+   De tres cuartos, echado hacia atrás y con los pies clavados, iza una cuerda vertical mano sobre mano.
+   Los brazos, los guantes, el torso, la cabeza y el cabo de la cuerda los mueve gve.js en cada fotograma
+   (cinemática inversa de dos huesos): aquí solo se dibuja la postura de reposo. */
+const tubeK = (d, cls = '') => `<path class="k-tube-o ${cls}-o" d="${d}"/><path class="k-tube-i ${cls}-i" d="${d}"/>`;
+const glove = (cls) => `<g class="k-glove ${cls}"><path class="k-fill" d="M-8 -6.5 h10 q7.5 0 7.5 6.5 q0 6.5 -7.5 6.5 h-10 q-3.5 0 -3.5 -6.5 q0 -6.5 3.5 -6.5z"/><path class="k-line" d="M-1.5 -6.5 v13 M3 -6 v12"/><path class="k-fill" d="M-6 -6.5 q-1 -5 3 -6 q4 0 4 5"/></g>`;
+export const MASCOT = `<svg class="k-svg" viewBox="0 0 170 210" aria-hidden="true" focusable="false">
+  <line class="k-rope" x1="116" y1="-4" x2="116" y2="120"/>
+  <path class="k-tail" d="M116 112 C116 160 118 188 136 196"/>
+  <path class="k-speed" d="M104 52 q-7 9 0 18 M97 58 q-5 6 0 12 M128 50 q7 9 0 18 M135 56 q5 6 0 12"/>
+  <ellipse class="k-coil" cx="147" cy="197" rx="17" ry="4.8"/><ellipse class="k-coil" cx="148" cy="193.5" rx="12.5" ry="3.6"/>
+  <g class="k-legs">
+    ${tubeK('M76 143 L71 167 L60 186', 'k-legB')}
+    <path class="k-boot" d="M46 184 q2 -6 10 -6 h7 q10 0 13 9 l1 5 h-31 q-2 -5 0 -8z"/><path class="k-sole" d="M45 192 h32"/>
   </g>
+  ${tubeK('M84 102 L100 118 L116 96', 'k-armB')}
+  <g class="k-torso">
+    <path class="k-fill" d="M57 100 Q72 91 88 100 L99 138 Q86 151 68 146 Z"/>
+    <path class="k-line" d="M67 112 L84 111.5 L88.5 129 L71.5 131 Z M70.5 120.5 h14.5 M67 112 L61.5 100.5 M84 111.5 L85.5 100.5 M77 138 L79 147"/>
+    <circle class="k-ink" cx="68.5" cy="114.5" r="1.7"/><circle class="k-ink" cx="82.5" cy="114" r="1.7"/>
+    <path class="k-fill" d="M56 97 Q72 106 89 97.5 L90 103.5 Q72 112 55 103 Z"/>
+    <g class="k-towel-ends"><path class="k-fill" d="M87 101 q10 1 14 11 l-5.5 2.5 q-3.5 -8 -10 -9.5z"/><path class="k-fill" d="M85.5 102.5 q5 6.5 2 16 l-5.5 -1.5 q2.5 -7.5 -1 -12.5z"/></g>
+  </g>
+  <g class="k-legs">
+    ${tubeK('M90 140 L105 161 L117 183', 'k-legF')}
+    <path class="k-boot" d="M107 182 q1 -6 9 -6 h6 q13 0 17 10 l1 5 h-33 q-2 -5 0 -9z"/><path class="k-sole" d="M106 190 h34"/>
+  </g>
+  <g class="k-head">
+    <path class="k-line" d="M42.5 72 q-8 -1 -8 6.5 q1 7 9 5.5"/>
+    <circle class="k-fill" cx="64" cy="74" r="24"/>
+    <g class="k-eyes"><ellipse class="k-ink" cx="64.5" cy="73" rx="2.9" ry="4.1"/><ellipse class="k-ink" cx="78.5" cy="72" rx="2.9" ry="4.1"/></g>
+    <path class="k-line" d="M59 64.5 q4.5 -3.5 9 0 M73.5 63.5 q4.5 -3.5 9 0"/>
+    <path class="k-line" d="M71.5 77 q3.5 3 0 5.5"/>
+    <g class="k-mouth"><path class="k-fill" d="M59.5 85 Q71.5 101 85 84 Q72 90.5 59.5 85 Z"/><path class="k-line" d="M66 92.5 q5.5 -3.5 11 0"/></g>
+    <path class="k-line" d="M50 62 q-6 1 -5 7 q1 3.5 4.5 2.5 q2.5 -2 0 -3.5"/>
+    <path class="k-sweat" d="M93 57 q5 7 0 10.5 q-5 -3.5 0 -10.5z"/>
+    <path class="k-fill" d="M40 63.5 Q40 39 64 37.5 Q88 39 89.5 60.5 Z"/>
+    <path class="k-fill" d="M33.5 64.5 Q62 56 99 60 Q102.5 63.5 99 66.5 Q62 63.5 37 69.5 Q30.5 68.5 33.5 64.5 Z"/>
+    <path class="k-line" d="M64 38 Q66.5 49 66.5 59.5"/>
+    <circle class="k-dot" cx="52.5" cy="50.5" r="5.2"/>
+  </g>
+  ${tubeK('M62 104 L88 122 L116 104', 'k-armF')}
+  ${glove('k-gloveB')}${glove('k-gloveF')}
 </svg>`;

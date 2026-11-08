@@ -1143,57 +1143,60 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .obra .op-mid-l { gap: 16px; }
 
 /* el capataz va pegado a la obra, como la plancha verde, y se va con la última lámina */
-.obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-top: calc(-100vh + var(--hd)); margin-top: calc(-100svh + var(--hd));
-  z-index: 5; pointer-events: none; --m-w: 104px; --m-h: 149px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
-.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); animation: m-in .7s cubic-bezier(.3, 1.5, .5, 1) both; }
-@keyframes m-in { from { transform: translateY(40px) scale(.6); opacity: 0; } }
-.mascot-svg { width: 100%; height: auto; overflow: visible; }
-.mascot-svg .m-tube { fill: none; stroke: var(--midori); stroke-width: 11; stroke-linecap: round; }
-.mascot-svg .m-tube-in { fill: none; stroke: var(--paper); stroke-width: 6; stroke-linecap: round; }
-.mascot-svg .m-suit, .mascot-svg .m-face, .mascot-svg .m-hat, .mascot-svg .m-glove, .mascot-svg .m-mouth { fill: var(--paper); stroke: var(--midori); stroke-width: 2.5; stroke-linejoin: round; }
-.mascot-svg .m-line { fill: none; stroke: var(--midori); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.mascot-svg .m-ink, .mascot-svg .m-dot, .mascot-svg .m-boot { fill: var(--midori); }
-.mascot-svg .m-boot { stroke: var(--midori); stroke-width: 2; stroke-linejoin: round; }
-.mascot-svg .m-rope-in { stroke: var(--midori); stroke-width: 3.2; stroke-dasharray: 3 2.2; stroke-dashoffset: var(--rope-o, 0); }
-.mascot-svg .m-body { transform-box: fill-box; transition: transform .25s ease; }
-.mascot-svg .m-body { transform-origin: 50% 100%; }
+.obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd));
+  z-index: 5; pointer-events: none; --m-w: 150px; --m-h: 185px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
 /* la cuerda sube hasta una polea bajo la cabecera de la lámina y corre con el scroll */
-.m-rope { position: absolute; right: calc(var(--m-r) + var(--m-w) / 2 - 2px); width: 4px; top: 58px; bottom: calc(var(--m-b) + var(--m-h) - 2px);
+.m-rope { position: absolute; right: calc(var(--m-r) + var(--m-w) * .3176 - 2px); width: 4px; top: 58px; bottom: calc(var(--m-b) + var(--m-h) - 2px);
   background: repeating-linear-gradient(0deg, var(--midori) 0 3px, transparent 3px 5.2px) 0 var(--rope, 0px) / 4px 5.2px; }
-.m-pulley { position: absolute; right: calc(var(--m-r) + var(--m-w) / 2 - 15px); top: 34px; width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--midori); background: var(--paper);
-  transform: rotate(var(--spin, 0deg)); }
+.m-pulley { position: absolute; right: calc(var(--m-r) + var(--m-w) * .3176 - 15px); top: 34px; width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--midori); background: var(--paper);
+  will-change: transform; }
 .m-pulley::before { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: conic-gradient(var(--midori) 0 8deg, transparent 8deg 90deg, var(--midori) 90deg 98deg, transparent 98deg 180deg, var(--midori) 180deg 188deg, transparent 188deg 270deg, var(--midori) 270deg 278deg, transparent 278deg); }
 .m-pulley::after { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--midori); }
 /* tirando: recoge cuerda mano sobre mano, inclinado hacia atrás (bajar) o hacia delante (subir) */
-.mascot-svg .m-fore { transform-box: view-box; }
-.mascot-svg .m-fore-l { transform-origin: 29px 84px; }
-.mascot-svg .m-fore-r { transform-origin: 91px 82px; }
-.mascot.pulling .m-fore-l { animation: m-haul-a .34s ease-in-out infinite; }
-.mascot.pulling .m-fore-r { animation: m-haul-b .34s ease-in-out infinite; }
-.mascot.pulling.up .m-fore-l, .mascot.pulling.up .m-fore-r { animation-direction: reverse; }
-.mascot.pulling.dn .m-body { transform: rotate(-7deg) translateY(2px); }
-.mascot.pulling.up .m-body { transform: rotate(5deg); }
-.mascot.pulling .m-legs { animation: m-step .34s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
-@keyframes m-haul-a { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
-@keyframes m-haul-b { 0%, 100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }
-@keyframes m-step { 50% { transform: translateY(-1.5px) scaleY(.98); } }
-.mascot:not(.pulling) .m-body { animation: m-idle 2.6s ease-in-out infinite; }
-@keyframes m-idle { 50% { transform: translateY(-1.5px); } }
 /* el bocadillo */
-.m-bubble { position: absolute; right: 34px; bottom: calc(100% + 14px); width: max-content; max-width: 250px; margin: 0; padding: 11px 14px 12px; background: var(--paper);
+.m-bubble { position: absolute; right: calc(var(--m-w) * .25); bottom: calc(100% + 14px); width: max-content; max-width: 250px; margin: 0; padding: 11px 14px 12px; background: var(--paper);
   border: 2.2px solid var(--midori); border-radius: 18px; color: var(--midori); font-size: .9rem; font-weight: 700; line-height: 1.18;
   opacity: 0; transform: translateY(8px) scale(.85); transform-origin: 85% 100%; transition: opacity .2s ease, transform .3s cubic-bezier(.3, 1.6, .5, 1); }
 .m-bubble::after { content: ''; position: absolute; right: 18px; bottom: -11px; width: 18px; height: 18px; background: var(--paper); border-right: 2.2px solid var(--midori); border-bottom: 2.2px solid var(--midori);
   transform: skewX(28deg) rotate(45deg) scale(.7); }
 .m-bubble.say { opacity: 1; transform: none; }
 @media (max-width: 900px) {
-  .obra .mascot-wrap { --m-w: 62px; --m-h: 89px; --m-r: 8px; --m-b: calc((100svh - var(--hd)) * .42); }
+  .obra .mascot-wrap { --m-w: 80px; --m-h: 99px; --m-r: 8px; --m-b: calc((100svh - var(--hd)) * .42); }
   .m-rope { top: 14%; }
-  .m-pulley { top: calc(14% - 22px); width: 22px; height: 22px; right: calc(var(--m-r) + var(--m-w) / 2 - 11px); border-width: 2px; }
-  .m-bubble { right: 22px; max-width: min(64vw, 240px); font-size: .82rem; padding: 9px 12px 10px; }
+  .m-pulley { top: calc(14% - 22px); width: 22px; height: 22px; right: calc(var(--m-r) + var(--m-w) * .3176 - 11px); border-width: 2px; }
+  .m-bubble { right: 18px; max-width: min(64vw, 240px); font-size: .82rem; padding: 9px 12px 10px; }
 }
+/* El capataz al estilo de las mascotas japonesas: línea gruesa y uniforme, a una tinta */
+.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); will-change: transform; contain: layout paint; animation: k-drop 1.2s cubic-bezier(.22, 1.35, .45, 1) .2s both; }
+@keyframes k-drop { from { transform: translateY(-48vh); } } /* llega bajando por la cuerda */
+.k-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.k-svg .k-fill { fill: var(--paper); stroke: var(--midori); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.k-svg .k-line { fill: none; stroke: var(--midori); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.k-svg .k-ink, .k-svg .k-dot { fill: var(--midori); }
+.k-svg .k-tube-o, .k-svg [class$="-o"] { fill: none; stroke: var(--midori); stroke-width: 13; stroke-linecap: round; stroke-linejoin: round; }
+.k-svg .k-tube-i, .k-svg [class$="-i"] { fill: none; stroke: var(--paper); stroke-width: 7.4; stroke-linecap: round; stroke-linejoin: round; }
+.k-svg .k-boot { fill: var(--midori); stroke: var(--midori); stroke-width: 2.4; stroke-linejoin: round; }
+.k-svg .k-sole { fill: none; stroke: var(--paper); stroke-width: 1.6; stroke-linecap: round; }
+.k-svg .k-rope, .k-svg .k-tail { fill: none; stroke: var(--midori); stroke-width: 5; stroke-dasharray: 3.8 2.6; }
+.k-svg .k-speed { fill: none; stroke: var(--midori); stroke-width: 2.4; stroke-linecap: round; opacity: 0; }
+.k-svg .k-coil { fill: none; stroke: var(--midori); stroke-width: 3; }
+.k-svg .k-sweat { fill: var(--paper); stroke: var(--midori); stroke-width: 2.2; opacity: 0; }
+.k-svg .k-eyes { transform-box: fill-box; transform-origin: center; animation: k-blink 4.6s infinite; }
+@keyframes k-blink { 0%, 93%, 100% { transform: none; } 96% { transform: scaleY(.12); } }
+.mascot.talking .k-mouth { transform-box: fill-box; transform-origin: 50% 15%; animation: k-talk .17s ease-in-out 8 alternate; }
+@keyframes k-talk { to { transform: scaleY(.4); } }
+.mascot.hop .k-svg { animation: k-hop .55s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes k-hop { 35% { transform: translateY(-9px) rotate(-2deg); } }
+
+/* Rendimiento en escritorio: la plancha verde ocupa solo su franja (no toda la pantalla), así la
+   máscara de sello y el multiplicar se componen sobre un tercio de la superficie */
+@media (min-width: 901px) {
+  .obra .obra-svg { width: 50%; margin-left: 21%; top: calc(var(--hd) + (100vh - var(--hd)) * .17); top: calc(var(--hd) + (100svh - var(--hd)) * .17);
+    height: calc((100vh - var(--hd)) * .58); height: calc((100svh - var(--hd)) * .58); }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .mascot, .mascot .m-arm, .mascot .m-legs, .mascot .m-body { animation: none !important; }
+  .mascot, .mascot .k-svg, .k-svg .k-eyes, .k-svg .k-mouth { animation: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

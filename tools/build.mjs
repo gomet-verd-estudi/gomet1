@@ -220,8 +220,8 @@ function home() {
 
   const body = `
 <section class="obra" id="obra" aria-label="El método: cómo se construye una marca" style="--n:11">
-    <div class="obra-track" aria-hidden="false"><svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
-    <div class="mascot-wrap"><span class="m-pulley" aria-hidden="true"></span><span class="m-rope" aria-hidden="true"></span><div class="mascot">${MASCOT}<p class="m-bubble" aria-live="polite"></p></div></div></div>
+    <div class="obra-track" aria-hidden="false"><div class="mascot-wrap"><span class="m-pulley" aria-hidden="true"></span><span class="m-rope" aria-hidden="true"></span><div class="mascot">${MASCOT}<p class="m-bubble" aria-live="polite"></p></div></div>
+    <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg></div>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0" id="metodo" data-tip="${esc(TIPS[0])}">
         ${run('El método', 'Instrucciones de montaje', '00')}
