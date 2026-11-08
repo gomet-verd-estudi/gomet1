@@ -35,7 +35,7 @@ const head = (title, no, tag, pill = '') => `<header class="pl-head"><div class=
 /* separador de sección a sangre, en el gris de la marca, como en las presentaciones */
 const tags = (no, tag, pill = '') => `<div class="pl-tags sec-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div>`;
 const divider = () => ''; // la web minimal separa las secciones con aire y un filete, sin bandas
-/* Una sola trama, la de las vallas de obra a rayas (トラ柵), en la tinta verde */
+/* Una sola trama, la de las vallas de obra a rayas, en la tinta verde */
 const RISO_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="tora" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3.2" height="3.2" fill="#FFFFFF"/><rect width="1.6" height="3.2" fill="#44D62C"/></pattern></defs></svg>`;
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
@@ -58,7 +58,7 @@ function header(r, current) {
   <a class="hd-logo" href="${r || './'}" aria-label="${STUDIO.name}, inicio">${LOGO}</a>
   <button class="hd-menu" type="button" aria-expanded="false" aria-controls="nav">${ICON.menu}<span>Menú</span></button>
   <nav class="hd-nav" id="nav" aria-label="Principal">
-    ${a('metodo/', 'Método', 'metodo')}
+    <a href="${r || './'}#obra">Método</a>
     ${a('obras/', 'Obras', 'obras')}
     ${a('estudio/', 'Estudio', 'estudio')}
     <a class="hd-cta" href="${r}contacto/"${current === 'contacto' ? ' aria-current="page"' : ''}>Empezar un proyecto</a>
@@ -86,7 +86,7 @@ function footer(r, current) {
       <li>${STUDIO.motto} [${STUDIO.mottoLong}]</li>
     </ul></div>
     <div><p class="lbl">Web</p><ul>
-      <li><a href="${r}metodo/">Método</a></li>
+      <li><a href="${r || './'}#obra">Método</a></li>
       <li><a href="${r}obras/">Obras</a></li>
       <li><a href="${r}estudio/">Estudio</a></li>
       <li><a href="${r}contacto/">Contacto</a></li>
@@ -194,19 +194,15 @@ function home() {
   // y a su derecha la ficha técnica (número, piezas señaladas en el dibujo, lo que recibís, la validación)
   const parts = (list) => `<ol class="op-parts" aria-label="Señalado en el dibujo">${list.map((p, i) => `<li data-i="${i}"><span class="mk-n" aria-hidden="true">${i + 1}</span>${esc(p)}</li>`).join('')}</ol>`;
   const list = (items) => `<ul class="op-list">${items.map((t) => `<li>${t}</li>`).join('')}</ul>`;
-  const count = (n, of = '08') => `<p class="op-count" aria-hidden="true"><small lang="ja">工程</small>${n}<span>/${of}</span></p>`;
-  const KANJI = ['一', '二', '三', '四', '五', '六', '七', '八'];
-  // Cada lámina, como una página de revista: cabecera corrida, título enorme, folio, rótulo vertical
-  // en japonés y un pie a tres columnas (titular · texto · ficha). La plancha verde ocupa el hueco central.
+  // Cada lámina, como una página de revista: cabecera corrida, título enorme, folio
+  // y un pie a tres columnas (titular · texto · ficha). La plancha verde ocupa el hueco central.
   const run = (a, b, n) => `<header class="op-run" aria-hidden="true"><span>Gomet Verd Estudi · ${a}</span><span>${b}</span><span>Lámina ${n} / 08</span></header>`;
-  const vert = (t) => `<p class="op-v" lang="ja" aria-hidden="true">${t}</p>`;
   const folio = (n) => `<p class="op-count" aria-hidden="true">${n}<span>/08</span></p>`;
   const panel = (x, k) => `
       <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}">
         ${run(esc(x.act), esc(x.layer), x.n)}
         <h2 class="op-title">[${esc(x.key)}]</h2>
         ${folio(x.n)}
-        ${vert(`組立説明書　第${KANJI[k]}工程`)}
         <div class="op-foot">
           <p class="op-h">${esc(x.head)}</p>
           <p class="op-short">${esc(SYNTH[k].short)}</p>
@@ -216,13 +212,12 @@ function home() {
 
   const body = `
 <section class="obra" id="obra" aria-label="Cómo se construye una marca" style="--n:10">
-    <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
+    <div class="obra-track" aria-hidden="false"><svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg></div>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0">
         ${run('Instrucciones de montaje', 'Método', '00')}
         <h1 class="op-title op-display">[${esc(INTRO.title)}.]</h1>
         ${folio('00')}
-        ${vert('組立説明書')}
         <div class="op-foot">
           <p class="op-h">Ocho fases, cuatro actos y un gomet verde en cada validación.</p>
           <p class="op-short">${esc(INTRO.sub)}<span class="op-hint">${ICON.down}Desliza para construir</span></p>
@@ -232,11 +227,10 @@ function home() {
       <article class="op op-end" data-p="9">
         ${run('Resultado', 'Cada marca, única', '08')}
         <h2 class="op-title">[Llave en mano.]</h2>
-        <p class="stamp" aria-hidden="true"><span lang="ja">完成</span><small>Terminado</small></p>
-        ${vert('完成　組立説明書')}
+        <p class="stamp" aria-hidden="true"><span>Fin</span><small>de obra</small></p>
         <div class="op-foot">
           <p class="op-h">${esc(FILTERS.result.head)}</p>
-          <div class="op-short"><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método</a></div></div>
+          <div class="op-short"><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="#metodo">El método, fase a fase</a></div></div>
           <div class="op-spec">${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}<p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
         </div>
       </article>
@@ -245,6 +239,8 @@ function home() {
       <ol class="rail">${rail}</ol>
     </div>
 </section>
+
+${METODO_REST}
 
 ${divider('Piezas', '01')}
 <section class="sec sec-cat" id="piezas">
@@ -265,15 +261,7 @@ ${divider('Obras', '02')}
   </div>
 </section>
 
-${divider('Criterio', '03')}
-<section class="sec" id="criterio">
-  <div class="wrap">
-    ${tags('03', 'Criterio', 'Técnica y creatividad')}
-    <div class="sec-intro"><h2 class="h2">${esc(CRITERIA.head)}</h2><p>${esc(CRITERIA.truss.text)}</p></div>
-    <div class="truss-wrap reveal">${trussBlock()}</div>
-    <div class="trio">${CRITERIA.rows.map(([k, v]) => `<div><p class="lbl">${esc(k)}</p><p>${esc(v)}</p></div>`).join('')}</div>
-  </div>
-</section>
+
 
 <section class="sec" id="estudio">
   <div class="wrap two">
@@ -290,7 +278,7 @@ ${divider('Criterio', '03')}
   </div>
 </section>`;
 
-  return page({ title: `${STUDIO.name} · Branding y dirección de arte en Valencia y Barcelona`, desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home', scripts: `<script src="assets/js/obra.js?v=${VERSION}" defer></script>\n` });
+  return page({ title: `${STUDIO.name} · Branding y dirección de arte en Valencia y Barcelona`, desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home', defs: FASES_DEFS, scripts: `<script src="assets/js/obra.js?v=${VERSION}" defer></script>\n` });
 }
 
 /* ========================================================================
@@ -350,6 +338,7 @@ function vereis() {
 /* ========================================================================
    MÉTODO — las láminas
    ======================================================================== */
+let METODO_REST = '';
 function metodo() {
   const r = '../';
   const legend = (items) => `<ol class="fig-legend">${items.map((x) => `<li>${x}</li>`).join('')}</ol>`;
@@ -425,6 +414,9 @@ ${divider('Preguntas', '04')}
   </div>
 </section>`;
 
+  const cut = body.indexOf('<section class="sec sec-alt">');
+  METODO_REST = `<div id="metodo" class="metodo-intro sec"><div class="wrap">${tags('01', 'Método', 'Fase a fase')}<div class="sec-intro"><h2 class="h2">Todo el método, sin salir de aquí</h2><p>Lo que acabáis de ver construirse, contado con detalle: qué hacemos en cada fase, qué recibís, qué os pedimos y cómo decidimos.</p></div></div></div>\n`
+    + body.slice(cut).replaceAll('href="../', 'href="');
   return page({ defs: FASES_DEFS,
     title: 'Método · Gomet Verd Estudi',
     desc: 'Cómo trabajamos: una marca se construye como un edificio. Ocho fases en cuatro actos, del workshop al mantenimiento, con una validación en cada capa.',
@@ -620,8 +612,10 @@ function write(rel, html) {
   fs.mkdirSync(path.dirname(f), { recursive: true });
   fs.writeFileSync(f, html);
 }
+metodo(); // prepara el detalle del método para la portada
 write('index.html', home());
-write('metodo/index.html', metodo());
+// la antigua página del método lleva a la portada, donde ahora está todo
+write('metodo/index.html', `<!doctype html>\n<html lang="es"><head><meta charset="utf-8"><title>Método · ${STUDIO.name}</title><meta name="robots" content="noindex"><link rel="canonical" href="${STUDIO.site}/#metodo"><meta http-equiv="refresh" content="0; url=../#metodo"></head><body><p><a href="../#metodo">El método está ahora en la portada</a></p></body></html>\n`);
 write('obras/index.html', obras());
 PROJECTS.forEach((p) => write(`obras/${p.slug}/index.html`, obra(p)));
 write('estudio/index.html', estudio());
@@ -629,7 +623,7 @@ write('contacto/index.html', contacto());
 write('404.html', notFound());
 
 const today = new Date().toISOString().slice(0, 10);
-const urls = ['', 'metodo/', 'obras/', ...PROJECTS.map((p) => `obras/${p.slug}/`), 'estudio/', 'contacto/'];
+const urls = ['', 'obras/', ...PROJECTS.map((p) => `obras/${p.slug}/`), 'estudio/', 'contacto/'];
 write('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${STUDIO.site}/${u}</loc><lastmod>${today}</lastmod></url>`).join('\n')}\n</urlset>\n`);
 write('robots.txt', `User-agent: *\nAllow: /\n\nSitemap: ${STUDIO.site}/sitemap.xml\n`);
 console.log(`OK · ${urls.length} páginas`);

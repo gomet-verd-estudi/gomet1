@@ -27,7 +27,7 @@
 
   /* ---------- medidas de la obra ---------- */
   const W = 8;                 // planta de 8 × 8
-  const F = 0.3;               // cimentación sobre rasante
+  const F = -0.3;              // cimentación hundida: su cara de arriba queda bajo la rasante
   const D = 1.3;               // profundidad de la excavación
   const S = 1.7, T = 0.3;      // altura de planta y canto del forjado
   const TOP = F + 4 * S;       // cubierta (7.1)
@@ -105,9 +105,9 @@
   const pitFloor = el('path', { class: 'pit-floor' }), pitWallA = el('path', { class: 'pit-wall a' }), pitWallB = el('path', { class: 'pit-wall b' });
   const pour = el('path', { class: 'f ft c-red pour' });
   add(() => {
-    const dig = eo(win(L[3], 0, 0.4)), fill = eo(win(L[3], 0.45, 0.85));
-    const bottom = -D * dig, top = bottom + (0 - bottom) * fill;
-    const show = dig > 0.002 && fill < 0.999;
+    const dig = eo(win(L[3], 0, 0.4)), fill = eo(win(L[3], 0.45, 0.95));
+    const bottom = -D * dig, top = bottom + (F - bottom) * fill; // se hormigona hasta F, bajo la rasante
+    const show = dig > 0.002; // el borde de la excavación sigue a la vista
     [pitFloor, pitWallA, pitWallB, pour].forEach((p) => { p.style.display = show ? '' : 'none'; });
     if (!show) return;
     pitFloor.setAttribute('d', poly([P(0, 0, bottom), P(W, 0, bottom), P(W, W, bottom), P(0, W, bottom)]));
@@ -116,7 +116,6 @@
     pour.style.display = fill > 0.002 ? '' : 'none';
     pour.setAttribute('d', poly([P(0, 0, top), P(W, 0, top), P(W, W, top), P(0, W, top)]));
   }, [3]);
-  rise(3, 0.82, 1, 0, 0, 0, W, W, F, 'c-red found');
 
   /* ---------- 4 · la estructura: cuatro pilares, por tramos de planta ---------- */
   const PIL = [[0.35, 0.35], [W - 1.05, 0.35], [0.35, W - 1.05], [W - 1.05, W - 1.05]];
@@ -200,7 +199,7 @@
     amp.setAttribute('d', poly([P(0, 0, z1), P(W, 0, z1), P(W, W, z1), P(0, W, z1)]) + open([P(W, 0, TOP + 0.4), P(W, 0, z1)]) + open([P(W, W, TOP + 0.4), P(W, W, z1)]) + open([P(0, W, TOP + 0.4), P(0, W, z1)]));
   }, [8]);
 
-  /* ---------- vallas de obra a rayas (トラ柵): llegan con el solar y se retiran en la entrega ---------- */
+  /* ---------- vallas de obra a rayas: llegan con el solar y se retiran en la entrega ---------- */
   const onSite = () => eo(win(L[2], 0.45, 0.9)) * (1 - eo(win(L[7], 0, 0.35)));
   [[0.3, 3.4], [4.6, 3.4]].forEach(([x0, w]) => {
     const y = W + 1.5, pa = boxNode('c-white post'), pb = boxNode('c-white post'), bar = boxNode('tora'), bar2 = boxNode('tora');
@@ -294,7 +293,7 @@
   }, [3, 4, 5, 6, 7]);
 
   /* ---------- gomets de validación ---------- */
-  const VAL = [[2, W + 0.5, W + 0.5, 0.9], [3, W, W, F], [4, W - 0.35, W - 0.35, TOP - T], [5, W, W, F + 4 * S - T * 0.5], [6, W, W * 0.5, TOP + 0.4]];
+  const VAL = [[2, W + 0.5, W + 0.5, 0.9], [3, 5, W, F], [4, W - 0.35, W - 0.35, TOP - T], [5, W, W, F + 4 * S - T * 0.5], [6, W, W * 0.5, TOP + 0.4]];
   const gomets = VAL.map(([ph, x, y, z]) => {
     const [cx, cy] = P(x, y, z);
     const g = el('g', { class: 'gomet-v', transform: `translate(${cx.toFixed(1)} ${cy.toFixed(1)})` });

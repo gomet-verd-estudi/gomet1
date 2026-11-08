@@ -1031,7 +1031,7 @@ p { margin-bottom: .7em; }
 .obra .op-get { line-height: 1.05; }
 .obra .op-note { line-height: 1.15; }
 .obra .op-hint { margin-top: 12px; }
-#piezas { scroll-snap-align: start; }
+#metodo { scroll-snap-align: start; } /* al salir de la obra, la siguiente parada es el método */
 @media (max-width: 900px) {
   .obra .obra-svg { height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd)); }
   .obra .op { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; gap: 0; padding: 2vh 0 calc(44px + 2vh); }
@@ -1059,7 +1059,6 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .obra .op-count { grid-column: 11 / -1; grid-row: 2; justify-self: end; margin: 2vh 0 0; font-weight: 200; font-stretch: 62%; font-size: clamp(4rem, 10.5vw, 11rem); line-height: .8; letter-spacing: -.02em; color: var(--g); }
 .obra .op-count span { font-size: .2em; font-weight: 700; letter-spacing: .08em; vertical-align: top; margin-left: .2em; color: var(--g); }
 .obra .stamp { grid-column: 11 / -1; grid-row: 2; justify-self: end; margin: 2vh 0 0; }
-.obra .op-v { position: absolute; right: 0; top: 50%; transform: translateY(-50%); margin: 0; writing-mode: vertical-rl; text-orientation: upright; font-family: 'Hiragino Sans', 'Noto Sans JP', 'Noto Sans CJK JP', 'Yu Gothic', sans-serif; font-stretch: normal; font-size: .85rem; font-weight: 600; line-height: 1; letter-spacing: .32em; color: var(--g); }
 .obra .op-foot { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(14px, 1.6vw, 28px); align-items: start; padding-top: 14px; border-top: 1px solid var(--g); }
 .obra .op-h { grid-column: 1 / 6; margin: 0; font-size: clamp(1.5rem, 2.4vw, 2.5rem); line-height: .98; font-weight: 800; letter-spacing: -.015em; max-width: none; }
 .obra .op-short { grid-column: 6 / 9; margin: 0; font-size: .98rem; line-height: 1.22; font-weight: 500; max-width: none; hyphens: auto; }
@@ -1080,13 +1079,22 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
   .obra .op-run span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .obra .op-title { grid-column: 1; margin-top: 1.4vh; font-size: clamp(2.8rem, 13vw, 4.4rem); }
   .obra .op-display { font-size: clamp(2.2rem, 10vw, 3.2rem); }
-  .obra .op-count, .obra .stamp, .obra .op-v, .obra .op-val, .obra .op-hint { display: none; }
+  .obra .op-count, .obra .stamp, .obra .op-val, .obra .op-hint { display: none; }
   .obra .op-foot { grid-template-columns: minmax(0, 1fr); row-gap: 8px; padding-top: 10px; }
   .obra .op-h, .obra .op-short, .obra .op-spec { grid-column: 1; }
   .obra .op-h { font-size: 1.3rem; }
   .obra .op-short { font-size: .95rem; }
   .obra .op-get { display: flex; gap: 8px; align-items: baseline; font-size: .92rem; }
   .obra .op-get span { margin: 0; }
+}
+
+/* La plancha verde va en un carril del alto de toda la obra: se queda fija mientras duran las láminas
+   y, al terminar la última, sube con ella (no se queda encima de lo que viene después). */
+.obra .obra-track { position: absolute; inset: 0; pointer-events: none; }
+.obra .obra-svg { margin-bottom: 0; }
+.metodo-intro { padding-bottom: 0; }
+@media (max-width: 900px) {
+  .obra .obra-svg { margin-bottom: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -118,8 +118,15 @@
         if (gliding) { e.preventDefault(); return; }
         const dir = Math.sign(e.deltaY), i = nearest();
         if (!dir) return;
-        // para salir de la obra por arriba o por abajo, scroll normal
-        if ((dir < 0 && i === 0) || (dir > 0 && i === N - 1)) return;
+        // por arriba, scroll normal; por abajo, desde la última lámina, un deslizamiento hasta el método
+        if (dir < 0 && i === 0) return;
+        if (dir > 0 && i === N - 1) {
+          const next = $('#metodo');
+          if (!next) return;
+          e.preventDefault();
+          if (fresh) glide(scrollY + next.getBoundingClientRect().top - hdH(), 1100);
+          return;
+        }
         e.preventDefault();
         if (!fresh) return; // la inercia del gesto anterior no cuenta como un gesto nuevo
         glide(topOf(i + dir));
