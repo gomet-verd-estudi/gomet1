@@ -91,10 +91,6 @@ p { margin: 0 0 1em; }
 /* ==========================================================================
    LA OBRA — el edificio se levanta mientras se hace scroll
    ========================================================================== */
-.obra { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); border-bottom: 1px solid var(--line); }
-.obra-steps { grid-column: 1; grid-row: 1; list-style: none; margin: 0; padding: 0 clamp(16px, 3.4vw, 56px) 0 var(--gut); }
-.obra-stage { grid-column: 2; grid-row: 1; position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); display: flex; flex-direction: column; border-left: 1px solid var(--line); background: var(--bg); }
-.obra-fig { flex: 1; min-height: 0; margin: 0; display: flex; align-items: center; justify-content: center; padding: 44px clamp(12px, 2vw, 32px) 4px; }
 .obra-svg { width: 100%; height: 100%; overflow: hidden; }
 .obra-svg .ghost path { fill: none; stroke: var(--line-2); stroke-width: .8; stroke-dasharray: none; }
 .obra-svg .acts .svg-k, .obra-svg .acts .svg-p { fill: var(--ink-4); transition: fill .4s; }
@@ -119,15 +115,6 @@ p { margin: 0 0 1em; }
 .obra-cap { margin: 10px 0 0; font-size: .78rem; color: var(--ink-4); display: flex; align-items: center; justify-content: flex-end; }
 .obra-stage .gve { left: 14px; right: 14px; top: 14px; }
 
-.step { min-height: calc(100vh - var(--hd)); min-height: calc(100svh - var(--hd)); display: flex; flex-direction: column; justify-content: center; padding-block: 10vh; transition: opacity .5s ease; }
-.obra.is-live .step:not(.is-active) { opacity: .2; }
-.step .pl-title { font-size: clamp(2.6rem, 4.6vw, 4.4rem); }
-.step-act { font-size: .66rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 14px; }
-.step-h { font-weight: 500; font-size: clamp(1.5rem, 2.3vw, 2.1rem); line-height: 1.12; letter-spacing: -.015em; margin: 0 0 .5em; max-width: 18em; text-wrap: balance; }
-.step-p { color: var(--ink-2); max-width: 34em; }
-.step .pl-rows { max-width: 34em; }
-.step-val { margin: 14px 0 0; font-size: .8rem; color: var(--ink-3); display: flex; align-items: center; }
-.step-intro .display { font-size: clamp(2.6rem, 4.8vw, 4.6rem); }
 
 /* ==========================================================================
    OBRAS (proyectos)
@@ -375,11 +362,8 @@ p { margin: 0 0 1em; }
 
 /* ---------- interfaz más actual ---------- */
 .display { font-stretch: 80%; font-weight: 500; font-size: clamp(2.8rem, 6vw, 6rem); line-height: .95; letter-spacing: -.025em; }
-.step-intro .display { font-size: clamp(2.8rem, 5vw, 5rem); }
 .h2 { font-stretch: 85%; }
 .ft-big { font-stretch: 80%; }
-.step .pl-no { font-weight: 500; }
-.step.is-active .pl-no { background: var(--ink); border-color: var(--ink); color: #fff; }
 
 /* catálogo de piezas */
 .catalog { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--bg); }
@@ -485,7 +469,7 @@ body { color: var(--ink-2); }
 
 /* titulares */
 .display { color: var(--brand); font-weight: 500; font-stretch: 75%; letter-spacing: -.02em; }
-.h2, .step-h, .pl-h, .card-name, .cat-name, .ft-big, .obra-nav b, .faq summary { color: var(--ink-2); }
+.h2, .pl-h, .card-name, .cat-name, .ft-big, .obra-nav b, .faq summary { color: var(--ink-2); }
 .h2 { font-weight: 500; }
 .pl-title { color: var(--brand); font-weight: 500; font-stretch: 75%; }
 .statement { color: var(--brand); }
@@ -497,7 +481,6 @@ body { color: var(--ink-2); }
 .pl-no { width: 26px; height: 26px; margin: 0; font-size: .66rem; border-color: var(--brand); color: var(--brand-d); }
 .pl-tag { margin: 0; padding: 4px 10px; font-size: .64rem; border-color: var(--brand); color: var(--brand-d); }
 .pl-pill { padding: 4px 12px; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-d); border: 1px solid var(--brand); border-radius: 999px; }
-.step.is-active .pl-no { background: var(--brand); border-color: var(--brand); color: #fff; }
 
 .intro-tags, .sec-tags { margin-bottom: 22px; }
 /* entradillas en mayúsculas entre filetes */
@@ -550,11 +533,10 @@ body { color: var(--ink-2); }
 .obra-svg .grid { stroke: #E4E4E8; }
 .obra-svg .ground { fill: #FBFBFC; }
 .obra-svg .ghost { stroke: #C6C6CC; }
-.obra-svg .lab-t { fill: var(--brand-d); }
+.obra-svg .lab-t { fill: var(--brand-d); paint-order: stroke; stroke: #fff; stroke-width: 5px; stroke-linejoin: round; }
 .obra-svg .lead { stroke: var(--brand); }
 .rail-i::before { background: var(--brand-d); }
 .rail-i.now .rail-k, .rail-i.now .rail-n { color: var(--ink-2); }
-.step-act, .card-meta, .cat-n, .crumb { color: var(--brand-d); }
 .cat a:hover { background: var(--grey-bg); }
 .card:hover .card-name { text-decoration-color: var(--brand); }
 
@@ -576,18 +558,9 @@ body { color: var(--ink-2); }
   .hd-nav.open { display: flex; }
   .hd-nav a { padding: 12px 0; border-bottom: 1px solid var(--line-2); }
   .hd-cta { margin-top: 12px; text-align: center; }
-  /* la obra: el dibujo arriba, fijo; las fases pasan por debajo */
-  .obra { display: block; }
-  .obra-stage { position: sticky; top: var(--hd); height: 50vh; height: 50svh; z-index: 5; border-left: 0; border-bottom: 1px solid var(--line); }
-  .obra-fig { padding: 34px 8px 0; }
   .obra-rail { padding: 0 12px 8px; }
   .rail-k { display: none; }
   .obra-cap { display: none; }
-  .obra-steps { padding: 0 var(--gut); }
-  .step { min-height: 0; padding-block: 36px 18vh; justify-content: flex-start; }
-  .step .pl-rows { display: none; }
-  .step .pl-title { font-size: 2.4rem; }
-  .step-intro .display { font-size: clamp(2.2rem, 9vw, 3rem); }
   .obra-svg .labels { display: none; }
   .sec-intro, .two, .obra-head, .pl-body, .pl-body-top { grid-template-columns: minmax(0, 1fr); }
   .phase-grid, .plate-pair { grid-template-columns: minmax(0, 1fr); }
@@ -624,6 +597,60 @@ body { color: var(--ink-2); }
   .ft-grid { grid-template-columns: minmax(0, 1fr); }
   .lb-p, .lb-n { top: auto; bottom: 16px; transform: none; }
 }
+
+/* ==========================================================================
+   LA OBRA A PANTALLA COMPLETA — el edificio llena la pantalla; el texto de cada fase,
+   resumido, se integra en la composición como en una lámina de la presentación.
+   ========================================================================== */
+.obra { display: block; height: calc(var(--n) * 85vh); border-bottom: 1px solid var(--line); }
+.obra-stage { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); width: 100%; overflow: hidden; border: 0; background: #fff; }
+.obra-stage .obra-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.obra-stage .gve { left: 16px; right: 16px; top: 14px; }
+.obra-panels { position: absolute; left: var(--gut); top: clamp(60px, 9vh, 110px); width: min(40%, 560px); z-index: 2; }
+.obra-panels::before { content: ''; position: absolute; left: calc(-1 * var(--gut)); top: -50vh; height: 200vh; width: calc(100% + var(--gut) + 120px); background: linear-gradient(90deg, rgba(255, 255, 255, .94) 58%, rgba(255, 255, 255, 0)); z-index: -1; pointer-events: none; }
+.obra-stage .gve { z-index: 3; }
+.op { position: absolute; left: 0; right: 0; top: 0; opacity: 0; visibility: hidden; transform: translateY(18px); transition: opacity .45s ease, transform .6s cubic-bezier(.2, .8, .2, 1), visibility 0s linear .45s; pointer-events: none; }
+.op.on { opacity: 1; visibility: visible; transform: none; pointer-events: auto; transition-delay: 0s; }
+/* Sin JavaScript: las fases se leen una tras otra */
+html:not(.js) .obra { height: auto; }
+html:not(.js) .obra .obra-stage { position: relative; top: 0; height: auto; overflow: hidden; }
+html:not(.js) .obra .obra-panels::before { display: none; }
+html:not(.js) .obra .obra-svg, html:not(.js) .obra .obra-rail, html:not(.js) .obra .gve { display: none; }
+html:not(.js) .obra .obra-panels { position: static; width: auto; max-width: 720px; padding: 64px var(--gut); }
+html:not(.js) .obra .op { position: static; opacity: 1; visibility: visible; transform: none; margin-bottom: 56px; }
+.op .pl-tags { margin-bottom: 16px; }
+.op.on .pl-no { background: var(--brand); border-color: var(--brand); color: #fff; }
+.op-display { margin: 0 0 .35em; color: var(--brand); font-weight: 500; font-stretch: 75%; font-size: clamp(2.8rem, 5vw, 5.4rem); line-height: .95; letter-spacing: -.02em; text-wrap: balance; }
+.op-title { margin: 0 0 .25em; color: var(--brand); font-weight: 500; font-stretch: 75%; font-size: clamp(3rem, 6vw, 6.2rem); line-height: .85; letter-spacing: -.025em; }
+.op-h { margin: 0 0 .5em; color: var(--ink-2); font-weight: 500; font-size: clamp(1.35rem, 2.1vw, 2rem); line-height: 1.12; letter-spacing: -.01em; max-width: 18em; text-wrap: balance; }
+.op-short { color: var(--ink-3); max-width: 30em; font-size: clamp(1rem, 1.25vw, 1.15rem); line-height: 1.45; }
+.op-get { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 18px 0 0; padding: 10px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-transform: uppercase; font-weight: 500; font-size: .82rem; letter-spacing: .03em; color: var(--brand-d); max-width: 34em; }
+.op-get span { font-size: .64rem; letter-spacing: .16em; color: var(--ink-4); }
+.op-val { display: flex; align-items: center; margin: 14px 0 0; font-size: .82rem; color: var(--brand-d); }
+.op-hint { display: inline-flex; align-items: center; gap: 8px; margin-top: 18px; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--brand-d); animation: hint 2.2s ease-in-out infinite; }
+@keyframes hint { 50% { transform: translateY(5px); } }
+.op-end .ctas { margin-top: 18px; }
+.obra-stage .obra-rail { position: absolute; left: var(--gut); right: var(--gut); bottom: 14px; padding: 0; z-index: 2; }
+@media (max-width: 900px) {
+  .obra { height: calc(var(--n) * 75vh); }
+  .obra-stage { height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); }
+  .obra-stage .obra-svg { inset: 0 0 auto 0; height: 52%; }
+  .obra-panels { left: var(--gut); right: var(--gut); width: auto; top: 52%; }
+  .obra-panels::before { left: calc(-1 * var(--gut)); right: calc(-1 * var(--gut)); width: auto; top: -18px; height: 100vh; background: #fff; }
+  .op .pl-tags { margin-bottom: 8px; }
+  .op-title { font-size: 2.6rem; }
+  .op-display { font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  .op-h { font-size: 1.2rem; }
+  .op-short { font-size: .95rem; margin-bottom: 0; }
+  .op-get { margin-top: 10px; font-size: .72rem; }
+  .op-val { display: none; }
+  .obra-stage .obra-rail { bottom: 8px; }
+}
+@media (max-height: 760px) and (min-width: 901px) {
+  .op-title { font-size: clamp(2.6rem, 4.6vw, 4.6rem); }
+  .op-h { font-size: 1.4rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

@@ -245,7 +245,7 @@
   const labelGroups = {};
   function buildLabels(bounds) {
     labelsG.textContent = '';
-    COLX = bounds.x1 + 30;
+    COLX = P(14, -1, 0)[0] + 34;
     Object.entries(LABELS).forEach(([ph, list]) => {
       const g = el('g', { class: 'lab', 'data-ph': ph }, labelsG);
       const placed = list.map(([txt, a]) => ({ txt, p: P(...a) })).sort((m, n) => m.p[1] - n.p[1]);
@@ -272,13 +272,30 @@
   const B = bounds();
   buildLabels(B);
   const narrow = () => innerWidth <= 900;
+  // Encuadre: la obra llena la pantalla. En escritorio el edificio y sus rótulos ocupan el 60 % derecho
+  // (a la izquierda va el texto de cada fase); en móvil, el edificio centrado en la mitad de arriba.
   function frameView() {
-    const pad = 14;
-    if (narrow()) { const [l] = P(-3, 9, 0), [r] = P(13, 1, 0); svg.setAttribute('viewBox', `${(l - pad).toFixed(0)} ${(B.y0 - pad).toFixed(0)} ${(r - l + 2 * pad).toFixed(0)} ${(B.y1 - B.y0 + 2 * pad).toFixed(0)}`); }
-    else svg.setAttribute('viewBox', `${(B.x0 - pad).toFixed(0)} ${(B.y0 - pad).toFixed(0)} ${(COLX + 270 - B.x0 + pad).toFixed(0)} ${(B.y1 - B.y0 + 2 * pad).toFixed(0)}`);
+    const r = svg.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) return; // aún sin medidas: lo encuadra el ResizeObserver
+    // En escritorio la línea de fases ocupa el pie de la pantalla: el edificio se encuadra por encima
+    const rail = document.querySelector('.obra-rail');
+    const pad = !narrow() && rail ? rail.offsetHeight + 20 : 0;
+    const eh = Math.max(1, r.height - pad);
+    const ar = r.width / eh;
+    const [L0] = P(-4, 10, 0), [R0] = P(14, -1, 0);
+    const top = Math.min(P(MX, MY, 11.8)[1], P(0, 0, TOP + 2.6)[1]) - 24, bottom = P(12.5, 12.5, 0)[1] + 18;
+    let x0, x1, y0 = top, y1 = bottom;
+    if (narrow()) { x0 = L0 + 40; x1 = R0 + 10; }
+    else { x1 = COLX + 230; x0 = x1 - (x1 - L0) / 0.6; }
+    let w = x1 - x0, h = y1 - y0;
+    if (w / h < ar) { const nw = h * ar; x0 -= narrow() ? (nw - w) / 2 : (nw - w); w = nw; }
+    else { const nh = w / ar; y0 -= (nh - h) * 0.55; h = nh; }
+    h *= r.height / eh;
+    svg.setAttribute('viewBox', `${x0.toFixed(0)} ${y0.toFixed(0)} ${w.toFixed(0)} ${h.toFixed(0)}`);
   }
   frameView();
-  addEventListener('resize', frameView);
+  if ('ResizeObserver' in window) new ResizeObserver(frameView).observe(svg);
+  else addEventListener('resize', frameView);
 
   /* ---------- pintar ---------- */
   let active = -1;

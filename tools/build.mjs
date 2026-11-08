@@ -18,7 +18,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS } from '../data/site.mjs';
+import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS, SYNTH } from '../data/site.mjs';
 import { LOGO, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, piece } from './figures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -193,42 +193,42 @@ const trussBlock = () => `
 function home() {
   const r = '';
   const rail = PHASES.map((x, k) => `<li class="rail-i" data-k="${k + 1}"><button type="button" data-go="${k + 1}" aria-label="Ir a la fase ${x.n}: ${esc(x.key)}"><span class="rail-n">${x.n}</span><span class="rail-k">${esc(x.key)}</span></button>${typeof x.val === 'number' ? `<span class="rail-v" data-v="${x.val}" aria-hidden="true"></span>` : ''}</li>`).join('');
-  const steps = PHASES.map((x, k) => `
-    <li class="step c-${PHASE_COLOR[k]}" data-step="${k + 1}" id="fase-${x.n}">
-      <p class="step-act">${esc(x.act)}</p>
-      ${head(x.key, x.n, x.layer)}
-      <h2 class="step-h">${esc(x.head)}</h2>
-      <p class="step-p">${esc(x.text)}</p>
-      ${rows(x.rows)}
-      <p class="step-val">${valNote(x.val)}</p>
-    </li>`).join('');
+  // Paneles de la obra: la síntesis de cada fase, integrada en el dibujo a pantalla completa
+  const panel = (x, k) => `
+      <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}">
+        <div class="pl-tags"><span class="pl-no">${x.n}</span><span class="pl-tag">${esc(x.act)}</span><span class="pl-pill">${esc(x.layer)}</span></div>
+        <p class="op-title">[${esc(x.key)}]</p>
+        <h2 class="op-h">${esc(x.head)}</h2>
+        <p class="op-short">${esc(SYNTH[k].short)}</p>
+        <p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>
+        ${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}
+      </article>`;
 
   const body = `
-<section class="obra" id="obra" aria-label="Cómo se construye una marca">
+<section class="obra" id="obra" aria-label="Cómo se construye una marca" style="--n:10">
   <div class="obra-stage">
+    <svg class="obra-svg" viewBox="-460 -330 1180 640" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
     ${gve}
-    <figure class="obra-fig"><svg class="obra-svg" viewBox="-460 -330 1180 640" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg></figure>
+    <div class="obra-panels">
+      <article class="op op-intro on" data-p="0">
+        <div class="pl-tags"><span class="pl-no">00</span><span class="pl-tag">Método</span><span class="pl-pill">Cómo trabajamos</span></div>
+        <h1 class="op-display">[${esc(INTRO.title)}.]</h1>
+        <p class="op-short">${esc(INTRO.sub)} Ocho fases, cuatro actos y un gomet verde en cada validación.</p>
+        <p class="op-hint">${ICON.down}Desliza para construir</p>
+      </article>${PHASES.map(panel).join('')}
+      <article class="op op-end" data-p="9">
+        <div class="pl-tags"><span class="pl-no">09</span><span class="pl-tag">Resultado</span><span class="pl-pill">Cada marca, única</span></div>
+        <p class="op-title">[Llave en mano.]</p>
+        <h2 class="op-h">${esc(FILTERS.result.head)}</h2>
+        <p class="op-short">Seguimos el mismo orden en cada proyecto para que el resultado pueda ser distinto: una marca que solo podría ser vuestra.</p>
+        <div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método completo</a></div>
+      </article>
+    </div>
     <div class="obra-rail">
       <ol class="rail">${rail}</ol>
       <p class="obra-cap">${gomet}Cada gomet verde es una validación con vosotros</p>
     </div>
   </div>
-  <ol class="obra-steps">
-    <li class="step step-intro" data-step="0">
-      <div class="pl-tags intro-tags"><span class="pl-no">00</span><span class="pl-tag">Método</span><span class="pl-pill">Cómo trabajamos</span></div>
-      <h1 class="display">[${esc(INTRO.title)}.]</h1>
-      <p class="lead">${esc(INTRO.sub)}</p>
-      <p class="step-p">${STUDIO.name} es un estudio independiente de branding y dirección de arte entre Valencia y Barcelona. Construimos cada marca de abajo arriba, en ocho fases y cuatro actos, y ninguna capa se levanta sin vuestro visto bueno.</p>
-      <div class="ctas"><a class="btn" href="#fase-01">Ver cómo se construye ${ICON.down}</a><a class="btn btn-ghost" href="contacto/">Empezar un proyecto</a></div>
-    </li>${steps}
-    <li class="step step-end" data-step="9">
-      ${head('Resultado', '00', 'Cada marca, única')}
-      <h2 class="step-h">${esc(FILTERS.result.head)}</h2>
-      <p class="step-p">${esc(FILTERS.result.text)}</p>
-      ${rows(FILTERS.result.rows)}
-      <div class="ctas"><a class="btn" href="obras/">Ver las obras ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método, lámina a lámina</a></div>
-    </li>
-  </ol>
 </section>
 
 ${divider('Piezas', '01')}

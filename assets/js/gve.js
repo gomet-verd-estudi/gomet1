@@ -32,28 +32,18 @@
   fitViewBox();
   addEventListener('resize', fitViewBox);
 
-  /* ---------- 2. la obra: el avance de cada fase llega al motor (assets/js/obra.js) ---------- */
+  /* ---------- 2. la obra a pantalla completa: el scroll dentro de la sección construye el edificio ---------- */
   const obra = $('.obra');
   if (obra) {
-    const steps = $$('.step', obra);
-    const stage = $('.obra-stage', obra);
+    const panels = $$('.op', obra);
     const rail = $$('.rail-i', obra), railVals = $$('.rail-v', obra);
+    const N = panels.length; // portada + 8 fases + resultado
     let cur = Array(9).fill(0), target = Array(9).fill(0), running = false, lastActive = -1, act = 0;
-
-    // La línea de lectura: a media pantalla en escritorio; bajo el dibujo fijo en móvil
-    const readLine = () => {
-      const sb = stage.getBoundingClientRect().bottom;
-      return innerWidth <= 900 ? sb + (innerHeight - sb) * 0.35 : innerHeight * 0.55;
-    };
-    // Posición continua: 0 = portada, k = fase k, 9 = resultado
+    // Posición continua 0–N: cuánto se ha recorrido la sección mientras la obra está fija
     const position = () => {
-      const y = readLine();
-      for (let i = 0; i < steps.length; i++) {
-        const r = steps[i].getBoundingClientRect();
-        if (y < r.top) return i;
-        if (y < r.bottom) return i + (y - r.top) / r.height;
-      }
-      return steps.length;
+      const r = obra.getBoundingClientRect();
+      const run = obra.offsetHeight - innerHeight;
+      return run > 0 ? clamp(-r.top / run) * N : N;
     };
     const send = () => { if (window.GVE_OBRA) window.GVE_OBRA.set(cur, act); };
     function frame() {
@@ -68,19 +58,19 @@
       if (moving) requestAnimationFrame(frame);
     }
     function update() {
-      const s = reduce ? steps.length : position();
-      // la fase k se construye mientras su texto pasa por la línea de lectura
-      for (let k = 1; k <= 8; k++) target[k] = clamp((s - k + 0.25) / 0.85);
-      railVals.forEach((v) => v.classList.toggle('on', s >= +v.dataset.v + 1 + 0.6));
-      const active = clamp(Math.floor(s), 0, steps.length - 1);
+      const s = position(); // con movimiento reducido el edificio salta de fase en fase, sin animar
+      for (let k = 1; k <= 8; k++) target[k] = clamp((s - k + 0.35) / 0.85);
+      railVals.forEach((v) => v.classList.toggle('on', s >= +v.dataset.v + 1 + 0.5));
+      const active = clamp(Math.floor(s), 0, N - 1);
       act = active >= 1 && active <= 8 ? active : 0;
       if (active !== lastActive) {
         lastActive = active;
-        steps.forEach((st, i) => st.classList.toggle('is-active', i === active));
+        panels.forEach((p, i) => p.classList.toggle('on', i === active));
+        obra.dataset.p = active;
       }
       rail.forEach((li, k) => {
         li.classList.toggle('now', k + 1 === active);
-        li.classList.toggle('done', s >= k + 1 + 0.6);
+        li.classList.toggle('done', s >= k + 1 + 0.5);
       });
       if (reduce) { cur = target.slice(); send(); return; }
       if (!running) { running = true; requestAnimationFrame(frame); }
@@ -92,13 +82,13 @@
     addEventListener('resize', onScroll);
     addEventListener('load', () => { update(); send(); });
     update();
-
-    // El riel: saltar a una fase
-    $$('[data-go]', obra).forEach((b) => b.addEventListener('click', () => {
-      const st = steps[+b.dataset.go];
-      const r = st.getBoundingClientRect();
-      scrollTo({ top: scrollY + r.top - readLine() + r.height * 0.6, behavior: reduce ? 'auto' : 'smooth' });
-    }));
+    // Saltar a una fase desde el riel (y desde los enlaces #fase-0X)
+    const go = (k) => {
+      const run = obra.offsetHeight - innerHeight;
+      const top = obra.getBoundingClientRect().top + scrollY + run * ((k + 0.7) / N);
+      scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+    };
+    $$('[data-go]', obra).forEach((b) => b.addEventListener('click', () => go(+b.dataset.go)));
   }
 
   /* ---------- 3. láminas ---------- */

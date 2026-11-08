@@ -318,3 +318,15 @@ export const VEREIS = {
     ]
   }
 };
+
+/* Síntesis de cada fase para la obra a pantalla completa de la portada: una frase y lo que se recibe. */
+export const SYNTH = [
+  { short: 'Una conversación larga y sin prisas: quiénes sois, qué os preocupa y hacia dónde queréis ir.', get: 'El brief y el programa de piezas' },
+  { short: 'Investigamos el mercado y decidimos juntos dónde construir: el hueco que nadie ocupa.', get: 'El documento estratégico' },
+  { short: 'La idea madre que sostendrá vuestra marca durante años. No se ve, pero todo se apoya en ella.', get: 'Fundamentos, concepto raíz y manifiesto' },
+  { short: 'Tipografía, retícula, color e imagen: reglas que se deciden una vez y sostienen cada pieza.', get: 'El sistema de identidad' },
+  { short: 'Papelería, web, packaging y redes: cada pieza en su formato, todas sobre los mismos pilares.', get: 'Todas las aplicaciones del programa' },
+  { short: 'El diseño aprobado se convierte en archivos que funcionan en imprenta, pantalla y fábrica.', get: 'Artes finales revisadas y probadas' },
+  { short: 'La marca pasa a ser vuestra: archivos fuente, licencias y el manual para no estropearla.', get: 'Llave en mano' },
+  { short: 'Revisamos, ajustamos y ampliamos sobre la misma estructura mientras la marca crece.', get: 'Acompañamiento durante el tiempo necesario' }
+];
