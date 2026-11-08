@@ -890,6 +890,39 @@ svg [fill="#1B1B1B"] { fill: var(--midori); }
   .cat-fig path, .pl-fig path, .pil-fig path, #fig-fases path, .timeline path, .fachada path { stroke-width: .7px; }
 }
 
+/* ==========================================================================
+   SELLO — la ilustración es un sello de tinta verde flúor (Riso Fluorescent Green) estampado sobre
+   la hoja: solo línea, sin sombras. Se imprime por encima de los textos grises en modo multiplicar:
+   el blanco del dibujo desaparece y la tinta se monta sobre las letras, como un sello de verdad.
+   La textura de goma es una máscara fija que compone la tarjeta gráfica: no cuesta repintar nada.
+   ========================================================================== */
+:root { --midori: #44D62C; --gomet: #44D62C; --gomet-d: #2FB51C; --t1: var(--paper); --t2: var(--paper); --t3: var(--paper); }
+.obra-stage { background: var(--paper); }
+.obra-stage .obra-svg { z-index: 3; pointer-events: none; mix-blend-mode: multiply; will-change: transform; transform: rotate(-.35deg);
+  -webkit-mask: url(../img/stamp.png) 0 0 / 128px 128px repeat; mask: url(../img/stamp.png) 0 0 / 128px 128px repeat; }
+.obra-svg { --thin: max(.92px, calc(.5px / var(--scale, 1))); --outer: max(2.6px, calc(1.4px / var(--scale, 1))); }
+.obra-svg use.under { --pw: max(2.5px, calc(1.35px / var(--scale, 1))); }
+/* sin sombras: todo en blanco (que al multiplicar es el papel) y solo la línea */
+.obra-svg .bx .ft, .obra-svg .bx .fl, .obra-svg .bx .fr, .obra-svg .bx path.o, .obra-svg .plot .ft, .obra-svg .pit-floor, .obra-svg .pit-wall.a, .obra-svg .pit-wall.b,
+.obra-svg .pour, .obra-svg .window, .obra-svg .door, .obra-svg .stake .f, .obra-svg .hook .f, .obra-svg .book .ft, .obra-svg .plant .fr, .obra-svg .mk circle,
+.obra-svg .p-paper, .obra-svg .p-red, .obra-svg .p-pink, .obra-svg .p-blue, .obra-svg .p-yellow, .obra-svg .p-navy, .obra-svg .cone .p-red { fill: var(--blank, #FFFFFF); }
+.obra-svg .door { stroke: var(--midori); stroke-width: var(--thin); }
+.obra-svg .p-shadow { display: none; }
+.obra-svg .val-k { stroke: var(--blank, #FFFFFF); }
+.obra-svg .mk text { fill: var(--midori); }
+.obra-svg .mk.hi circle { fill: var(--midori); }
+.obra-svg .mk.hi text { fill: var(--blank, #FFFFFF); }
+.obra-svg .grid { opacity: .5; }
+/* los dibujos fijos (piezas y láminas), con el mismo sello */
+.cat-fig svg, .pl-fig svg, .pil-fig svg, svg.ph-icon { -webkit-mask: url(../img/stamp.png) 0 0 / 128px 128px repeat; mask: url(../img/stamp.png) 0 0 / 128px 128px repeat; }
+.cat-fig path, .pl-fig path, .pil-fig path, #fig-fases path, .timeline path, .fachada path { stroke-width: 1px; }
+@media (max-width: 900px) {
+  /* en móvil el dibujo no se monta sobre el texto: sin multiplicar (lo más ligero) y el blanco pasa a ser el papel */
+  .obra-stage .obra-svg { mix-blend-mode: normal; }
+  .obra-svg { --blank: var(--paper); }
+  .cat-fig path, .pl-fig path, .pil-fig path, #fig-fases path, .timeline path, .fachada path { stroke-width: .8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

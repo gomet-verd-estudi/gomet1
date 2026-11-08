@@ -248,7 +248,7 @@
   const B = BODY;
   const FOLK = [
     // peatones, siempre en la calle: el público que estudiamos en el terreno
-    { at: [10.2, 5.4], parts: [B.shadow, ...B.legs('p-navy'), ['M4.6 -10.2h4.8v3.6h-4.8Z', 'p-k'], ['M5.9 -10.2v-1h2.2v1', 'p-none'], B.torso('p-k'), ...B.tie, ...B.armL('p-k'), ...B.armR('p-k'), ...B.head, B.hair] }, // oficinista con cartera
+    { at: [10.2, 5.4], parts: [B.shadow, ...B.legs('p-navy'), ['M4.6 -10.2h4.8v3.6h-4.8Z', 'p-paper'], ['M5.9 -10.2v-1h2.2v1', 'p-none'], B.torso('p-paper'), ...B.tie, ...B.armL('p-paper'), ...B.armR('p-paper'), ...B.head, B.hair] }, // oficinista con cartera
     { at: [3.2, 10.6], s: 0.74, parts: [B.shadow, ...B.legs('p-blue'), ['M-5 -18.6h10v7.4h-10Z', 'p-red'], B.torso('p-paper'), ...B.armL('p-paper'), ...B.armR('p-paper'), ...B.head, ['M-3.6 -22.4A3.7 3.6 0 0 1 3.6 -22.4L4.8 -21.8L-3.6 -21.8Z', 'p-yellow']] }, // colegial con gorro amarillo y mochila roja
     { at: [11, 9.8], parts: [B.shadow, ['M-2.4 -6.2L-0.6 -6.2L-0.8 -1L-2.2 -1Z', 'p-paper'], ['M0.6 -6.2L2.4 -6.2L2.2 -0.8L0.8 -0.8Z', 'p-paper'], ['M-3.4 -1.3L-0.6 -1.3L-0.5 0.3L-3.7 0.3Z', 'p-k'], ['M0.6 -1.1L3.2 -1.1L3.6 0.5L0.5 0.5Z', 'p-k'], ['M-3.8 -10.6L3.8 -10.6L4.8 -5.6L-4.8 -5.6Z', 'p-pink'], B.torso('p-paper'), ['M-8 -12.6h4.2l.5 4.8h-5.2Z', 'p-blue'], ...B.armL('p-paper'), ...B.armR('p-paper'), ...B.head, ['M-3.3 -21.6Q-3.6 -26 0 -25.6Q3.6 -26 3.3 -21.6L3.6 -18.6L2.6 -18.8Q3 -22.6 0 -23.2Q-3 -22.6 -2.6 -18.8L-3.6 -18.6Z', 'p-k']] }, // vecina con bolsa
     // obreros: llegan con la obra y se van con la entrega de llaves
@@ -260,7 +260,7 @@
     const sc = sc0 * FOLK_SCALE;
     const [px, py] = P(at[0], at[1], 0);
     const g = el('g', { class: 'ppl', transform: `translate(${px.toFixed(1)} ${py.toFixed(1)})${sc !== 1 ? ` scale(${sc})` : ''}` });
-    parts.forEach(([d, c, key = 1]) => el('path', { d, class: 'pf ' + c + (key ? '' : ' nk') }, g));
+    parts.forEach(([d, c, key = 1]) => { if (c !== 'p-shadow') el('path', { d, class: 'pf ' + c + (key ? '' : ' nk') }, g); }); // sin sombras: solo línea
     return { g, u: outline(g), site };
   });
   add(() => { const on = onSite() > 0.5; folk.forEach((f) => { if (f.site) { f.g.style.display = on ? '' : 'none'; f.u.style.display = f.g.style.display; } }); }, [2, 7]);
@@ -363,7 +363,7 @@
     if (!narrow() && stage) {
       const L1 = stage.querySelector('.op-l'), R1 = stage.querySelector('.op-r'), rail = stage.querySelector('.obra-rail');
       const gap = Math.max(20, r.width * 0.02);
-      if (L1 && R1) half = Math.min(cx - (L1.getBoundingClientRect().right - r.left), (R1.getBoundingClientRect().left - r.left) - cx) - gap;
+      if (L1 && R1) half = Math.min(cx - (L1.getBoundingClientRect().right - r.left), (R1.getBoundingClientRect().left - r.left) - cx) - gap + Math.min(110, r.width * 0.06);
       if (L1) y0 = L1.getBoundingClientRect().top - r.top;
       if (rail) y1 = rail.getBoundingClientRect().top - r.top - 24;
     }

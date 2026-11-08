@@ -36,7 +36,7 @@ const head = (title, no, tag, pill = '') => `<header class="pl-head"><div class=
 const tags = (no, tag, pill = '') => `<div class="pl-tags sec-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div>`;
 const divider = () => ''; // la web minimal separa las secciones con aire y un filete, sin bandas
 /* Una sola trama, la de las vallas de obra a rayas (トラ柵), en la tinta verde */
-const RISO_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="tora" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3.2" height="3.2" fill="#F4EFE6"/><rect width="1.6" height="3.2" fill="#007B43"/></pattern></defs></svg>`;
+const RISO_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><pattern id="tora" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3.2" height="3.2" fill="#FFFFFF"/><rect width="1.6" height="3.2" fill="#44D62C"/></pattern></defs></svg>`;
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
 const gve = '';
