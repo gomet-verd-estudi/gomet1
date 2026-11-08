@@ -37,9 +37,13 @@
 
   /* ---------- primitivas ---------- */
   // Caja: tapa y dos laterales visibles. h y extensión se recalculan cada fotograma.
+  // Cada caja se imprime en dos pasadas, como en risografía: la plancha de color (algo desplazada)
+  // y encima la plancha negra del trazo. El desajuste entre las dos es intencionado.
   function boxNode(cls) {
-    const g = el('g', { class: 'bx ' + cls });
-    return { g, l: el('path', { class: 'f fl' }, g), r: el('path', { class: 'f fr' }, g), t: el('path', { class: 'f ft' }, g) };
+    const g = el('g', { class: 'bx ' + cls }), ink = el('g', { class: 'ink' }, g);
+    const n = { g, l: el('path', { class: 'f fl' }, ink), r: el('path', { class: 'f fr' }, ink), t: el('path', { class: 'f ft' }, ink) };
+    n.k = [el('path', { class: 'k' }, g), el('path', { class: 'k' }, g), el('path', { class: 'k' }, g)];
+    return n;
   }
   function drawBox(n, x, y, z, w, d, h) {
     if (h <= 0.002 || w <= 0.002 || d <= 0.002) { n.g.style.display = 'none'; return; }
@@ -47,6 +51,7 @@
     n.t.setAttribute('d', poly([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)]));
     n.l.setAttribute('d', poly([P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h)]));
     n.r.setAttribute('d', poly([P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h)]));
+    n.k[0].setAttribute('d', n.l.getAttribute('d')); n.k[1].setAttribute('d', n.r.getAttribute('d')); n.k[2].setAttribute('d', n.t.getAttribute('d'));
   }
   // Caja que crece hacia arriba desde su base dentro de la ventana [a, b] de su fase
   function rise(ph, a, b, x, y, z, w, d, h, cls) {
@@ -306,7 +311,10 @@
     // las cotas mantienen su tamaño en pantalla, sea cual sea la escala del dibujo
     const ms = (narrow() ? 0.85 : 1) / k;
     marks.forEach((m) => m.setAttribute('transform', `translate(${(+m.dataset.x).toFixed(1)} ${(+m.dataset.y).toFixed(1)}) scale(${ms.toFixed(3)})`));
-    svg.style.setProperty('--k', k.toFixed(3));
+    svg.style.setProperty('--scale', k.toFixed(3));
+    // desajuste de la plancha de color: unos 2 px en pantalla, sea cual sea la escala
+    svg.style.setProperty('--mx', (1.9 / k).toFixed(2) + 'px');
+    svg.style.setProperty('--my', (-1.3 / k).toFixed(2) + 'px');
   }
   frameView();
   if ('ResizeObserver' in window) { const ro = new ResizeObserver(frameView); ro.observe(svg); if (stage) ro.observe(stage); }

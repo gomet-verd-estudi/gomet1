@@ -703,6 +703,160 @@ html:not(.js) .obra .op { position: static; opacity: 1; visibility: visible; tra
   .catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ==========================================================================
+   RISO — la web impresa: papel con grano, tintas planas (rojo, azul, amarillo, magenta,
+   negro y el verde del gomet), tonos en trama de puntos, la plancha de color desajustada
+   respecto al trazo negro y huecos donde la tinta no agarra. Lenguaje de los folletos
+   japoneses de montaje: banderines, flechas de trazos, cajas con marco y números de paso.
+   ========================================================================== */
+:root {
+  --paper: #F4EFE6; --k: #231F20;
+  --red: #E63A2E; --blue: #0078BF; --yellow: #FFE100; --pink: #E5007E; --aqua: #CDE6F0; --gomet: #00A95C; --gomet-d: #00894A;
+  --bg: var(--paper); --bg-alt: #ECE6DA; --grey-bg: #ECE6DA;
+  --ink: var(--k); --ink-2: var(--k); --ink-3: #4F4945; --ink-4: #8C857D;
+  --line: var(--k); --line-2: rgba(35, 31, 32, .22);
+  --brand: var(--pink); --brand-d: var(--k);
+  --red-l: var(--red); --red-d: var(--red); --blue-l: var(--blue); --blue-d: var(--blue); --yellow-l: var(--yellow); --yellow-d: var(--yellow);
+  --cream-l: var(--paper); --cream-d: #D9D2C5;
+  --mis: .05em .04em 0 var(--blue); /* desajuste de la tinta en los títulos */
+}
+html, body { background: var(--paper); }
+body { color: var(--k); }
+::selection { background: var(--yellow); color: var(--k); }
+/* el papel y la tinta: grano, fibras y motas sin tinta, por encima de todo */
+body::after { content: ''; position: fixed; inset: 0; z-index: 900; pointer-events: none; background-image: url(../img/dropout.png), url(../img/grain.png); background-size: 220px 220px, 300px 300px; }
+a { text-decoration-color: var(--red); }
+:focus-visible { outline: 2px dashed var(--blue); outline-offset: 3px; }
+
+/* tramas en todas las piezas axonométricas: cara superior en trama clara, lateral lleno, sombra con puntos */
+.c-red, .L-cim, .L-pc, .L-book, .P2, .P6 { --ht: url(#ht-red); --sh: url(#sh-red); --acc: var(--red); }
+.c-blue, .L-sol, .L-pa, .P0, .P1, .P4 { --ht: url(#ht-blue); --sh: url(#sh-blue); --acc: var(--blue); }
+.c-yellow, .L-est, .L-ins, .L-key, .P3, .P5, .P7 { --ht: url(#ht-yellow); --sh: url(#sh-yellow); --acc: var(--yellow); }
+.c-white { --ht: var(--paper); --sh: url(#sh-k); --acc: url(#ht-k); }
+.f.a.ft, .obra-svg .bx .ft { fill: var(--ht, var(--paper)); }
+.f.a.fl, .obra-svg .bx .fl { fill: var(--acc, url(#ht-k)); }
+.f.a.fr, .obra-svg .bx .fr { fill: var(--sh, url(#sh-k)); }
+.f.w.ft { fill: var(--paper); }
+.f.w.fl { fill: url(#ht-k); }
+.f.w.fr { fill: url(#sh-k); }
+
+/* ---------- la obra ---------- */
+.obra-stage { background: transparent; }
+.obra-svg .bx .ink { transform: translate(var(--mx, 1.6px), var(--my, -1.1px)); }
+.obra-svg .bx .f { stroke: none; }
+.obra-svg .bx .k { fill: none; stroke: var(--k); stroke-width: 1.1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.obra-svg .city .k { stroke-width: .9; }
+.obra-svg .ground { fill: transparent; }
+.obra-svg .grid { stroke: var(--blue); stroke-width: .6; opacity: .45; }
+.obra-svg .ghost { stroke: var(--pink); stroke-width: 1; stroke-dasharray: 5 4; opacity: .8; }
+.obra-svg .mark { stroke: var(--k); stroke-width: 1.4; }
+.obra-svg .pit-floor { fill: url(#sh-k); stroke: var(--k); }
+.obra-svg .pit-wall.a, .obra-svg .pit-wall.b { fill: url(#ht-k); stroke: var(--k); }
+.obra-svg .pour { fill: url(#ht-red); stroke: var(--k); }
+.obra-svg .window { fill: var(--blue); stroke: var(--k); }
+.obra-svg .door, .obra-svg .head { stroke: var(--k); }
+.obra-svg .cable, .obra-svg .hook-line { stroke: var(--k); }
+.obra-svg .amp { stroke: var(--pink); stroke-width: 1.4; stroke-dasharray: 6 4; }
+.obra-svg .mullion { stroke: var(--k); opacity: .5; }
+.obra-svg .val { fill: var(--gomet); }
+.obra-svg .mk circle { fill: var(--red); stroke: var(--k); stroke-width: 1.2; }
+.obra-svg .mk text { fill: var(--paper); font-weight: 700; }
+.obra-svg .mk.hi circle { fill: var(--blue); }
+.obra-svg .mk.hi text { fill: var(--paper); }
+
+.jp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin: 0 0 14px; white-space: nowrap; font-weight: 800; font-size: 1.05rem; letter-spacing: .12em; color: var(--k); }
+.jp-head .jp-es { order: -1; flex-basis: 100%; font-size: .56rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
+.bars { flex: 1; min-width: 18px; max-width: 46px; height: 12px; background: repeating-linear-gradient(90deg, var(--blue) 0 4px, transparent 4px 8px); }
+.banner { display: inline-block; white-space: nowrap; margin: 0 0 18px; padding: 8px 16px 9px; background: var(--red); color: var(--paper); font-weight: 900; font-stretch: 75%; font-size: clamp(1rem, 1.4vw, 1.3rem); letter-spacing: .01em; transform: rotate(-4deg); transform-origin: left; box-shadow: 3px 3px 0 var(--yellow); }
+.op-meta { display: inline-block; padding: 4px 9px; background: var(--red); color: var(--paper); font-weight: 700; letter-spacing: .14em; transform: rotate(-2.5deg); transform-origin: left; }
+.op-meta i { color: var(--yellow); }
+.op-title, .op-display { color: var(--pink); font-weight: 900; font-stretch: 62%; letter-spacing: -.01em; text-shadow: var(--mis); }
+.op-title { font-size: clamp(2.6rem, 3.8vw, 4rem); line-height: .88; }
+.op-display { font-size: clamp(2.4rem, 3.3vw, 3.6rem); line-height: .9; }
+.op-h { font-weight: 700; color: var(--k); }
+.op-short { color: var(--ink-3); }
+.op-count { font-weight: 900; font-stretch: 62%; color: var(--red); text-shadow: .045em .045em 0 var(--yellow); letter-spacing: 0; }
+.op-count small { display: block; margin-bottom: 4px; font-size: .32em; font-weight: 800; letter-spacing: .1em; color: var(--k); text-shadow: none; }
+.op-count span { color: var(--ink-4); text-shadow: none; font-weight: 700; }
+.mk-n { background: var(--red); color: var(--paper); border-color: var(--k); font-weight: 700; }
+.op-parts li.hi .mk-n { background: var(--blue); color: var(--paper); }
+.op-parts li, .op-list li { color: var(--k); }
+.op-get { padding: 10px 12px; border: 1.5px solid var(--k); background: var(--aqua); text-align: left; }
+.op-get span { display: table; margin: 0 0 6px; padding: 2px 6px; background: var(--blue); color: var(--paper); letter-spacing: .16em; }
+.op-val { color: var(--k); }
+.op-note { max-width: 100%; text-align: left; border: 1.5px solid var(--red); padding: 10px 12px; font-size: .82rem; line-height: 1.45; color: var(--k); }
+.op-note p { margin: 0; }
+.op-note .op-note-h { display: inline-block; margin: -22px 0 6px; padding: 1px 8px; background: var(--paper); border: 1.5px solid var(--red); color: var(--red); font-weight: 800; font-size: .78rem; letter-spacing: .12em; }
+.stamp { width: 104px; height: 104px; margin: 0 0 18px auto; border: 3px solid var(--red); border-radius: 50%; display: grid; place-content: center; text-align: center; color: var(--red); transform: rotate(-12deg); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5.5px var(--red); opacity: .92; }
+.stamp span { font-weight: 900; font-size: 1.9rem; letter-spacing: .06em; line-height: 1; }
+.stamp small { font-size: .5rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; margin-top: 4px; }
+.op-vals .op-vals-t { color: var(--k); }
+/* la línea de fases, como las flechas de trazos de los folletos */
+.obra-stage .rail { border-top: 0; background: repeating-linear-gradient(90deg, var(--blue) 0 16px, transparent 16px 24px) 0 0 / calc(100% - 14px) 5px no-repeat; position: relative; }
+.obra-stage .rail::after { content: ''; position: absolute; right: 0; top: -5px; border-left: 14px solid var(--blue); border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; }
+.rail-i::before { background: var(--red); height: 5px; top: 0; }
+.rail-v { border-color: var(--k); background: var(--paper); top: -5px; }
+.rail-v.on { background: var(--gomet); border-color: var(--k); }
+.rail-n { color: var(--red); font-weight: 700; }
+.rail-k { color: var(--k); }
+.rail-i.now .rail-k { font-weight: 700; }
+
+/* ---------- toda la web ---------- */
+.hd { background: var(--paper); border-bottom: 2px solid var(--k); }
+.hd-logo { color: var(--k); }
+.hd-nav a[aria-current], .hd-nav a:hover { text-decoration-color: var(--red); text-decoration-thickness: 3px; }
+.hd-cta, .hd-menu { border: 2px solid var(--k); border-radius: 0; background: var(--yellow); color: var(--k); font-weight: 700; box-shadow: 3px 3px 0 var(--k); }
+.hd-cta:hover { background: var(--red); color: var(--paper); }
+.pl-title, .ft .ft-big { color: var(--pink); font-weight: 900; font-stretch: 62%; letter-spacing: -.01em; text-shadow: var(--mis); }
+.h2, .pl-h, .card-name, .cat-name, .faq summary { color: var(--k); font-weight: 700; }
+.h2 { font-stretch: 80%; letter-spacing: -.015em; }
+.statement { color: var(--k); }
+.pl-tags { display: inline-flex; padding: 5px 10px; background: var(--red); color: var(--paper); font-weight: 700; transform: rotate(-2deg); transform-origin: left; box-shadow: 2px 2px 0 var(--yellow); }
+.pl-tags .pl-no { color: var(--yellow); }
+.pl-tags .pl-tag::before, .pl-tags .pl-pill::before { color: var(--yellow); }
+.lbl { color: var(--k); font-weight: 700; }
+.lbl::before { content: ''; width: 24px; height: 9px; flex: none; background: repeating-linear-gradient(90deg, var(--blue) 0 3px, transparent 3px 6px); }
+.sec { border-top: 0; background: repeating-linear-gradient(90deg, var(--k) 0 10px, transparent 10px 16px) top left / 100% 1.5px no-repeat; }
+.ft { border-top: 2px solid var(--k); }
+.ft-cta { border-bottom: 1.5px solid var(--k); }
+.plate, .plate-grey { border: 1.5px solid var(--k); padding: clamp(20px, 2.6vw, 36px); background: transparent; box-shadow: 4px 4px 0 rgba(0, 120, 191, .25); }
+.plate-pair .plate { margin-bottom: clamp(32px, 4vw, 56px); }
+.plate { margin-bottom: clamp(32px, 4vw, 56px); }
+.pl-rows div { border-top: 1px solid var(--line-2); }
+.pl-rows dt { color: var(--red); font-weight: 700; }
+.catalog { gap: 14px; }
+.cat { border: 1.5px solid var(--k); background: transparent; }
+.cat a { padding: 12px 14px 14px; }
+.cat a:hover { background: var(--aqua); }
+.cat-fig { border-bottom: 0; }
+.cat-n { color: var(--red); font-weight: 900; font-stretch: 62%; font-size: 1.5rem; letter-spacing: 0; text-shadow: 2px 2px 0 var(--yellow); }
+.media, .g-media, .obra-cover { border: 1.5px solid var(--k); background: var(--bg-alt); }
+.card-n, .card-meta { color: var(--red); }
+.tags li, .chip span { border: 1.5px solid var(--k); border-radius: 0; background: transparent; color: var(--k); }
+.chip input:checked + span { background: var(--blue); color: var(--paper); border-color: var(--k); }
+.field input { border-bottom: 1.5px solid var(--k); }
+.field textarea { border: 1.5px solid var(--k); }
+.tbl thead th { background: var(--blue); color: var(--paper); }
+.faq details { border-color: var(--k); }
+.btn { border-radius: 0; border: 2px solid var(--k); background: var(--red); color: var(--paper); font-weight: 700; box-shadow: 3px 3px 0 var(--blue); transition: transform .15s, box-shadow .15s, background .2s; }
+.btn:hover { background: var(--pink); border-color: var(--k); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--blue); }
+.btn-ghost { background: var(--paper); color: var(--k); box-shadow: 3px 3px 0 var(--yellow); }
+.btn-ghost:hover { background: var(--yellow); color: var(--k); box-shadow: 4px 4px 0 var(--k); }
+.diag .d-fill { fill: url(#ht-yellow); stroke: var(--k); }
+.diag .d-line, .diag .d-dash { stroke: var(--k); }
+.diag .d-k { fill: var(--k); font-weight: 600; }
+.ft-logo { color: var(--k); }
+.pl-gomet { background: var(--gomet); box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .18), 1px -1px 0 rgba(0, 120, 191, .35); }
+@media (max-width: 900px) {
+  .banner { font-size: .95rem; margin-bottom: 12px; }
+  .jp-head { margin-bottom: 8px; }
+  .op-title { font-size: 2.6rem; }
+  .op-display { font-size: clamp(2.1rem, 9vw, 2.8rem); }
+  .op-get { border: 0; background: none; padding: 0; }
+  .op-get span { margin: 0 8px 0 0; }
+  .op-note, .stamp { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

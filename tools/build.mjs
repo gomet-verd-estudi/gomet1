@@ -35,6 +35,14 @@ const head = (title, no, tag, pill = '') => `<header class="pl-head"><div class=
 /* separador de sección a sangre, en el gris de la marca, como en las presentaciones */
 const tags = (no, tag, pill = '') => `<div class="pl-tags sec-tags"><span class="pl-no">${no}</span><span class="pl-tag">${esc(tag)}</span>${pill ? `<span class="pl-pill">${esc(pill)}</span>` : ''}</div>`;
 const divider = () => ''; // la web minimal separa las secciones con aire y un filete, sin bandas
+/* Tramas de risografía: con tintas planas, los tonos se hacen con puntos.
+   ht-*: la tinta en trama sobre el papel (tono claro) · sh-*: tinta llena con trama de sombra encima */
+const INKS = { red: '#E63A2E', blue: '#0078BF', yellow: '#FFE100', pink: '#E5007E', k: '#231F20' };
+const PAPER = '#F4EFE6';
+const dots = (id, size, r, bg, fg, op = 1) => `<pattern id="${id}" width="${size}" height="${size}" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><rect width="${size}" height="${size}" fill="${bg}"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="${fg}"${op < 1 ? ` fill-opacity="${op}"` : ''}/></pattern>`;
+const RISO_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>${
+  Object.entries(INKS).map(([k, c]) => dots('ht-' + k, 4.6, k === 'k' ? 0.9 : 1.55, PAPER, c)).join('')
+}${dots('sh-red', 3.8, 1.05, INKS.red, INKS.k, 0.75)}${dots('sh-blue', 3.8, 1.05, INKS.blue, INKS.k, 0.75)}${dots('sh-yellow', 3.8, 1.15, INKS.yellow, INKS.red, 0.9)}${dots('sh-k', 3.6, 1.15, PAPER, INKS.k, 0.85)}${dots('ht-aqua', 4, 1.35, PAPER, INKS.blue, 0.55)}</defs></svg>`;
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
 const gve = '';
@@ -127,12 +135,13 @@ function page({ title, desc, rel, r, body, cls = '', current = '', image = 'og.j
 <link rel="apple-touch-icon" href="${r}apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap">
 <link rel="stylesheet" href="${r}assets/css/gve.css?v=${VERSION}">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 </head>
 <body class="${cls}">
 ${defs}
+${RISO_DEFS}
 ${header(r, current)}
 <main id="main">
 ${body}
@@ -191,7 +200,7 @@ function home() {
   // y a su derecha la ficha técnica (número, piezas señaladas en el dibujo, lo que recibís, la validación)
   const parts = (list) => `<ol class="op-parts" aria-label="Señalado en el dibujo">${list.map((p, i) => `<li data-i="${i}"><span class="mk-n" aria-hidden="true">${i + 1}</span>${esc(p)}</li>`).join('')}</ol>`;
   const list = (items) => `<ul class="op-list">${items.map((t) => `<li>${t}</li>`).join('')}</ul>`;
-  const count = (n, of = '08') => `<p class="op-count" aria-hidden="true">${n}<span>/${of}</span></p>`;
+  const count = (n, of = '08') => `<p class="op-count" aria-hidden="true"><small lang="ja">工程</small>${n}<span>/${of}</span></p>`;
   const panel = (x, k) => `
       <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}">
         <div class="op-l">
@@ -211,12 +220,12 @@ function home() {
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0">
         <div class="op-l">
-          <div class="op-top"><p class="op-meta">Método <i>/</i> Cómo trabajamos</p><h1 class="op-display">[${esc(INTRO.title)}.]</h1></div>
+          <div class="op-top"><p class="jp-head"><span class="bars" aria-hidden="true"></span><span lang="ja">組立説明書</span><span class="jp-es">Instrucciones de montaje</span><span class="bars" aria-hidden="true"></span></p><p class="banner">¡Ocho fases, una marca!</p><h1 class="op-display">[${esc(INTRO.title)}.]</h1></div>
           <div class="op-bot"><p class="op-short">${esc(INTRO.sub)}</p><p class="op-hint">${ICON.down}Desliza para construir</p></div>
         </div>
         <div class="op-r">
           <div class="op-top">${count('00')}${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}</div>
-          <div class="op-bot"><p class="op-val">${gomet}Cada gomet verde es una validación con vosotros</p></div>
+          <div class="op-bot"><div class="op-note"><p class="op-note-h"><span lang="ja">注意</span> Atención</p><p>${gomet}Cada gomet verde es una validación con vosotros: nada avanza sin vuestro visto bueno.</p></div></div>
         </div>
       </article>${PHASES.map(panel).join('')}
       <article class="op op-end" data-p="9">
@@ -225,7 +234,7 @@ function home() {
           <div class="op-bot"><p class="op-h">${esc(FILTERS.result.head)}</p><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método</a></div></div>
         </div>
         <div class="op-r">
-          <div class="op-top">${count('08')}${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}</div>
+          <div class="op-top"><p class="stamp" aria-hidden="true"><span lang="ja">完成</span><small>Terminado</small></p>${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}</div>
           <div class="op-bot"><p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
         </div>
       </article>
