@@ -100,24 +100,33 @@
       clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); if (cap) { if (reduce) cap.still('idle'); else cap.set('idle'); } }, 6500);
     };
     say = talk;
+    let entering = false;
     haul = () => {
       const y = scrollY, dy = y - lastY; lastY = y;
-      if (!live || Math.abs(dy) < 0.5) return;
+      if (!live || Math.abs(dy) < 0.5 || entering) return;
       if (cap && !reduce) { cap.set('walk'); cap.face(dy > 0 ? 1 : -1); cap.advance(Math.abs(dy) / 520); }
       bubble.classList.remove('say');
       clearTimeout(idleT); idleT = setTimeout(say, 420);
     };
     if (mascot && canvas) {
+      mascot.classList.add('wait'); // hasta que entra, no se ve (sin JavaScript se ve la imagen fija)
       const boot = () => {
         const s = document.createElement('script'); s.src = canvas.dataset.src || 'assets/js/capataz3d.js'; s.async = true;
+        s.onerror = () => { mascot.classList.remove('wait'); };
         s.onload = () => window.GVECapataz3D({ canvas, base: 'assets/capataz/', reduce }).then((c) => {
-          cap = c; mascot.classList.add('is-3d');
-          if (reduce) c.still('idle'); else if (live) c.start();
+          cap = c; mascot.classList.add('is-3d'); mascot.classList.remove('wait');
+          if (reduce || !live) { c.face(0); if (reduce) c.still('idle'); else c.start(); setTimeout(say, 600); }
+          else {
+            // entra caminando de perfil desde el margen izquierdo, se gira hacia quien lee, saluda y habla
+            const r = mascot.getBoundingClientRect();
+            entering = true; clearTimeout(idleT);
+            c.enter(r.left + r.width * 0.75).then(() => { entering = false; lastY = scrollY; say(); });
+          }
           if ('IntersectionObserver' in window) new IntersectionObserver((es) => es.forEach((e) => {
             live = e.isIntersecting; if (reduce) return; if (live) cap.start(); else cap.stop();
           })).observe(obra);
           document.addEventListener('visibilitychange', () => { if (!document.hidden && live && !reduce) cap.start(); });
-        }).catch(() => {}); // sin WebGL se queda la imagen fija
+        }).catch(() => { mascot.classList.remove('wait'); setTimeout(say, 400); }); // sin WebGL, la imagen fija
         document.head.appendChild(s);
       };
       // primero el contenido; el muñeco 3D después, cuando el navegador está libre
@@ -129,7 +138,7 @@
     const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); haul(); }); } };
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll);
-    addEventListener('load', () => { update(); send(); setTimeout(() => say(), 1500); });
+    addEventListener('load', () => { update(); send(); if (!mascot) setTimeout(() => say(), 1500); });
     update();
     // Saltar a una fase desde el riel (y desde los enlaces #fase-0X)
     const html = document.documentElement;

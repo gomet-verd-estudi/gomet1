@@ -50,6 +50,12 @@ export async function createCapataz({ canvas, url, texture, relief, folds = null
   const footMin = () => Math.min(...FEET.map((b) => b.getWorldPosition(_v).y));
   root.updateMatrixWorld(true);
   const restFoot = footMin();
+  // el pie que está en el suelo y su posición en pantalla (x del mundo, la cámara mira de frente)
+  const SOLES = [B.LeftToeBase || B.LeftFoot, B.RightToeBase || B.RightFoot], ANKLES = [B.LeftFoot, B.RightFoot];
+  function planted() {
+    const a = SOLES[0].getWorldPosition(new THREE.Vector3()).y, b = SOLES[1].getWorldPosition(new THREE.Vector3()).y;
+    const i = a <= b ? 0 : 1; return { i, x: ANKLES[i].getWorldPosition(_v).x, gap: Math.abs(a - b) };
+  }
   const AX = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) };
   const ORDER = ['Hips', 'Spine', 'Spine1', 'Spine2', 'Neck', 'Head',
     'LeftShoulder', 'LeftArm', 'LeftForeArm', 'LeftHand', 'RightShoulder', 'RightArm', 'RightForeArm', 'RightHand',
@@ -62,7 +68,8 @@ export async function createCapataz({ canvas, url, texture, relief, folds = null
     root.updateMatrixWorld(true);
     for (const n of ORDER) {
       const r = p[n]; if (!r) continue;
-      if (r.y) turn(n, AX.y, r.y); if (r.x) turn(n, AX.x, r.x); if (r.z) turn(n, AX.z, r.z);
+      // primero se abre o cierra (z), luego gira sobre sí mismo (y) y al final se balancea (x)
+      if (r.z) turn(n, AX.z, r.z); if (r.y) turn(n, AX.y, r.y); if (r.x) turn(n, AX.x, r.x);
       B[n].updateMatrixWorld(true);
     }
     root.updateMatrixWorld(true);
@@ -174,5 +181,7 @@ export async function createCapataz({ canvas, url, texture, relief, folds = null
     mesh.material = flatMat; renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(post, postCam);
   }
   const set = (k, v) => { U[k].value = v; };
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, materials: { flatMat, detailMat } };
+  // píxeles CSS por unidad del mundo, para pasar el desplazamiento del pie a la pantalla
+  const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, planted, pxPerUnit, materials: { flatMat, detailMat } };
 }

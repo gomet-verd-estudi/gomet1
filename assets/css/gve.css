@@ -1159,8 +1159,8 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
   .m-bubble { right: 18px; max-width: min(64vw, 240px); font-size: .82rem; padding: 9px 12px 10px; }
 }
 /* El capataz al estilo de las mascotas japonesas: línea gruesa y uniforme, a una tinta */
-.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); will-change: transform; animation: cp-in .9s cubic-bezier(.22, 1.4, .45, 1) .2s both; }
-@keyframes cp-in { from { transform: translateX(120%) rotate(8deg); } } /* entra corriendo desde el borde */
+.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); will-change: transform; }
+.mascot.wait .cp-poster, .mascot.wait .m-bubble { visibility: hidden; } /* entra caminando cuando carga */
 
 /* Rendimiento en escritorio: la plancha verde ocupa solo su franja (no toda la pantalla), así la
    máscara de sello y el multiplicar se componen sobre un tercio de la superficie */
