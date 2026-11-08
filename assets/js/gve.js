@@ -40,10 +40,14 @@
     const N = panels.length; // portada + 8 fases + resultado
     let cur = Array(9).fill(0), target = Array(9).fill(0), running = false, lastActive = -1, act = 0;
     // Posición continua 0–N: cuánto se ha recorrido la sección mientras la obra está fija
+    // Posición continua 0–N: qué texto cruza el centro de la pantalla y cuánto ha avanzado
     const position = () => {
-      const r = obra.getBoundingClientRect();
-      const run = obra.offsetHeight - innerHeight;
-      return run > 0 ? clamp(-r.top / run) * N : N;
+      const mid = innerHeight * 0.55;
+      for (let i = 0; i < N; i++) {
+        const r = panels[i].getBoundingClientRect();
+        if (r.bottom > mid) return clamp(i + (mid - r.top) / r.height, 0, N);
+      }
+      return N;
     };
     const send = () => { if (window.GVE_OBRA) window.GVE_OBRA.set(cur, act); };
     function frame() {
@@ -84,9 +88,8 @@
     update();
     // Saltar a una fase desde el riel (y desde los enlaces #fase-0X)
     const go = (k) => {
-      const run = obra.offsetHeight - innerHeight;
-      const top = obra.getBoundingClientRect().top + scrollY + run * ((k + 0.7) / N);
-      scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+      const r = panels[k].getBoundingClientRect();
+      scrollTo({ top: scrollY + r.top + r.height * 0.7 - innerHeight * 0.55, behavior: reduce ? 'auto' : 'smooth' });
     };
     $$('[data-go]', obra).forEach((b) => b.addEventListener('click', () => go(+b.dataset.go)));
   }

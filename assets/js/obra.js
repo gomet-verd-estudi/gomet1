@@ -353,7 +353,7 @@
     return { x0: Math.min(...xs) - m, y0: Math.min(...ys) - m - 8, x1: Math.max(...xs) + m, y1: Math.max(...ys) + m };
   }
   const BOX = measure();
-  const stage = svg.closest('.obra-stage');
+  const stage = svg.closest('.obra');
   // Zona libre para el dibujo: en escritorio, entre la columna del relato y la de la ficha, y por encima
   // de la línea de fases, siempre centrada en la pantalla; en móvil, el hueco superior.
   function frameView() {
@@ -361,11 +361,10 @@
     if (r.width < 2 || r.height < 2) return;
     let cx = r.width / 2, half = r.width / 2 - 12, y0 = 12, y1 = r.height - 12;
     if (!narrow() && stage) {
-      const L1 = stage.querySelector('.op-l'), R1 = stage.querySelector('.op-r'), rail = stage.querySelector('.obra-rail');
-      const gap = Math.max(20, r.width * 0.02);
-      if (L1 && R1) half = Math.min(cx - (L1.getBoundingClientRect().right - r.left), (R1.getBoundingClientRect().left - r.left) - cx) - gap + Math.min(110, r.width * 0.06);
-      if (L1) y0 = L1.getBoundingClientRect().top - r.top;
-      if (rail) y1 = rail.getBoundingClientRect().top - r.top - 24;
+      const rail = stage.querySelector('.obra-rail');
+      half = Math.min(half, r.width * 0.36);
+      y0 = Math.max(24, r.height * 0.05);
+      if (rail) y1 = Math.min(y1, rail.getBoundingClientRect().top - r.top - 20);
     }
     const bw = BOX.x1 - BOX.x0, bh = BOX.y1 - BOX.y0;
     const k = Math.max(0.05, Math.min((2 * half) / bw, (y1 - y0) / bh));

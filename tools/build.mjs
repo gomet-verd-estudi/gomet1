@@ -209,7 +209,6 @@ function home() {
 
   const body = `
 <section class="obra" id="obra" aria-label="Cómo se construye una marca" style="--n:10">
-  <div class="obra-stage">
     <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0">
@@ -236,7 +235,6 @@ function home() {
     <div class="obra-rail">
       <ol class="rail">${rail}</ol>
     </div>
-  </div>
 </section>
 
 ${divider('Piezas', '01')}

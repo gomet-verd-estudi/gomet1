@@ -923,6 +923,81 @@ svg [fill="#1B1B1B"] { fill: var(--midori); }
   .cat-fig path, .pl-fig path, .pil-fig path, #fig-fases path, .timeline path, .fachada path { stroke-width: .8px; }
 }
 
+/* ==========================================================================
+   CAPAS — dos tintas, como en risografía. El texto, en un solo gris claro, grande y grueso,
+   corre por debajo al hacer scroll; la plancha verde del dibujo queda fija encima y, donde
+   se cruzan, las tintas se suman (multiplicar): el trazo verde se funde con el gris de la letra.
+   ========================================================================== */
+:root { --midori: #0A9651; --gomet: #0A9651; --gomet-d: #087A42; --g: #9A9A9F; --g1: var(--g); --g2: var(--g); --g3: var(--g); --g0: #E7E4DD; }
+body { font-size: 18px; font-weight: 500; }
+.h2, .pl-h, .op-h, .card-name, .cat-name, .faq summary, .statement, .jp-head, .lbl, .rail-k, .rail-n { color: var(--g); }
+.btn { background: var(--g); border-color: var(--g); color: #fff; box-shadow: none; }
+.btn:hover { background: #87878C; border-color: #87878C; }
+.btn-ghost { background: transparent; color: var(--g); border-color: var(--g); }
+.btn-ghost:hover { background: var(--g0); color: var(--g); }
+
+/* la plancha verde: fija, encima de todo lo que corre por debajo, impresa en multiplicar */
+.obra { height: auto; position: relative; border-bottom: 0; overflow-x: clip; }
+.obra .obra-svg { position: sticky; top: var(--hd); display: block; width: 100%; height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd));
+  margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd)); z-index: 3; overflow: hidden; pointer-events: none;
+  mix-blend-mode: multiply; transform: rotate(-.35deg); will-change: transform; contain: strict;
+  -webkit-mask: url(../img/stamp.png) 0 0 / 128px 128px repeat; mask: url(../img/stamp.png) 0 0 / 128px 128px repeat; }
+.obra .obra-svg { --blank: #FFFFFF; }
+/* los textos corren por debajo, uno por fase */
+.obra .obra-panels { position: relative; z-index: 1; inset: auto; width: auto; padding: 0 var(--gut); pointer-events: auto; }
+.obra .obra-panels::before { content: none; }
+.obra .op { position: relative; inset: auto; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, .7fr); gap: 4vh 6vw; align-content: center; align-items: end;
+  min-height: 92vh; min-height: 92svh; padding: 14vh 0; opacity: 1; visibility: visible; transform: none; transition: none; }
+.obra .op-l, .obra .op-r { width: auto; display: flex; flex-direction: column; justify-content: flex-start; gap: 26px; text-align: left; align-items: flex-start; }
+.obra .op-meta { padding: 0; border: 0; background: none; transform: none; color: var(--g); font-size: .92rem; font-weight: 800; letter-spacing: .18em; margin: 0 0 18px; }
+.obra .op-meta i { color: var(--g0); }
+.obra .op-title, .obra .op-display { color: var(--g); font-weight: 900; font-stretch: 62%; letter-spacing: -.012em; line-height: .86; text-shadow: none; }
+.obra .op-title { font-size: clamp(4rem, 10.5vw, 11rem); }
+.obra .op-display { font-size: clamp(3.4rem, 8.4vw, 8.6rem); max-width: 9em; }
+.obra .op-h { margin: 0 0 .5em; color: var(--g); font-weight: 800; font-size: clamp(1.6rem, 2.9vw, 2.8rem); line-height: 1.08; letter-spacing: -.015em; max-width: 17em; }
+.obra .op-short { color: var(--g); font-weight: 600; font-size: clamp(1.2rem, 1.75vw, 1.65rem); line-height: 1.35; max-width: 28em; }
+.obra .op-count { margin: 0; color: var(--g); font-weight: 900; font-stretch: 62%; font-size: clamp(3.4rem, 6.5vw, 6.6rem); line-height: .85; }
+.obra .op-count small { color: var(--g); font-size: .26em; }
+.obra .op-count span { color: var(--g0); }
+.obra .op-parts, .obra .op-list { justify-items: start; gap: 10px; }
+.obra .op-parts li, .obra .op-list li { color: var(--g); font-size: clamp(1.1rem, 1.4vw, 1.35rem); font-weight: 700; }
+.obra .mk-n { order: 0; width: 24px; height: 24px; font-size: .75rem; border: 2px solid var(--g); color: var(--g); background: transparent; }
+.obra .op-parts li.hi .mk-n { background: var(--g); color: #fff; }
+.obra .op-list span { color: var(--g); font-size: .85rem; }
+.obra .op-get { padding: 0; border: 0; background: none; color: var(--g); font-size: clamp(1.15rem, 1.5vw, 1.45rem); font-weight: 800; line-height: 1.25; }
+.obra .op-get span { display: block; margin: 0 0 6px; padding: 0; background: none; color: var(--g); font-size: .78rem; letter-spacing: .2em; }
+.obra .op-val { justify-content: flex-start; color: var(--g); font-weight: 700; font-size: 1.05rem; }
+.obra .op-vals .op-vals-t { text-align: left; color: var(--g); }
+.obra .op-note { border: 2px solid var(--g); color: var(--g); font-size: 1.05rem; font-weight: 600; }
+.obra .op-note .op-note-h { color: var(--g); border-color: var(--g); }
+.obra .stamp { margin: 0; border-color: var(--g); color: var(--g); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5.5px var(--g); }
+.obra .banner { background: var(--g); color: #fff; font-size: clamp(1.1rem, 1.6vw, 1.5rem); }
+.obra .bars { background: repeating-linear-gradient(90deg, var(--g) 0 4px, transparent 4px 8px); }
+.obra .op-hint { color: var(--g); font-weight: 700; font-size: .85rem; }
+.obra .op-end .ctas { margin-top: 18px; }
+/* la línea de fases, fija abajo, sobre papel */
+.obra .obra-rail { position: sticky; bottom: 0; z-index: 4; padding: 12px var(--gut) 16px; background: var(--paper); }
+.obra .rail { border-top: 0; background: repeating-linear-gradient(90deg, var(--g) 0 14px, transparent 14px 22px) 0 1px / calc(100% - 14px) 3px no-repeat; position: relative; }
+.obra .rail::after { content: ''; position: absolute; right: 0; top: -4.5px; border-left: 14px solid var(--g); border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent; }
+.obra .rail-i::before { background: var(--g); height: 5px; top: 0; }
+.obra .rail-v { border-color: var(--g); background: var(--paper); top: -5px; }
+.obra .rail-v.on { background: var(--gomet); border-color: var(--gomet-d); }
+.obra .rail-n, .obra .rail-k { color: var(--g); font-weight: 700; }
+@media (max-width: 900px) {
+  .obra .obra-svg { height: 50vh; height: 50svh; margin-bottom: -50vh; margin-bottom: -50svh; }
+  .obra .op { grid-template-columns: minmax(0, 1fr); gap: 22px; min-height: 86vh; min-height: 86svh; padding: 10vh 0; }
+  .obra .op-r { gap: 14px; }
+  .obra .op-title { font-size: clamp(2.8rem, 13vw, 4.4rem); }
+  .obra .op-display { font-size: clamp(2.8rem, 13vw, 4rem); }
+  .obra .op-h { font-size: 1.45rem; }
+  .obra .op-short { font-size: 1.1rem; }
+  .obra .op-count, .obra .stamp, .obra .op-val, .obra .op-hint { display: none; }
+  .obra .op-parts, .obra .op-list { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+  .obra .op-parts li, .obra .op-list li { font-size: 1rem; }
+  .obra .op-note { display: block; font-size: .95rem; }
+  .obra .obra-rail { padding: 8px var(--gut) 10px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
