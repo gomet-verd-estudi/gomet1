@@ -195,15 +195,22 @@ function home() {
   const parts = (list) => `<ol class="op-parts" aria-label="Señalado en el dibujo">${list.map((p, i) => `<li data-i="${i}"><span class="mk-n" aria-hidden="true">${i + 1}</span>${esc(p)}</li>`).join('')}</ol>`;
   const list = (items) => `<ul class="op-list">${items.map((t) => `<li>${t}</li>`).join('')}</ul>`;
   const count = (n, of = '08') => `<p class="op-count" aria-hidden="true"><small lang="ja">工程</small>${n}<span>/${of}</span></p>`;
+  const KANJI = ['一', '二', '三', '四', '五', '六', '七', '八'];
+  // Cada lámina, como una página de revista: cabecera corrida, título enorme, folio, rótulo vertical
+  // en japonés y un pie a tres columnas (titular · texto · ficha). La plancha verde ocupa el hueco central.
+  const run = (a, b, n) => `<header class="op-run" aria-hidden="true"><span>Gomet Verd Estudi · ${a}</span><span>${b}</span><span>Lámina ${n} / 08</span></header>`;
+  const vert = (t) => `<p class="op-v" lang="ja" aria-hidden="true">${t}</p>`;
+  const folio = (n) => `<p class="op-count" aria-hidden="true">${n}<span>/08</span></p>`;
   const panel = (x, k) => `
       <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}">
-        <div class="op-l">
-          <div class="op-top"><p class="op-meta">${esc(x.act)} <i>/</i> ${esc(x.layer)}</p><h2 class="op-title">[${esc(x.key)}]</h2></div>
-          <div class="op-bot"><p class="op-h">${esc(x.head)}</p><p class="op-short">${esc(SYNTH[k].short)}</p></div>
-        </div>
-        <div class="op-r">
-          <div class="op-top">${count(x.n)}</div>
-          <div class="op-bot">${parts(PARTS[k])}<p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}</div>
+        ${run(esc(x.act), esc(x.layer), x.n)}
+        <h2 class="op-title">[${esc(x.key)}]</h2>
+        ${folio(x.n)}
+        ${vert(`組立説明書　第${KANJI[k]}工程`)}
+        <div class="op-foot">
+          <p class="op-h">${esc(x.head)}</p>
+          <p class="op-short">${esc(SYNTH[k].short)}</p>
+          <div class="op-spec">${parts(PARTS[k])}<p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : ''}</div>
         </div>
       </article>`;
 
@@ -212,23 +219,25 @@ function home() {
     <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0">
-        <div class="op-l">
-          <div class="op-top"><p class="jp-head"><span class="bars" aria-hidden="true"></span><span lang="ja">組立説明書</span><span class="jp-es">Instrucciones de montaje</span><span class="bars" aria-hidden="true"></span></p><p class="banner">¡Ocho fases, una marca!</p><h1 class="op-display">[${esc(INTRO.title)}.]</h1></div>
-          <div class="op-bot"><p class="op-short">${esc(INTRO.sub)}</p><p class="op-hint">${ICON.down}Desliza para construir</p></div>
-        </div>
-        <div class="op-r">
-          <div class="op-top">${count('00')}</div>
-          <div class="op-bot">${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}<div class="op-note"><p class="op-note-h"><span lang="ja">注意</span> Atención</p><p>${gomet}Cada gomet verde es una validación con vosotros: nada avanza sin vuestro visto bueno.</p></div></div>
+        ${run('Instrucciones de montaje', 'Método', '00')}
+        <h1 class="op-title op-display">[${esc(INTRO.title)}.]</h1>
+        ${folio('00')}
+        ${vert('組立説明書')}
+        <div class="op-foot">
+          <p class="op-h">Ocho fases, cuatro actos y un gomet verde en cada validación.</p>
+          <p class="op-short">${esc(INTRO.sub)}<span class="op-hint">${ICON.down}Desliza para construir</span></p>
+          <div class="op-spec">${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}<p class="op-val">${gomet}Cada gomet verde es una validación con vosotros</p></div>
         </div>
       </article>${PHASES.map(panel).join('')}
       <article class="op op-end" data-p="9">
-        <div class="op-l">
-          <div class="op-top"><p class="op-meta">Resultado <i>/</i> Cada marca, única</p><h2 class="op-title">[Llave en mano.]</h2></div>
-          <div class="op-bot"><p class="op-h">${esc(FILTERS.result.head)}</p><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método</a></div></div>
-        </div>
-        <div class="op-r">
-          <div class="op-top"><p class="stamp" aria-hidden="true"><span lang="ja">完成</span><small>Terminado</small></p></div>
-          <div class="op-bot">${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}<p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
+        ${run('Resultado', 'Cada marca, única', '08')}
+        <h2 class="op-title">[Llave en mano.]</h2>
+        <p class="stamp" aria-hidden="true"><span lang="ja">完成</span><small>Terminado</small></p>
+        ${vert('完成　組立説明書')}
+        <div class="op-foot">
+          <p class="op-h">${esc(FILTERS.result.head)}</p>
+          <div class="op-short"><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a><a class="btn btn-ghost" href="metodo/">El método</a></div></div>
+          <div class="op-spec">${list(['<b>Ocho fases</b>', '<b>Cuatro actos</b>', '<b>Cinco validaciones</b>'])}<p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
         </div>
       </article>
     </div>

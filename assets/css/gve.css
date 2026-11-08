@@ -1044,6 +1044,51 @@ p { margin-bottom: .7em; }
   .obra .op-note { display: none; }
 }
 
+/* ==========================================================================
+   EDITORIAL — cada lámina como una página de revista sobre una retícula de 12 columnas:
+   cabecera corrida con filete, título enorme y folio fino, rótulo vertical en japonés en el
+   margen y un pie a tres columnas (titular · texto · ficha). La plancha verde, en el hueco.
+   ========================================================================== */
+html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !important; }
+.obra .op { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto auto 1fr auto;
+  column-gap: clamp(14px, 1.6vw, 28px); align-items: start; padding: 0 0 calc(64px + 2.4vh); }
+.obra .op-run { grid-column: 1 / -1; grid-row: 1; display: flex; justify-content: space-between; gap: 16px; margin: 0; padding: 12px 0 9px;
+  border-bottom: 1px solid var(--g); font-size: .68rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--g); }
+.obra .op-title { grid-column: 1 / 11; grid-row: 2; margin: 2vh 0 0; font-size: clamp(4rem, 10.5vw, 11rem); line-height: .8; }
+.obra .op-display { font-size: clamp(2.8rem, 6.2vw, 6.6rem); line-height: .84; max-width: 12.5em; }
+.obra .op-count { grid-column: 11 / -1; grid-row: 2; justify-self: end; margin: 2vh 0 0; font-weight: 200; font-stretch: 62%; font-size: clamp(4rem, 10.5vw, 11rem); line-height: .8; letter-spacing: -.02em; color: var(--g); }
+.obra .op-count span { font-size: .2em; font-weight: 700; letter-spacing: .08em; vertical-align: top; margin-left: .2em; color: var(--g); }
+.obra .stamp { grid-column: 11 / -1; grid-row: 2; justify-self: end; margin: 2vh 0 0; }
+.obra .op-v { position: absolute; right: 0; top: 50%; transform: translateY(-50%); margin: 0; writing-mode: vertical-rl; text-orientation: upright; font-family: 'Hiragino Sans', 'Noto Sans JP', 'Noto Sans CJK JP', 'Yu Gothic', sans-serif; font-stretch: normal; font-size: .85rem; font-weight: 600; line-height: 1; letter-spacing: .32em; color: var(--g); }
+.obra .op-foot { grid-column: 1 / -1; grid-row: 4; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(14px, 1.6vw, 28px); align-items: start; padding-top: 14px; border-top: 1px solid var(--g); }
+.obra .op-h { grid-column: 1 / 6; margin: 0; font-size: clamp(1.5rem, 2.4vw, 2.5rem); line-height: .98; font-weight: 800; letter-spacing: -.015em; max-width: none; }
+.obra .op-short { grid-column: 6 / 9; margin: 0; font-size: .98rem; line-height: 1.22; font-weight: 500; max-width: none; hyphens: auto; }
+.obra .op-spec { grid-column: 9 / -1; display: flex; flex-direction: column; gap: 10px; }
+.obra .op-parts, .obra .op-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px 14px; }
+.obra .op-parts li, .obra .op-list li { font-size: .95rem; line-height: 1.05; }
+.obra .mk-n { width: 18px; height: 18px; font-size: .58rem; border-width: 1.5px; }
+.obra .op-get { margin: 0; padding-top: 8px; border-top: 1px solid var(--g0); font-size: 1rem; line-height: 1.1; }
+.obra .op-get span { font-size: .64rem; margin-bottom: 3px; }
+.obra .op-val { margin: 0; font-size: .82rem; }
+.obra .op-hint { display: flex; margin-top: 12px; }
+.obra .op-end .ctas { margin: 0; }
+@media (max-width: 900px) {
+  .obra .op { grid-template-columns: minmax(0, 1fr); padding-bottom: calc(44px + 2vh); }
+  .obra .op-run { font-size: .56rem; letter-spacing: .14em; padding: 9px 0 7px; }
+  .obra .op-run span:nth-child(2) { display: none; }
+  .obra .op-run span { white-space: nowrap; }
+  .obra .op-run span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .obra .op-title { grid-column: 1; margin-top: 1.4vh; font-size: clamp(2.8rem, 13vw, 4.4rem); }
+  .obra .op-display { font-size: clamp(2.2rem, 10vw, 3.2rem); }
+  .obra .op-count, .obra .stamp, .obra .op-v, .obra .op-val, .obra .op-hint { display: none; }
+  .obra .op-foot { grid-template-columns: minmax(0, 1fr); row-gap: 8px; padding-top: 10px; }
+  .obra .op-h, .obra .op-short, .obra .op-spec { grid-column: 1; }
+  .obra .op-h { font-size: 1.3rem; }
+  .obra .op-short { font-size: .95rem; }
+  .obra .op-get { display: flex; gap: 8px; align-items: baseline; font-size: .92rem; }
+  .obra .op-get span { margin: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

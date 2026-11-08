@@ -50,16 +50,19 @@
     // el scroll se detiene en cada fase solo mientras se recorre la obra
     const snap = () => { const r = obra.getBoundingClientRect(); document.documentElement.classList.toggle('snap', r.top <= (hd ? hd.offsetHeight : 0) + 2 && r.bottom >= innerHeight - 2); };
     const send = () => { if (window.GVE_OBRA) window.GVE_OBRA.set(cur, act); };
-    function frame() {
+    let lastT = 0;
+    function frame(now) {
+      const dt = lastT ? Math.min(50, now - lastT) : 16; lastT = now;
+      const maxStep = dt / 1100; // una fase entera, como mínimo en 1,1 s
       let moving = false;
       cur = cur.map((c, k) => {
         const d = target[k] - c;
-        if (Math.abs(d) > 0.001) { moving = true; return c + d * 0.2; }
+        if (Math.abs(d) > 0.001) { moving = true; return c + clamp(d * 0.14, -maxStep, maxStep); }
         return target[k];
       });
       send();
       running = moving;
-      if (moving) requestAnimationFrame(frame);
+      if (moving) requestAnimationFrame(frame); else lastT = 0;
     }
     function update() {
       measure(); snap();
@@ -89,10 +92,39 @@
     addEventListener('load', () => { update(); send(); });
     update();
     // Saltar a una fase desde el riel (y desde los enlaces #fase-0X)
-    const go = (k) => {
-      const r = panels[k].getBoundingClientRect();
-      scrollTo({ top: scrollY + r.top - (hd ? hd.offsetHeight : 0), behavior: reduce ? 'auto' : 'smooth' });
+    const html = document.documentElement;
+    const hdH = () => (hd ? hd.offsetHeight : 0);
+    const easeIO = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    let gliding = false;
+    // Deslizamiento lento hasta una lámina: 1,4 s con aceleración y frenada suaves, para ver la fase entera
+    const glide = (to, ms = 1400) => {
+      gliding = true; html.classList.add('gliding');
+      const from = scrollY, t0 = performance.now();
+      const step = (now) => {
+        const t = Math.min(1, (now - t0) / ms);
+        scrollTo(0, from + (to - from) * easeIO(t));
+        if (t < 1) requestAnimationFrame(step); else { gliding = false; html.classList.remove('gliding'); }
+      };
+      requestAnimationFrame(step);
     };
+    const topOf = (k) => scrollY + panels[k].getBoundingClientRect().top - hdH();
+    const go = (k) => (reduce ? scrollTo(0, topOf(k)) : glide(topOf(k)));
+    if (fine && !reduce) {
+      const nearest = () => { let best = 0, bd = Infinity; panels.forEach((p, i) => { const d = Math.abs(p.getBoundingClientRect().top - hdH()); if (d < bd) { bd = d; best = i; } }); return best; };
+      let lastWheel = 0;
+      addEventListener('wheel', (e) => {
+        if (!html.classList.contains('snap') && !gliding) return; // fuera de la obra, scroll normal
+        const now = performance.now(), fresh = now - lastWheel > 170; lastWheel = now;
+        if (gliding) { e.preventDefault(); return; }
+        const dir = Math.sign(e.deltaY), i = nearest();
+        if (!dir) return;
+        // para salir de la obra por arriba o por abajo, scroll normal
+        if ((dir < 0 && i === 0) || (dir > 0 && i === N - 1)) return;
+        e.preventDefault();
+        if (!fresh) return; // la inercia del gesto anterior no cuenta como un gesto nuevo
+        glide(topOf(i + dir));
+      }, { passive: false });
+    }
     $$('[data-go]', obra).forEach((b) => b.addEventListener('click', () => go(+b.dataset.go)));
   }
 
