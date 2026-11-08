@@ -50,13 +50,10 @@
 
   /* ---------- primitivas ---------- */
   // Caja: tapa y dos laterales visibles. h y extensión se recalculan cada fotograma.
-  // Cada caja se imprime en dos pasadas, como en risografía: la plancha de color (algo desplazada)
-  // y encima la plancha negra del trazo. El desajuste entre las dos es intencionado.
+  // Dibujo a línea, a una tinta: cada caja son tres caras con el fondo del papel (o una tinta muy clara) y su trazo
   function boxNode(cls) {
-    const g = el('g', { class: 'bx ' + cls }), ink = el('g', { class: 'ink' }, g);
-    const n = { g, l: el('path', { class: 'f fl' }, ink), r: el('path', { class: 'f fr' }, ink), t: el('path', { class: 'f ft' }, ink) };
-    n.k = [el('path', { class: 'k' }, g), el('path', { class: 'k' }, g), el('path', { class: 'k' }, g)];
-    return n;
+    const g = el('g', { class: 'bx ' + cls });
+    return { g, l: el('path', { class: 'f fl' }, g), r: el('path', { class: 'f fr' }, g), t: el('path', { class: 'f ft' }, g) };
   }
   function drawBox(n, x, y, z, w, d, h) {
     if (h <= 0.002 || w <= 0.002 || d <= 0.002) { n.g.style.display = 'none'; return; }
@@ -64,7 +61,6 @@
     n.t.setAttribute('d', poly([P(x, y, z + h), P(x + w, y, z + h), P(x + w, y + d, z + h), P(x, y + d, z + h)]));
     n.l.setAttribute('d', poly([P(x, y + d, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x, y + d, z + h)]));
     n.r.setAttribute('d', poly([P(x + w, y, z), P(x + w, y + d, z), P(x + w, y + d, z + h), P(x + w, y, z + h)]));
-    n.k[0].setAttribute('d', n.l.getAttribute('d')); n.k[1].setAttribute('d', n.r.getAttribute('d')); n.k[2].setAttribute('d', n.t.getAttribute('d'));
   }
   // Caja que crece hacia arriba desde su base dentro de la ventana [a, b] de su fase
   function rise(ph, a, b, x, y, z, w, d, h, cls) {
@@ -216,7 +212,7 @@
   const cone = (x, y) => {
     const [cx, cy] = P(x, y, 0);
     const g = el('g', { class: 'ppl cone', transform: `translate(${cx.toFixed(1)} ${cy.toFixed(1)})` });
-    [['M-4.2 0.6L4.2 0.6L4.2 -0.6L-4.2 -0.6Z', 'p-red'], ['M-2.6 -0.6L-0.7 -10.6L0.7 -10.6L2.6 -0.6Z', 'p-red'], ['M-1.9 -4.2L1.9 -4.2L1.5 -6.4L-1.5 -6.4Z', 'p-paper']].forEach(([d, c]) => { el('path', { d, class: 'pf ' + c }, g); el('path', { d, class: 'pk' }, g); });
+    [['M-4.2 0.6L4.2 0.6L4.2 -0.6L-4.2 -0.6Z', 'p-red'], ['M-2.6 -0.6L-0.7 -10.6L0.7 -10.6L2.6 -0.6Z', 'p-red'], ['M-1.9 -4.2L1.9 -4.2L1.5 -6.4L-1.5 -6.4Z', 'p-paper']].forEach(([d, c]) => el('path', { d, class: 'pf ' + c }, g));
     return g;
   };
   const cones = [cone(-1, W + 1.6), cone(W + 1.7, -0.9)];
@@ -252,10 +248,7 @@
     const sc = sc0 * FOLK_SCALE;
     const [px, py] = P(at[0], at[1], 0);
     const g = el('g', { class: 'ppl', transform: `translate(${px.toFixed(1)} ${py.toFixed(1)})${sc !== 1 ? ` scale(${sc})` : ''}` });
-    parts.forEach(([d, c, key = 1]) => {
-      if (c !== 'p-none') el('path', { d, class: 'pf ' + c }, g);
-      if (key) el('path', { d, class: 'pk' }, g);
-    });
+    parts.forEach(([d, c, key = 1]) => el('path', { d, class: 'pf ' + c + (key ? '' : ' nk') }, g));
     return { g, site };
   });
   add(() => { const on = onSite() > 0.5; folk.forEach((f) => { if (f.site) f.g.style.display = on ? '' : 'none'; }); }, [2, 7]);
@@ -338,20 +331,14 @@
 
   /* ---------- encuadre: la obra entera, centrada, sin cortes ---------- */
   const narrow = () => innerWidth <= 900;
-  // Caja de la obra en todas sus fases (la grúa sube y se desmonta, el andamio y la ampliación aparecen al final)
+  // Caja de la obra en todas sus fases, calculada a partir de la geometría (sin tocar el DOM al cargar):
+  // el terreno marca los lados y el pie; arriba manda lo más alto (grúa, ampliación o vecinos).
   function measure() {
-    let b = null;
-    for (let s = 0; s <= 9.01; s += 0.25) {
-      for (let k = 1; k <= 8; k++) L[k] = clamp((s - k + 0.05) / 0.72);
-      runItems(true);
-      const r = scene.getBBox();
-      b = b ? { x0: Math.min(b.x0, r.x), y0: Math.min(b.y0, r.y), x1: Math.max(b.x1, r.x + r.width), y1: Math.max(b.y1, r.y + r.height) }
-        : { x0: r.x, y0: r.y, x1: r.x + r.width, y1: r.y + r.height };
-    }
-    for (let k = 1; k <= 8; k++) L[k] = 0;
-    items.forEach((it) => { it.last = null; });
-    const m = 14; // aire para trazos y gomets
-    return { x0: b.x0 - m, y0: b.y0 - m, x1: b.x1 + m, y1: b.y1 + m };
+    const pts = [P(G0, G0, 0), P(G1, G0, 0), P(G1, G1, 0), P(G0, G1, 0), P(0, 0, TOP + 2.3), P(W, 0, TOP + 2.3), P(MX, MY, 11.4), P(MX + 3.6, MY, 11.4)];
+    city.forEach(([x, y, , , h]) => pts.push(P(x, y, h)));
+    const xs = pts.map((q) => q[0]), ys = pts.map((q) => q[1]);
+    const m = 18; // aire para trazos, gomets y banderines
+    return { x0: Math.min(...xs) - m, y0: Math.min(...ys) - m - 8, x1: Math.max(...xs) + m, y1: Math.max(...ys) + m };
   }
   const BOX = measure();
   const stage = svg.closest('.obra-stage');
@@ -377,9 +364,7 @@
     const ms = (narrow() ? 0.85 : 1) / k;
     marks.forEach((m) => m.setAttribute('transform', `translate(${(+m.dataset.x).toFixed(1)} ${(+m.dataset.y).toFixed(1)}) scale(${ms.toFixed(3)})`));
     svg.style.setProperty('--scale', k.toFixed(3));
-    // desajuste de la plancha de color: unos 2 px en pantalla, sea cual sea la escala
-    svg.style.setProperty('--mx', (1.9 / k).toFixed(2) + 'px');
-    svg.style.setProperty('--my', (-1.3 / k).toFixed(2) + 'px');
+
   }
   frameView();
   if ('ResizeObserver' in window) { const ro = new ResizeObserver(frameView); ro.observe(svg); if (stage) ro.observe(stage); }

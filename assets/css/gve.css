@@ -703,177 +703,171 @@ html:not(.js) .obra .op { position: static; opacity: 1; visibility: visible; tra
 }
 
 /* ==========================================================================
-   RISO — la web impresa: papel con grano, tintas planas (rojo, azul, amarillo, magenta,
-   negro y el verde del gomet), tonos en trama de puntos, la plancha de color desajustada
-   respecto al trazo negro y huecos donde la tinta no agarra. Lenguaje de los folletos
-   japoneses de montaje: banderines, flechas de trazos, cajas con marco y números de paso.
+   MIDORI — un manual japonés impreso a una tinta: todo a línea en 常磐色 (tokiwa-iro, el verde
+   perenne) sobre papel crudo. Las caras en sombra llevan un velado plano de la misma tinta;
+   el único verde lleno es el del gomet. Sin tramas ni texturas: el dibujo pinta rápido.
    ========================================================================== */
 :root {
-  --paper: #F4EFE6; --k: #231F20;
-  --red: #E63A2E; --blue: #0078BF; --yellow: #FFE100; --pink: #E5007E; --aqua: #CDE6F0; --gomet: #00A95C; --gomet-d: #00894A;
-  --bg: var(--paper); --bg-alt: #ECE6DA; --grey-bg: #ECE6DA;
-  --ink: var(--k); --ink-2: var(--k); --ink-3: #4F4945; --ink-4: #8C857D;
-  --line: var(--k); --line-2: rgba(35, 31, 32, .22);
-  --brand: var(--pink); --brand-d: var(--k);
-  --red-l: var(--red); --red-d: var(--red); --blue-l: var(--blue); --blue-d: var(--blue); --yellow-l: var(--yellow); --yellow-d: var(--yellow);
-  --cream-l: var(--paper); --cream-d: #D9D2C5;
-  --mis: .05em .04em 0 var(--blue); /* desajuste de la tinta en los títulos */
+  --paper: #F4EFE6; --midori: #007B43; --midori-d: #005A31; --t1: #E7EBDF; --t2: #D3E0D2; --t3: #B9D1BE;
+  --k: var(--midori-d);
+  --red: var(--midori); --blue: var(--midori); --yellow: var(--t2); --pink: var(--midori); --aqua: var(--t1);
+  --gomet: #00A95C; --gomet-d: #007B43;
+  --bg: var(--paper); --bg-alt: #ECE8DD; --grey-bg: #ECE8DD;
+  --ink: #1F2A22; --ink-2: #1F2A22; --ink-3: #4A5A4E; --ink-4: #8A968C;
+  --line: var(--midori); --line-2: rgba(0, 123, 67, .22);
+  --brand: var(--midori); --brand-d: var(--midori-d);
+  --red-l: var(--t1); --red-d: var(--t2); --blue-l: var(--t1); --blue-d: var(--t2); --yellow-l: var(--t1); --yellow-d: var(--t2);
+  --cream-l: var(--paper); --cream-d: var(--t1);
 }
 html, body { background: var(--paper); }
-body { color: var(--k); }
-::selection { background: var(--yellow); color: var(--k); }
+body { color: var(--ink); }
+::selection { background: var(--t3); color: var(--ink); }
+a { text-decoration-color: var(--midori); }
+:focus-visible { outline: 2px dashed var(--midori); outline-offset: 3px; }
+
 /* Rendimiento: lo que está fuera de pantalla no se pinta hasta que se acerca */
 .sec, .ft { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 
-/* Grano de impresión, solo en las ilustraciones: motas finísimas del color del papel encima del dibujo.
-   Sobre el papel no se ven; sobre la tinta, son los huecos y la tinta desigual de la risografía. */
-.obra-grain, .cat-fig::after, .pl-fig::after, .pil-fig::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: url(../img/grain-fine.png) 0 0 / 120px 120px; }
-.obra-grain { z-index: 1; }
-.cat-fig, .pl-fig, .pil-fig { position: relative; }
-a { text-decoration-color: var(--red); }
-:focus-visible { outline: 2px dashed var(--blue); outline-offset: 3px; }
-
-/* tramas en todas las piezas axonométricas: cara superior en trama clara, lateral lleno, sombra con puntos */
-.c-red, .L-cim, .L-pc, .L-book, .P2, .P6 { --ht: url(#ht-red); --sh: url(#sh-red); --acc: var(--red); }
-.c-blue, .L-sol, .L-pa, .P0, .P1, .P4 { --ht: url(#ht-blue); --sh: url(#sh-blue); --acc: var(--blue); }
-.c-yellow, .L-est, .L-ins, .L-key, .P3, .P5, .P7 { --ht: url(#ht-yellow); --sh: url(#sh-yellow); --acc: var(--yellow); }
-.c-white { --ht: var(--paper); --sh: url(#ht-k); --acc: var(--paper); }
-.obra-svg .city { --sh: url(#ht-aqua); }
-.f.a.ft, .obra-svg .bx .ft { fill: var(--ht, var(--paper)); }
-.f.a.fl, .obra-svg .bx .fl { fill: var(--acc, url(#ht-k)); }
-.f.a.fr, .obra-svg .bx .fr { fill: var(--sh, url(#sh-k)); }
-.f.w.ft { fill: var(--paper); }
-.f.w.fl { fill: var(--paper); }
-.f.w.fr { fill: url(#ht-k); }
+/* ---------- todas las axonometrías a una tinta: cara de arriba en papel, laterales velados ---------- */
+.f.a.ft, .f.w.ft { fill: var(--paper); }
+.f.a.fl, .f.w.fl { fill: var(--t1); }
+.f.a.fr, .f.w.fr { fill: var(--t2); }
+.f { stroke: var(--midori); }
+svg [stroke="#1B1B1B"], svg [stroke="#6F6F6D"] { stroke: var(--midori); }
+svg [stroke="#B3B3B1"], svg [stroke="#D6D6D4"], svg [stroke="#A3A3A1"] { stroke: var(--midori); stroke-opacity: .4; }
+svg [fill="#1B1B1B"] { fill: var(--midori); }
+.piece path { stroke: var(--midori); }
 
 /* ---------- la obra ---------- */
-.obra-stage { background: transparent; }
-.obra-svg .bx .ink { transform: translate(var(--mx, 1.6px), var(--my, -1.1px)); }
-.obra-svg .bx .f { stroke: none; }
-.obra-svg .bx .k { fill: none; stroke: var(--k); stroke-width: 1.1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.obra-svg .city .k { stroke-width: .9; }
+/* el escenario se pinta aparte: lo que cambia dentro no obliga a repintar la página, ni al revés */
+.obra-stage { background: transparent; contain: layout paint; }
+.obra-stage .obra-svg { contain: strict; }
+.obra-svg .bx path { stroke: var(--midori); stroke-width: calc(1.1px / var(--scale, 1)); stroke-linejoin: round; }
+.obra-svg .bx .ft { fill: var(--paper); }
+.obra-svg .bx .fl { fill: var(--t1); }
+.obra-svg .bx .fr { fill: var(--t2); }
+.obra-svg .city path { stroke-width: calc(.8px / var(--scale, 1)); }
+.obra-svg .stake .f, .obra-svg .hook .f, .obra-svg .book .ft, .obra-svg .plant .fr { fill: var(--midori); }
+.obra-svg .plot .ft { fill: var(--t1); }
+.obra-svg .plot path { stroke: var(--midori); }
 .obra-svg .ground { fill: transparent; }
-.obra-svg .grid { stroke: var(--blue); stroke-width: .6; opacity: .45; }
-.obra-svg .ghost { stroke: var(--pink); stroke-width: 1; stroke-dasharray: 5 4; opacity: .8; }
-.obra-svg .mark { stroke: var(--k); stroke-width: 1.4; }
-.obra-svg .pit-floor { fill: url(#sh-k); stroke: var(--k); }
-.obra-svg .pit-wall.a, .obra-svg .pit-wall.b { fill: url(#ht-k); stroke: var(--k); }
-.obra-svg .pour { fill: url(#ht-red); stroke: var(--k); }
-.obra-svg .window { fill: var(--blue); stroke: var(--k); }
-.obra-svg .door, .obra-svg .head { stroke: var(--k); }
-.obra-svg .cable, .obra-svg .hook-line { stroke: var(--k); }
-.obra-svg .amp { stroke: var(--pink); stroke-width: 1.4; stroke-dasharray: 6 4; }
-.obra-svg .mullion { stroke: var(--k); opacity: .5; }
+.obra-svg .grid { stroke: var(--midori); stroke-width: calc(.6px / var(--scale, 1)); opacity: .28; }
+.obra-svg .ghost { stroke: var(--midori); stroke-width: calc(.9px / var(--scale, 1)); stroke-dasharray: 4 4; opacity: .6; }
+.obra-svg .mark { stroke: var(--midori); stroke-width: calc(1.4px / var(--scale, 1)); }
+.obra-svg .pit-floor { fill: var(--t2); stroke: var(--midori); stroke-width: calc(1px / var(--scale, 1)); }
+.obra-svg .pit-wall.a, .obra-svg .pit-wall.b { fill: var(--t1); stroke: var(--midori); stroke-width: calc(1px / var(--scale, 1)); }
+.obra-svg .pour { fill: var(--t1); stroke: var(--midori); }
+.obra-svg .window { fill: var(--t3); stroke: var(--midori); stroke-width: calc(.8px / var(--scale, 1)); }
+.obra-svg .door { fill: var(--midori); }
+.obra-svg .mullion, .obra-svg .cable, .obra-svg .hook-line, .obra-svg .lattice { stroke: var(--midori); }
+.obra-svg .mullion { opacity: .45; }
+.obra-svg .key { stroke: var(--midori); }
+.obra-svg .amp { stroke: var(--midori); stroke-width: calc(1.2px / var(--scale, 1)); stroke-dasharray: 6 4; }
 .obra-svg .val { fill: var(--gomet); }
 .obra-svg .tora .f { fill: url(#tora); }
-.obra-svg .post .k { stroke-width: .8; }
-/* personitas: plancha de color desajustada y trazo negro encima */
-.obra-svg .ppl .pf { stroke: none; transform: translate(var(--mx, 1.6px), var(--my, -1.1px)); }
-.obra-svg .ppl .pk { fill: none; stroke: var(--k); stroke-width: .95; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.obra-svg .p-paper { fill: var(--paper); }
-.obra-svg .p-k { fill: var(--k); }
-.obra-svg .p-navy { fill: url(#sh-blue); }
-.obra-svg .p-blue { fill: var(--blue); }
-.obra-svg .p-red { fill: var(--red); }
-.obra-svg .p-yellow { fill: var(--yellow); }
-.obra-svg .p-pink { fill: var(--pink); }
-.obra-svg .p-green { fill: var(--gomet); }
-.obra-svg .p-shadow { fill: url(#ht-k); opacity: .6; }
-.obra-svg .mk circle { fill: var(--red); stroke: var(--k); stroke-width: 1.2; }
-.obra-svg .mk text { fill: var(--paper); font-weight: 700; }
-.obra-svg .mk.hi circle { fill: var(--blue); }
+.obra-svg .mk circle { fill: var(--paper); stroke: var(--midori); stroke-width: 1.3; }
+.obra-svg .mk text { fill: var(--midori); font-weight: 700; }
+.obra-svg .mk.hi circle { fill: var(--midori); }
 .obra-svg .mk.hi text { fill: var(--paper); }
+/* personitas a línea */
+.obra-svg .ppl .pf { stroke: var(--midori); stroke-width: calc(.95px / var(--scale, 1)); stroke-linejoin: round; stroke-linecap: round; }
+.obra-svg .ppl .nk { stroke: none; }
+.obra-svg .p-paper, .obra-svg .p-red, .obra-svg .p-pink { fill: var(--paper); }
+.obra-svg .p-blue, .obra-svg .p-yellow { fill: var(--t2); }
+.obra-svg .p-navy { fill: var(--t3); }
+.obra-svg .p-k, .obra-svg .p-green { fill: var(--midori); }
+.obra-svg .p-none { fill: none; }
+.obra-svg .p-shadow { fill: var(--t2); opacity: .8; }
+.obra-svg .cone .p-red { fill: var(--midori); }
 
-.jp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin: 0 0 14px; white-space: nowrap; font-weight: 800; font-size: 1.05rem; letter-spacing: .12em; color: var(--k); }
-.jp-head .jp-es { order: -1; flex-basis: 100%; font-size: .56rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
-.bars { flex: 1; min-width: 18px; max-width: 46px; height: 12px; background: repeating-linear-gradient(90deg, var(--blue) 0 4px, transparent 4px 8px); }
-.banner { display: inline-block; white-space: nowrap; margin: 0 0 18px; padding: 8px 16px 9px; background: var(--red); color: var(--paper); font-weight: 900; font-stretch: 75%; font-size: clamp(1rem, 1.4vw, 1.3rem); letter-spacing: .01em; transform: rotate(-4deg); transform-origin: left; box-shadow: 3px 3px 0 var(--yellow); }
-.op-meta { display: inline-block; padding: 4px 9px; background: var(--red); color: var(--paper); font-weight: 700; letter-spacing: .14em; transform: rotate(-2.5deg); transform-origin: left; }
-.op-meta i { color: var(--yellow); }
-.op-title, .op-display { color: var(--pink); font-weight: 900; font-stretch: 62%; letter-spacing: -.01em; text-shadow: var(--mis); }
+/* ---------- la ficha y el relato de cada fase ---------- */
+.jp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin: 0 0 14px; white-space: nowrap; font-weight: 800; font-size: 1.05rem; letter-spacing: .12em; color: var(--midori); }
+.jp-head .jp-es { order: -1; flex-basis: 100%; font-size: .56rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
+.bars { flex: 1; min-width: 18px; max-width: 46px; height: 12px; background: repeating-linear-gradient(90deg, var(--midori) 0 4px, transparent 4px 8px); }
+.banner { display: inline-block; white-space: nowrap; margin: 0 0 18px; padding: 8px 16px 9px; background: var(--midori); color: var(--paper); font-weight: 900; font-stretch: 75%; font-size: clamp(1rem, 1.4vw, 1.3rem); transform: rotate(-4deg); transform-origin: left; }
+.op-meta { display: inline-block; padding: 4px 9px; border: 1.5px solid var(--midori); color: var(--midori); font-weight: 700; letter-spacing: .14em; }
+.op-meta i { color: var(--t3); }
+.op-title, .op-display { color: var(--midori); font-weight: 900; font-stretch: 62%; letter-spacing: -.01em; }
 .op-title { font-size: clamp(2.6rem, 3.8vw, 4rem); line-height: .88; }
 .op-display { font-size: clamp(2.4rem, 3.3vw, 3.6rem); line-height: .9; }
-.op-h { font-weight: 700; color: var(--k); }
+.op-h { font-weight: 700; color: var(--ink); }
 .op-short { color: var(--ink-3); }
-.op-count { font-weight: 900; font-stretch: 62%; color: var(--red); text-shadow: .045em .045em 0 var(--yellow); letter-spacing: 0; }
-.op-count small { display: block; margin-bottom: 4px; font-size: .32em; font-weight: 800; letter-spacing: .1em; color: var(--k); text-shadow: none; }
-.op-count span { color: var(--ink-4); text-shadow: none; font-weight: 700; }
-.mk-n { background: var(--red); color: var(--paper); border-color: var(--k); font-weight: 700; }
-.op-parts li.hi .mk-n { background: var(--blue); color: var(--paper); }
-.op-parts li, .op-list li { color: var(--k); }
-.op-get { padding: 10px 12px; border: 1.5px solid var(--k); background: var(--aqua); text-align: left; }
-.op-get span { display: table; margin: 0 0 6px; padding: 2px 6px; background: var(--blue); color: var(--paper); letter-spacing: .16em; }
-.op-val { color: var(--k); }
-.op-note { max-width: 100%; text-align: left; border: 1.5px solid var(--red); padding: 10px 12px; font-size: .82rem; line-height: 1.45; color: var(--k); }
+.op-count { font-weight: 900; font-stretch: 62%; color: var(--midori); letter-spacing: 0; }
+.op-count small { display: block; margin-bottom: 4px; font-size: .32em; font-weight: 800; letter-spacing: .1em; color: var(--midori); }
+.op-count span { color: var(--t3); font-weight: 700; }
+.mk-n { background: var(--paper); color: var(--midori); border: 1.5px solid var(--midori); font-weight: 700; }
+.op-parts li.hi .mk-n { background: var(--midori); color: var(--paper); }
+.op-parts li, .op-list li { color: var(--ink); }
+.op-get { padding: 10px 12px; border: 1.5px solid var(--midori); background: var(--t1); text-align: left; }
+.op-get span { display: table; margin: 0 0 6px; padding: 2px 6px; background: var(--midori); color: var(--paper); letter-spacing: .16em; }
+.op-val { color: var(--ink); }
+.op-note { text-align: left; border: 1.5px solid var(--midori); padding: 10px 12px; font-size: .82rem; line-height: 1.45; color: var(--ink); }
 .op-note p { margin: 0; }
-.op-note .op-note-h { display: inline-block; margin: -22px 0 6px; padding: 1px 8px; background: var(--paper); border: 1.5px solid var(--red); color: var(--red); font-weight: 800; font-size: .78rem; letter-spacing: .12em; }
-.stamp { width: 104px; height: 104px; margin: 0 0 18px auto; border: 3px solid var(--red); border-radius: 50%; display: grid; place-content: center; text-align: center; color: var(--red); transform: rotate(-12deg); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5.5px var(--red); opacity: .92; }
+.op-note .op-note-h { display: inline-block; margin: -22px 0 6px; padding: 1px 8px; background: var(--paper); border: 1.5px solid var(--midori); color: var(--midori); font-weight: 800; font-size: .78rem; letter-spacing: .12em; }
+.stamp { width: 104px; height: 104px; margin: 0 0 18px auto; border: 3px solid var(--midori); border-radius: 50%; display: grid; place-content: center; text-align: center; color: var(--midori); transform: rotate(-12deg); box-shadow: inset 0 0 0 4px var(--paper), inset 0 0 0 5.5px var(--midori); }
 .stamp span { font-weight: 900; font-size: 1.9rem; letter-spacing: .06em; line-height: 1; }
 .stamp small { font-size: .5rem; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; margin-top: 4px; }
-.op-vals .op-vals-t { color: var(--k); }
-/* la línea de fases, como las flechas de trazos de los folletos */
-.obra-stage .rail { border-top: 0; background: repeating-linear-gradient(90deg, var(--blue) 0 16px, transparent 16px 24px) 0 0 / calc(100% - 14px) 5px no-repeat; position: relative; }
-.obra-stage .rail::after { content: ''; position: absolute; right: 0; top: -5px; border-left: 14px solid var(--blue); border-top: 7.5px solid transparent; border-bottom: 7.5px solid transparent; }
-.rail-i::before { background: var(--red); height: 5px; top: 0; }
-.rail-v { border-color: var(--k); background: var(--paper); top: -5px; }
-.rail-v.on { background: var(--gomet); border-color: var(--k); }
-.rail-n { color: var(--red); font-weight: 700; }
-.rail-k { color: var(--k); }
-.rail-i.now .rail-k { font-weight: 700; }
+.op-vals .op-vals-t { color: var(--ink); }
+/* la línea de fases: flecha de trazos, que se rellena al avanzar */
+.obra-stage .rail { border-top: 0; background: repeating-linear-gradient(90deg, var(--midori) 0 14px, transparent 14px 22px) 0 1px / calc(100% - 14px) 3px no-repeat; position: relative; }
+.obra-stage .rail::after { content: ''; position: absolute; right: 0; top: -4.5px; border-left: 14px solid var(--midori); border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent; }
+.rail-i::before { background: var(--midori); height: 5px; top: 0; }
+.rail-v { border-color: var(--midori); background: var(--paper); top: -5px; }
+.rail-v.on { background: var(--gomet); border-color: var(--midori-d); }
+.rail-n { color: var(--midori); font-weight: 700; }
+.rail-k { color: var(--ink); }
+.rail-i.now .rail-k { font-weight: 700; color: var(--midori); }
 
-/* ---------- toda la web ---------- */
-.hd { background: var(--paper); border-bottom: 2px solid var(--k); }
-.hd-logo { color: var(--k); }
-.hd-nav a[aria-current], .hd-nav a:hover { text-decoration-color: var(--red); text-decoration-thickness: 3px; }
-.hd-cta, .hd-menu { border: 2px solid var(--k); border-radius: 0; background: var(--yellow); color: var(--k); font-weight: 700; box-shadow: 3px 3px 0 var(--k); }
-.hd-cta:hover { background: var(--red); color: var(--paper); }
-.pl-title, .ft .ft-big { color: var(--pink); font-weight: 900; font-stretch: 62%; letter-spacing: -.01em; text-shadow: var(--mis); }
-.h2, .pl-h, .card-name, .cat-name, .faq summary { color: var(--k); font-weight: 700; }
+/* ---------- toda la web, a la misma tinta ---------- */
+.hd { background: var(--paper); border-bottom: 1.5px solid var(--midori); }
+.hd-logo, .ft-logo { color: var(--midori); }
+.hd-nav a[aria-current], .hd-nav a:hover { text-decoration-color: var(--midori); text-decoration-thickness: 2px; }
+.hd-cta, .hd-menu { border: 1.5px solid var(--midori); border-radius: 0; background: var(--paper); color: var(--midori); font-weight: 700; }
+.hd-cta:hover { background: var(--midori); color: var(--paper); }
+.pl-title, .ft .ft-big { color: var(--midori); font-weight: 900; font-stretch: 62%; letter-spacing: -.01em; }
+.h2, .pl-h, .card-name, .cat-name, .faq summary, .statement { color: var(--ink); font-weight: 700; }
 .h2 { font-stretch: 80%; letter-spacing: -.015em; }
-.statement { color: var(--k); }
-.pl-tags { display: inline-flex; padding: 5px 10px; background: var(--red); color: var(--paper); font-weight: 700; transform: rotate(-2deg); transform-origin: left; box-shadow: 2px 2px 0 var(--yellow); }
-.pl-tags .pl-no { color: var(--yellow); }
-.pl-tags .pl-tag::before, .pl-tags .pl-pill::before { color: var(--yellow); }
-.lbl { color: var(--k); font-weight: 700; }
-.lbl::before { content: ''; width: 24px; height: 9px; flex: none; background: repeating-linear-gradient(90deg, var(--blue) 0 3px, transparent 3px 6px); }
-.sec { border-top: 0; background: repeating-linear-gradient(90deg, var(--k) 0 10px, transparent 10px 16px) top left / 100% 1.5px no-repeat; }
-.ft { border-top: 2px solid var(--k); }
-.ft-cta { border-bottom: 1.5px solid var(--k); }
-.plate, .plate-grey { border: 1.5px solid var(--k); padding: clamp(20px, 2.6vw, 36px); background: transparent; box-shadow: 4px 4px 0 rgba(0, 120, 191, .25); }
+.pl-tags { display: inline-flex; padding: 4px 10px; border: 1.5px solid var(--midori); color: var(--midori); font-weight: 700; }
+.pl-tags .pl-no { color: var(--midori); }
+.pl-tags .pl-tag::before, .pl-tags .pl-pill::before { color: var(--t3); }
+.lbl { color: var(--midori); font-weight: 700; }
+.lbl::before { content: ''; width: 24px; height: 9px; flex: none; background: repeating-linear-gradient(90deg, var(--midori) 0 3px, transparent 3px 6px); }
+.sec { border-top: 0; background: repeating-linear-gradient(90deg, var(--midori) 0 10px, transparent 10px 16px) top left / 100% 1.5px no-repeat; }
+.ft { border-top: 1.5px solid var(--midori); }
+.ft-cta { border-bottom: 1.5px solid var(--midori); }
+.plate, .plate-grey { border: 1.5px solid var(--midori); padding: clamp(20px, 2.6vw, 36px); background: transparent; margin-bottom: clamp(32px, 4vw, 56px); }
 .plate-pair .plate { margin-bottom: clamp(32px, 4vw, 56px); }
-.plate { margin-bottom: clamp(32px, 4vw, 56px); }
 .pl-rows div { border-top: 1px solid var(--line-2); }
-.pl-rows dt { color: var(--red); font-weight: 700; }
+.pl-rows dt { color: var(--midori); font-weight: 700; }
 .catalog { gap: 14px; }
-.cat { border: 1.5px solid var(--k); background: transparent; }
+.cat { border: 1.5px solid var(--midori); background: transparent; }
 .cat a { padding: 12px 14px 14px; }
-.cat a:hover { background: var(--aqua); }
+.cat a:hover { background: var(--t1); }
 .cat-fig { border-bottom: 0; }
-.cat-n { color: var(--red); font-weight: 900; font-stretch: 62%; font-size: 1.5rem; letter-spacing: 0; text-shadow: 2px 2px 0 var(--yellow); }
-.media, .g-media, .obra-cover { border: 1.5px solid var(--k); background: var(--bg-alt); }
-.card-n, .card-meta { color: var(--red); }
-.tags li, .chip span { border: 1.5px solid var(--k); border-radius: 0; background: transparent; color: var(--k); }
-.chip input:checked + span { background: var(--blue); color: var(--paper); border-color: var(--k); }
-.field input { border-bottom: 1.5px solid var(--k); }
-.field textarea { border: 1.5px solid var(--k); }
-.tbl thead th { background: var(--blue); color: var(--paper); }
-.faq details { border-color: var(--k); }
-.btn { border-radius: 0; border: 2px solid var(--k); background: var(--red); color: var(--paper); font-weight: 700; box-shadow: 3px 3px 0 var(--blue); transition: transform .15s, box-shadow .15s, background .2s; }
-.btn:hover { background: var(--pink); border-color: var(--k); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--blue); }
-.btn-ghost { background: var(--paper); color: var(--k); box-shadow: 3px 3px 0 var(--yellow); }
-.btn-ghost:hover { background: var(--yellow); color: var(--k); box-shadow: 4px 4px 0 var(--k); }
-.diag .d-fill { fill: url(#ht-yellow); stroke: var(--k); }
-.diag .d-line, .diag .d-dash { stroke: var(--k); }
-.diag .d-k { fill: var(--k); font-weight: 600; }
-.ft-logo { color: var(--k); }
-.pl-gomet { background: var(--gomet); box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .18), 1px -1px 0 rgba(0, 120, 191, .35); }
+.cat-n { color: var(--midori); font-weight: 900; font-stretch: 62%; font-size: 1.5rem; letter-spacing: 0; }
+.media, .g-media, .obra-cover { border: 1.5px solid var(--midori); background: var(--bg-alt); }
+.card-n, .card-meta { color: var(--midori); }
+.tags li, .chip span { border: 1.5px solid var(--midori); border-radius: 0; background: transparent; color: var(--ink); }
+.chip input:checked + span { background: var(--midori); color: var(--paper); border-color: var(--midori); }
+.field input { border-bottom: 1.5px solid var(--midori); }
+.field textarea { border: 1.5px solid var(--midori); }
+.tbl thead th { background: var(--midori); color: var(--paper); }
+.faq details { border-color: var(--midori); }
+.diag .d-fill { fill: var(--t2); stroke: var(--midori); }
+.diag .d-line, .diag .d-dash { stroke: var(--midori); }
+.diag .d-k { fill: var(--midori); font-weight: 600; }
+.btn { border-radius: 0; border: 1.5px solid var(--midori); background: var(--midori); color: var(--paper); font-weight: 700; box-shadow: 3px 3px 0 var(--t3); transition: transform .15s, box-shadow .15s, background .2s; }
+.btn:hover { background: var(--midori-d); border-color: var(--midori-d); transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--t3); }
+.btn-ghost { background: var(--paper); color: var(--midori); }
+.btn-ghost:hover { background: var(--t1); color: var(--midori); }
+.pl-gomet { background: var(--gomet); box-shadow: inset -2px -2px 0 rgba(0, 0, 0, .18); }
 @media (max-width: 900px) {
   .banner { font-size: .95rem; margin-bottom: 12px; }
   .jp-head { margin-bottom: 8px; }
   .op-title { font-size: 2.6rem; }
   .op-display { font-size: clamp(2.1rem, 9vw, 2.8rem); }
   .op-get { border: 0; background: none; padding: 0; }
-  .op-get span { margin: 0 8px 0 0; }
+  .op-get span { display: inline-block; margin: 0 8px 0 0; }
   .op-note, .stamp { display: none; }
 }
 
