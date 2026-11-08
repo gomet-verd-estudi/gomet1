@@ -42,7 +42,7 @@ const PAPER = '#F4EFE6';
 const dots = (id, size, r, bg, fg, op = 1) => `<pattern id="${id}" width="${size}" height="${size}" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><rect width="${size}" height="${size}" fill="${bg}"/><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="${fg}"${op < 1 ? ` fill-opacity="${op}"` : ''}/></pattern>`;
 const RISO_DEFS = `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>${
   Object.entries(INKS).map(([k, c]) => dots('ht-' + k, 4.6, k === 'k' ? 0.9 : 1.55, PAPER, c)).join('')
-}${dots('sh-red', 3.8, 1.05, INKS.red, INKS.k, 0.75)}${dots('sh-blue', 3.8, 1.05, INKS.blue, INKS.k, 0.75)}${dots('sh-yellow', 3.8, 1.15, INKS.yellow, INKS.red, 0.9)}${dots('sh-k', 3.6, 1.15, PAPER, INKS.k, 0.85)}${dots('ht-aqua', 4, 1.35, PAPER, INKS.blue, 0.55)}</defs></svg>`;
+}${dots('sh-red', 3.8, 1.05, INKS.red, INKS.k, 0.75)}${dots('sh-blue', 3.8, 1.05, INKS.blue, INKS.k, 0.75)}${dots('sh-yellow', 3.8, 1.15, INKS.yellow, INKS.red, 0.9)}${dots('sh-k', 3.6, 1.15, PAPER, INKS.k, 0.85)}${dots('ht-aqua', 4, 1.35, PAPER, INKS.blue, 0.55)}<pattern id="tora" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3.2" height="3.2" fill="${INKS.yellow}"/><rect width="1.6" height="3.2" fill="${INKS.k}"/></pattern></defs></svg>`;
 /* el color de cada capa del edificio (y de cada fase) */
 const PHASE_COLOR = ['blue', 'blue', 'red', 'yellow', 'red', 'yellow', 'red', 'blue'];
 const gve = '';
@@ -217,6 +217,7 @@ function home() {
 <section class="obra" id="obra" aria-label="Cómo se construye una marca" style="--n:10">
   <div class="obra-stage">
     <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
+    <div class="obra-grain" aria-hidden="true"></div>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0">
         <div class="op-l">

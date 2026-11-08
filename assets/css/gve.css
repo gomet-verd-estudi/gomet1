@@ -97,7 +97,6 @@ p { margin: 0 0 1em; }
 .obra-svg[data-act="e"] .act-e, .obra-svg[data-act="d"] .act-d, .obra-svg[data-act="c"] .act-c, .obra-svg[data-act="m"] .act-m { fill: var(--ink); }
 .obra-svg .ph .svg-k { transition: fill .3s; }
 .obra-svg .ph.now .svg-k { fill: var(--ink); }
-.ph, .v { will-change: transform, opacity; }
 .v { transform-box: fill-box; transform-origin: center; transition: opacity .3s ease, transform .5s cubic-bezier(.3, 1.6, .5, 1); }
 .obra.is-live .v:not(.on) { opacity: 0; transform: scale(.2); }
 .obra-rail { padding: 0 clamp(12px, 2vw, 32px) 16px; }
@@ -723,8 +722,14 @@ html:not(.js) .obra .op { position: static; opacity: 1; visibility: visible; tra
 html, body { background: var(--paper); }
 body { color: var(--k); }
 ::selection { background: var(--yellow); color: var(--k); }
-/* el papel y la tinta: grano, fibras y motas sin tinta, por encima de todo */
-body::after { content: ''; position: fixed; inset: 0; z-index: 900; pointer-events: none; background-image: url(../img/dropout.png), url(../img/grain.png); background-size: 220px 220px, 300px 300px; }
+/* Rendimiento: lo que está fuera de pantalla no se pinta hasta que se acerca */
+.sec, .ft { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+
+/* Grano de impresión, solo en las ilustraciones: motas finísimas del color del papel encima del dibujo.
+   Sobre el papel no se ven; sobre la tinta, son los huecos y la tinta desigual de la risografía. */
+.obra-grain, .cat-fig::after, .pl-fig::after, .pil-fig::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: url(../img/grain-fine.png) 0 0 / 120px 120px; }
+.obra-grain { z-index: 1; }
+.cat-fig, .pl-fig, .pil-fig { position: relative; }
 a { text-decoration-color: var(--red); }
 :focus-visible { outline: 2px dashed var(--blue); outline-offset: 3px; }
 
@@ -732,13 +737,14 @@ a { text-decoration-color: var(--red); }
 .c-red, .L-cim, .L-pc, .L-book, .P2, .P6 { --ht: url(#ht-red); --sh: url(#sh-red); --acc: var(--red); }
 .c-blue, .L-sol, .L-pa, .P0, .P1, .P4 { --ht: url(#ht-blue); --sh: url(#sh-blue); --acc: var(--blue); }
 .c-yellow, .L-est, .L-ins, .L-key, .P3, .P5, .P7 { --ht: url(#ht-yellow); --sh: url(#sh-yellow); --acc: var(--yellow); }
-.c-white { --ht: var(--paper); --sh: url(#sh-k); --acc: url(#ht-k); }
+.c-white { --ht: var(--paper); --sh: url(#ht-k); --acc: var(--paper); }
+.obra-svg .city { --sh: url(#ht-aqua); }
 .f.a.ft, .obra-svg .bx .ft { fill: var(--ht, var(--paper)); }
 .f.a.fl, .obra-svg .bx .fl { fill: var(--acc, url(#ht-k)); }
 .f.a.fr, .obra-svg .bx .fr { fill: var(--sh, url(#sh-k)); }
 .f.w.ft { fill: var(--paper); }
-.f.w.fl { fill: url(#ht-k); }
-.f.w.fr { fill: url(#sh-k); }
+.f.w.fl { fill: var(--paper); }
+.f.w.fr { fill: url(#ht-k); }
 
 /* ---------- la obra ---------- */
 .obra-stage { background: transparent; }
@@ -759,6 +765,20 @@ a { text-decoration-color: var(--red); }
 .obra-svg .amp { stroke: var(--pink); stroke-width: 1.4; stroke-dasharray: 6 4; }
 .obra-svg .mullion { stroke: var(--k); opacity: .5; }
 .obra-svg .val { fill: var(--gomet); }
+.obra-svg .tora .f { fill: url(#tora); }
+.obra-svg .post .k { stroke-width: .8; }
+/* personitas: plancha de color desajustada y trazo negro encima */
+.obra-svg .ppl .pf { stroke: none; transform: translate(var(--mx, 1.6px), var(--my, -1.1px)); }
+.obra-svg .ppl .pk { fill: none; stroke: var(--k); stroke-width: .95; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.obra-svg .p-paper { fill: var(--paper); }
+.obra-svg .p-k { fill: var(--k); }
+.obra-svg .p-navy { fill: url(#sh-blue); }
+.obra-svg .p-blue { fill: var(--blue); }
+.obra-svg .p-red { fill: var(--red); }
+.obra-svg .p-yellow { fill: var(--yellow); }
+.obra-svg .p-pink { fill: var(--pink); }
+.obra-svg .p-green { fill: var(--gomet); }
+.obra-svg .p-shadow { fill: url(#ht-k); opacity: .6; }
 .obra-svg .mk circle { fill: var(--red); stroke: var(--k); stroke-width: 1.2; }
 .obra-svg .mk text { fill: var(--paper); font-weight: 700; }
 .obra-svg .mk.hi circle { fill: var(--blue); }

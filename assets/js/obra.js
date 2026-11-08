@@ -32,8 +32,21 @@
   const S = 1.7, T = 0.3;      // altura de planta y canto del forjado
   const TOP = F + 4 * S;       // cubierta (7.1)
   const L = Array(9).fill(0);  // avance de cada fase 1–8 (L[0] sin uso)
-  const items = [];            // piezas en orden de dibujo
-  const add = (fn) => items.push(fn);
+  // Piezas en orden de dibujo. Cada una declara de qué fases depende y solo se redibuja cuando
+  // alguna de ellas cambia: al hacer scroll se tocan unas pocas piezas, no la obra entera.
+  const items = [];
+  const add = (fn, deps) => items.push({ fn, deps, last: null });
+  function runItems(force) {
+    for (const it of items) {
+      if (!force && it.deps) {
+        let key = '';
+        for (const d of it.deps) key += L[d].toFixed(4) + ',';
+        if (key === it.last) continue;
+        it.last = key;
+      }
+      it.fn();
+    }
+  }
 
   /* ---------- primitivas ---------- */
   // Caja: tapa y dos laterales visibles. h y extensión se recalculan cada fotograma.
@@ -56,18 +69,18 @@
   // Caja que crece hacia arriba desde su base dentro de la ventana [a, b] de su fase
   function rise(ph, a, b, x, y, z, w, d, h, cls) {
     const n = boxNode(cls);
-    add(() => drawBox(n, x, y, z, w, d, h * eo(win(L[ph], a, b))));
+    add(() => drawBox(n, x, y, z, w, d, h * eo(win(L[ph], a, b))), [ph]);
   }
   // Losa que se extiende desde su esquina trasera (hormigonado sobre encofrado)
   function spread(ph, a, b, x, y, z, w, d, h, cls) {
     const n = boxNode(cls);
-    add(() => { const t = eo(win(L[ph], a, b)); drawBox(n, x, y, z, w * t, d * Math.min(1, t * 1.15), h); });
+    add(() => { const t = eo(win(L[ph], a, b)); drawBox(n, x, y, z, w * t, d * Math.min(1, t * 1.15), h); }, [ph]);
   }
   // Trazo que se dibuja de principio a fin
   function stroke(ph, a, b, segs, cls) {
     const p = el('path', { class: 'ln ' + cls, d: segs, pathLength: 1 });
     p.style.strokeDasharray = '1 1';
-    add(() => { const t = win(L[ph], a, b); p.style.strokeDashoffset = String(1 - t); p.style.opacity = t > 0 ? 1 : 0; });
+    add(() => { const t = win(L[ph], a, b); p.style.strokeDashoffset = String(1 - t); p.style.opacity = t > 0 ? 1 : 0; }, [ph]);
   }
 
   /* ---------- 1 · el terreno: la ciudad que estudiamos ---------- */
@@ -85,7 +98,7 @@
 
   /* ---------- 2 · el solar: el hueco que nadie ocupa ---------- */
   const plot = boxNode('c-blue plot');
-  add(() => { const t = eo(win(L[2], 0.15, 0.7)); drawBox(plot, -0.3, -0.3, 0, (W + 0.6) * t, (W + 0.6) * Math.min(1, t * 1.15), 0.04); });
+  add(() => { const t = eo(win(L[2], 0.15, 0.7)); drawBox(plot, -0.3, -0.3, 0, (W + 0.6) * t, (W + 0.6) * Math.min(1, t * 1.15), 0.04); }, [2]);
   stroke(2, 0, 0.35, poly([P(-0.6, -0.6, 0), P(W + 0.6, -0.6, 0), P(W + 0.6, W + 0.6, 0), P(-0.6, W + 0.6, 0)]), 'mark');
   [[-0.6, -0.6], [W + 0.4, -0.6], [W + 0.4, W + 0.4], [-0.6, W + 0.4]].forEach(([x, y], i) => rise(2, 0.35 + i * 0.1, 0.65 + i * 0.1, x, y, 0, 0.2, 0.2, 0.9, 'c-red stake'));
 
@@ -103,7 +116,7 @@
     pitWallB.setAttribute('d', poly([P(0, 0, top), P(0, W, top), P(0, W, 0), P(0, 0, 0)])); // pared del fondo (x = 0)
     pour.style.display = fill > 0.002 ? '' : 'none';
     pour.setAttribute('d', poly([P(0, 0, top), P(W, 0, top), P(W, W, top), P(0, W, top)]));
-  });
+  }, [3]);
   rise(3, 0.82, 1, 0, 0, 0, W, W, F, 'c-red found');
 
   /* ---------- 4 · la estructura: cuatro pilares, por tramos de planta ---------- */
@@ -149,9 +162,9 @@
   };
   // orden de dibujo: pilares traseros, luego planta a planta (pilar delantero, fachada, forjado)
   for (let j = 0; j < 4; j++) {
-    add(pillarSeg(0, j)); add(pillarSeg(1, j)); add(pillarSeg(2, j));
-    add(pillarSeg(3, j));
-    add(wallLeft(j)); add(wallRight(j));
+    add(pillarSeg(0, j), [4]); add(pillarSeg(1, j), [4]); add(pillarSeg(2, j), [4]);
+    add(pillarSeg(3, j), [4]);
+    add(wallLeft(j), [6]); add(wallRight(j), [6]);
     slab(j);
   }
   // remates: el peto de cubierta crece en sus cuatro lados; instalaciones en cubierta
@@ -171,7 +184,7 @@
     const t = eo(win(L[7], 0, 0.35));
     door.style.display = t > 0.002 ? '' : 'none';
     door.setAttribute('d', poly([P(5.9, W, F), P(7.2, W, F), P(7.2, W, F + 1.2 * t), P(5.9, W, F + 1.2 * t)]));
-  });
+  }, [7]);
   let mull = '';
   for (let k = 1; k < 8; k++) mull += open([P(k, W, F), P(k, W, TOP)]) + open([P(W, k, F), P(W, k, TOP)]);
   stroke(7, 0.15, 0.6, mull, 'mullion');
@@ -186,15 +199,66 @@
     const t = eo(win(L[8], 0.45, 0.95)), z1 = TOP + 0.4 + 1.9 * t;
     amp.style.display = t > 0.002 ? '' : 'none';
     amp.setAttribute('d', poly([P(0, 0, z1), P(W, 0, z1), P(W, W, z1), P(0, W, z1)]) + open([P(W, 0, TOP + 0.4), P(W, 0, z1)]) + open([P(W, W, TOP + 0.4), P(W, W, z1)]) + open([P(0, W, TOP + 0.4), P(0, W, z1)]));
-  });
+  }, [8]);
 
-  /* ---------- figuras a escala (como en la presentación) ---------- */
-  [[10.2, 5.4], [3.2, 10.6], [11, 9.8]].forEach(([x, y]) => {
-    const b = boxNode('c-white person');
-    drawBox(b, x, y, 0, 0.32, 0.32, 0.75);
-    const [hx, hy] = P(x + 0.16, y + 0.16, 0.98);
-    el('circle', { class: 'head', cx: hx.toFixed(1), cy: hy.toFixed(1), r: 3.6 });
+  /* ---------- vallas de obra a rayas (トラ柵): llegan con el solar y se retiran en la entrega ---------- */
+  const onSite = () => eo(win(L[2], 0.45, 0.9)) * (1 - eo(win(L[7], 0, 0.35)));
+  [[0.3, 3.4], [4.6, 3.4]].forEach(([x0, w]) => {
+    const y = W + 1.5, pa = boxNode('c-white post'), pb = boxNode('c-white post'), bar = boxNode('tora'), bar2 = boxNode('tora');
+    add(() => {
+      const t = onSite();
+      drawBox(pa, x0, y, 0, 0.14, 0.14, 0.78 * t); drawBox(pb, x0 + w - 0.14, y, 0, 0.14, 0.14, 0.78 * t);
+      drawBox(bar, x0, y - 0.02, 0.52 * t, w, 0.08, 0.2 * (t > 0.01 ? 1 : 0));
+      drawBox(bar2, x0, y - 0.02, 0.16 * t, w, 0.08, 0.14 * (t > 0.01 ? 1 : 0));
+    }, [2, 7]);
   });
+  // conos en las esquinas del solar
+  const cone = (x, y) => {
+    const [cx, cy] = P(x, y, 0);
+    const g = el('g', { class: 'ppl cone', transform: `translate(${cx.toFixed(1)} ${cy.toFixed(1)})` });
+    [['M-4.2 0.6L4.2 0.6L4.2 -0.6L-4.2 -0.6Z', 'p-red'], ['M-2.6 -0.6L-0.7 -10.6L0.7 -10.6L2.6 -0.6Z', 'p-red'], ['M-1.9 -4.2L1.9 -4.2L1.5 -6.4L-1.5 -6.4Z', 'p-paper']].forEach(([d, c]) => { el('path', { d, class: 'pf ' + c }, g); el('path', { d, class: 'pk' }, g); });
+    return g;
+  };
+  const cones = [cone(-1, W + 1.6), cone(W + 1.7, -0.9)];
+  add(() => { const on = onSite() > 0.5; cones.forEach((c) => { c.style.display = on ? '' : 'none'; }); }, [2, 7]);
+
+  /* ---------- personitas, como en los folletos japoneses de montaje ---------- */
+  // Figuras planas con los pies en un punto del suelo: el color va desajustado y el trazo negro encima.
+  const circ = (cx, cy, r) => `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+  const BODY = {
+    shadow: [circ(0, 0, 6).replace(/a6 6/g, 'a6 2.6'), 'p-shadow', 0],
+    legs: (c) => [['M-3.1 -10.2L-0.4 -10.2L-0.7 -1L-3 -1Z', c], ['M0.4 -10.2L3.1 -10.2L3 -0.8L0.7 -0.8Z', c], ['M-3.6 -1.4L-0.5 -1.4L-0.4 0.3L-4 0.3Z', 'p-k'], ['M0.5 -1.2L3.4 -1.2L3.9 0.5L0.4 0.5Z', 'p-k']],
+    torso: (c) => ['M-4.4 -18.4Q0 -19.8 4.4 -18.4L3.9 -9.4L-3.9 -9.4Z', c],
+    armL: (c) => [['M-4.4 -18.2L-6 -11.2L-4.5 -10.8L-3.3 -16.6Z', c], [circ(-5.3, -10.6, 1), 'p-paper']],
+    armR: (c) => [['M4.4 -18.2L6 -11.2L4.5 -10.8L3.3 -16.6Z', c], [circ(5.3, -10.6, 1), 'p-paper']],
+    head: [[circ(0, -21.8, 3.1), 'p-paper'], [circ(-1.1, -21.5, 0.38), 'p-k', 0], [circ(1.1, -21.5, 0.38), 'p-k', 0]],
+    hair: ['M-3.2 -22.3Q-3.1 -25.7 0 -25.5Q3.1 -25.7 3.2 -22.3Q1.6 -23.7 0 -23.5Q-1.7 -23.7 -3.2 -22.3Z', 'p-k'],
+    helmet: (c) => [['M-3.5 -22.5A3.6 3.9 0 0 1 3.5 -22.5Z', c], ['M-4.4 -22.6L4.4 -22.6L4.2 -21.7L-4.2 -21.7Z', c], ['M-1 -24.3h2v.55h-2Z', 'p-green', 0], ['M-0.28 -25.05h.56v2.05h-.56Z', 'p-green', 0]],
+    vest: ['M-4.2 -14.3L4.2 -14.3L4.15 -12.9L-4.15 -12.9Z', 'p-yellow'],
+    tie: [['M-1.7 -18.9L0 -15.6L1.7 -18.9Z', 'p-paper'], ['M-0.5 -18.4L0.5 -18.4L0.8 -13.6L0 -12.6L-0.8 -13.6Z', 'p-red']]
+  };
+  const B = BODY;
+  const FOLK = [
+    // peatones, siempre en la calle: el público que estudiamos en el terreno
+    { at: [10.2, 5.4], parts: [B.shadow, ...B.legs('p-navy'), ['M4.6 -10.2h4.8v3.6h-4.8Z', 'p-k'], ['M5.9 -10.2v-1h2.2v1', 'p-none'], B.torso('p-k'), ...B.tie, ...B.armL('p-k'), ...B.armR('p-k'), ...B.head, B.hair] }, // oficinista con cartera
+    { at: [3.2, 10.6], s: 0.74, parts: [B.shadow, ...B.legs('p-blue'), ['M-5 -18.6h10v7.4h-10Z', 'p-red'], B.torso('p-paper'), ...B.armL('p-paper'), ...B.armR('p-paper'), ...B.head, ['M-3.6 -22.4A3.7 3.6 0 0 1 3.6 -22.4L4.8 -21.8L-3.6 -21.8Z', 'p-yellow']] }, // colegial con gorro amarillo y mochila roja
+    { at: [11, 9.8], parts: [B.shadow, ['M-2.4 -6.2L-0.6 -6.2L-0.8 -1L-2.2 -1Z', 'p-paper'], ['M0.6 -6.2L2.4 -6.2L2.2 -0.8L0.8 -0.8Z', 'p-paper'], ['M-3.4 -1.3L-0.6 -1.3L-0.5 0.3L-3.7 0.3Z', 'p-k'], ['M0.6 -1.1L3.2 -1.1L3.6 0.5L0.5 0.5Z', 'p-k'], ['M-3.8 -10.6L3.8 -10.6L4.8 -5.6L-4.8 -5.6Z', 'p-pink'], B.torso('p-paper'), ['M-8 -12.6h4.2l.5 4.8h-5.2Z', 'p-blue'], ...B.armL('p-paper'), ...B.armR('p-paper'), ...B.head, ['M-3.3 -21.6Q-3.6 -26 0 -25.6Q3.6 -26 3.3 -21.6L3.6 -18.6L2.6 -18.8Q3 -22.6 0 -23.2Q-3 -22.6 -2.6 -18.8L-3.6 -18.6Z', 'p-k']] }, // vecina con bolsa
+    // obreros: llegan con la obra y se van con la entrega de llaves
+    { at: [9.5, 7.7], site: 1, parts: [B.shadow, ...B.legs('p-navy'), B.torso('p-blue'), B.vest, ...B.armL('p-blue'), ['M4.2 -18.2L7.4 -22.8L8.6 -21.8L5.2 -16.4Z', 'p-blue'], [circ(8.1, -22.6, 1.05), 'p-paper'], ['M8.1 -21.4L8.1 -31', 'p-none'], ['M8.1 -31L13.6 -29.2L8.1 -27.4Z', 'p-green'], ...B.head, ...B.helmet('p-yellow')] }, // vigilante con banderín
+    { at: [-1.5, 9.6], site: 1, parts: [B.shadow, ...B.legs('p-navy'), B.torso('p-paper'), B.vest, ...B.armR('p-paper'), ['M-7.8 -15.4L1.8 -13L1.5 -11.7L-8.1 -14.1Z', 'p-blue'], ...B.armL('p-paper'), ...B.head, ...B.helmet('p-paper')] } // arquitecta con planos
+  ];
+  const FOLK_SCALE = 1.3; // algo mayores que a escala, como en los folletos, para que se lean
+  const folk = FOLK.map(({ at, s: sc0 = 1, parts, site }) => {
+    const sc = sc0 * FOLK_SCALE;
+    const [px, py] = P(at[0], at[1], 0);
+    const g = el('g', { class: 'ppl', transform: `translate(${px.toFixed(1)} ${py.toFixed(1)})${sc !== 1 ? ` scale(${sc})` : ''}` });
+    parts.forEach(([d, c, key = 1]) => {
+      if (c !== 'p-none') el('path', { d, class: 'pf ' + c }, g);
+      if (key) el('path', { d, class: 'pk' }, g);
+    });
+    return { g, site };
+  });
+  add(() => { const on = onSite() > 0.5; folk.forEach((f) => { if (f.site) f.g.style.display = on ? '' : 'none'; }); }, [2, 7]);
   // vecinos delante de la obra
   [[11.2, 11.4, 1.5, 1.4, 1.1]].forEach(([x, y, w, d, h]) => rise(1, 0.5, 0.85, x, y, 0, w, d, h, 'c-white city'));
 
@@ -222,7 +286,7 @@
     hookLine.style.display = show ? '' : 'none';
     if (show) hookLine.setAttribute('d', open([P(tx, ty, H), P(tx, ty, work + 0.35)]));
     drawBox(hook, tx - 0.15, ty - 0.15, work, 0.3, 0.3, show ? 0.35 : 0);
-  });
+  }, [3, 4, 5, 6, 7]);
 
   /* ---------- gomets de validación ---------- */
   const VAL = [[2, W + 0.5, W + 0.5, 0.9], [3, W, W, F], [4, W - 0.35, W - 0.35, TOP - T], [5, W, W, F + 4 * S - T * 0.5], [6, W, W * 0.5, TOP + 0.4]];
@@ -279,12 +343,13 @@
     let b = null;
     for (let s = 0; s <= 9.01; s += 0.25) {
       for (let k = 1; k <= 8; k++) L[k] = clamp((s - k + 0.05) / 0.72);
-      items.forEach((fn) => fn());
+      runItems(true);
       const r = scene.getBBox();
       b = b ? { x0: Math.min(b.x0, r.x), y0: Math.min(b.y0, r.y), x1: Math.max(b.x1, r.x + r.width), y1: Math.max(b.y1, r.y + r.height) }
         : { x0: r.x, y0: r.y, x1: r.x + r.width, y1: r.y + r.height };
     }
     for (let k = 1; k <= 8; k++) L[k] = 0;
+    items.forEach((it) => { it.last = null; });
     const m = 14; // aire para trazos y gomets
     return { x0: b.x0 - m, y0: b.y0 - m, x1: b.x1 + m, y1: b.y1 + m };
   }
@@ -324,7 +389,7 @@
   /* ---------- pintar ---------- */
   let active = -1;
   function paint() {
-    items.forEach((fn) => fn());
+    runItems(false);
     gomets.forEach(({ ph, g }) => g.classList.toggle('on', L[ph] >= 0.97));
   }
   window.GVE_OBRA = {
