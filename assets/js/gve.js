@@ -94,10 +94,10 @@
     const talk = () => {
       const i = Math.max(0, lastActive), t = panels[i] && panels[i].dataset.tip;
       if (!t || !html.classList.contains('snap')) { if (cap) { cap.set('idle'); cap.face(0); } return; }
-      if (cap) { cap.face(0); if (reduce) cap.still('talk'); else cap.set('talk'); }
+      if (cap) { cap.face(0); cap.set('talk'); }
       bubble.textContent = t;
       bubble.classList.remove('say'); void bubble.offsetWidth; bubble.classList.add('say');
-      clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); if (cap) { if (reduce) cap.still('idle'); else cap.set('idle'); } }, 6500);
+      clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); if (cap) cap.set('idle'); }, 6500);
     };
     say = talk;
     let entering = false;
@@ -115,7 +115,8 @@
         s.onerror = () => { mascot.classList.remove('wait'); };
         s.onload = () => window.GVECapataz3D({ canvas, base: 'assets/capataz/', reduce }).then((c) => {
           cap = c; mascot.classList.add('is-3d'); mascot.classList.remove('wait');
-          if (reduce || !live) { c.face(0); if (reduce) c.still('idle'); else c.start(); setTimeout(say, 600); }
+          // con movimiento reducido no entra caminando, pero respira, parpadea y gesticula al hablar
+          if (reduce || !live) { c.face(0); c.start(); setTimeout(say, 600); }
           else {
             // entra caminando de perfil desde el margen izquierdo, se gira hacia quien lee, saluda y habla
             const r = mascot.getBoundingClientRect();
@@ -123,9 +124,9 @@
             c.enter(r.left + r.width * 0.75).then(() => { entering = false; lastY = scrollY; say(); });
           }
           if ('IntersectionObserver' in window) new IntersectionObserver((es) => es.forEach((e) => {
-            live = e.isIntersecting; if (reduce) return; if (live) cap.start(); else cap.stop();
+            live = e.isIntersecting; if (live) cap.start(); else cap.stop();
           })).observe(obra);
-          document.addEventListener('visibilitychange', () => { if (!document.hidden && live && !reduce) cap.start(); });
+          document.addEventListener('visibilitychange', () => { if (!document.hidden && live) cap.start(); });
         }).catch(() => { mascot.classList.remove('wait'); setTimeout(say, 400); }); // sin WebGL, la imagen fija
         document.head.appendChild(s);
       };

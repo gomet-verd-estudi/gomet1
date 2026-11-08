@@ -9,12 +9,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 1 }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 1 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
   const load = (u) => new THREE.TextureLoader().loadAsync(u);
-  const [gltf, tex, bump, foldTex, texB] = await Promise.all([new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null, textureBlink ? load(textureBlink) : null]);
+  const [gltf, tex, bump, foldTex, texB] = await Promise.all([gltfBuffer ? new GLTFLoader().parseAsync(gltfBuffer, '') : new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null, textureBlink ? load(textureBlink) : null]);
   for (const t of [tex, texB]) { if (!t) continue; t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; } // colores puros, sin mezclas en los bordes
   bump.flipY = false; bump.colorSpace = THREE.NoColorSpace;
   if (foldTex) { foldTex.flipY = false; foldTex.colorSpace = THREE.NoColorSpace; }

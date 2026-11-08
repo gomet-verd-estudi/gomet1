@@ -1176,10 +1176,14 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .mascot .cp-canvas { opacity: 0; transition: opacity .25s ease; }
 .mascot.is-3d .cp-canvas { opacity: 1; }
 .mascot.is-3d .cp-poster { visibility: hidden; }
+/* si el 3D no puede arrancar, la imagen fija tampoco se queda parada: respira y se balancea */
+.mascot:not(.is-3d):not(.wait) .cp-poster { transform-origin: 50% 100%; animation: cp-breathe 3.2s ease-in-out infinite; }
+@keyframes cp-breathe { 0%, 100% { transform: none; } 30% { transform: translateY(-1.5%) rotate(-1.2deg) scaleY(1.012); } 65% { transform: translateY(0) rotate(1deg) scaleY(.994); } }
 .mascot .m-bubble { right: calc(var(--m-w) * .5); bottom: calc(100% - 10px); }
 
 @media (prefers-reduced-motion: reduce) {
   .mascot, .mascot .cp-canvas { animation: none !important; transition: none !important; }
+  .mascot:not(.is-3d):not(.wait) .cp-poster { animation-duration: 4.5s; }
 }
 
 @media (prefers-reduced-motion: reduce) {

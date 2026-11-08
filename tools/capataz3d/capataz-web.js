@@ -9,11 +9,22 @@ function webgl() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
 }
 
+// El modelo puede venir como .glb (lo normal) o, donde no se sirven .glb ni se puede usar fetch con data:, como un
+// script que deja el .glb en base64 en window.CAPATAZ_GLB (data-model="js:archivo.js")
+function modelSource(base, spec) {
+  if (!spec || !spec.startsWith('js:')) return Promise.resolve({ url: base + (spec || 'capataz.glb') });
+  return new Promise((ok, ko) => {
+    const s = document.createElement('script'); s.src = base + spec.slice(3);
+    s.onload = () => { const b = atob(window.CAPATAZ_GLB || ''); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); window.CAPATAZ_GLB = null; ok({ gltfBuffer: u.buffer }); };
+    s.onerror = ko; document.head.appendChild(s);
+  });
+}
+
 window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, reduce = false }) {
   if (!webgl()) throw new Error('sin WebGL');
   const dpr = Math.min(1.5, window.devicePixelRatio || 1); // con este grosor de línea, más resolución no se nota
   const C = await createCapataz({
-    canvas, url: base + (canvas.dataset.model || 'capataz.glb'), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
+    canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
     line, fine, fineThreshold: 2.0, background: null
   });
   C.renderer.setPixelRatio(dpr);
@@ -75,7 +86,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     set: (s) => { D.set(s); dirty = true; },
     advance: (d) => { D.advance(d); dirty = true; },
     face: (dir) => { D.face(dir); dirty = true; },
-    start() { if (reduce || running) return; running = true; last = 0; if (!raf) raf = requestAnimationFrame(frame); },
+    start() { if (running) return; running = true; last = 0; if (!raf) raf = requestAnimationFrame(frame); },
     stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; },
     // con movimiento reducido: una sola imagen por cambio de estado
     still(state = 'idle') { D.set(state); for (let i = 0; i < 30; i++) D.tick(1 / 30); draw(0); },
