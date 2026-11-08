@@ -13,7 +13,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   if (!webgl()) throw new Error('sin WebGL');
   const dpr = Math.min(1.5, window.devicePixelRatio || 1); // con este grosor de línea, más resolución no se nota
   const C = await createCapataz({
-    canvas, url: base + (canvas.dataset.model || 'capataz.glb'), texture: base + 'color.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
+    canvas, url: base + (canvas.dataset.model || 'capataz.glb'), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
     line, fine, fineThreshold: 2.0, background: null
   });
   C.renderer.setPixelRatio(dpr);
@@ -27,7 +27,16 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   let ent = null;
   const host = canvas.closest('.mascot') || canvas;
   const place = (x) => { host.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; };
+  // parpadeo: cada 2,5–5,5 s, 0,13 s con los ojos cerrados; a veces dos seguidos
+  let blinkAt = 2 + Math.random() * 2, clock = 0, shut = false;
+  const blinkTick = (dt) => {
+    clock += dt;
+    const want = clock >= blinkAt && clock < blinkAt + 0.13;
+    if (clock >= blinkAt + 0.13) { blinkAt = clock + (Math.random() < 0.18 ? 0.22 : 2.5 + Math.random() * 3); }
+    if (want !== shut) { shut = want; C.blink(shut); }
+  };
   const draw = (dt) => {
+    blinkTick(dt);
     const a = ent && ent.walking ? C.planted() : null;
     let dp = 0;
     if (ent && ent.walking) { dp = Math.min(dt / ent.cycle, ent.left); D.advance(dp); }
@@ -56,7 +65,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     raf = 0; if (!running) return;
     const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 24;
     // como en animación: 24 fotogramas por segundo en movimiento y 12 en reposo (respira despacio)
-    const calm = D.state === 'idle' && !D.busy();
+    const calm = D.state === 'idle' && !D.busy() && !shut && clock + 0.1 < blinkAt;
     if (now - last >= (calm ? 1000 / 12 : 1000 / 24) - 2) { last = now; draw(dt); dirty = false; }
     raf = requestAnimationFrame(frame);
   }

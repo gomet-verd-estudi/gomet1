@@ -9,13 +9,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, texture, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 1 }) {
+export async function createCapataz({ canvas, url, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 1 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
   const load = (u) => new THREE.TextureLoader().loadAsync(u);
-  const [gltf, tex, bump, foldTex] = await Promise.all([new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null]);
-  tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace; tex.generateMipmaps = false; tex.minFilter = THREE.NearestFilter; tex.magFilter = THREE.NearestFilter; // colores puros, sin mezclas en los bordes
+  const [gltf, tex, bump, foldTex, texB] = await Promise.all([new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null, textureBlink ? load(textureBlink) : null]);
+  for (const t of [tex, texB]) { if (!t) continue; t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; } // colores puros, sin mezclas en los bordes
   bump.flipY = false; bump.colorSpace = THREE.NoColorSpace;
   if (foldTex) { foldTex.flipY = false; foldTex.colorSpace = THREE.NoColorSpace; }
   const root = gltf.scene; scene.add(root);
@@ -79,7 +79,8 @@ export async function createCapataz({ canvas, url, texture, relief, folds = null
   }
 
   // ---- pasada de línea ----
-  const rt = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1) });
+  // sin interpolar: al leer el color entre dos píxeles saldrían mezclas que no son de la paleta (y contornos falsos)
+  const rt = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1), minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
   const rtD = new THREE.WebGLRenderTarget(1, 1);
   const hex = (h) => { const v = parseInt(h.slice(1), 16); return [(v >> 16 & 255) / 255, (v >> 8 & 255) / 255, (v & 255) / 255]; };
   const U = {
@@ -115,7 +116,9 @@ export async function createCapataz({ canvas, url, texture, relief, folds = null
           float a = float(i) * 0.5235988; vec2 o = vec2(cos(a), sin(a)) * px * line;
           float dd = d(o); vec3 cc = c(o);
           bool e = (d0 < 1.) != (dd < 1.) || (d0 < 1. && abs(dd - d0) > 0.0035) || (d0 < 1. && distance(cc, c0) > 0.22);
-          if (e) { if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
+          // los rasgos de la cara (ojos, cejas, bigote) son masas de tinta sin contorno alrededor: no se engordan
+          bool feat = !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035 && distance(cc, vec3(0.106, 0.098, 0.098)) < 0.1;
+          if (e && !feat) { if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
         }
         if (edge) { return vec4(ink, 1.); }
         if (d0 >= 1.) { return bg; }
@@ -181,7 +184,9 @@ export async function createCapataz({ canvas, url, texture, relief, folds = null
     mesh.material = flatMat; renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(post, postCam);
   }
   const set = (k, v) => { U[k].value = v; };
+  // parpadeo: la misma textura con los ojos cerrados
+  const blink = (on) => { flatMat.map = on && texB ? texB : tex; };
   // píxeles CSS por unidad del mundo, para pasar el desplazamiento del pie a la pantalla
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, planted, pxPerUnit, materials: { flatMat, detailMat } };
 }
