@@ -1144,14 +1144,8 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 
 /* el capataz va pegado a la obra, como la plancha verde, y se va con la última lámina */
 .obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd));
-  z-index: 5; pointer-events: none; --m-w: 150px; --m-h: 185px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
+  z-index: 5; pointer-events: none; --m-w: 176px; --m-h: 182px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
 /* la cuerda sube hasta una polea bajo la cabecera de la lámina y corre con el scroll */
-.m-rope { position: absolute; right: calc(var(--m-r) + var(--m-w) * .3176 - 2px); width: 4px; top: 58px; bottom: calc(var(--m-b) + var(--m-h) - 2px);
-  background: repeating-linear-gradient(0deg, var(--midori) 0 3px, transparent 3px 5.2px) 0 var(--rope, 0px) / 4px 5.2px; }
-.m-pulley { position: absolute; right: calc(var(--m-r) + var(--m-w) * .3176 - 15px); top: 34px; width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--midori); background: var(--paper);
-  will-change: transform; }
-.m-pulley::before { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: conic-gradient(var(--midori) 0 8deg, transparent 8deg 90deg, var(--midori) 90deg 98deg, transparent 98deg 180deg, var(--midori) 180deg 188deg, transparent 188deg 270deg, var(--midori) 270deg 278deg, transparent 278deg); }
-.m-pulley::after { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--midori); }
 /* tirando: recoge cuerda mano sobre mano, inclinado hacia atrás (bajar) o hacia delante (subir) */
 /* el bocadillo */
 .m-bubble { position: absolute; right: calc(var(--m-w) * .25); bottom: calc(100% + 14px); width: max-content; max-width: 250px; margin: 0; padding: 11px 14px 12px; background: var(--paper);
@@ -1161,32 +1155,12 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
   transform: skewX(28deg) rotate(45deg) scale(.7); }
 .m-bubble.say { opacity: 1; transform: none; }
 @media (max-width: 900px) {
-  .obra .mascot-wrap { --m-w: 80px; --m-h: 99px; --m-r: 8px; --m-b: calc((100svh - var(--hd)) * .42); }
-  .m-rope { top: 14%; }
-  .m-pulley { top: calc(14% - 22px); width: 22px; height: 22px; right: calc(var(--m-r) + var(--m-w) * .3176 - 11px); border-width: 2px; }
+  .obra .mascot-wrap { --m-w: 108px; --m-h: 112px; --m-r: 8px; --m-b: calc((100svh - var(--hd)) * .42); }
   .m-bubble { right: 18px; max-width: min(64vw, 240px); font-size: .82rem; padding: 9px 12px 10px; }
 }
 /* El capataz al estilo de las mascotas japonesas: línea gruesa y uniforme, a una tinta */
-.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); will-change: transform; contain: layout paint; animation: k-drop 1.2s cubic-bezier(.22, 1.35, .45, 1) .2s both; }
-@keyframes k-drop { from { transform: translateY(-48vh); } } /* llega bajando por la cuerda */
-.k-svg { display: block; width: 100%; height: auto; overflow: visible; }
-.k-svg .k-fill { fill: var(--paper); stroke: var(--midori); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
-.k-svg .k-line { fill: none; stroke: var(--midori); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.k-svg .k-ink, .k-svg .k-dot { fill: var(--midori); }
-.k-svg .k-tube-o, .k-svg [class$="-o"] { fill: none; stroke: var(--midori); stroke-width: 13; stroke-linecap: round; stroke-linejoin: round; }
-.k-svg .k-tube-i, .k-svg [class$="-i"] { fill: none; stroke: var(--paper); stroke-width: 7.4; stroke-linecap: round; stroke-linejoin: round; }
-.k-svg .k-boot { fill: var(--midori); stroke: var(--midori); stroke-width: 2.4; stroke-linejoin: round; }
-.k-svg .k-sole { fill: none; stroke: var(--paper); stroke-width: 1.6; stroke-linecap: round; }
-.k-svg .k-rope, .k-svg .k-tail { fill: none; stroke: var(--midori); stroke-width: 5; stroke-dasharray: 3.8 2.6; }
-.k-svg .k-speed { fill: none; stroke: var(--midori); stroke-width: 2.4; stroke-linecap: round; opacity: 0; }
-.k-svg .k-coil { fill: none; stroke: var(--midori); stroke-width: 3; }
-.k-svg .k-sweat { fill: var(--paper); stroke: var(--midori); stroke-width: 2.2; opacity: 0; }
-.k-svg .k-eyes { transform-box: fill-box; transform-origin: center; animation: k-blink 4.6s infinite; }
-@keyframes k-blink { 0%, 93%, 100% { transform: none; } 96% { transform: scaleY(.12); } }
-.mascot.talking .k-mouth { transform-box: fill-box; transform-origin: 50% 15%; animation: k-talk .17s ease-in-out 8 alternate; }
-@keyframes k-talk { to { transform: scaleY(.4); } }
-.mascot.hop .k-svg { animation: k-hop .55s cubic-bezier(.3, 1.6, .5, 1); }
-@keyframes k-hop { 35% { transform: translateY(-9px) rotate(-2deg); } }
+.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); will-change: transform; animation: cp-in .9s cubic-bezier(.22, 1.4, .45, 1) .2s both; }
+@keyframes cp-in { from { transform: translateX(120%) rotate(8deg); } } /* entra corriendo desde el borde */
 
 /* Rendimiento en escritorio: la plancha verde ocupa solo su franja (no toda la pantalla), así la
    máscara de sello y el multiplicar se componen sobre un tercio de la superficie */
@@ -1195,8 +1169,14 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
     height: calc((100vh - var(--hd)) * .58); height: calc((100svh - var(--hd)) * .58); }
 }
 
+/* El capataz: la ilustración original como un único trazado, deformado por su esqueleto (capataz.js) */
+.mascot .cp-svg { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 80%; transition: transform .32s cubic-bezier(.3, 1.4, .5, 1); }
+.mascot .cp-ink { fill: var(--midori); }
+.mascot.back .cp-svg { transform: scaleX(-1); } /* al subir, se da la vuelta y corre hacia el otro lado */
+.mascot .m-bubble { right: calc(var(--m-w) * .42); bottom: calc(100% - 4px); }
+
 @media (prefers-reduced-motion: reduce) {
-  .mascot, .mascot .k-svg, .k-svg .k-eyes, .k-svg .k-mouth { animation: none !important; }
+  .mascot, .mascot .cp-svg { animation: none !important; transition: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -84,85 +84,37 @@
       if (reduce) { cur = target.slice(); send(); return; }
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
-    // El capataz. Su movimiento va pegado al scroll: cada 170 px de página, un ciclo mano sobre mano
-    // (una mano agarra y baja tirando mientras la otra suelta, sube y vuelve a agarrar más arriba).
-    // Los brazos se resuelven con cinemática inversa de dos huesos; el cuerpo se echa atrás según la
-    // velocidad, la cabeza le sigue con retraso, el tenugui se balancea y suda si se tira deprisa.
-    // Al parar, habla en su bocadillo con el dato concreto de la lámina.
-    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), mwrap = $('.mascot-wrap', obra);
-    const K = mascot && $('.k-svg', mascot);
+    // El capataz (assets/js/capataz.js): la ilustración deformada por su esqueleto.
+    // Al hacer scroll corre (la zancada sigue a la página: un paso cada ~240 px); si se sube, se da la vuelta y
+    // corre hacia el otro lado. Al parar, frena, saluda y dice en su bocadillo el dato de la lámina; luego flota.
+    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), csvg = $('.cp-svg', obra);
     let say = () => {}, haul = () => {};
-    if (K) {
-      const q = (c) => K.querySelector(c);
-      const armF = [q('.k-armF-o'), q('.k-armF-i')], armB = [q('.k-armB-o'), q('.k-armB-i')];
-      const gloveF = q('.k-gloveF'), gloveB = q('.k-gloveB'), torso = q('.k-torso'), head = q('.k-head'), tail = q('.k-tail'), ends = q('.k-towel-ends');
-      const rope = q('.k-rope'), sweat = q('.k-sweat'), speed = q('.k-speed'), ropeEl = $('.m-rope', obra), pulley = $('.m-pulley', obra);
-      const HIP = [84, 141], NECK = [71, 97], SF0 = [62, 104], SB0 = [84, 102], ROPE = 116, L1 = 32, L2 = 35, TOP = 72, BOT = 114;
-      const rot = (p, c, a) => { const s = Math.sin(a), co = Math.cos(a), x = p[0] - c[0], y = p[1] - c[1]; return [c[0] + x * co - y * s, c[1] + x * s + y * co]; };
-      const f = (p) => p[0].toFixed(1) + ' ' + p[1].toFixed(1);
-      const ik = (S, T) => { // codo hacia abajo
-        let dx = T[0] - S[0], dy = T[1] - S[1], d = Math.hypot(dx, dy); const max = L1 + L2 - 0.6;
-        if (d > max) { T = [S[0] + dx / d * max, S[1] + dy / d * max]; dx = T[0] - S[0]; dy = T[1] - S[1]; d = max; }
-        const a = Math.atan2(dy, dx), b = Math.acos(clamp((L1 * L1 + d * d - L2 * L2) / (2 * L1 * d), -1, 1));
-        return [[S[0] + L1 * Math.cos(a + b), S[1] + L1 * Math.sin(a + b)], T];
-      };
-      const hand = (ph) => { // 0–0.56: agarrada, baja tirando; 0.56–1: suelta, sube rápida y se adelanta
-        if (ph < 0.56) { const t = ph / 0.56; return { y: TOP + (BOT - TOP) * t, x: ROPE }; }
-        const t = (ph - 0.56) / 0.44, e = t * t * (3 - 2 * t);
-        return { y: BOT - (BOT - TOP) * e, x: ROPE - 9 * Math.sin(Math.PI * t) };
-      };
-      let phase = 0.2, vel = 0, lean = 0, look = 0, sway = 0, lastY = scrollY, lastT = performance.now(), looping = false, idleT = 0, sayT = 0, still = 0;
-      const pose = (now) => {
-        const a = -(0.035 + lean) + Math.sin(phase * Math.PI * 4) * 0.012 * Math.min(1, Math.abs(vel) * 2) + Math.sin(now / 900) * 0.006 * (1 - Math.min(1, Math.abs(vel) * 3));
-        torso.setAttribute('transform', `rotate(${(a * 57.3).toFixed(2)} ${f(HIP)})`);
-        const N = rot(NECK, HIP, a);
-        head.setAttribute('transform', `translate(${(N[0] - NECK[0]).toFixed(2)} ${(N[1] - NECK[1]).toFixed(2)}) rotate(${(look * 57.3).toFixed(2)} ${f(NECK)})`);
-        ends.setAttribute('transform', `rotate(${(sway * 57.3).toFixed(2)} 87 101)`);
-        const SF = rot(SF0, HIP, a), SB = rot(SB0, HIP, a);
-        const hF = hand(((phase % 1) + 1) % 1), hB = hand((((phase + 0.5) % 1) + 1) % 1);
-        const [EF, TF] = ik(SF, [hF.x, hF.y]), [EB, TB] = ik(SB, [hB.x, hB.y]);
-        const dF = `M${f(SF)} L${f(EF)} L${f(TF)}`, dB = `M${f(SB)} L${f(EB)} L${f(TB)}`;
-        armF.forEach((p) => p.setAttribute('d', dF)); armB.forEach((p) => p.setAttribute('d', dB));
-        const ang = (E, T) => Math.atan2(T[1] - E[1], T[0] - E[0]) * 57.3;
-        gloveF.setAttribute('transform', `translate(${f(TF)}) rotate(${ang(EF, TF).toFixed(1)}) scale(1.32)`);
-        gloveB.setAttribute('transform', `translate(${f(TB)}) rotate(${ang(EB, TB).toFixed(1)}) scale(1.32)`);
-        const low = Math.max(hF.x === ROPE ? hF.y : 0, hB.x === ROPE ? hB.y : 0, TOP);
-        tail.setAttribute('d', `M${ROPE} ${low.toFixed(1)} C${ROPE} ${(low + 44).toFixed(1)} ${ROPE + 2} 188 136 196`);
-        // cada valor va solo al elemento que lo usa: nada de recalcular los estilos de todo el muñeco
-        sweat.setAttribute('opacity', Math.min(1, Math.max(0, Math.abs(vel) * 2.2 - 0.6)).toFixed(2));
-        speed.setAttribute('opacity', Math.min(1, Math.max(0, Math.abs(vel) * 3 - 0.25)).toFixed(2));
-      };
-      const loop = (now) => {
-        const dt = Math.min(50, now - lastT); lastT = now;
-        const y = scrollY, dy = y - lastY; lastY = y;
-        const v = clamp(dy / Math.max(8, dt) / 2.2, -1, 1); // velocidad normalizada
-        vel += (v - vel) * 0.18;
-        if (!reduce) phase += dy / 170;
-        lean += ((vel > 0 ? vel * 0.16 : vel * 0.06) - lean) * 0.12;
-        look += ((-vel * 0.08 + (vel ? 0 : Math.sin(now / 1600) * 0.03)) - look) * 0.08;
-        sway += ((-vel * 0.5) - sway) * 0.1;
-        pose(now);
-        if (Math.abs(dy) > 0.2) still = 0; else still += dt;
-        if (still < 900) requestAnimationFrame(loop); else looping = false;
-      };
+    if (mascot && csvg && window.GVEMascot && window.CAPATAZ_RIG) {
+      const cap = window.GVEMascot(csvg, window.CAPATAZ_RIG);
+      let lastY = scrollY, idleT = 0, sayT = 0, facing = 1, live = true;
+      if (reduce) cap.apply({}); else cap.start();
+      // fuera de la obra no se anima (ahorra batería)
+      if ('IntersectionObserver' in window && !reduce) new IntersectionObserver((es) => es.forEach((e) => {
+        live = e.isIntersecting; if (live) cap.start(); else cap.stop();
+      })).observe(obra);
       haul = () => {
-        const y = scrollY, o = (y * 0.25).toFixed(1);
-        ropeEl.style.backgroundPositionY = (-y * 0.9).toFixed(1) + 'px';
-        pulley.style.transform = `rotate(${(y * 0.6).toFixed(1)}deg)`;
-        rope.setAttribute('stroke-dashoffset', o); tail.setAttribute('stroke-dashoffset', o);
-        bubble.classList.remove('say'); mascot.classList.remove('talking');
-        if (!looping) { looping = true; lastT = performance.now(); requestAnimationFrame(loop); }
-        clearTimeout(idleT); idleT = setTimeout(say, 380);
+        const y = scrollY, dy = y - lastY; lastY = y;
+        if (!live || Math.abs(dy) < 0.5) return;
+        const dir = dy > 0 ? 1 : -1;
+        if (dir !== facing) { facing = dir; mascot.classList.toggle('back', dir < 0); }
+        if (!reduce) { cap.set('run'); cap.advance(Math.abs(dy) / 240); }
+        bubble.classList.remove('say');
+        clearTimeout(idleT); idleT = setTimeout(say, 420);
       };
       say = () => {
         const i = Math.max(0, lastActive), t = panels[i] && panels[i].dataset.tip;
-        if (!t || !html.classList.contains('snap')) return;
+        if (!t || !html.classList.contains('snap')) { cap.set('idle'); return; }
+        if (facing < 0) { facing = 1; mascot.classList.remove('back'); }
+        cap.set('wave');
         bubble.textContent = t;
         bubble.classList.remove('say'); void bubble.offsetWidth; bubble.classList.add('say');
-        mascot.classList.remove('talking', 'hop'); void mascot.offsetWidth; mascot.classList.add('talking', 'hop');
-        clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); mascot.classList.remove('talking'); }, 7000);
+        clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); cap.set('idle'); }, 6500);
       };
-      pose(performance.now());
     }
     obra.classList.add('is-live');
     let ticking = false;
