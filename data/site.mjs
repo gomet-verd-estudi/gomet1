@@ -342,3 +342,40 @@ export const PARTS = [
   ['Llaves', 'Libro del edificio'],
   ['Revisiones', 'Ajustes', 'Ampliaciones']
 ];
+
+/* ---------- Lectura corta en las láminas ----------
+   Cada punto del método, en una línea. El texto largo sigue en PHASES (y en la memoria del proyecto). */
+export const ROWS_SHORT = [
+  [['Qué hacemos', 'Escuchar: historia, público, competencia y valores.'], ['Qué recibís', 'El brief y el programa de piezas.'], ['Vuestro papel', 'Venir con tiempo y sin filtros.']],
+  [['Espacio en el mercado', 'El hueco libre que podéis ocupar con autoridad.'], ['Programa', 'Las piezas, dimensionadas desde el principio.'], ['Qué recibís', 'Oportunidad, target, competencia y posicionamiento.']],
+  [['Fundamentos', 'Lo que vuestra marca cree y defiende.'], ['Concepto raíz', 'La idea madre, su arquetipo y su manifiesto.'], ['Vuestro papel', 'Validar la idea antes de pasar a lo visual.']],
+  [['Tipografía', 'Familias, jerarquías y tono.'], ['Retícula', 'Márgenes, columnas y proporciones.'], ['Color', 'Qué color manda y cuál acompaña.'], ['Imagen', 'Luz, encuadre y tratamiento.']],
+  [['Qué hacemos', 'Todas las piezas: en conjunto y una a una.'], ['Qué recibís', 'Las aplicaciones, listas para revisar.'], ['Vuestro papel', 'Revisar y validar cada pieza.']],
+  [['Instalaciones', 'Cada archivo listo para imprenta, pantalla o fábrica.'], ['Remates', 'Pruebas y correcciones antes de producir.'], ['Qué recibís', 'Archivos finales, sin sorpresas.']],
+  [['Las llaves', 'Archivos fuente, logotipos, tipografías y plantillas.'], ['El libro del edificio', 'El manual: qué se puede hacer y qué no.'], ['Vuestro papel', 'Compartir el manual con quien use la marca.']],
+  [['Revisiones', 'Las piezas nuevas respetan los pilares.'], ['Ajustes', 'Corregimos lo que se desgasta con el uso.'], ['Ampliaciones', 'Nuevas plantas sobre la misma estructura.']]
+];
+export const PROBLEM_SHORT = [['Lo que se nota', 'Piezas que no encajan y decisiones de gusto.'], ['Lo que cuesta', 'Rehacerlo todo cada vez que la marca crece.'], ['Lo que proponemos', 'Empezar por abajo y validar cada capa.']];
+export const SEE_LABEL = { brief: 'Brief', oportunidad: 'Oportunidad', target: 'Target', competencia: 'Mapa de competencia', idea: 'Idea madre', pilares: 'Cuatro pilares', plantas: 'Mapa de piezas' };
+export const FAQ_SHORT = [
+  ['¿Cuánto dura un proyecto?', 'Depende del programa: tenéis calendario desde el workshop.'],
+  ['¿Qué necesitáis de nosotros?', 'Tiempo, una persona que decida y respuestas a tiempo.'],
+  ['¿Y si una propuesta no nos convence?', 'Lo hablamos: discutimos razones, no gustos.'],
+  ['¿Podemos cambiar algo ya aprobado?', 'Sí, pero cuanto más abajo está la capa, más cuesta.'],
+  ['¿Qué nos llevamos al final?', 'Archivos, licencias y manual: todo vuestro.'],
+  ['¿Y cuando termine el proyecto?', 'Seguimos cuidando la marca si lo necesitáis.']
+];
+/* Lo que dice el capataz en su bocadillo, lámina a lámina: el dato concreto de cada fase */
+export const TIPS = [
+  '¡Hola! Soy el capataz. Bajad conmigo: levantamos vuestra marca planta a planta.',
+  'Lo que nos contéis aquí sostiene todo lo demás. Venid con tiempo y sin filtros.',
+  'Fijamos ya las piezas que necesitaréis: así el alcance no cambia a mitad de obra.',
+  'Validar la idea es la decisión más importante del proyecto. Sin esto, no se sube.',
+  'Estos cuatro pilares se deciden una vez y sostienen cada pieza durante años.',
+  'Como el programa se fijó al principio, aquí no hay sorpresas de alcance.',
+  'Resolvemos lo que solo aparece en obra: ajustes, pruebas y correcciones.',
+  'Compartid el manual con cualquiera que trabaje con la marca, dentro o fuera.',
+  '¿Una campaña o un local nuevo? Se construye sobre la misma estructura.',
+  'Cuanto más abajo está la capa, más cuesta moverla. Por eso validamos en orden.',
+  '¡Obra terminada! La marca es completamente vuestra. ¿Empezamos la siguiente?'
+];

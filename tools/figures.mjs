@@ -168,3 +168,32 @@ export const ICON = {
   down: `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12,3 V20 M6,14 L12,20 L18,14" ${S}/></svg>`,
   menu: `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3,7 H21 M3,12 H21 M3,17 H21" ${S}/></svg>`
 };
+
+/* ---------- El capataz: la mascota del estudio ----------
+   Al estilo de las mascotas de empresa japonesas de los años 60: línea gruesa y uniforme a una tinta,
+   cabeza grande y redonda, sonrisa abierta. Casco con un gomet de emblema, mono con peto y tirantes,
+   guantes grandes y botas. Tira de una cuerda con las dos manos por encima de la cabeza: al hacer scroll,
+   recoge cuerda mano sobre mano y arrastra la página. Los brazos van en grupos para animarlos. */
+const tube = (d, cls = '') => `<path class="m-tube ${cls}" d="${d}"/><path class="m-tube-in ${cls}" d="${d}"/>`;
+export const MASCOT = `<svg class="mascot-svg" viewBox="0 0 120 172" aria-hidden="true" focusable="false">
+  <line class="m-rope-in" x1="60" y1="-2" x2="60" y2="52"/>
+  <g class="m-body">
+    <g class="m-legs">${tube('M51 132 L45 156')}${tube('M69 132 L77 155')}
+      <path class="m-boot" d="M33 152 h14 q6 0 6 6 v4 h-23 q-2 -10 3 -10z"/><path class="m-boot" d="M74 151 h12 q8 0 8 7 v4 h-21 q-3 -11 1 -11z"/></g>
+    <path class="m-suit" d="M43 101 Q60 94 77 101 L81 135 Q60 142 39 135 Z"/>
+    <path class="m-line" d="M51 107 h18 v14 h-18 z M51 107 L47 100.5 M69 107 L73 100.5 M56 112 h8 M60 129 v10"/>
+    <circle class="m-ink" cx="53" cy="109" r="1.5"/><circle class="m-ink" cx="67" cy="109" r="1.5"/>
+    <path class="m-line m-ear" d="M44 85 q-6 1 -4 7 q2 3 6 1 M76 85 q6 1 4 7 q-2 3 -6 1"/>
+    <circle class="m-face" cx="60" cy="86" r="17"/>
+    <path class="m-line" d="M50 82 q3 -2.5 6 0 M64 82 q3 -2.5 6 0"/>
+    <circle class="m-ink" cx="53" cy="88" r="2.2"/><circle class="m-ink" cx="67" cy="88" r="2.2"/>
+    <path class="m-mouth" d="M51 93 Q60 104 69 93 Q60 96 51 93 Z"/>
+    <circle class="m-line" cx="47.5" cy="94" r="2.8"/><circle class="m-line" cx="72.5" cy="94" r="2.8"/>
+    <path class="m-hat" d="M41 79 Q41 58 60 57 Q79 58 79 79 Z"/>
+    <path class="m-hat" d="M35 79 Q60 73 85 79 Q87 83.5 82.5 83.5 Q60 79.5 37.5 83.5 Q33 83.5 35 79 Z"/>
+    <path class="m-line" d="M60 57.5 V77"/>
+    <circle class="m-dot" cx="51" cy="69" r="4.2"/>
+    <g class="m-arm m-arm-l">${tube('M45 102 L29 84')}<g class="m-fore m-fore-l">${tube('M29 84 L57 49')}<circle class="m-glove" cx="60" cy="46" r="7.5"/><path class="m-line" d="M54.5 51.5 q5.5 3 11 0"/></g></g>
+    <g class="m-arm m-arm-r">${tube('M75 102 L91 82')}<g class="m-fore m-fore-r">${tube('M91 82 L63 33')}<circle class="m-glove" cx="60" cy="30" r="7.5"/><path class="m-line" d="M54.5 35.5 q5.5 3 11 0"/></g></g>
+  </g>
+</svg>`;

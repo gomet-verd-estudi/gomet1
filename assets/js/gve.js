@@ -84,12 +84,36 @@
       if (reduce) { cur = target.slice(); send(); return; }
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
+    // El capataz: mientras hay scroll, tira de la cuerda en el sentido del movimiento; al parar, dice
+    // en su bocadillo el dato concreto de la lámina en la que estamos.
+    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), mwrap = $('.mascot-wrap', obra);
+    let lastY = scrollY, idleT = 0, sayT = 0;
+    const say = () => {
+      if (!mascot) return;
+      mascot.classList.remove('pulling', 'dn', 'up');
+      const t = panels[Math.max(0, lastActive)] && panels[Math.max(0, lastActive)].dataset.tip;
+      if (!t || !html.classList.contains('snap')) return;
+      bubble.textContent = t;
+      bubble.classList.remove('say'); void bubble.offsetWidth; bubble.classList.add('say');
+      clearTimeout(sayT); sayT = setTimeout(() => bubble.classList.remove('say'), 7000);
+    };
+    const haul = () => {
+      if (!mascot) return;
+      const y = scrollY, dy = y - lastY; lastY = y;
+      if (Math.abs(dy) < 0.5) return;
+      mwrap.style.setProperty('--rope', (-y * 0.9).toFixed(1) + 'px');
+      mwrap.style.setProperty('--rope-o', (y * 0.25).toFixed(1));
+      mwrap.style.setProperty('--spin', (y * 0.6).toFixed(1) + 'deg');
+      if (!reduce) { mascot.classList.add('pulling'); mascot.classList.toggle('dn', dy > 0); mascot.classList.toggle('up', dy < 0); }
+      bubble.classList.remove('say');
+      clearTimeout(idleT); idleT = setTimeout(say, 260);
+    };
     obra.classList.add('is-live');
     let ticking = false;
-    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); haul(); }); } };
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll);
-    addEventListener('load', () => { update(); send(); });
+    addEventListener('load', () => { update(); send(); setTimeout(say, 900); });
     update();
     // Saltar a una fase desde el riel (y desde los enlaces #fase-0X)
     const html = document.documentElement;

@@ -1131,6 +1131,71 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
   .obra .op-spec2 .op-val { display: flex; }
 }
 
+/* ==========================================================================
+   LECTURA CORTA Y EL CAPATAZ — una frase por fase, lo que veréis en etiquetas y el detalle en una línea.
+   La última columna queda libre para la cuerda y el capataz, que arrastra la página al hacer scroll.
+   ========================================================================== */
+.obra .op-mid-r { grid-column: 9 / 12; }
+.obra .op-spec2 { grid-column: 9 / 12; }
+.obra .op-count, .obra .stamp { grid-column: 9 / 12; }
+.obra .op-see ul.op-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.obra .op-chips li { padding: 4px 9px 5px; border: 1.5px solid var(--g); border-radius: 999px; font-size: .82rem; font-weight: 700; line-height: 1; color: var(--g); }
+.obra .op-mid-l { gap: 16px; }
+
+/* el capataz va pegado a la obra, como la plancha verde, y se va con la última lámina */
+.obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-top: calc(-100vh + var(--hd)); margin-top: calc(-100svh + var(--hd));
+  z-index: 5; pointer-events: none; --m-w: 104px; --m-h: 149px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
+.mascot { position: absolute; right: var(--m-r); bottom: var(--m-b); width: var(--m-w); animation: m-in .7s cubic-bezier(.3, 1.5, .5, 1) both; }
+@keyframes m-in { from { transform: translateY(40px) scale(.6); opacity: 0; } }
+.mascot-svg { width: 100%; height: auto; overflow: visible; }
+.mascot-svg .m-tube { fill: none; stroke: var(--midori); stroke-width: 11; stroke-linecap: round; }
+.mascot-svg .m-tube-in { fill: none; stroke: var(--paper); stroke-width: 6; stroke-linecap: round; }
+.mascot-svg .m-suit, .mascot-svg .m-face, .mascot-svg .m-hat, .mascot-svg .m-glove, .mascot-svg .m-mouth { fill: var(--paper); stroke: var(--midori); stroke-width: 2.5; stroke-linejoin: round; }
+.mascot-svg .m-line { fill: none; stroke: var(--midori); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.mascot-svg .m-ink, .mascot-svg .m-dot, .mascot-svg .m-boot { fill: var(--midori); }
+.mascot-svg .m-boot { stroke: var(--midori); stroke-width: 2; stroke-linejoin: round; }
+.mascot-svg .m-rope-in { stroke: var(--midori); stroke-width: 3.2; stroke-dasharray: 3 2.2; stroke-dashoffset: var(--rope-o, 0); }
+.mascot-svg .m-body { transform-box: fill-box; transition: transform .25s ease; }
+.mascot-svg .m-body { transform-origin: 50% 100%; }
+/* la cuerda sube hasta una polea bajo la cabecera de la lámina y corre con el scroll */
+.m-rope { position: absolute; right: calc(var(--m-r) + var(--m-w) / 2 - 2px); width: 4px; top: 58px; bottom: calc(var(--m-b) + var(--m-h) - 2px);
+  background: repeating-linear-gradient(0deg, var(--midori) 0 3px, transparent 3px 5.2px) 0 var(--rope, 0px) / 4px 5.2px; }
+.m-pulley { position: absolute; right: calc(var(--m-r) + var(--m-w) / 2 - 15px); top: 34px; width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid var(--midori); background: var(--paper);
+  transform: rotate(var(--spin, 0deg)); }
+.m-pulley::before { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: conic-gradient(var(--midori) 0 8deg, transparent 8deg 90deg, var(--midori) 90deg 98deg, transparent 98deg 180deg, var(--midori) 180deg 188deg, transparent 188deg 270deg, var(--midori) 270deg 278deg, transparent 278deg); }
+.m-pulley::after { content: ''; position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--midori); }
+/* tirando: recoge cuerda mano sobre mano, inclinado hacia atrás (bajar) o hacia delante (subir) */
+.mascot-svg .m-fore { transform-box: view-box; }
+.mascot-svg .m-fore-l { transform-origin: 29px 84px; }
+.mascot-svg .m-fore-r { transform-origin: 91px 82px; }
+.mascot.pulling .m-fore-l { animation: m-haul-a .34s ease-in-out infinite; }
+.mascot.pulling .m-fore-r { animation: m-haul-b .34s ease-in-out infinite; }
+.mascot.pulling.up .m-fore-l, .mascot.pulling.up .m-fore-r { animation-direction: reverse; }
+.mascot.pulling.dn .m-body { transform: rotate(-7deg) translateY(2px); }
+.mascot.pulling.up .m-body { transform: rotate(5deg); }
+.mascot.pulling .m-legs { animation: m-step .34s ease-in-out infinite; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes m-haul-a { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes m-haul-b { 0%, 100% { transform: rotate(9deg); } 50% { transform: rotate(-9deg); } }
+@keyframes m-step { 50% { transform: translateY(-1.5px) scaleY(.98); } }
+.mascot:not(.pulling) .m-body { animation: m-idle 2.6s ease-in-out infinite; }
+@keyframes m-idle { 50% { transform: translateY(-1.5px); } }
+/* el bocadillo */
+.m-bubble { position: absolute; right: 34px; bottom: calc(100% + 14px); width: max-content; max-width: 250px; margin: 0; padding: 11px 14px 12px; background: var(--paper);
+  border: 2.2px solid var(--midori); border-radius: 18px; color: var(--midori); font-size: .9rem; font-weight: 700; line-height: 1.18;
+  opacity: 0; transform: translateY(8px) scale(.85); transform-origin: 85% 100%; transition: opacity .2s ease, transform .3s cubic-bezier(.3, 1.6, .5, 1); }
+.m-bubble::after { content: ''; position: absolute; right: 18px; bottom: -11px; width: 18px; height: 18px; background: var(--paper); border-right: 2.2px solid var(--midori); border-bottom: 2.2px solid var(--midori);
+  transform: skewX(28deg) rotate(45deg) scale(.7); }
+.m-bubble.say { opacity: 1; transform: none; }
+@media (max-width: 900px) {
+  .obra .mascot-wrap { --m-w: 62px; --m-h: 89px; --m-r: 8px; --m-b: calc((100svh - var(--hd)) * .42); }
+  .m-rope { top: 14%; }
+  .m-pulley { top: calc(14% - 22px); width: 22px; height: 22px; right: calc(var(--m-r) + var(--m-w) / 2 - 11px); border-width: 2px; }
+  .m-bubble { right: 22px; max-width: min(64vw, 240px); font-size: .82rem; padding: 9px 12px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mascot, .mascot .m-arm, .mascot .m-legs, .mascot .m-body { animation: none !important; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

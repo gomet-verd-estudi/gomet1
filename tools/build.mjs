@@ -18,8 +18,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS, SYNTH, PARTS } from '../data/site.mjs';
-import { LOGO, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, piece } from './figures.mjs';
+import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS, SYNTH, PARTS, ROWS_SHORT, PROBLEM_SHORT, SEE_LABEL, FAQ_SHORT, TIPS } from '../data/site.mjs';
+import { LOGO, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, piece, MASCOT } from './figures.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PROJECTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects.json'), 'utf8'));
@@ -203,15 +203,15 @@ function home() {
   // abajo el titular, las piezas señaladas en el dibujo, lo que recibís y la validación.
   const SEE = { 1: ['brief'], 2: ['oportunidad', 'target', 'competencia'], 3: ['idea'], 4: ['pilares'], 5: ['plantas'] };
   const dl = (list) => `<dl class="op-rows">${list.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
-  const see = (n) => SEE[n] ? `<div class="op-see"><p class="op-k">Lo que veréis</p><ul>${SEE[n].map((k) => `<li>${esc(VEREIS[k].head)}</li>`).join('')}</ul></div>` : '';
+  const see = (n) => SEE[n] ? `<div class="op-see"><p class="op-k">Lo que veréis</p><ul class="op-chips">${SEE[n].map((k) => `<li title="${esc(VEREIS[k].head)}">${esc(SEE_LABEL[k])}</li>`).join('')}</ul></div>` : '';
   const panel = (x, k) => `
-      <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}">
+      <article class="op" data-p="${k + 1}" id="fase-${x.n}" aria-label="Fase ${x.n}: ${esc(x.key)}" data-tip="${esc(TIPS[k + 1])}">
         ${run(esc(x.act), esc(x.layer), x.n)}
         <h2 class="op-title">[${esc(x.key)}]</h2>
         ${folio(x.n)}
         <p class="op-h">${esc(x.head)}</p>
-        <div class="op-mid-l"><p class="op-text">${esc(x.text)}</p>${see(k + 1)}</div>
-        <div class="op-mid-r">${dl(x.rows)}</div>
+        <div class="op-mid-l"><p class="op-text">${esc(SYNTH[k].short)}</p>${see(k + 1)}</div>
+        <div class="op-mid-r">${dl(ROWS_SHORT[k])}</div>
         <div class="op-spec">${parts(PARTS[k])}</div>
         <div class="op-spec2"><p class="op-get"><span>Recibís</span>${esc(SYNTH[k].get)}</p>${typeof x.val === 'number' ? `<p class="op-val">${gomet}Validación ${pad(x.val)} con vosotros</p>` : '<p class="op-val">Sin validación: es el punto de partida</p>'}</div>
       </article>`;
@@ -220,33 +220,34 @@ function home() {
 
   const body = `
 <section class="obra" id="obra" aria-label="El método: cómo se construye una marca" style="--n:11">
-    <div class="obra-track" aria-hidden="false"><svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg></div>
+    <div class="obra-track" aria-hidden="false"><svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg>
+    <div class="mascot-wrap"><span class="m-pulley" aria-hidden="true"></span><span class="m-rope" aria-hidden="true"></span><div class="mascot">${MASCOT}<p class="m-bubble" aria-live="polite"></p></div></div></div>
     <div class="obra-panels">
-      <article class="op op-intro on" data-p="0" id="metodo">
+      <article class="op op-intro on" data-p="0" id="metodo" data-tip="${esc(TIPS[0])}">
         ${run('El método', 'Instrucciones de montaje', '00')}
         <h1 class="op-title op-display">[${esc(INTRO.title)}.]</h1>
         ${folio('00')}
         <p class="op-h">${esc(INTRO.building.head)}</p>
-        <div class="op-mid-l"><p class="op-k">Lo que suele pasar</p><p class="op-text"><b>${esc(INTRO.problem.head)}.</b> ${esc(INTRO.problem.text)}</p></div>
-        <div class="op-mid-r">${dl(INTRO.problem.rows)}</div>
+        <div class="op-mid-l"><p class="op-k">Lo que suele pasar</p><p class="op-text"><b>${esc(INTRO.problem.head)}.</b> Y luego nada encaja.</p></div>
+        <div class="op-mid-r">${dl(PROBLEM_SHORT)}</div>
         <div class="op-spec">${list(ACTS.map((a) => `<b>${esc(a.k)}</b><span>${esc(a.phases)}</span>`))}</div>
-        <div class="op-spec2"><p class="op-text">${esc(INTRO.building.text)}</p><p class="op-val">${gomet}Cada gomet verde es una validación con vosotros</p><p class="op-hint">${ICON.down}Desliza para construir</p></div>
+        <div class="op-spec2"><p class="op-text">De lo grande a lo pequeño, y ninguna capa sin vuestro visto bueno.</p><p class="op-val">${gomet}Cada gomet verde es una validación con vosotros</p><p class="op-hint">${ICON.down}Desliza para construir</p></div>
       </article>${PHASES.map(panel).join('')}
-      <article class="op op-faq-sheet" data-p="9" id="preguntas">
+      <article class="op op-faq-sheet" data-p="9" id="preguntas" data-tip="${esc(TIPS[9])}">
         ${run('Preguntas', 'Antes de empezar', 'Anexo')}
         <h2 class="op-title">[Preguntas]</h2>
         <p class="op-h">Lo que casi todo el mundo nos pregunta</p>
-        <div class="op-mid-l">${qa(FAQ.slice(0, half))}</div>
-        <div class="op-mid-r">${qa(FAQ.slice(half))}</div>
+        <div class="op-mid-l">${qa(FAQ_SHORT.slice(0, half))}</div>
+        <div class="op-mid-r">${qa(FAQ_SHORT.slice(half))}</div>
       </article>
-      <article class="op op-end" data-p="10">
+      <article class="op op-end" data-p="10" data-tip="${esc(TIPS[10])}">
         ${run('Resultado', 'Cada marca, única', 'Fin de obra')}
         <h2 class="op-title">[Llave en mano.]</h2>
         <p class="stamp" aria-hidden="true"><span>Fin</span><small>de obra</small></p>
         <p class="op-h">${esc(FILTERS.result.head)}</p>
-        <div class="op-mid-l"><p class="op-k">Criterio</p><p class="op-text"><b>${esc(CRITERIA.head)}.</b> ${esc(CRITERIA.text)}</p></div>
-        <div class="op-mid-r">${dl([[FILTERS.curate.head, FILTERS.curate.text], [FILTERS.proof.head, FILTERS.proof.text]])}</div>
-        <div class="op-spec"><p class="op-text">${esc(FILTERS.result.text)}</p><p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
+        <div class="op-mid-l"><p class="op-k">Criterio</p><p class="op-text"><b>${esc(CRITERIA.head)}:</b> análisis técnico y creatividad, juntos.</p></div>
+        <div class="op-mid-r">${dl([[FILTERS.curate.head, 'Abrimos todos los caminos y os explicamos por qué elegimos uno.'], [FILTERS.proof.head, 'Cada propuesta llega con su argumento y sus pruebas.']])}</div>
+        <div class="op-spec"><p class="op-text">El mismo orden en cada proyecto, para que el resultado solo pueda ser vuestro.</p><p class="op-val op-vals">${gomet.repeat(5)}<span class="op-vals-t">Una marca que solo podría ser vuestra</span></p></div>
         <div class="op-spec2"><div class="ctas"><a class="btn" href="contacto/">Empezar un proyecto ${ICON.arrow}</a></div></div>
       </article>
     </div>
