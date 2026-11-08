@@ -373,7 +373,7 @@
     const vx = mx - cx / k, vy = my - cy / k;
     svg.setAttribute('viewBox', `${vx.toFixed(1)} ${vy.toFixed(1)} ${(r.width / k).toFixed(1)} ${(r.height / k).toFixed(1)}`);
     // las cotas mantienen su tamaño en pantalla, sea cual sea la escala del dibujo
-    const ms = (narrow() ? 0.85 : 1) / k;
+    const ms = (narrow() ? 0.72 : 1) / k;
     marks.forEach((m) => m.setAttribute('transform', `translate(${(+m.dataset.x).toFixed(1)} ${(+m.dataset.y).toFixed(1)}) scale(${ms.toFixed(3)})`));
     svg.style.setProperty('--scale', k.toFixed(3));
 
