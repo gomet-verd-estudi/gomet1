@@ -20,7 +20,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { STUDIO, SERVICES, ACTS, INTRO, PHASES, LAYERS, CRITERIA, FILTERS, CREW, SPECS, FAQ, START, ORDER, CLIENTS, VEREIS, SYNTH, PARTS, ROWS_SHORT, PROBLEM_SHORT, SEE_LABEL, FAQ_SHORT, TIPS } from '../data/site.mjs';
 import { LOGO, edificio, FASES_DEFS, phaseIcon, timeline, fachada, truss, ICON, piece } from './figures.mjs';
-const CAPATAZ = fs.readFileSync(new URL('../data/capataz-path.txt', import.meta.url), 'utf8').trim();
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PROJECTS = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/projects.json'), 'utf8'));
@@ -221,7 +220,7 @@ function home() {
 
   const body = `
 <section class="obra" id="obra" aria-label="El método: cómo se construye una marca" style="--n:11">
-    <div class="obra-track" aria-hidden="false"><div class="mascot-wrap"><div class="mascot"><svg class="cp-svg" viewBox="-60 -110 1374 1425" aria-hidden="true" focusable="false"><path class="cp-ink" fill-rule="nonzero" d="${CAPATAZ}"/></svg><p class="m-bubble" aria-live="polite"></p></div></div>
+    <div class="obra-track" aria-hidden="false"><div class="mascot-wrap"><div class="mascot"><img class="cp-poster" src="assets/capataz/capataz.png" width="352" height="440" alt="" decoding="async"><canvas class="cp-canvas" aria-hidden="true"></canvas><p class="m-bubble" aria-live="polite"></p></div></div>
     <svg class="obra-svg" viewBox="-360 -260 720 580" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="obra-t"><title id="obra-t">Un edificio se construye de abajo arriba mientras se recorren las ocho fases del método: terreno, solar, cimientos, pilares, plantas, fachada e instalaciones, entrega de llaves y mantenimiento. Cada validación se marca con un gomet verde.</title><g class="scene"></g><g class="labels"></g></svg></div>
     <div class="obra-panels">
       <article class="op op-intro on" data-p="0" id="metodo" data-tip="${esc(TIPS[0])}">
@@ -293,7 +292,7 @@ ${divider('Obras', '02')}
   </div>
 </section>`;
 
-  return page({ title: `${STUDIO.name} · Branding y dirección de arte en Valencia y Barcelona`, desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home', scripts: `<script src="assets/js/obra.js?v=${VERSION}" defer></script>\n<script src="assets/js/capataz.js?v=${VERSION}" defer></script>\n` });
+  return page({ title: `${STUDIO.name} · Branding y dirección de arte en Valencia y Barcelona`, desc: STUDIO.desc, rel: '', r, body, cls: 'is-home', current: 'home', scripts: `<script src="assets/js/obra.js?v=${VERSION}" defer></script>\n` });
 }
 
 /* ========================================================================

@@ -1,0 +1,10 @@
+{
+  "name": "capataz3d",
+  "private": true,
+  "description": "El capataz en 3D: motor de render a línea (capataz3d.js), animaciones (capataz-anim.js) y entrada web (capataz-web.js). npm run build genera assets/js/capataz3d.js; npm run pack prepara el modelo.",
+  "scripts": {
+    "build": "esbuild capataz-web.js --bundle --minify --format=iife --target=es2019 --legal-comments=none --outfile=../../assets/js/capataz3d.js",
+    "pack": "node pack.mjs modelo-tripo.glb ../../assets/capataz/capataz.glb"
+  },
+  "devDependencies": { "three": "0.170.0", "esbuild": "0.24.0", "@gltf-transform/core": "4.1.1", "@gltf-transform/functions": "4.1.1", "@gltf-transform/extensions": "4.1.1" }
+}

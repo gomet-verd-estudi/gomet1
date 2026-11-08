@@ -84,37 +84,45 @@
       if (reduce) { cur = target.slice(); send(); return; }
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
-    // El capataz (assets/js/capataz.js): la ilustración deformada por su esqueleto.
-    // Al hacer scroll corre (la zancada sigue a la página: un paso cada ~240 px); si se sube, se da la vuelta y
-    // corre hacia el otro lado. Al parar, frena, saluda y dice en su bocadillo el dato de la lámina; luego flota.
-    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), csvg = $('.cp-svg', obra);
+    // El capataz en 3D (assets/js/capataz3d.js, se carga después del contenido; mientras, se ve su imagen fija).
+    // Al hacer scroll camina: la zancada sigue a la página (un ciclo de dos pasos cada ~520 px) y se gira hacia
+    // donde va (abajo → derecha, arriba → izquierda). Al parar, se vuelve hacia quien lee, levanta el pulgar y dice
+    // en su bocadillo el dato de la lámina; luego descansa, respirando.
+    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), canvas = $('.cp-canvas', obra);
     let say = () => {}, haul = () => {};
-    if (mascot && csvg && window.GVEMascot && window.CAPATAZ_RIG) {
-      const cap = window.GVEMascot(csvg, window.CAPATAZ_RIG);
-      let lastY = scrollY, idleT = 0, sayT = 0, facing = 1, live = true;
-      if (reduce) cap.apply({}); else cap.start();
-      // fuera de la obra no se anima (ahorra batería)
-      if ('IntersectionObserver' in window && !reduce) new IntersectionObserver((es) => es.forEach((e) => {
-        live = e.isIntersecting; if (live) cap.start(); else cap.stop();
-      })).observe(obra);
-      haul = () => {
-        const y = scrollY, dy = y - lastY; lastY = y;
-        if (!live || Math.abs(dy) < 0.5) return;
-        const dir = dy > 0 ? 1 : -1;
-        if (dir !== facing) { facing = dir; mascot.classList.toggle('back', dir < 0); }
-        if (!reduce) { cap.set('run'); cap.advance(Math.abs(dy) / 240); }
-        bubble.classList.remove('say');
-        clearTimeout(idleT); idleT = setTimeout(say, 420);
+    let cap = null, lastY = scrollY, idleT = 0, sayT = 0, live = true;
+    const talk = () => {
+      const i = Math.max(0, lastActive), t = panels[i] && panels[i].dataset.tip;
+      if (!t || !html.classList.contains('snap')) { if (cap) { cap.set('idle'); cap.face(0); } return; }
+      if (cap) { cap.face(0); if (reduce) cap.still('talk'); else cap.set('talk'); }
+      bubble.textContent = t;
+      bubble.classList.remove('say'); void bubble.offsetWidth; bubble.classList.add('say');
+      clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); if (cap) { if (reduce) cap.still('idle'); else cap.set('idle'); } }, 6500);
+    };
+    say = talk;
+    haul = () => {
+      const y = scrollY, dy = y - lastY; lastY = y;
+      if (!live || Math.abs(dy) < 0.5) return;
+      if (cap && !reduce) { cap.set('walk'); cap.face(dy > 0 ? 1 : -1); cap.advance(Math.abs(dy) / 520); }
+      bubble.classList.remove('say');
+      clearTimeout(idleT); idleT = setTimeout(say, 420);
+    };
+    if (mascot && canvas) {
+      const boot = () => {
+        const s = document.createElement('script'); s.src = canvas.dataset.src || 'assets/js/capataz3d.js'; s.async = true;
+        s.onload = () => window.GVECapataz3D({ canvas, base: 'assets/capataz/', reduce }).then((c) => {
+          cap = c; mascot.classList.add('is-3d');
+          if (reduce) c.still('idle'); else if (live) c.start();
+          if ('IntersectionObserver' in window) new IntersectionObserver((es) => es.forEach((e) => {
+            live = e.isIntersecting; if (reduce) return; if (live) cap.start(); else cap.stop();
+          })).observe(obra);
+          document.addEventListener('visibilitychange', () => { if (!document.hidden && live && !reduce) cap.start(); });
+        }).catch(() => {}); // sin WebGL se queda la imagen fija
+        document.head.appendChild(s);
       };
-      say = () => {
-        const i = Math.max(0, lastActive), t = panels[i] && panels[i].dataset.tip;
-        if (!t || !html.classList.contains('snap')) { cap.set('idle'); return; }
-        if (facing < 0) { facing = 1; mascot.classList.remove('back'); }
-        cap.set('wave');
-        bubble.textContent = t;
-        bubble.classList.remove('say'); void bubble.offsetWidth; bubble.classList.add('say');
-        clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); cap.set('idle'); }, 6500);
-      };
+      // primero el contenido; el muñeco 3D después, cuando el navegador está libre
+      const later = () => ('requestIdleCallback' in window ? requestIdleCallback(boot, { timeout: 1500 }) : setTimeout(boot, 300));
+      if (document.readyState === 'complete') later(); else addEventListener('load', later, { once: true });
     }
     obra.classList.add('is-live');
     let ticking = false;

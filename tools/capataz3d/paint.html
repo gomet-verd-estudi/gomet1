@@ -1,0 +1,30 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head>
+<body><canvas id="c"></canvas><script type="module">
+// Proyecta los pliegues dibujados en pantalla sobre el modelo (pose de reposo) y los pinta en su textura.
+import * as THREE from 'three';
+import { createCapataz } from './capataz3d.js';
+const C = await createCapataz({ canvas: document.getElementById('c'), url: './model.glb', texture: './flat.png', relief: './relief.png', line: 3, background: '#F4EFE6' });
+C.renderer.setPixelRatio(1); C.resize(900, 1100); C.pose({});
+const spec = await (await fetch('./folds.json')).json();
+const S = 2048, cv = document.createElement('canvas'); cv.width = cv.height = S;
+const g = cv.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, S, S); g.fillStyle = '#fff';
+const ray = new THREE.Raycaster(); let hits = 0, miss = 0; const per = [];
+const hitAt = (x, y) => { ray.setFromCamera(new THREE.Vector2(x / 450 - 1, 1 - y / 550), C.camera); const h = ray.intersectObject(C.mesh, false)[0]; return h && h.uv ? h.uv.clone() : null; };
+for (const v of spec.views) {
+  C.view({ yaw: v.yaw, zoom: 0.95 });
+  for (const [a, c, b] of v.strokes) {
+    const pts = [];
+    const L = Math.hypot(c[0] - a[0], c[1] - a[1]) + Math.hypot(b[0] - c[0], b[1] - c[1]), n = Math.ceil(L * 2);
+    for (let i = 0; i <= n; i++) { const t = i / n, u = 1 - t; pts.push([u * u * a[0] + 2 * u * t * c[0] + t * t * b[0], u * u * a[1] + 2 * u * t * c[1] + t * t * b[1]]); }
+    const uvs = pts.map(([x, y]) => hitAt(x, y)); per.push(v.yaw + ':' + uvs.filter(Boolean).length + '/' + uvs.length);
+    // escala local texel/píxel: mediana de los pasos dentro de una misma isla UV
+    const k = []; for (let i = 1; i < uvs.length; i++) if (uvs[i] && uvs[i - 1]) { const du = uvs[i].distanceTo(uvs[i - 1]); if (du < 0.01) k.push(du / Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); }
+    k.sort((p, q) => p - q); const scale = k.length ? k[k.length >> 1] : 0.0005;
+    const r = Math.max(1.2, spec.width / 2 * scale * S);
+    // trazo con extremos afinados, como a rotulador
+    uvs.forEach((uv, i) => { if (!uv) { miss++; return; } hits++; const t = i / (uvs.length - 1), taper = 0.55 + 0.45 * Math.sin(Math.PI * t); g.beginPath(); g.arc(uv.x * S, uv.y * S, r * taper, 0, 7); g.fill(); });
+  }
+}
+window.PNG = cv.toDataURL('image/png'); window.INFO = { hits, miss, per }; window.DONE = true;
+</script></body></html>

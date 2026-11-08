@@ -1144,7 +1144,7 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 
 /* el capataz va pegado a la obra, como la plancha verde, y se va con la última lámina */
 .obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd));
-  z-index: 5; pointer-events: none; --m-w: 176px; --m-h: 182px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
+  z-index: 5; pointer-events: none; --m-w: 190px; --m-h: 238px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
 /* la cuerda sube hasta una polea bajo la cabecera de la lámina y corre con el scroll */
 /* tirando: recoge cuerda mano sobre mano, inclinado hacia atrás (bajar) o hacia delante (subir) */
 /* el bocadillo */
@@ -1170,13 +1170,16 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 }
 
 /* El capataz: la ilustración original como un único trazado, deformado por su esqueleto (capataz.js) */
-.mascot .cp-svg { display: block; width: 100%; height: auto; overflow: visible; transform-origin: 50% 80%; transition: transform .32s cubic-bezier(.3, 1.4, .5, 1); }
-.mascot .cp-ink { fill: var(--midori); }
-.mascot.back .cp-svg { transform: scaleX(-1); } /* al subir, se da la vuelta y corre hacia el otro lado */
-.mascot .m-bubble { right: calc(var(--m-w) * .42); bottom: calc(100% - 4px); }
+/* el capataz en 3D: un lienzo transparente; hasta que carga (o sin WebGL), su imagen fija en el mismo sitio */
+.mascot { aspect-ratio: 352 / 440; }
+.mascot .cp-poster, .mascot .cp-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mascot .cp-canvas { opacity: 0; transition: opacity .25s ease; }
+.mascot.is-3d .cp-canvas { opacity: 1; }
+.mascot.is-3d .cp-poster { visibility: hidden; }
+.mascot .m-bubble { right: calc(var(--m-w) * .5); bottom: calc(100% - 10px); }
 
 @media (prefers-reduced-motion: reduce) {
-  .mascot, .mascot .cp-svg { animation: none !important; transition: none !important; }
+  .mascot, .mascot .cp-canvas { animation: none !important; transition: none !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
