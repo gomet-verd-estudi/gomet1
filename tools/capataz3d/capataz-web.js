@@ -13,7 +13,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   if (!webgl()) throw new Error('sin WebGL');
   const dpr = Math.min(1.5, window.devicePixelRatio || 1); // con este grosor de línea, más resolución no se nota
   const C = await createCapataz({
-    canvas, url: base + 'capataz.glb', texture: base + 'color.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
+    canvas, url: base + (canvas.dataset.model || 'capataz.glb'), texture: base + 'color.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
     line, fine, fineThreshold: 2.0, background: null
   });
   C.renderer.setPixelRatio(dpr);
