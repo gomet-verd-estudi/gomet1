@@ -1,9 +1,17 @@
 /*
  * El capataz en la web: crea el muñeco 3D en un <canvas>, lo anima con el director y solo pinta cuando hace falta.
- * API para gve.js: set('walk' | 'idle' | 'talk'), advance(fase), face(±1 | 0), start(), stop().
+ * API para gve.js: set('idle' | 'talk'), haul(dy), face(±1 | 0), start(), stop(), enter(dist).
  */
 import { createCapataz } from './capataz3d.js';
-import { director, walk as walkPose } from './capataz-anim.js';
+import { director, walk as walkPose, ROPE_Z, ropePerPhase } from './capataz-anim.js';
+
+const INK = '#0A9651';
+// La polea cuelga de la línea de la cabecera; la cuerda baja por su lado izquierdo hasta las manos y el suelo,
+// y el otro ramal sube hasta la cabecera: tirando de ella, él sube y baja la página.
+const PULLEY = `<svg class="m-pulley" viewBox="-15 -30 34 42" aria-hidden="true"><g fill="none" stroke="${INK}" stroke-linecap="round">
+<path d="M0 -30V0" stroke-width="1.8"/>
+<g class="m-wheel"><circle r="9" fill="#F4EFE6" stroke-width="2.4"/><path d="M0 -8.6V8.6M-7.4 -4.3L7.4 4.3M-7.4 4.3L7.4 -4.3" stroke-width="1.5"/><circle r="2.2" fill="${INK}" stroke="none"/></g>
+<path d="M-9 0A9 9 0 0 1 9 0V-30" style="stroke-width:var(--rw)"/></g></svg>`;
 
 function webgl() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
@@ -22,7 +30,7 @@ function modelSource(base, spec) {
 
 window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, reduce = false }) {
   if (!webgl()) throw new Error('sin WebGL');
-  const dpr = Math.min(1.5, window.devicePixelRatio || 1); // con este grosor de línea, más resolución no se nota
+  const dpr = Math.min(2, window.devicePixelRatio || 1); // el lienzo es pequeño: a 2x el trazo sale limpio también en móvil
   const C = await createCapataz({
     canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
     line, fine, fineThreshold: 2.0, background: null
@@ -31,13 +39,38 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   const D = director({ faceYaw: 40 });
   const fit = () => {
     const r = canvas.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return;
+    // el trazo se mide para el muñeco de escritorio (238 px de alto) y escala con él: en móvil no engorda
+    C.setLineScale(Math.max(.55, Math.min(1.2, r.height / 238)));
     C.resize(r.width, r.height); C.view({ zoom: 0.9, cy: -0.03 }); dirty = true;
+    // distancia del muñeco a la línea de la cabecera (el envoltorio es pegajoso: no cambia con el scroll)
+    offTop = wrap ? host.offsetTop : r.top;
   };
   let dirty = true, raf = 0, last = 0, running = false;
   // Entrada caminando: el muñeco avanza lo que retrocede el pie apoyado (sin patinar). ent = { x, end, done }
   let ent = null;
   const host = canvas.closest('.mascot') || canvas;
   const place = (x) => { host.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; };
+  // ---- la cuerda (dibujo en la página, detrás del lienzo: las manos quedan por delante) ----
+  const wrap = canvas.closest('.mascot-wrap');
+  const ropeEl = document.createElement('div'); ropeEl.className = 'm-rope'; ropeEl.setAttribute('aria-hidden', 'true');
+  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + PULLEY; host.prepend(ropeEl);
+  const ropeLine = ropeEl.firstChild, pulley = ropeEl.lastChild, wheel = pulley.querySelector('.m-wheel');
+  const HAUL_YAW = -90; // de perfil, mirando hacia la página
+  let rope = 0, ropeTarget = 0, units = 0, offTop = 0, lastHaul = 0;
+  const ease = (t) => t * t * (3 - 2 * t);
+  function drawRope(dt) {
+    rope = ropeTarget > rope ? Math.min(ropeTarget, rope + dt / 0.3) : Math.max(ropeTarget, rope - dt / 0.35);
+    if (rope <= 0) { if (ropeEl.classList.contains('on')) ropeEl.classList.remove('on'); return; }
+    if (!ropeEl.classList.contains('on')) ropeEl.classList.add('on');
+    const ppu = C.pxPerUnit(), sx = Math.sin(HAUL_YAW * Math.PI / 180) * ROPE_Z, sz = Math.cos(HAUL_YAW * Math.PI / 180) * ROPE_Z;
+    const [x, ground] = C.projectWorld(sx, 0, sz);
+    const rw = Math.max(2.4, Math.min(5, ppu * 0.022)), R = rw * 3, k = R / 9;   // grosor de la cuerda y radio de la polea
+    const top = -offTop + 30 * k, full = Math.max(0, ground - top), h = full * ease(rope);
+    ropeEl.style.setProperty('--rw', (rw / k).toFixed(2));
+    ropeLine.style.cssText = `width:${rw.toFixed(2)}px;height:${h.toFixed(1)}px;transform:translate(${(x - rw / 2).toFixed(1)}px,${top.toFixed(1)}px);background-position:0 ${(units * ppu).toFixed(1)}px`;
+    pulley.style.cssText = `width:${(34 * k).toFixed(1)}px;height:${(42 * k).toFixed(1)}px;transform:translate(${(x - 6 * k).toFixed(1)}px,${(top - 30 * k).toFixed(1)}px);opacity:${Math.min(1, rope * 2.5).toFixed(2)}`;
+    wheel.style.transform = `rotate(${(units * ppu / R * 180 / Math.PI).toFixed(1)}deg)`;
+  }
   // parpadeo: cada 2,5–5,5 s, 0,13 s con los ojos cerrados; a veces dos seguidos
   let blinkAt = 2 + Math.random() * 2, clock = 0, shut = false;
   const blinkTick = (dt) => {
@@ -60,6 +93,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     }
     if (ent && !ent.walking) { ent.st = Math.min(1, ent.st + dt / 0.5); ent.x = ent.settle * (1 - ent.st * ent.st * (3 - 2 * ent.st)); if (ent.st >= 1) { ent = null; } }
     if (ent) place(ent.x); else if (host.style.transform) place(0);
+    if (rope > 0 || ropeTarget > 0) drawRope(dt);
     C.render();
   };
   // largo de medio ciclo (un paso) en píxeles, de perfil: para empezar fuera de la pantalla y acabar justo en su sitio
@@ -83,9 +117,23 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   if ('ResizeObserver' in window) new ResizeObserver(fit).observe(canvas); else addEventListener('resize', fit);
   fit(); draw(0);
   const api = {
-    set: (s) => { D.set(s); dirty = true; },
+    // al soltar la cuerda se vuelve hacia quien lee como una persona (cabeza, torso, cadera y dos pasitos)
+    set: (s) => {
+      if (s !== 'haul') ropeTarget = 0;
+      if (D.state === 'haul' && s !== 'haul') D.play('turn', { to: 12, then: s }); else D.set(s);
+      dirty = true;
+    },
     advance: (d) => { D.advance(d); dirty = true; },
-    face: (dir) => { D.face(dir); dirty = true; },
+    face: (dir) => { if (D.state !== 'haul' && D.state !== 'turn') D.face(dir); dirty = true; },
+    // Scroll = tirar de la cuerda. dy > 0 (bajar la página): recoge cuerda mano sobre mano; dy < 0: la deja correr.
+    // Un ciclo (dos tirones) cada ~300 px de scroll, y nunca más de 1,6 ciclos por segundo.
+    haul(dy) {
+      if (D.state !== 'haul') { D.set('haul'); D.yawTo(HAUL_YAW); }
+      ropeTarget = 1;
+      const now = performance.now(), cap = 1.6 * Math.min(0.1, lastHaul ? (now - lastHaul) / 1000 : 1 / 60); lastHaul = now;
+      const d = Math.max(-cap, Math.min(cap, dy / 300));
+      D.advance(d); units += d * ropePerPhase; dirty = true; api.start();
+    },
     start() { if (running) return; running = true; last = 0; if (!raf) raf = requestAnimationFrame(frame); },
     stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; },
     // con movimiento reducido: una sola imagen por cambio de estado

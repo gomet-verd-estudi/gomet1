@@ -85,9 +85,9 @@
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
     // El capataz en 3D (assets/js/capataz3d.js, se carga después del contenido; mientras, se ve su imagen fija).
-    // Al hacer scroll camina: la zancada sigue a la página (un ciclo de dos pasos cada ~520 px) y se gira hacia
-    // donde va (abajo → derecha, arriba → izquierda). Al parar, se vuelve hacia quien lee, levanta el pulgar y dice
-    // en su bocadillo el dato de la lámina; luego descansa, respirando.
+    // Al hacer scroll tira de la cuerda de una polea colgada de la cabecera: es él quien sube y baja la página
+    // (hacia abajo recoge cuerda mano sobre mano; hacia arriba la deja correr). Al parar suelta la cuerda, se vuelve
+    // hacia quien lee y dice en su bocadillo el dato de la lámina; luego descansa, respirando.
     const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), canvas = $('.cp-canvas', obra);
     let say = () => {}, haul = () => {};
     let cap = null, lastY = scrollY, idleT = 0, sayT = 0, live = true;
@@ -104,7 +104,7 @@
     haul = () => {
       const y = scrollY, dy = y - lastY; lastY = y;
       if (!live || Math.abs(dy) < 0.5 || entering) return;
-      if (cap && !reduce) { cap.set('walk'); cap.face(dy > 0 ? 1 : -1); cap.advance(Math.abs(dy) / 520); }
+      if (cap && !reduce) cap.haul(dy);
       bubble.classList.remove('say');
       clearTimeout(idleT); idleT = setTimeout(say, 420);
     };

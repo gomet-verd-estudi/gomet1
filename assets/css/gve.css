@@ -1145,8 +1145,13 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 /* el capataz va pegado a la obra, como la plancha verde, y se va con la última lámina */
 .obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd));
   z-index: 5; pointer-events: none; --m-w: 190px; --m-h: 238px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
-/* la cuerda sube hasta una polea bajo la cabecera de la lámina y corre con el scroll */
-/* tirando: recoge cuerda mano sobre mano, inclinado hacia atrás (bajar) o hacia delante (subir) */
+/* Al hacer scroll el capataz tira de una cuerda que cuelga de una polea en la línea de la cabecera: él sube y baja
+   la página. La cuerda va detrás del lienzo (sus manos quedan por delante) y su trenzado corre con el scroll. */
+.m-rope { position: absolute; left: 0; top: 0; width: 0; height: 0; display: none; }
+.m-rope.on { display: block; }
+.m-rope-line { position: absolute; left: 0; top: 0; border-radius: 0 0 9px 9px; will-change: transform;
+  background: repeating-linear-gradient(-62deg, #0A9651 0 2.3px, #F4EFE6 2.3px 3.4px); }
+.m-pulley { position: absolute; left: 0; top: 0; display: block; max-width: none; overflow: visible; }
 /* el bocadillo */
 .m-bubble { position: absolute; right: calc(var(--m-w) * .25); bottom: calc(100% + 14px); width: max-content; max-width: 250px; margin: 0; padding: 11px 14px 12px; background: var(--paper);
   border: 2.2px solid var(--midori); border-radius: 18px; color: var(--midori); font-size: .9rem; font-weight: 700; line-height: 1.18;

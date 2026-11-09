@@ -8,9 +8,9 @@ import * as THREE from 'three';
 import { createCapataz } from './capataz3d.js';
 import { idle } from './capataz-anim.js';
 const SKIN = [0xF4, 0xC2, 0xA4], DARK = [0x1B, 0x19, 0x19], WHITE = [255, 255, 255];
-const C = await createCapataz({ canvas: document.getElementById('c'), url: './model.glb', texture: './flat-line.png', relief: './relief.png' });
+const C = await createCapataz({ canvas: document.getElementById('c'), url: './model.glb', texture: './flat-line-ojosT.png', relief: './relief.png' });
 C.renderer.setPixelRatio(1); C.resize(600, 600); C.pose({}); C.view({ yaw: 0, zoom: 3.2, cy: 0.26 });
-const img = new Image(); img.src = './flat-line.png'; await img.decode();
+const img = new Image(); img.src = './flat-line-ojosT.png'; await img.decode();
 const S = img.width, cv = document.createElement('canvas'); cv.width = cv.height = S;
 const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
 const base = g.getImageData(0, 0, S, S);
@@ -77,16 +77,6 @@ const erase = texels((x, y) => x >= 142 && x <= 412 && y >= 122 && (y <= 252 || 
 paint(base, erase.map(([u, v, r]) => [u, v, r + 2.5]), SKIN, isDark);
 // motas sueltas de los ojos viejos junto al bigote
 paint(base, [...texels(ell(195, 245, 9, 9), 185, 235, 205, 255), ...texels(ell(403, 243, 8, 8), 394, 234, 412, 252)].map(([u, v, r]) => [u, v, r + 2]), SKIN);
-// patillas bajo el ala: a tamaño de web se juntan con los ojos y el ala; fuera (el pelo de la nuca se queda)
-const burns = [...texels((x, y) => x >= 80 && x <= 150 && y >= 118 && y <= 232, 80, 118, 150, 232), ...texels((x, y) => x >= 455 && x <= 520 && y >= 170 && y <= 240, 455, 170, 520, 240)];
-paint(base, burns.map(([u, v, r]) => [u, v, r + 2.5]), SKIN, isDark);
-// pelo del lateral, junto a la cara, visto de 3/4 (vista de 500 px, zoom 3, como en reposo)
-const side = (yaw, box) => { uvPass(Object.assign(idle(0.6), { yaw }), { yaw: 0, zoom: 3.0 * 600 / 500, cy: 0.27 });
-  const [x0, y0, x1, y1] = box.map((v) => v * 600 / 500);
-  return texels((x, y) => x >= x0 && x <= x1 && y >= y0 && y <= y1, x0, y0, x1, y1); };
-const hair = [...side(40, [55, 90, 190, 265]), ...side(-40, [335, 100, 420, 268]), ...side(12, [90, 95, 130, 155]), ...side(12, [195, 100, 225, 125]), ...side(12, [375, 110, 410, 135])];
-paint(base, hair.map(([u, v, r]) => [u, v, r + 2.5]), SKIN, isDark);
-uvPass({}, { yaw: 0, zoom: 3.2, cy: 0.26 });
 // astillas: oscuros sueltos (menos del 35 % de oscuro alrededor, 11 × 11) pasan a piel
 { const d = base.data, n = S * S, I = new Uint32Array((S + 1) * (S + 1));
   for (let y = 0; y < S; y++) { let row = 0; for (let x = 0; x < S; x++) { const i = (y * S + x) * 4; row += (d[i] < 70 && d[i + 1] < 70 && d[i + 2] < 70) ? 1 : 0; I[(y + 1) * (S + 1) + x + 1] = I[y * (S + 1) + x + 1] + row; } }
@@ -98,14 +88,15 @@ uvPass({}, { yaw: 0, zoom: 3.2, cy: 0.26 });
       const skin = (q) => Math.abs(d[q] - SKIN[0]) + Math.abs(d[q + 1] - SKIN[1]) + Math.abs(d[q + 2] - SKIN[2]) < 30;
       if (skin(j) || skin(k)) { d[i] = SKIN[0]; d[i + 1] = SKIN[1]; d[i + 2] = SKIN[2]; } } } }
 // 2) cejas: arcos cortos y gruesos
-const L = 226, R = 370, EY = 222;
-const brows = [...texels(band(arc(L - 30, L + 26, 177, 8), 12), L - 40, 158, L + 36, 190), ...texels(band(arc(R - 24, R + 22, 183, 6), 11), R - 34, 166, R + 32, 196)];
+const L = 226, R = 370, EY = 228;
+// cejas separadas del ala del casco (si no, a 190 px se funden con ella); el ala, ladeada, tapa un poco la derecha
+const brows = [...texels(band(arc(L - 30, L + 26, 184, 9), 19), L - 44, 160, L + 40, 198), ...texels(band(arc(R - 22, R + 26, 188, 7), 17), R - 36, 166, R + 40, 200)];
 const open = new ImageData(new Uint8ClampedArray(base.data), S, S), shut = new ImageData(new Uint8ClampedArray(base.data), S, S);
-// sin cejas: a tamaño de web se pegan a los ojos y bajo el ala del casco no hay sitio
+for (const D of [open, shut]) paint(D, brows, DARK);
 // 3a) ojos abiertos: óvalos de tinta con brillo en papel (blanco = se ve papel)
-const eyes = [...texels(ell(L, EY - 4, 22, 30), L - 23, EY - 35, L + 23, EY + 27), ...texels(ell(R, EY - 4, 22, 30), R - 23, EY - 35, R + 23, EY + 27)];
+const eyes = [...texels(ell(L, EY, 20, 23), L - 22, EY - 27, L + 22, EY + 27), ...texels(ell(R, EY, 20, 23), R - 22, EY - 27, R + 22, EY + 27)];
 paint(open, eyes, DARK);
-const glints = [...texels(ell(L + 7, EY - 15, 9, 11), L - 3, EY - 27, L + 17, EY - 3), ...texels(ell(R + 7, EY - 15, 9, 11), R - 3, EY - 27, R + 17, EY - 3)];
+const glints = [...texels(ell(L + 7, EY - 10, 8, 10), L - 2, EY - 21, L + 16, EY + 1), ...texels(ell(R + 7, EY - 10, 8, 10), R - 2, EY - 21, R + 16, EY + 1)];
 paint(open, glints, WHITE);
 // 3b) ojos cerrados: un arco de tinta (sonriente), a media altura del ojo
 // ojos cerrados de risa: un arco hacia arriba, como en la mascota original

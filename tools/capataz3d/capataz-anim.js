@@ -39,10 +39,14 @@ function add(base, extra) {
 export function mix(a, b, k) {
   const o = {};
   for (const n of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    if (n === 'reach') continue;
     const x = a[n], y = b[n];
     if (typeof x === 'number' || typeof y === 'number') { o[n] = (x || 0) + ((y || 0) - (x || 0)) * k; continue; }
     o[n] = { x: (x?.x || 0) + ((y?.x || 0) - (x?.x || 0)) * k, y: (x?.y || 0) + ((y?.y || 0) - (x?.y || 0)) * k, z: (x?.z || 0) + ((y?.z || 0) - (x?.z || 0)) * k };
   }
+  // las manos con alcance (tirar de la cuerda)
+  // (el alcance entra y sale con peso: el brazo pasa de su pose a la cuerda sin saltos)
+  if (b.reach) o.reach = { ...b.reach, w: k * (b.reach.w ?? 1) }; else if (a.reach) o.reach = { ...a.reach, w: (1 - k) * (a.reach.w ?? 1) };
   return o;
 }
 
@@ -96,6 +100,35 @@ export function talk(t) {
   });
 }
 
+/* Tirar de la cuerda (de perfil): la página sube o baja porque él la mueve. p ∈ [0, 1) es la fase: cada mano
+   agarra arriba y baja tirando (medio ciclo) mientras la otra suelta, sube por fuera y vuelve a agarrar. Al hacer
+   scroll hacia arriba la fase va al revés: la mano que agarra sube con la cuerda (la deja subir) y la otra baja.
+   Postura de tirar: pierna cercana adelantada y flexionada, la otra atrás, cuerpo echado atrás en cada tirón. */
+export const ROPE_HI = 0.68, ROPE_LO = 0.40, ROPE_Z = 0.25;
+export const ropePerPhase = 2 * (ROPE_HI - ROPE_LO); // cuerda que corre por cada ciclo de fase
+function hand(p, side) {
+  const t = ((p % 1) + 1) % 1;
+  if (t < 0.5) { const u = t / 0.5; return [0, ROPE_HI - (ROPE_HI - ROPE_LO) * u, ROPE_Z]; } // agarrada, tira
+  const u = (t - 0.5) / 0.5, e = u * u * (3 - 2 * u), a = Math.sin(Math.PI * u);
+  return [side * 0.06 * a, ROPE_LO + (ROPE_HI - ROPE_LO) * e, ROPE_Z - 0.025 * a];              // suelta, sube pegada al cuerpo
+}
+export function haul(p) {
+  const pull = Math.pow(Math.abs(Math.sin(Math.PI * 2 * p)), 0.8); // dos tirones por ciclo, uno por mano
+  const tug = Math.sin(Math.PI * 4 * p - 0.6);                       // rebote del cuerpo en cada tirón
+  const q = add(BASE, {
+    RightUpLeg: { x: -24 }, RightLeg: { x: 22 + 6 * pull }, RightFoot: { x: -8 },
+    LeftUpLeg: { x: 20 }, LeftLeg: { x: 6 + 4 * pull }, LeftFoot: { x: -18 },
+    // inclinado hacia la cuerda; en cada tirón se echa atrás
+    Hips: { x: -6 + 5 * pull, y: 3 * Math.sin(Math.PI * 2 * p) },
+    // (de perfil mirando a la izquierda: pecho y cara un poco abiertos hacia quien mira)
+    Spine: { x: -8 + 7 * pull }, Spine1: { x: -3 + 3 * pull, y: 6 }, Spine2: { y: 6 },
+    Head: { x: -4 - 3 * tug, y: 22 },
+    squash: 0.03 * pull
+  });
+  q.reach = { Left: hand(p, 1), Right: hand(p + 0.5, -1), LeftPole: [0.3, 0.3, -0.12], RightPole: [-0.3, 0.3, -0.12] };
+  return q;
+}
+
 /* Girarse hacia quien mira, como una persona: primero la cabeza, luego el torso y al final la cadera, recolocando
    los pies con dos pasitos; antes, una pequeña anticipación (se agacha un poco) y al final se pasa y vuelve. */
 export const TURN = 1.1;
@@ -141,7 +174,7 @@ export function wave(t) {
    set('walk' | 'idle' | 'talk'), advance(fase), face(+1 | −1 | 0), yawTo(grados), play('turn' | 'wave', ...) */
 export function director({ faceYaw = 40 } = {}) {
   const st = { energy: 1, cur: 'idle', prev: null, k: 1, phase: 0, t: 0, yaw: faceYaw, yawTarget: faceYaw, yawVel: 0, clip: null, prevPose: null };
-  const poseOf = (s) => (s === 'walk' ? walk(st.phase, st.energy) : s === 'talk' ? talk(st.t) : idle(st.t));
+  const poseOf = (s) => (s === 'haul' ? haul(st.phase) : s === 'walk' ? walk(st.phase, st.energy) : s === 'talk' ? talk(st.t) : idle(st.t));
   const api = {
     get state() { return st.clip ? st.clip.name : st.cur; },
     get yaw() { return st.yaw; },

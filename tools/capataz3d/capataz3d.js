@@ -61,6 +61,31 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     'LeftShoulder', 'LeftArm', 'LeftForeArm', 'LeftHand', 'RightShoulder', 'RightArm', 'RightForeArm', 'RightHand',
     'LeftUpLeg', 'LeftLeg', 'LeftFoot', 'RightUpLeg', 'RightLeg', 'RightFoot'];
   // pose: ángulos por hueso; yaw: hacia dónde mira; squash: aplastar (+) o estirar (−) sobre el suelo
+  // Brazo con cinemática inversa: la mano llega a un punto (en el espacio del personaje) con el codo hacia el polo
+  const _S = new THREE.Vector3(), _E = new THREE.Vector3(), _H = new THREE.Vector3(), _T = new THREE.Vector3(), _Po = new THREE.Vector3(),
+    _n = new THREE.Vector3(), _pp = new THREE.Vector3(), _E2 = new THREE.Vector3(), _T2 = new THREE.Vector3(), _va = new THREE.Vector3(), _vb = new THREE.Vector3(),
+    _qw = new THREE.Quaternion(), _qp = new THREE.Quaternion(), _qd = new THREE.Quaternion();
+  function aim(bone, from, to) {
+    _qd.setFromUnitVectors(from.normalize(), to.normalize());
+    bone.getWorldQuaternion(_qw); bone.parent.getWorldQuaternion(_qp);
+    bone.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); bone.updateMatrixWorld(true);
+  }
+  const _qa = new THREE.Quaternion(), _qf = new THREE.Quaternion();
+  function reach(side, t, pole, w = 1) {
+    const A = B[side + 'Arm'], F = B[side + 'ForeArm'], H = B[side + 'Hand']; if (!A || !F || !H || w <= 0) return;
+    _qa.copy(A.quaternion); _qf.copy(F.quaternion);
+    A.getWorldPosition(_S); F.getWorldPosition(_E); H.getWorldPosition(_H);
+    const l1 = _S.distanceTo(_E), l2 = _E.distanceTo(_H);
+    root.localToWorld(_T.set(t[0], t[1], t[2])); root.localToWorld(_Po.set(pole[0], pole[1], pole[2]));
+    _n.subVectors(_T, _S); let d = _n.length(); _n.normalize(); d = Math.min(Math.max(d, Math.abs(l1 - l2) + 1e-3), l1 + l2 - 1e-3);
+    _pp.subVectors(_Po, _S); _pp.addScaledVector(_n, -_pp.dot(_n)).normalize();
+    const a = (l1 * l1 - l2 * l2 + d * d) / (2 * d), h = Math.sqrt(Math.max(0, l1 * l1 - a * a));
+    _E2.copy(_S).addScaledVector(_n, a).addScaledVector(_pp, h); _T2.copy(_S).addScaledVector(_n, d);
+    aim(A, _va.subVectors(_E, _S), _vb.subVectors(_E2, _S));
+    F.getWorldPosition(_E); H.getWorldPosition(_H);
+    aim(F, _va.subVectors(_H, _E), _vb.subVectors(_T2, _E));
+    if (w < 1) { A.quaternion.slerpQuaternions(_qa, A.quaternion.clone(), w); F.quaternion.slerpQuaternions(_qf, F.quaternion.clone(), w); A.updateMatrixWorld(true); }
+  }
   function pose(p = {}) {
     rest.forEach((q, b) => b.quaternion.copy(q)); B.Hips.position.copy(restPos);
     root.position.set(0, 0, 0); root.rotation.set(0, (p.yaw || 0) * Math.PI / 180, 0);
@@ -73,6 +98,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       B[n].updateMatrixWorld(true);
     }
     root.updateMatrixWorld(true);
+    if (p.reach) for (const side of ['Left', 'Right']) if (p.reach[side]) reach(side, p.reach[side], p.reach[side + 'Pole'], p.reach.w ?? 1);
     // pies en el suelo: el pie más bajo apoya siempre en el suelo (de ahí sale el sube y baja natural del paso)
     root.position.y = restFoot * (1 - sq) - footMin() + (p.hop || 0) * size.y;
     root.updateMatrixWorld(true);
@@ -145,16 +171,16 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       }
       void main(){
         vec2 fc = vUv * res;
-        P = vUv + (vec2(vn(fc / 2.3), vn(fc / 2.3 + 17.)) - .5) * px * 1.4 * riso;
+        P = vUv + (vec2(vn(fc / 2.3), vn(fc / 2.3 + 17.)) - .5) * px * .55 * riso;
         vec4 o = shade();
         if (riso < .01) { gl_FragColor = o; return; }
         // cuánta tinta hay: 1 donde el color es la tinta
         float ink01 = o.a < .01 ? 0. : clamp(1. - distance(o.rgb, ink) / max(.001, distance(fillC, ink)), 0., 1.);
         // densidad desigual en manchas grandes, grano fino y motas sin tinta
-        float dens = .8 + .2 * vn(fc / 38.) + .06 * (vn(fc / 9.) - .5);
-        float grain = .9 + .1 * h21(fc);
-        float drop = step(.955, h21(floor(fc / 1.6) + 3.1)) * step(.5, vn(fc / 3.));
-        float cov = ink01 * dens * grain * (1. - .75 * drop) * riso + ink01 * (1. - riso);
+        float dens = .94 + .06 * vn(fc / 46.);
+        float grain = .975 + .025 * h21(fc);
+        float drop = step(.993, h21(floor(fc / 1.6) + 3.1)) * step(.55, vn(fc / 3.));
+        float cov = ink01 * dens * grain * (1. - .55 * drop) * riso + ink01 * (1. - riso);
         if (o.a < .99) { gl_FragColor = vec4(ink, cov); return; }
         gl_FragColor = vec4(mix(fillC, ink, cov), 1.);
       }`,
@@ -171,11 +197,13 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     cam.position.set(t.x + Math.sin(a) * Math.cos(p) * R, t.y + Math.sin(p) * R, t.z + Math.cos(a) * Math.cos(p) * R);
     cam.lookAt(t); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
   }
+  let lineScale = 1;
+  const setLineScale = (k) => { lineScale = k; };
   function resize(w, h) {
     renderer.setSize(w, h, false);
     const W = renderer.domElement.width, H = renderer.domElement.height, r = renderer.getPixelRatio();
     rt.setSize(W, H); rtD.setSize(W, H); U.px.value.set(1 / W, 1 / H); U.res.value.set(W, H);
-    U.line.value = line * r; U.fine.value = fine * r;
+    U.line.value = Math.max(1, line * r * lineScale); U.fine.value = Math.max(.75, fine * r * lineScale);
   }
   function render() {
     renderer.setClearColor(0x000000, 0);
@@ -187,6 +215,12 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   // parpadeo: la misma textura con los ojos cerrados
   const blink = (on) => { flatMat.map = on && texB ? texB : tex; };
   // píxeles CSS por unidad del mundo, para pasar el desplazamiento del pie a la pantalla
+  const _pj = new THREE.Vector3();
+  // punto del espacio del personaje → píxeles CSS del lienzo
+  // de un punto (del personaje o del mundo) a píxeles CSS del lienzo
+  const toPx = (v) => { v.project(cam); const c = renderer.domElement; return [(v.x + 1) / 2 * c.clientWidth, (1 - v.y) / 2 * c.clientHeight]; };
+  const project = (x, y, z) => toPx(root.localToWorld(_pj.set(x, y, z)));
+  const projectWorld = (x, y, z) => toPx(_pj.set(x, y, z));
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, setLineScale, project, projectWorld, planted, pxPerUnit, materials: { flatMat, detailMat } };
 }
