@@ -3,7 +3,7 @@
  * API para gve.js: set('idle' | 'talk'), haul(dy), face(±1 | 0), start(), stop(), enter(dist).
  */
 import { createCapataz } from './capataz3d.js';
-import { director, walk as walkPose, ROPE_Z, ropePerPhase } from './capataz-anim.js';
+import { director, stride, setRig, ROPE_Z, ropePerPhase } from './capataz-anim.js';
 
 const INK = '#0A9651';
 // La polea cuelga de la línea de la cabecera; la cuerda baja por su lado izquierdo hasta las manos y el suelo,
@@ -30,12 +30,16 @@ function modelSource(base, spec) {
 
 window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, reduce = false }) {
   if (!webgl()) throw new Error('sin WebGL');
-  const dpr = 2; // el lienzo es pequeño: siempre a 2x, así el trazo sale limpio (y suavizado en pantallas normales)
+  // Trazo suavizado: se dibuja al doble y se reduce (ss = 2), y el lienzo va a la densidad de la pantalla hasta 1,75x
+  // (más no se distingue a este tamaño y cuesta el doble). Sin mapa de relieve: solo las líneas del modelo y los
+  // pliegues dibujados, sin el ruido de motas que daba el relieve.
+  const dpr = Math.max(1, Math.min(1.75, window.devicePixelRatio || 1));
   const C = await createCapataz({
-    canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
-    line, fine, fineThreshold: 2.0, background: null
+    canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'plano.png', folds: base + 'pliegues.png',
+    line, fine, fineThreshold: 2.0, background: null, ss: 2, reliefScale: 0
   });
   C.renderer.setPixelRatio(dpr);
+  setRig(C.rig); // los pasos se planean con las medidas reales de las piernas
   const D = director({ faceYaw: 40 });
   const fit = () => {
     const r = canvas.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return;
@@ -45,8 +49,8 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     // distancia del muñeco a la línea de la cabecera (el envoltorio es pegajoso: no cambia con el scroll)
     offTop = wrap ? host.offsetTop : r.top;
   };
-  let dirty = true, raf = 0, last = 0, running = false;
-  // Entrada caminando: el muñeco avanza lo que retrocede el pie apoyado (sin patinar). ent = { x, end, done }
+  let dirty = true, raf = 0, last = 0, running = false, slow = 16;
+  // Entrada caminando: el cuerpo avanza exactamente lo que el paso planea (los pies apoyados quedan quietos en la página)
   let ent = null;
   const host = canvas.closest('.mascot') || canvas;
   const place = (x) => { host.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; };
@@ -81,38 +85,30 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   };
   const draw = (dt) => {
     blinkTick(dt);
-    const a = ent && ent.walking ? C.planted() : null;
-    let dp = 0;
-    // el último paso frena (como al llegar a un sitio): la raíz sigue al pie, así que frena todo el cuerpo
-    if (ent && ent.walking) { dp = Math.min(dt / ent.cycle * (0.55 + 0.45 * Math.min(1, ent.left / 0.5)), ent.left); D.advance(dp); }
-    C.pose(D.tick(dt));
-    if (a) {
-      const b = C.planted();
-      if (b.i === a.i) ent.x -= (b.x - a.x) * C.pxPerUnit();
-      ent.left -= dp;
-      if (ent.left <= 0) { ent.walking = false; ent.settle = ent.x; ent.st = 0; ent.end(); }
+    // el último paso frena (como al llegar a un sitio); el cuerpo avanza lo mismo que la fase, así que los pies no patinan
+    if (ent && ent.walking) {
+      const dp = Math.min(dt / ent.cycle * (0.45 + 0.55 * ease(Math.min(1, ent.left / 0.6))), ent.left);
+      D.advance(dp); ent.x += dp * stride(ent.k) * C.pxPerUnit(); ent.left -= dp;
+      if (ent.left <= 1e-6) { ent.walking = false; ent.settle = ent.x; ent.st = 0; ent.end(); }
     }
+    C.pose(D.tick(dt));
     if (ent && !ent.walking) { ent.st = Math.min(1, ent.st + dt / 0.5); ent.x = ent.settle * (1 - ent.st * ent.st * (3 - 2 * ent.st)); if (ent.st >= 1) { ent = null; } }
     if (ent) place(ent.x); else if (host.style.transform) place(0);
     if (rope > 0 || ropeTarget > 0) drawRope(dt);
     C.render();
   };
-  // largo de medio ciclo (un paso) en píxeles, de perfil: para empezar fuera de la pantalla y acabar justo en su sitio
-  function stepPx(k) {
-    let d = 0, prev = null; const q0 = D.tick(0);
-    for (let i = 0; i <= 48; i++) {
-      const q = walkPose(i / 48, k); q.yaw = 90; C.pose(q); const pl = C.planted();
-      if (prev && pl.i === prev.i) d -= pl.x - prev.x; prev = pl;
-    }
-    C.pose(q0);
-    return Math.max(1, d / 2 * C.pxPerUnit());
-  }
+  // largo de un paso en píxeles: para empezar fuera de la pantalla y acabar justo en su sitio
+  const stepPx = (k) => Math.max(1, stride(k) / 2 * C.pxPerUnit());
   function frame(now) {
     raf = 0; if (!running) return;
-    const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 24;
-    // como en animación: 24 fotogramas por segundo en movimiento y 12 en reposo (respira despacio)
-    const calm = D.state === 'idle' && !D.busy() && !shut && clock + 0.1 < blinkAt;
-    if (now - last >= (calm ? 1000 / 12 : 1000 / 24) - 2) { last = now; draw(dt); dirty = false; }
+    const dt = last ? Math.min(0.1, (now - last) / 1000) : 1 / 60;
+    // en movimiento, cada fotograma de la pantalla (fluido); en reposo, 30 por segundo (respira despacio)
+    const calm = D.state === 'idle' && !D.busy() && !shut && clock + 0.1 < blinkAt && !ent && rope <= 0;
+    if (!calm || now - last >= 1000 / 30 - 2) {
+      // si en movimiento no llega a ~30 fotogramas por segundo, baja el suavizado (una vez por escalón)
+      if (!calm && last) { slow = slow * 0.92 + (now - last) * 0.08; if (slow > 34 && C.quality() > 1) { C.quality(C.quality() > 1.5 ? 1.5 : 1); slow = 16; } }
+      last = now; draw(dt); dirty = false;
+    }
     raf = requestAnimationFrame(frame);
   }
   if ('ResizeObserver' in window) new ResizeObserver(fit).observe(canvas); else addEventListener('resize', fit);
@@ -142,9 +138,9 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     // entra caminando de perfil desde `dist` píxeles a la izquierda, se gira hacia quien lee y saluda
     enter(dist) {
       return new Promise((resolve) => {
-        const E = 1.08, step = stepPx(E), n = Math.max(2, Math.ceil(dist / step));
+        const E = 1.1, step = stepPx(E), n = Math.max(2, Math.ceil(dist / step));
         D.yawTo(90, true); D.setEnergy(E); D.set('walk'); D.setPhase(0);
-        ent = { x: -n * step, left: n * 0.5, cycle: 0.86, walking: true, end: () => {
+        ent = { x: -n * step, k: E, left: n * 0.5, cycle: 0.8, walking: true, end: () => {
           D.setEnergy(1);
           D.play('turn', { to: 12, then: 'idle', done: () => D.play('wave', { then: 'idle', done: resolve }) });
         } };

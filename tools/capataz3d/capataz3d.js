@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0 }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
@@ -23,7 +23,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   root.traverse((o) => { if (o.isMesh) { o.frustumCulled = false; mesh = o; } });
   const flatMat = new THREE.MeshBasicMaterial({ map: tex });
   // pasada de detalle: normales con relieve en RGB y el mapa de pliegues dibujados en A
-  const detailMat = new THREE.MeshNormalMaterial({ normalMap: bump, normalScale: new THREE.Vector2(1.4, 1.4) });
+  const detailMat = new THREE.MeshNormalMaterial({ normalMap: bump, normalScale: new THREE.Vector2(reliefScale, reliefScale) });
   detailMat.onBeforeCompile = (sh) => {
     sh.uniforms.tFolds = { value: foldTex };
     sh.fragmentShader = sh.fragmentShader
@@ -83,8 +83,10 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     bone.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); bone.updateMatrixWorld(true);
   }
   const _qa = new THREE.Quaternion(), _qf = new THREE.Quaternion();
-  function reach(side, t, pole, w = 1) {
-    const A = B[side + 'Arm'], F = B[side + 'ForeArm'], H = B[side + 'Hand']; if (!A || !F || !H || w <= 0) return;
+  // dos huesos (brazo y antebrazo, o muslo y espinilla): el extremo llega al punto t (espacio del personaje) con la
+  // articulación del medio hacia el polo; w mezcla con la pose que ya tenían
+  function ik2(A, F, H, t, pole, w = 1) {
+    if (!A || !F || !H || w <= 0) return;
     _qa.copy(A.quaternion); _qf.copy(F.quaternion);
     A.getWorldPosition(_S); F.getWorldPosition(_E); H.getWorldPosition(_H);
     const l1 = _S.distanceTo(_E), l2 = _E.distanceTo(_H);
@@ -98,11 +100,28 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     aim(F, _va.subVectors(_H, _E), _vb.subVectors(_T2, _E));
     if (w < 1) { A.quaternion.slerpQuaternions(_qa, A.quaternion.clone(), w); F.quaternion.slerpQuaternions(_qf, F.quaternion.clone(), w); A.updateMatrixWorld(true); }
   }
+  const reach = (side, t, pole, w) => ik2(B[side + 'Arm'], B[side + 'ForeArm'], B[side + 'Hand'], t, pole, w);
+  // medidas de las piernas y los pies en reposo (unidades del mundo, suelo en floor): para planear los pasos
+  const rig = (() => {
+    const g = (n) => B[n].getWorldPosition(new THREE.Vector3()), o = { H: size.y, floor, hips: g('Hips').toArray() };
+    for (const side of ['Left', 'Right']) {
+      const hip = g(side + 'UpLeg'), knee = g(side + 'Leg'), ank = g(side + 'Foot'), toe = g(side + 'ToeBase');
+      const len = Math.hypot(toe.x - ank.x, toe.z - ank.z);
+      o[side] = { hip: hip.toArray(), thigh: hip.distanceTo(knee), shin: knee.distanceTo(ank), ah: ank.y - floor, back: len * 0.3, F: len * 1.75 };
+    }
+    return o;
+  })();
+  const _hp = new THREE.Vector3(), _hc = new THREE.Vector3();
   function pose(p = {}) {
     rest.forEach((q, b) => b.quaternion.copy(q)); B.Hips.position.copy(restPos);
     root.position.set(0, 0, 0); root.rotation.set(0, (p.yaw || 0) * Math.PI / 180, 0);
     const sq = p.squash || 0; root.scale.set(1 + sq * 0.5, 1 - sq, 1 + sq * 0.5);
     root.updateMatrixWorld(true);
+    // la pelvis, a una altura y posición dadas (al andar sube y baja y se mece hacia la pierna de apoyo)
+    if (p.legs && p.legs.hip) {
+      const w = p.legs.w ?? 1; B.Hips.getWorldPosition(_hc); root.localToWorld(_hp.fromArray(p.legs.hip)); _hc.lerp(_hp, w);
+      B.Hips.position.copy(B.Hips.parent.worldToLocal(_hc)); B.Hips.updateMatrixWorld(true);
+    }
     for (const n of ORDER) {
       const r = p[n]; if (!r) continue;
       // primero se abre o cierra (z), luego gira sobre sí mismo (y) y al final se balancea (x)
@@ -110,11 +129,17 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       B[n].updateMatrixWorld(true);
     }
     root.updateMatrixWorld(true);
+    // piernas por cinemática inversa: el tobillo va a su sitio y la rodilla mira al polo (delante)
+    if (p.legs) for (const side of ['Left', 'Right']) { const L = p.legs[side]; if (L) ik2(B[side + 'UpLeg'], B[side + 'Leg'], B[side + 'Foot'], L.ankle, L.pole, p.legs.w ?? 1); }
     // planta del pie a un ángulo exacto respecto al suelo (− punta arriba): talón al pisar, plano al cargar, punta al despegar
     // (por defecto, plana: el modelo de base deja las botas 9° de puntillas)
     for (const [k, side] of [[0, 'Left'], [1, 'Right']]) {
       const t = (p.sole && p.sole[side]) || 0; if (!SOLE[2 * k]) continue;
-      root.worldToLocal(SOLE[2 * k].bone.localToWorld(_h.copy(SOLE[2 * k].at))); root.worldToLocal(SOLE[2 * k + 1].bone.localToWorld(_t.copy(SOLE[2 * k + 1].at)));
+      const hs = () => { root.worldToLocal(SOLE[2 * k].bone.localToWorld(_h.copy(SOLE[2 * k].at))); root.worldToLocal(SOLE[2 * k + 1].bone.localToWorld(_t.copy(SOLE[2 * k + 1].at))); };
+      hs();
+      // al andar, la bota apunta al frente (si no, el talón y la punta no caen donde se planean y el pie patina)
+      const yw = p.soleYaw && p.soleYaw[side];
+      if (yw !== undefined) { turn(side + 'Foot', AX.y, yw - Math.atan2(_t.x - _h.x, _t.z - _h.z) * 180 / Math.PI); B[side + 'Foot'].updateMatrixWorld(true); hs(); }
       const pitch = Math.atan2(_t.y - _h.y, Math.hypot(_t.x - _h.x, _t.z - _h.z)) * 180 / Math.PI;
       turn(side + 'Foot', AX.x, pitch + t); B[side + 'Foot'].updateMatrixWorld(true);
     }
@@ -155,6 +180,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       bool isFill(vec3 k){ return distance(k, vec3(0.078, 0.431, 0.235)) < 0.1 || distance(k, vec3(0.122, 0.388, 0.839)) < 0.18 || distance(k, vec3(0.227)) < 0.1 || distance(k, vec3(0.106, 0.098, 0.098)) < 0.1; }
       vec4 shade(){
         float d0 = d(vec2(0.)); vec3 c0 = c(vec2(0.)); bool f0 = d0 < 1. && isFill(c0);
+        bool skin0 = distance(c0, vec3(0.957, 0.761, 0.643)) < 0.16;
         vec3 paper = useFill > 0.5 ? fillC : vec3(1.);
         // trazo principal: silueta, piezas que se tapan y cambios de color plano (entre dos zonas macizas, calado en papel)
         bool edge = false, knock = false;
@@ -162,8 +188,15 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
           float a = float(i) * 0.5235988; vec2 o = vec2(cos(a), sin(a)) * px * line;
           float dd = d(o); vec3 cc = c(o);
           bool e = (d0 < 1.) != (dd < 1.) || (d0 < 1. && abs(dd - d0) > 0.0035) || (d0 < 1. && distance(cc, c0) > 0.22);
+
           // los rasgos de la cara (ojos, cejas, bigote) son masas de tinta sin contorno alrededor: no se engordan
-          bool feat = !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035 && distance(cc, vec3(0.106, 0.098, 0.098)) < 0.1;
+          // (y en la piel, nada macizo lleva contorno: los bordes suavizados de los rasgos salen en gris o verde oscuro)
+          bool feat = !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035 && (distance(cc, vec3(0.106, 0.098, 0.098)) < 0.1 || (skin0 && isFill(cc)));
+          // ni a través de ellos: si entre este punto y la muestra hay un rasgo, lo de detrás (el brillo del ojo, el casco
+          // tras la patilla) no cuenta; si no, salen anillos de puntos alrededor de los rasgos
+          if (e && !feat && !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035) {
+            if (distance(c(o * .5), vec3(0.106, 0.098, 0.098)) < 0.1 || distance(c(o * .25), vec3(0.106, 0.098, 0.098)) < 0.1 || distance(c(o * .75), vec3(0.106, 0.098, 0.098)) < 0.1) feat = true;
+          }
           if (e && !feat) { if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
         }
         if (edge) { return vec4(ink, 1.); }
@@ -204,9 +237,18 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
         if (o.a < .99) { gl_FragColor = vec4(ink, cov); return; }
         gl_FragColor = vec4(mix(fillC, ink, cov), 1.);
       }`,
-    depthTest: false, depthWrite: false, transparent: true
+    depthTest: false, depthWrite: false, blending: THREE.NoBlending
   }));
   const post = new THREE.Scene(); post.add(quad); const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  // Suavizado: todo se dibuja a `ss` veces la resolución del lienzo y se reduce promediando (con ss = 2, una sola lectura
+  // con filtro lineal en el centro de cada píxel promedia exactamente los 2 × 2 de dentro). Colores premultiplicados.
+  const rtPost = new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+  const down = new THREE.Scene(); down.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+    uniforms: { t: { value: rtPost.texture } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
+    fragmentShader: 'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor = texture2D(t, vUv); }',
+    depthTest: false, depthWrite: false, blending: THREE.NoBlending
+  })));
 
   const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 50);
   function view({ yaw = 0, pitch = 0, zoom = 1, cx = 0, cy = 0 } = {}) {
@@ -219,19 +261,24 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   }
   let lineScale = 1;
   const setLineScale = (k) => { lineScale = k; };
+  let lastW = 1, lastH = 1;
   function resize(w, h) {
+    lastW = w; lastH = h;
     renderer.setSize(w, h, false);
-    const W = renderer.domElement.width, H = renderer.domElement.height, r = renderer.getPixelRatio();
-    rt.setSize(W, H); rtD.setSize(W, H); U.px.value.set(1 / W, 1 / H); U.res.value.set(W, H);
+    const W = Math.round(renderer.domElement.width * ss), H = Math.round(renderer.domElement.height * ss), r = renderer.getPixelRatio() * ss;
+    rt.setSize(W, H); rtD.setSize(W, H); rtPost.setSize(W, H); U.px.value.set(1 / W, 1 / H); U.res.value.set(W, H);
     U.line.value = Math.max(1, line * r * lineScale); U.fine.value = Math.max(.75, fine * r * lineScale);
   }
   function render() {
     renderer.setClearColor(0x000000, 0);
     mesh.material = flatMat; renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, cam);
     mesh.material = detailMat; renderer.setRenderTarget(rtD); renderer.setClearColor(0x8080ff, 1); renderer.clear(); renderer.render(scene, cam);
-    mesh.material = flatMat; renderer.setRenderTarget(null); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(post, postCam);
+    mesh.material = flatMat; renderer.setRenderTarget(rtPost); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(post, postCam);
+    renderer.setRenderTarget(null); renderer.clear(); renderer.render(down, postCam);
   }
   const set = (k, v) => { U[k].value = v; };
+  // calidad del suavizado (si el equipo no llega, se baja: 2 → 1,5 → 1)
+  const quality = (v) => { if (v === undefined) return ss; ss = v; resize(lastW, lastH); return ss; };
   // parpadeo: la misma textura con los ojos cerrados
   const blink = (on) => { flatMat.map = on && texB ? texB : tex; };
   // píxeles CSS por unidad del mundo, para pasar el desplazamiento del pie a la pantalla
@@ -242,5 +289,5 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const project = (x, y, z) => toPx(root.localToWorld(_pj.set(x, y, z)));
   const projectWorld = (x, y, z) => toPx(_pj.set(x, y, z));
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, setLineScale, project, projectWorld, floor: restFoot, soles: () => SOLE.map(soleY), planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
 }
