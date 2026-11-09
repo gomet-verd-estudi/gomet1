@@ -3,7 +3,8 @@
  * Ángulos en grados sobre la pose de reposo, en ejes del personaje; en cada hueso se aplica primero z (abrir o
  * cerrar), luego y (girar sobre sí mismo) y al final x (balancear: adelante −, atrás +).
  * Límites medidos en la malla para que no se rompa ni se atraviese:
- *  - brazos: como mucho 48° bajo la horizontal (más abajo, el puño se mete en el pantalón, que es muy ancho);
+ *  - brazos: en reposo, como mucho 48° bajo la horizontal (más abajo, el puño se mete en el pantalón, que es muy
+ *    ancho); al andar pueden bajar a ~64° porque el puño va y viene por delante y por detrás del pantalón;
  *  - piernas: el modelo tiene las botas abiertas casi 70°; para que miren al frente se gira la pierna entera desde
  *    la cadera (42°) y el tobillo solo el resto (22°): así la bota no se retuerce.
  */
@@ -39,39 +40,64 @@ function add(base, extra) {
 export function mix(a, b, k) {
   const o = {};
   for (const n of new Set([...Object.keys(a), ...Object.keys(b)])) {
-    if (n === 'reach') continue;
+    if (n === 'reach' || n === 'sole') continue;
     const x = a[n], y = b[n];
     if (typeof x === 'number' || typeof y === 'number') { o[n] = (x || 0) + ((y || 0) - (x || 0)) * k; continue; }
     o[n] = { x: (x?.x || 0) + ((y?.x || 0) - (x?.x || 0)) * k, y: (x?.y || 0) + ((y?.y || 0) - (x?.y || 0)) * k, z: (x?.z || 0) + ((y?.z || 0) - (x?.z || 0)) * k };
   }
   // las manos con alcance (tirar de la cuerda)
   // (el alcance entra y sale con peso: el brazo pasa de su pose a la cuerda sin saltos)
+  // la planta del pie respecto al suelo (sin indicar, plana)
+  if (a.sole || b.sole) { const sa = a.sole || {}, sb = b.sole || {}; o.sole = { Left: (sa.Left || 0) + ((sb.Left || 0) - (sa.Left || 0)) * k, Right: (sa.Right || 0) + ((sb.Right || 0) - (sa.Right || 0)) * k }; }
   if (b.reach) o.reach = { ...b.reach, w: k * (b.reach.w ?? 1) }; else if (a.reach) o.reach = { ...a.reach, w: (1 - k) * (a.reach.w ?? 1) };
   return o;
 }
 
-/* Caminar: p ∈ [0, 1) es la fase del ciclo de dos pasos.
-   Contacto (p = 0 y 0.5), recepción, paso e impulso; brazos en oposición; cadera que gira y se inclina; columna
-   que contrarresta; antebrazos y cabeza con retraso (follow-through); aplastamiento al recibir el peso. */
+/* Caminar, por poses clave como en animación (no con senos): cada pierna recorre su ciclo con apoyo ~60 % y
+   balanceo ~40 %. q = 0: el talón toca el suelo delante; carga (la rodilla cede y el cuerpo baja); apoyo medio (la
+   pierna se estira y el cuerpo sube); impulso (el talón se levanta); despegue de la punta; balanceo con la rodilla
+   alta y el pie que pasa bajo el cuerpo; y la pierna que se extiende para volver a pisar. Interpolación suave
+   (Catmull-Rom cerrada). El sube y baja del cuerpo sale solo: el suelo se apoya en el punto más bajo de la suela.
+   p ∈ [0, 1) es la fase del ciclo de dos pasos; p = 0 y 0.5: paso (pies juntos), p = 0.25: pisa la izquierda. */
+//                 contacto carga  medio  impulso despegue balanceo  paso  extensión
+export const THIGH = [   -18,    -15,    -4,     9,     20,      10,      -8,    -18 ];  // muslo (− adelante)
+export const KNEE = [      4,     20,    10,    18,     44,      56,      56,     16 ];  // rodilla (+ dobla)
+export const SOLE = [    -16,      0,     0,     5,     20,      24,       8,     -6 ];  // planta respecto al suelo (− punta arriba)
+function loop(keys, q) {
+  const n = keys.length, f = (((q % 1) + 1) % 1) * n, i = Math.floor(f), t = f - i;
+  const a = keys[(i + n - 1) % n], b = keys[i], c = keys[(i + 1) % n], d = keys[(i + 2) % n];
+  return 0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (3 * b - a - 3 * c + d) * t * t * t);
+}
+function leg(q, k) {
+  const th = loop(THIGH, q) * k, kn = loop(KNEE, q) * (0.75 + 0.25 * k), so = loop(SOLE, q) * Math.min(k, 1.3);
+  return { th, kn, so };
+}
 export function walk(p, k = 1) {
-  // k: energía del paso (1 normal; más, zancada más larga y brazos más sueltos, como al llegar con prisa)
-  const A = 24 * k, K = 42 * Math.min(k, 1.2), B = 24 * k;
-  const hipL = -A * S(p), hipR = A * S(p);
-  const kneeL = K * Math.pow(pos(C(p)), 1.4) + 6 * pos(-C(p)), kneeR = K * Math.pow(pos(-C(p)), 1.4) + 6 * pos(C(p));
-  // el pie acompaña: talón al contactar, punta al despegar
-  const footL = -(hipL + kneeL) * 0.75 + 12 * pos(S(p + 0.15)), footR = -(hipR + kneeR) * 0.75 + 12 * pos(-S(p + 0.15));
-  const land = Math.pow(pos(Math.abs(S(p + 0.04)) - 0.6) / 0.4, 2);
-  return add(BASE, {
-    Hips: { y: 7 * S(p), z: 2.5 * C(p * 2 + 0.1), x: 3 + 3 * (k - 1) },
-    Spine: { y: -5 * S(p), x: 2 }, Spine2: { y: -3 * S(p - 0.05) },
-    Head: { y: 4 * S(p - 0.12), x: 2.5 * C(p * 2 - 0.2) },
-    LeftUpLeg: { x: hipL }, RightUpLeg: { x: hipR },
-    LeftLeg: { x: kneeL }, RightLeg: { x: kneeR },
-    LeftFoot: { x: footL }, RightFoot: { x: footR },
-    LeftArm: { x: B * S(p - 0.04) }, RightArm: { x: -B * S(p - 0.04) },
-    LeftForeArm: { x: -6 - 16 * pos(-S(p - 0.12)) }, RightForeArm: { x: -6 - 16 * pos(S(p - 0.12)) },
-    squash: 0.035 * land
+  // k: energía (1 paseo; más, zancada más larga, más inclinado y brazos más sueltos)
+  const qL = p - 0.25, qR = p + 0.25, L = leg(qL, k), R = leg(qR, k);
+  const B = 26 * k;                                   // vaivén de los brazos, en oposición a las piernas
+  const cL = C(qL), cR = C(qR);
+  const load = Math.max(0, S(2 * p - 0.06));          // recepción del peso tras cada contacto
+  const lean = -4 - 3 * (k - 1);
+  const q = add(BASE, {
+    // la pelvis gira con la pierna que avanza y cae hacia el lado de la pierna en el aire; el pecho contrarresta
+    // (la inclinación va en la columna, no en la pelvis: así no altera el ángulo de las piernas)
+    Hips: { y: 6 * cL, z: 2.2 * C(2 * p + 0.12) },
+    Spine: { x: lean, y: -3.5 * cL }, Spine1: { y: -2 * C(qL - 0.04) }, Spine2: { y: -2.5 * C(qL - 0.08), x: 1.2 * load },
+    // la cabeza estabiliza la mirada: compensa el giro y la inclinación y asiente un poco con retraso
+    Neck: { y: 3 * C(qL - 0.1) },
+    Head: { y: 1.5 * C(qL - 0.16), x: -lean * 0.6 + 1.6 * S(2 * p - 0.18) },
+    LeftUpLeg: { x: L.th }, RightUpLeg: { x: R.th },
+    LeftLeg: { x: L.kn }, RightLeg: { x: R.kn },
+    // brazos: el hombro lleva el péndulo; el antebrazo llega tarde y se dobla más al ir hacia delante
+    // al andar los brazos cuelgan más (el puño ya no roza el pantalón porque va y viene por delante y por detrás)
+    LeftArm: { x: -6 + B * C(qL - 0.03), z: -16 + 2 * load }, RightArm: { x: -6 + B * C(qR - 0.03), z: 16 - 2 * load },
+    LeftForeArm: { x: -8 - 20 * Math.max(0, -C(qL - 0.1)) }, RightForeArm: { x: -8 - 20 * Math.max(0, -C(qR - 0.1)) },
+    LeftHand: { x: 6 * C(qL - 0.18) }, RightHand: { x: 6 * C(qR - 0.18) },
+    squash: 0.018 * load * load
   });
+  q.sole = { Left: L.so, Right: R.so };
+  return q;
 }
 
 // Reposo: respira, cambia el peso de pierna y mira alrededor despacio

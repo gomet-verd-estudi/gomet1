@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 1 }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
@@ -46,15 +46,27 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     _ax.copy(axis).applyQuaternion(_pw.invert()).normalize();
     b.quaternion.premultiply(_q.setFromAxisAngle(_ax, deg * Math.PI / 180));
   }
-  const FEET = ['LeftFoot', 'RightFoot', 'LeftToeBase', 'RightToeBase'].map((n) => B[n]);
-  const footMin = () => Math.min(...FEET.map((b) => b.getWorldPosition(_v).y));
   root.updateMatrixWorld(true);
+  // La suela de cada bota, con dos puntos pegados a sus huesos: el talón (bajo el tobillo, un poco atrás) y la punta
+  // (delante del metatarso). El suelo se apoya siempre en el punto más bajo: al pisar entra el talón, el pie rueda
+  // y despega de la punta, sin hundirse ni flotar.
+  const floor = box.min.y;
+  const SOLE = [];
+  for (const side of ['Left', 'Right']) {
+    const F = B[side + 'Foot'], T = B[side + 'ToeBase'] || F; if (!F) continue;
+    const a = F.getWorldPosition(new THREE.Vector3()), b = T.getWorldPosition(new THREE.Vector3());
+    const fwd = b.clone().sub(a).setY(0); const len = Math.max(fwd.length(), size.y * 0.04); fwd.normalize();
+    const heel = new THREE.Vector3(a.x, floor, a.z).addScaledVector(fwd, -len * 0.3), toe = new THREE.Vector3(b.x, floor, b.z).addScaledVector(fwd, len * 0.45);
+    SOLE.push({ bone: F, at: F.worldToLocal(heel) }, { bone: T, at: T.worldToLocal(toe) });
+  }
+  const soleY = (s) => s.bone.localToWorld(_v.copy(s.at)).y;
+  const _h = new THREE.Vector3(), _t = new THREE.Vector3();
+  const footMin = () => Math.min(...SOLE.map(soleY));
   const restFoot = footMin();
-  // el pie que está en el suelo y su posición en pantalla (x del mundo, la cámara mira de frente)
-  const SOLES = [B.LeftToeBase || B.LeftFoot, B.RightToeBase || B.RightFoot], ANKLES = [B.LeftFoot, B.RightFoot];
+  // el punto de la suela que está en el suelo y su x en el mundo (la cámara mira de frente): para avanzar sin patinar
   function planted() {
-    const a = SOLES[0].getWorldPosition(new THREE.Vector3()).y, b = SOLES[1].getWorldPosition(new THREE.Vector3()).y;
-    const i = a <= b ? 0 : 1; return { i, x: ANKLES[i].getWorldPosition(_v).x, gap: Math.abs(a - b) };
+    let i = 0, y = Infinity; SOLE.forEach((s, k) => { const v = soleY(s); if (v < y - 1e-6) { y = v; i = k; } });
+    return { i, x: SOLE[i].bone.localToWorld(_v.copy(SOLE[i].at)).x };
   }
   const AX = { x: new THREE.Vector3(1, 0, 0), y: new THREE.Vector3(0, 1, 0), z: new THREE.Vector3(0, 0, 1) };
   const ORDER = ['Hips', 'Spine', 'Spine1', 'Spine2', 'Neck', 'Head',
@@ -98,6 +110,14 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       B[n].updateMatrixWorld(true);
     }
     root.updateMatrixWorld(true);
+    // planta del pie a un ángulo exacto respecto al suelo (− punta arriba): talón al pisar, plano al cargar, punta al despegar
+    // (por defecto, plana: el modelo de base deja las botas 9° de puntillas)
+    for (const [k, side] of [[0, 'Left'], [1, 'Right']]) {
+      const t = (p.sole && p.sole[side]) || 0; if (!SOLE[2 * k]) continue;
+      root.worldToLocal(SOLE[2 * k].bone.localToWorld(_h.copy(SOLE[2 * k].at))); root.worldToLocal(SOLE[2 * k + 1].bone.localToWorld(_t.copy(SOLE[2 * k + 1].at)));
+      const pitch = Math.atan2(_t.y - _h.y, Math.hypot(_t.x - _h.x, _t.z - _h.z)) * 180 / Math.PI;
+      turn(side + 'Foot', AX.x, pitch + t); B[side + 'Foot'].updateMatrixWorld(true);
+    }
     if (p.reach) for (const side of ['Left', 'Right']) if (p.reach[side]) reach(side, p.reach[side], p.reach[side + 'Pole'], p.reach.w ?? 1);
     // pies en el suelo: el pie más bajo apoya siempre en el suelo (de ahí sale el sube y baja natural del paso)
     root.position.y = restFoot * (1 - sq) - footMin() + (p.hop || 0) * size.y;
@@ -222,5 +242,5 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const project = (x, y, z) => toPx(root.localToWorld(_pj.set(x, y, z)));
   const projectWorld = (x, y, z) => toPx(_pj.set(x, y, z));
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, setLineScale, project, projectWorld, planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, setLineScale, project, projectWorld, floor: restFoot, soles: () => SOLE.map(soleY), planted, pxPerUnit, materials: { flatMat, detailMat } };
 }

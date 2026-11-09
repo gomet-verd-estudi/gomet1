@@ -115,6 +115,15 @@
         s.onerror = () => { mascot.classList.remove('wait'); };
         s.onload = () => window.GVECapataz3D({ canvas, base: 'assets/capataz/', reduce }).then((c) => {
           cap = c; mascot.classList.add('is-3d'); mascot.classList.remove('wait');
+          // de pie sobre la línea del riel: el riel se pega abajo igual que el envoltorio del capataz, así que la
+          // distancia de su línea al borde inferior es la misma que para él
+          const strip = $('.obra-rail', obra), line = strip && $('.rail', strip);
+          const ground = () => {
+            if (!line) return;
+            const d = strip.getBoundingClientRect().bottom - line.getBoundingClientRect().top;
+            mascot.style.bottom = Math.round(d - c.feet() - 1) + 'px';
+          };
+          ground(); addEventListener('resize', ground);
           // con movimiento reducido no entra caminando, pero respira, parpadea y gesticula al hablar
           if (reduce || !live) { c.face(0); c.start(); setTimeout(say, 600); }
           else {

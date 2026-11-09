@@ -30,7 +30,7 @@ function modelSource(base, spec) {
 
 window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, reduce = false }) {
   if (!webgl()) throw new Error('sin WebGL');
-  const dpr = Math.min(2, window.devicePixelRatio || 1); // el lienzo es pequeño: a 2x el trazo sale limpio también en móvil
+  const dpr = 2; // el lienzo es pequeño: siempre a 2x, así el trazo sale limpio (y suavizado en pantallas normales)
   const C = await createCapataz({
     canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', relief: base + 'relieve.jpg', folds: base + 'pliegues.png',
     line, fine, fineThreshold: 2.0, background: null
@@ -40,7 +40,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   const fit = () => {
     const r = canvas.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return;
     // el trazo se mide para el muñeco de escritorio (238 px de alto) y escala con él: en móvil no engorda
-    C.setLineScale(Math.max(.55, Math.min(1.2, r.height / 238)));
+    C.setLineScale(Math.max(.55, Math.min(1.15, r.height / 238)));
     C.resize(r.width, r.height); C.view({ zoom: 0.9, cy: -0.03 }); dirty = true;
     // distancia del muñeco a la línea de la cabecera (el envoltorio es pegajoso: no cambia con el scroll)
     offTop = wrap ? host.offsetTop : r.top;
@@ -83,7 +83,8 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     blinkTick(dt);
     const a = ent && ent.walking ? C.planted() : null;
     let dp = 0;
-    if (ent && ent.walking) { dp = Math.min(dt / ent.cycle, ent.left); D.advance(dp); }
+    // el último paso frena (como al llegar a un sitio): la raíz sigue al pie, así que frena todo el cuerpo
+    if (ent && ent.walking) { dp = Math.min(dt / ent.cycle * (0.55 + 0.45 * Math.min(1, ent.left / 0.5)), ent.left); D.advance(dp); }
     C.pose(D.tick(dt));
     if (a) {
       const b = C.planted();
@@ -141,15 +142,17 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     // entra caminando de perfil desde `dist` píxeles a la izquierda, se gira hacia quien lee y saluda
     enter(dist) {
       return new Promise((resolve) => {
-        const E = 1.4, step = stepPx(E), n = Math.max(2, Math.ceil(dist / step));
+        const E = 1.08, step = stepPx(E), n = Math.max(2, Math.ceil(dist / step));
         D.yawTo(90, true); D.setEnergy(E); D.set('walk'); D.setPhase(0);
-        ent = { x: -n * step, left: n * 0.5, cycle: 0.72, walking: true, end: () => {
+        ent = { x: -n * step, left: n * 0.5, cycle: 0.86, walking: true, end: () => {
           D.setEnergy(1);
           D.play('turn', { to: 12, then: 'idle', done: () => D.play('wave', { then: 'idle', done: resolve }) });
         } };
         place(ent.x); dirty = true; api.start();
       });
     },
+    // de la base del lienzo a las suelas (px): para apoyarlo sobre una línea de la página
+    feet: () => canvas.getBoundingClientRect().height - C.projectWorld(0, C.floor, 0)[1],
     get entering() { return !!ent || D.state === 'turn' || D.state === 'wave'; }
   };
   document.addEventListener('visibilitychange', () => { if (document.hidden) api.stop(); });

@@ -1137,6 +1137,8 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
    ========================================================================== */
 .obra .op-mid-r { grid-column: 9 / 12; }
 .obra .op-spec2 { grid-column: 9 / 12; }
+/* aire para el capataz, que al hablar abre los brazos */
+@media (min-width: 901px) { .obra .op-mid-r, .obra .op-spec2 { padding-right: calc(var(--m-w) * .16); } }
 .obra .op-count, .obra .stamp { grid-column: 9 / 12; }
 .obra .op-see ul.op-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .obra .op-chips li { padding: 4px 9px 5px; border: 1.5px solid var(--g); border-radius: 999px; font-size: .82rem; font-weight: 700; line-height: 1; color: var(--g); }
@@ -1144,7 +1146,9 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 
 /* el capataz va pegado a la obra, como la plancha verde, y se va con la última lámina */
 .obra .mascot-wrap { position: sticky; top: var(--hd); height: calc(100vh - var(--hd)); height: calc(100svh - var(--hd)); margin-bottom: calc(-100vh + var(--hd)); margin-bottom: calc(-100svh + var(--hd));
-  z-index: 5; pointer-events: none; --m-w: 190px; --m-h: 238px; --m-r: var(--gut); --m-b: calc(64px + 2.4vh + 6px); }
+  z-index: 5; pointer-events: none; --m-r: calc(var(--gut) - var(--m-w) * .2); --m-b: calc(56px - var(--m-w) * .17); }
+.obra { --m-w: clamp(196px, 28vh, 250px); }
+/* de pie sobre la línea del riel, que hace de suelo (gve.js lo ajusta al píxel con la altura real de las suelas) */
 /* Al hacer scroll el capataz tira de una cuerda que cuelga de una polea en la línea de la cabecera: él sube y baja
    la página. La cuerda va detrás del lienzo (sus manos quedan por delante) y su trenzado corre con el scroll. */
 .m-rope { position: absolute; left: 0; top: 0; width: 0; height: 0; display: none; }
@@ -1160,7 +1164,8 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
   transform: skewX(28deg) rotate(45deg) scale(.7); }
 .m-bubble.say { opacity: 1; transform: none; }
 @media (max-width: 900px) {
-  .obra .mascot-wrap { --m-w: 108px; --m-h: 112px; --m-r: 8px; --m-b: calc((100svh - var(--hd)) * .42); }
+  .obra { --m-w: 128px; }
+  .obra .mascot-wrap { --m-r: 2px; --m-b: calc(34px - var(--m-w) * .17); }
   .m-bubble { right: 18px; max-width: min(64vw, 240px); font-size: .82rem; padding: 9px 12px 10px; }
 }
 /* El capataz al estilo de las mascotas japonesas: línea gruesa y uniforme, a una tinta */
