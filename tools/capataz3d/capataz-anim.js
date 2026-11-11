@@ -17,41 +17,66 @@ const eio = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const win = (t, a, b) => clamp((t - a) / (b - a));
 const bump = (t, a, b) => { const u = win(t, a, b); return Math.sin(Math.PI * u); };
 
-// de pie, con los pies al frente, las piernas algo cerradas y los brazos bajados en A con el codo suelto
+// De pie como un capataz: pies al frente, piernas algo cerradas, brazos caídos con el codo suelto y los puños a los
+// lados de la cadera, con los nudillos hacia delante (local: torsión del antebrazo sobre su eje).
 export const BASE = {
   LeftUpLeg: { z: -12, y: -42 }, RightUpLeg: { z: 12, y: 42 },
   LeftLeg: { z: 4 }, RightLeg: { z: -4 },
   LeftFoot: { y: -22 }, RightFoot: { y: 22 },
-  // el modelo no tiene los brazos simétricos en reposo (+8° y −22°): ambos quedan a 48° bajo la horizontal
-  LeftArm: { z: -56, x: -4 }, RightArm: { z: 26, x: -4 },
-  LeftForeArm: { x: -14 }, RightForeArm: { x: -14 },
-  Spine: { x: 2 }, Head: { x: -3 }
+  // el modelo no tiene los brazos simétricos en reposo (+8° y −22°): ambos quedan a 64° bajo la horizontal
+  LeftArm: { z: -72, x: -12 }, RightArm: { z: 42, x: -12 },
+  LeftForeArm: { x: -34 }, RightForeArm: { x: -34 },
+  Spine: { x: 2 }, Head: { x: -3 },
+  local: { LeftForeArm: { y: -60 }, RightForeArm: { y: 60 } }
 };
-
-function add(base, extra) {
+const SPECIAL = new Set(['reach', 'sole', 'legs', 'soleYaw', 'local', 'thumb', 'face', 'twist']);
+const addV = (a, b) => ({ x: (a?.x || 0) + (b?.x || 0), y: (a?.y || 0) + (b?.y || 0), z: (a?.z || 0) + (b?.z || 0) });
+const mixV = (a, b, k) => ({ x: (a?.x || 0) + ((b?.x || 0) - (a?.x || 0)) * k, y: (a?.y || 0) + ((b?.y || 0) - (a?.y || 0)) * k, z: (a?.z || 0) + ((b?.z || 0) - (a?.z || 0)) * k });
+const keys = (a, b) => new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+// suma una pose a otra (ángulos); lo demás (alcances, piernas, planta, pulgares) lo pone la segunda
+export function add(base, extra) {
   const o = {};
-  for (const k of new Set([...Object.keys(base), ...Object.keys(extra)])) {
+  for (const k of keys(base, extra)) {
+    if (SPECIAL.has(k)) continue;
     const a = base[k], b = extra[k];
     if (typeof a === 'number' || typeof b === 'number') { o[k] = (a || 0) + (b || 0); continue; }
-    o[k] = { x: (a?.x || 0) + (b?.x || 0), y: (a?.y || 0) + (b?.y || 0), z: (a?.z || 0) + (b?.z || 0) };
+    o[k] = addV(a, b);
   }
+  if (base.local || extra.local) { o.local = {}; for (const n of keys(base.local, extra.local)) o.local[n] = addV(base.local?.[n], extra.local?.[n]); }
+  for (const k of ['reach', 'sole', 'legs', 'soleYaw', 'thumb', 'face', 'twist']) { const v = extra[k] ?? base[k]; if (v !== undefined) o[k] = v; }
   return o;
 }
+const mixP = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
 export function mix(a, b, k) {
   const o = {};
-  for (const n of new Set([...Object.keys(a), ...Object.keys(b)])) {
-    if (n === 'reach' || n === 'sole' || n === 'legs' || n === 'soleYaw') continue;
+  for (const n of keys(a, b)) {
+    if (SPECIAL.has(n)) continue;
     const x = a[n], y = b[n];
     if (typeof x === 'number' || typeof y === 'number') { o[n] = (x || 0) + ((y || 0) - (x || 0)) * k; continue; }
-    o[n] = { x: (x?.x || 0) + ((y?.x || 0) - (x?.x || 0)) * k, y: (x?.y || 0) + ((y?.y || 0) - (x?.y || 0)) * k, z: (x?.z || 0) + ((y?.z || 0) - (x?.z || 0)) * k };
+    o[n] = mixV(x, y, k);
   }
-  // las manos con alcance (tirar de la cuerda)
-  // (el alcance entra y sale con peso: el brazo pasa de su pose a la cuerda sin saltos)
+  if (a.local || b.local) { o.local = {}; for (const n of keys(a.local, b.local)) o.local[n] = mixV(a.local?.[n], b.local?.[n], k); }
+  // pulgares: 0 puño, 1 arriba
+  if (a.thumb || b.thumb) o.thumb = { Left: (a.thumb?.Left || 0) + ((b.thumb?.Left || 0) - (a.thumb?.Left || 0)) * k, Right: (a.thumb?.Right || 0) + ((b.thumb?.Right || 0) - (a.thumb?.Right || 0)) * k };
+  for (const f of ['twist']) if (a[f] || b[f]) o[f] = { Left: (a[f]?.Left || 0) + ((b[f]?.Left || 0) - (a[f]?.Left || 0)) * k, Right: (a[f]?.Right || 0) + ((b[f]?.Right || 0) - (a[f]?.Right || 0)) * k };
   // la planta del pie respecto al suelo (sin indicar, plana)
   if (a.sole || b.sole) { const sa = a.sole || {}, sb = b.sole || {}; o.sole = { Left: (sa.Left || 0) + ((sb.Left || 0) - (sa.Left || 0)) * k, Right: (sa.Right || 0) + ((sb.Right || 0) - (sa.Right || 0)) * k }; }
   const sy = k < 0.5 ? a.soleYaw : b.soleYaw; if (sy) o.soleYaw = sy;
-  if (a.legs && b.legs) o.legs = b.legs; else if (b.legs) o.legs = { ...b.legs, w: k * (b.legs.w ?? 1) }; else if (a.legs) o.legs = { ...a.legs, w: (1 - k) * (a.legs.w ?? 1) };
-  if (b.reach) o.reach = { ...b.reach, w: k * (b.reach.w ?? 1) }; else if (a.reach) o.reach = { ...a.reach, w: (1 - k) * (a.reach.w ?? 1) };
+  // piernas por cinemática inversa: entre dos poses que las llevan se mezclan los puntos; si solo una, entra o sale con peso
+  if (a.legs && b.legs) {
+    const L = (s) => ({ ankle: mixP(a.legs[s].ankle, b.legs[s].ankle, k), pole: mixP(a.legs[s].pole, b.legs[s].pole, k) });
+    o.legs = { hip: mixP(a.legs.hip, b.legs.hip, k), Left: L('Left'), Right: L('Right'), w: (a.legs.w ?? 1) + ((b.legs.w ?? 1) - (a.legs.w ?? 1)) * k };
+  } else if (b.legs) o.legs = { ...b.legs, w: k * (b.legs.w ?? 1) }; else if (a.legs) o.legs = { ...a.legs, w: (1 - k) * (a.legs.w ?? 1) };
+  // manos con alcance (cuerda, casco): cada brazo por su cuenta, igual
+  if (a.reach || b.reach) {
+    o.reach = {};
+    for (const s of ['Left', 'Right']) {
+      const x = a.reach?.[s], y = b.reach?.[s];
+      if (x && y) o.reach[s] = { at: mixP(x.at, y.at, k), pole: mixP(x.pole, y.pole, k), w: (x.w ?? 1) + ((y.w ?? 1) - (x.w ?? 1)) * k };
+      else if (y) o.reach[s] = { ...y, w: k * (y.w ?? 1) }; else if (x) o.reach[s] = { ...x, w: (1 - k) * (x.w ?? 1) };
+    }
+  }
+  if ((k < 0.5 ? a.face : b.face) !== undefined) o.face = k < 0.5 ? a.face : b.face;
   return o;
 }
 
@@ -130,8 +155,8 @@ export function walk(p, k = 1) {
     Neck: { y: -2 * C(qL - 0.1) },
     Head: { y: -1 * C(qL - 0.16), x: -lean * 0.7 + 1.2 * S(2 * p - 0.2) },
     // los brazos cuelgan más que en reposo y van en oposición a las piernas; el antebrazo llega tarde
-    LeftArm: { x: -6 + B * C(qL - 0.03), z: -16 + 2 * load }, RightArm: { x: -6 + B * C(qR - 0.03), z: 16 - 2 * load },
-    LeftForeArm: { x: -8 - 18 * Math.max(0, -C(qL - 0.1)) }, RightForeArm: { x: -8 - 18 * Math.max(0, -C(qR - 0.1)) },
+    LeftArm: { x: 2 + B * C(qL - 0.03), z: 2 * load }, RightArm: { x: 2 + B * C(qR - 0.03), z: -2 * load },
+    LeftForeArm: { x: 12 - 18 * Math.max(0, -C(qL - 0.1)) }, RightForeArm: { x: 12 - 18 * Math.max(0, -C(qR - 0.1)) },
     LeftHand: { x: 5 * C(qL - 0.18) }, RightHand: { x: 5 * C(qR - 0.18) }
   });
   const pole = (x) => [x, RIG.Left.hip[1] * 0.5, 0.4 * H];
@@ -140,30 +165,62 @@ export function walk(p, k = 1) {
   return q;
 }
 
-// Reposo: respira, cambia el peso de pierna y mira alrededor despacio
+/* De pie con los pies plantados: la pelvis puede mecerse, bajar o adelantarse sin que los pies se muevan (las piernas
+   llegan por cinemática inversa). Así cambia el peso de pierna o se agacha sin patinar. */
+function stand({ sway = 0, dip = 0, fwd = 0 } = {}) {
+  const H = RIG.H, ax = 0.135 * H, az = RIG.hips[2] + 0.061 * H, dy = RIG.hips[1] - RIG.Left.hip[1];
+  const top = (R, x) => { const L = (R.thigh + R.shin) * 0.985, dx = x - (R.hip[0] + sway), dz = az - (R.hip[2] + fwd); return RIG.floor + R.ah + Math.sqrt(Math.max(0, L * L - dx * dx - dz * dz)) + dy; };
+  const y = Math.min(top(RIG.Left, ax), top(RIG.Right, -ax)) - dip;
+  const pole = (x) => [x, RIG.Left.hip[1] * 0.5, 0.4 * H];
+  return { hip: [RIG.hips[0] + sway, y, RIG.hips[2] + fwd], Left: { ankle: [ax, RIG.floor + RIG.Left.ah, az], pole: pole(ax * 1.5) }, Right: { ankle: [-ax, RIG.floor + RIG.Right.ah, az], pole: pole(-ax * 1.5) } };
+}
+const TOES = { Left: 6, Right: -6 };   // de pie, las puntas un poco abiertas
+// brazos en jarra: los puños en la cintura y los codos fuera (la postura de quien mira cómo va la obra)
+const JARRA = { LeftArm: { z: 10, x: 12 }, RightArm: { z: -10, x: 12 }, LeftForeArm: { x: -10, z: -30 }, RightForeArm: { x: -10, z: 30 }, local: { LeftForeArm: { y: -10 }, RightForeArm: { y: 10 } } };
+const JARRA_L = { LeftArm: JARRA.LeftArm, LeftForeArm: JARRA.LeftForeArm, local: { LeftForeArm: JARRA.local.LeftForeArm } };
+const hold = (x, g = 2.4) => Math.tanh(g * x) / Math.tanh(g);   // una onda con pausas en los extremos
+
+// Reposo: en jarra, respira (pecho y hombros), cambia el peso de una pierna a otra con pausas y mira alrededor
 export function idle(t) {
-  const br = S(t / 3.4), sh = S(t / 7.3), lk = S(t / 9.1 + 0.2);
-  return add(BASE, {
-    Hips: { z: 1.8 * sh }, LeftUpLeg: { z: -1.5 * sh }, RightUpLeg: { z: -1.5 * sh },
-    Spine2: { x: 1.6 * br }, Neck: { x: -0.8 * br },
-    Head: { y: 9 * lk, x: 1.5 * S(t / 4.7) },
-    LeftArm: { z: 2.2 * br }, RightArm: { z: -2.2 * br },
-    LeftForeArm: { x: -3 * S(t / 3.4 - 0.15) }, RightForeArm: { x: -3 * S(t / 3.4 - 0.2) },
-    squash: 0.006 * br
+  const br = S(t / 3.6), sh = hold(S(t / 12.5)), lk = S(t / 9.1 + 0.2), H = RIG.H;
+  const q = add(add(BASE, JARRA), {
+    LeftArm: { z: 1.6 * br }, RightArm: { z: -1.6 * br }, LeftShoulder: { z: 1.4 * br }, RightShoulder: { z: -1.4 * br },
+    Hips: { z: -3.4 * sh }, Spine: { z: 2.2 * sh }, Spine2: { x: 1.6 * br, z: 1.2 * sh },
+    Neck: { x: -0.8 * br }, Head: { y: 7 * lk, x: 1.2 * S(t / 4.7), z: -1.2 * sh }
   });
+  q.legs = stand({ sway: 0.024 * H * sh, dip: 0.003 * H * (1 - br) + 0.006 * H * Math.abs(sh) });
+  q.soleYaw = TOES;
+  return q;
 }
 
-// Habla: pulgar arriba hacia el bocadillo, al ritmo de la frase, con la cabeza que asiente y el cuerpo que rebota
-export function talk(t) {
-  const beat = S(t * 1.6), nod = S(t * 1.6 - 0.12), bounce = pos(S(t * 1.6));
-  return add(BASE, {
-    RightArm: { z: -48, x: -28 + 4 * beat }, RightForeArm: { x: -24 - 10 * pos(nod), z: -8 },
-    LeftArm: { z: 2, x: 3 }, LeftForeArm: { x: -6 },
-    Spine: { x: -2 + 1.5 * beat, z: 2 }, Spine2: { y: 5 },
-    Head: { x: -4 + 4 * nod, y: 6, z: -3 },
-    LeftLeg: { x: 5 * bounce }, RightLeg: { x: 5 * bounce }, LeftUpLeg: { x: -2.5 * bounce }, RightUpLeg: { x: -2.5 * bounce },
-    squash: 0.02 * bounce
+/* Hablar, con tres maneras de explicarse (v):
+   0 «señala»: el puño derecho a un lado con el pulgar hacia la obra, y la cabeza va de la obra a quien lee;
+   1 «pulgar»: pulgar arriba hacia quien lee, con un asentimiento (visto bueno);
+   2 «en jarra»: los puños en la cintura, asiente y se balancea, como quien da un parte.
+   El izquierdo queda siempre en la cintura. El cuerpo marca el ritmo de la frase. */
+export function talk(t, v = 0) {
+  const f = 1.45, beat = S(t * f), nod = S(t * f - 0.12), em = pos(S(t * f)), H = RIG.H;
+  const q = add(add(BASE, v === 2 ? JARRA : JARRA_L), {
+    Spine: { x: -2 + 1.5 * beat, z: v === 2 ? 0 : 2 }, Spine2: { y: v === 0 ? -6 : v === 1 ? 4 : 0, x: 1 * em },
+    LeftShoulder: { z: 1.2 * em }, RightShoulder: { z: -1.2 * em },
+    Head: { x: -3 + 4 * nod, z: v === 2 ? 2 * S(t * f / 2) : -2 }
   });
+  if (v === 0) {
+    // mira hacia la obra (a su derecha) al empezar cada frase y vuelve a quien lee
+    const look = bump(t % 4.2, 0.1, 1.5);
+    q.Head.y = -26 * look; q.Neck = { y: -8 * look }; q.Spine = addV(q.Spine, { z: -5 });
+    q.reach = { Right: { at: [-0.34, 0.66 + 0.02 * beat, 0.04 + 0.01 * em], pole: [-0.3, 0.2, -0.1] } };
+    q.thumb = { Right: 1 };
+  } else if (v === 1) {
+    q.Head.y = 5;
+    q.reach = { Right: { at: [-0.22, 0.6 + 0.025 * em, 0.18 + 0.015 * em], pole: [-0.35, 0.3, 0] } };
+    q.twist = { Right: -100 }; q.thumb = { Right: 1 };
+  } else {
+    q.Head.y = 6 * S(t * f / 4); q.LeftArm = addV(q.LeftArm, { z: 2 * em }); q.RightArm = addV(q.RightArm, { z: -2 * em });
+  }
+  q.legs = stand({ sway: 0.006 * H * S(t * f / 2), dip: 0.008 * H * em });
+  q.soleYaw = TOES;
+  return q;
 }
 
 /* Tirar de la cuerda (de perfil): la página sube o baja porque él la mueve. p ∈ [0, 1) es la fase: cada mano
@@ -191,7 +248,7 @@ export function haul(p) {
     Head: { x: -4 - 3 * tug, y: 22 },
     squash: 0.03 * pull
   });
-  q.reach = { Left: hand(p, 1), Right: hand(p + 0.5, -1), LeftPole: [0.3, 0.3, -0.12], RightPole: [-0.3, 0.3, -0.12] };
+  q.reach = { Left: { at: hand(p, 1), pole: [0.3, 0.3, -0.12] }, Right: { at: hand(p + 0.5, -1), pole: [-0.3, 0.3, -0.12] } };
   return q;
 }
 
@@ -215,67 +272,150 @@ export function turn(t, from, to) {
   return q;
 }
 
-/* Saludar: levanta el brazo con anticipación (primero baja un poco), agita la mano tres veces con el antebrazo de lado a lado (el codo
-   quieto, la muñeca suelta), ladea la cabeza y se balancea; luego lo baja. */
-export const WAVE = 2.0;
-export function wave(t) {
-  const up = eio(win(t, 0.05, 0.45)) * (1 - eio(win(t, 1.65, 2.0)));
-  const shake = Math.sin(win(t, 0.4, 1.65) * Math.PI * 6) * bump(t, 0.4, 1.65);
-  const antic = bump(t, 0, 0.18);
-  // brazo derecho del capataz (el más cercano a la cámara cuando se gira hacia quien lee): el brazo sale hacia fuera
-  // a unos 20° sobre la horizontal y el antebrazo queda vertical; la mano saluda por encima del hombro, lejos de la cabeza
-  return add(BASE, {
-    RightArm: { z: -54 * up + 6 * antic, x: -8 * up }, RightForeArm: { z: (-44 - 32 * shake) * up, x: -4 * up },
-    RightHand: { z: -16 * shake * up },
-    LeftArm: { x: 4 * up }, LeftForeArm: { x: -6 * up },
-    Spine: { z: 3 * up, x: -1.5 * up }, Spine2: { y: 4 * up },
-    Head: { z: -5 * up - 2 * shake * up, y: 4 * up, x: -3 * up },
-    LeftLeg: { x: 4 * antic }, RightLeg: { x: 4 * antic },
-    squash: 0.025 * antic
+/* Saludar tocándose el casco: se agacha un pelo (anticipación), lleva el puño derecho al ala, inclina la cabeza y
+   el casco con él, y lo remata con el pulgar arriba hacia quien lee antes de volver a la cintura. */
+export const GREET = 2.5;
+export function greet(t) {
+  const up = eio(win(t, 0.08, 0.5)), out = eio(win(t, 1.05, 1.45)), back = eio(win(t, 2.05, 2.5));
+  const antic = bump(t, 0, 0.22), tip = bump(t, 0.45, 1.05), H = RIG.H;
+  const brim = [-0.17, 0.79 - 0.018 * tip, 0.07], thumb = [-0.22, 0.62, 0.18], hip = [-0.2, 0.5, 0.06];
+  const at = mixP(mixP(mixP(hip, brim, up), thumb, out), hip, back);
+  const q = add(add(BASE, JARRA), {
+    Spine: { z: -3 * up * (1 - out), x: -1.5 * tip }, Spine2: { y: 4 * up * (1 - back) },
+    Head: { x: -3 - 9 * tip, z: 4 * up * (1 - out), y: 4 * out * (1 - back) }
   });
+  q.reach = { Right: { at, pole: mixP([-0.45, 0.6, -0.1], [-0.35, 0.3, 0], out), w: Math.min(1, up * 4) * (1 - back) } };
+  q.twist = { Right: -100 * out * (1 - back) }; q.thumb = { Right: out * (1 - back) };
+  q.legs = stand({ dip: 0.012 * H * antic + 0.004 * H * tip }); q.soleYaw = TOES;
+  return q;
 }
 
-/* Director: estados con transiciones suaves; la marcha avanza con el scroll (o con el tiempo, al entrar); el giro
-   sigue a la dirección con un muelle; y piezas con principio y fin (girarse, saludar) que avisan al acabar.
-   set('walk' | 'idle' | 'talk'), advance(fase), face(+1 | −1 | 0), yawTo(grados), play('turn' | 'wave', ...) */
-export function director({ faceYaw = 40 } = {}) {
-  const st = { energy: 1, cur: 'idle', prev: null, k: 1, phase: 0, t: 0, yaw: faceYaw, yawTarget: faceYaw, yawVel: 0, clip: null, prevPose: null };
-  const poseOf = (s) => (s === 'haul' ? haul(st.phase) : s === 'walk' ? walk(st.phase, st.energy) : s === 'talk' ? talk(st.t) : idle(st.t));
+/* Celebrar (fin de obra): se agacha, salta con los dos puños arriba y cae amortiguando; aguanta un momento y baja. */
+export const CHEER = 1.9;
+export function cheer(t) {
+  const crouch = bump(t, 0, 0.34), air = win(t, 0.3, 0.74), land = bump(t, 0.72, 1.02), H = RIG.H;
+  const up = eio(win(t, 0.16, 0.44)) * (1 - eio(win(t, 1.4, 1.9)));
+  const q = add(add(BASE, JARRA), {
+    Spine: { x: 3 * crouch - 3 * up }, Head: { x: -3 + 5 * crouch - 6 * up },
+    squash: 0.05 * crouch - 0.04 * Math.sin(Math.PI * air) + 0.05 * land,
+    hop: 0.085 * Math.sin(Math.PI * air)
+  });
+  const pump = 0.012 * S(win(t, 0.74, 1.4) * 2) * up;
+  q.reach = { Left: { at: [0.2, 0.9 + pump, 0.04], pole: [0.5, 0.6, -0.1], w: up }, Right: { at: [-0.2, 0.9 + pump, 0.04], pole: [-0.5, 0.6, -0.1], w: up } };
+  q.thumb = { Left: up, Right: up };
+  q.legs = stand({ dip: 0.03 * H * crouch + 0.02 * H * land }); q.soleYaw = TOES;
+  return q;
+}
+
+/* Respuesta a un toque: un saltito con el pulgar arriba. */
+export const HOP = 1.0;
+export function hop(t) {
+  const crouch = bump(t, 0, 0.22), air = win(t, 0.18, 0.5), land = bump(t, 0.48, 0.72), H = RIG.H;
+  const up = eio(win(t, 0.1, 0.32)) * (1 - eio(win(t, 0.72, 1.0)));
+  const q = add(add(BASE, JARRA), { Head: { x: -3 + 4 * crouch - 4 * up }, squash: 0.04 * crouch - 0.03 * Math.sin(Math.PI * air) + 0.04 * land, hop: 0.045 * Math.sin(Math.PI * air) });
+  q.reach = { Right: { at: [-0.22, 0.62, 0.18], pole: [-0.35, 0.3, 0], w: up } }; q.twist = { Right: -100 * up }; q.thumb = { Right: up };
+  q.legs = stand({ dip: 0.02 * H * crouch + 0.014 * H * land }); q.soleYaw = TOES;
+  return q;
+}
+
+/* Gestos sueltos mientras espera (uno cada tanto, al azar):
+   mirar la obra (cabeza y pecho hacia ella, echándose un poco), colocarse el casco y mecerse de puntas a talones. */
+export const PEEK = 2.8, HAT = 2.0, ROCK = 2.4;
+export function peek(t) {
+  const k = eio(win(t, 0, 0.6)) * (1 - eio(win(t, 2.1, 2.8))), H = RIG.H;
+  const q = add(add(BASE, JARRA), { Spine: { y: -8 * k, z: -2 * k }, Spine2: { y: -10 * k }, Neck: { y: -10 * k }, Head: { y: -24 * k, x: -3 + 2 * k + 2 * bump(t, 1.0, 1.9) } });
+  q.legs = stand({ sway: -0.014 * H * k, dip: 0.004 * H * k }); q.soleYaw = TOES;
+  return q;
+}
+export function hat(t) {
+  const up = eio(win(t, 0.05, 0.5)) * (1 - eio(win(t, 1.45, 2.0))), fix = S(win(t, 0.55, 1.4) * 1.5) * bump(t, 0.5, 1.45);
+  const q = add(add(BASE, JARRA), { Head: { x: -3 - 4 * up, z: 4 * fix }, Spine: { z: -2 * up } });
+  q.reach = { Right: { at: [-0.17, 0.8 + 0.012 * fix, 0.07], pole: [-0.45, 0.6, -0.1], w: up } };
+  q.twist = { Right: -20 * up };
+  q.legs = stand(); q.soleYaw = TOES;
+  return q;
+}
+export function rock(t) {
+  const r = S(win(t, 0.1, 2.3) * 2) * bump(t, 0, 2.4), H = RIG.H;   // + de puntillas, − sobre los talones
+  const q = add(add(BASE, JARRA), { Spine: { x: -1.5 * r }, Head: { x: -3 + 1.5 * r }, LeftArm: { z: 2 * pos(r) }, RightArm: { z: -2 * pos(r) } });
+  q.legs = stand({ fwd: 0.012 * H * r }); q.soleYaw = TOES;
+  q.sole = { Left: r > 0 ? 13 * r : 9 * r, Right: r > 0 ? 13 * r : 9 * r };
+  return q;
+}
+
+/* Director: estados con transiciones suaves (reposo, hablar, andar, tirar de la cuerda), piezas con principio y fin
+   (girarse, saludar, celebrar, saltito y los gestos de espera) que avisan al acabar, la mirada (la cabeza sigue un
+   punto, con el cuello y el pecho acompañando) y, en reposo, un gesto suelto cada tanto para que no parezca parado.
+   set('idle' | 'talk' | 'walk' | 'haul', variante), advance(fase), face(+1 | −1 | 0), yawTo(grados),
+   play('turn' | 'greet' | 'cheer' | 'hop' | 'peek' | 'hat' | 'rock', { to, then, done }), look(giro, cabeceo) */
+const CLIPS = { turn: { dur: TURN }, greet: { dur: GREET, fn: greet }, cheer: { dur: CHEER, fn: cheer }, hop: { dur: HOP, fn: hop },
+  peek: { dur: PEEK, fn: peek }, hat: { dur: HAT, fn: hat }, rock: { dur: ROCK, fn: rock } };
+const FIDGETS = ['peek', 'rock', 'hat', 'rock', 'peek'];
+// cuánto sigue la mirada en cada momento (andando, tirando o girándose mira a lo suyo)
+const LOOKS = { idle: 1, talk: 0.7, greet: 0.5, hop: 0.6, hat: 0.6, rock: 1, cheer: 0.3, peek: 0, turn: 0, walk: 0, haul: 0 };
+export function director({ faceYaw = 40, fidget = true } = {}) {
+  const st = { energy: 1, cur: 'idle', prev: null, k: 1, phase: 0, t: 0, yaw: faceYaw, yawTarget: faceYaw, yawVel: 0, clip: null, prevPose: null,
+    variant: 0, look: [0, 0], lookTo: [0, 0], lookW: 0, waited: 0, nextFidget: 5 + Math.random() * 4, fi: Math.floor(Math.random() * FIDGETS.length) };
+  const poseOf = (s) => (s === 'haul' ? haul(st.phase) : s === 'walk' ? walk(st.phase, st.energy) : s === 'talk' ? talk(st.t, st.variant) : idle(st.t));
   const api = {
     get state() { return st.clip ? st.clip.name : st.cur; },
     get yaw() { return st.yaw; },
-    set(s) { if (s === st.cur && !st.clip) return; st.clip = null; st.prevPose = st.lastPose || null; st.prev = st.cur; st.cur = s; st.k = 0; },
+    set(s, v) {
+      if (s === 'talk' && v !== undefined && v !== st.variant) { st.variant = v; if (s === st.cur && !st.clip) { st.prevPose = st.lastPose || null; st.k = 0; } }
+      if (s === st.cur && !st.clip) return;
+      st.clip = null; st.prevPose = st.lastPose || null; st.prev = st.cur; st.cur = s; st.k = 0; st.waited = 0;
+    },
     advance(d) { st.phase = (st.phase + d) % 1; if (st.phase < 0) st.phase += 1; },
     setPhase(p) { st.phase = p; },
     setEnergy(e) { st.energy = e; },
+    variant(v) { st.variant = v; },
+    get current() { return st.cur; },
     face(dir) { st.yawTarget = dir > 0 ? faceYaw : dir < 0 ? -faceYaw : 12; },
     yawTo(deg, snap = false) { st.yawTarget = deg; if (snap) { st.yaw = deg; st.yawVel = 0; } },
+    // hacia dónde mira: giro (+ a su izquierda, la derecha de la pantalla) y cabeceo (+ arriba), en grados
+    look(yaw, pitch) { st.lookTo[0] = yaw; st.lookTo[1] = pitch; },
     // pieza con principio y fin; al acabar vuelve a 'then' (con transición) y llama a done
     play(name, { to = 12, then = 'idle', done } = {}) {
-      st.prevPose = st.lastPose || null;
-      st.clip = { name, t: 0, dur: name === 'turn' ? TURN : WAVE, from: st.yaw, to, then, done, blendIn: 0 };
+      if (!CLIPS[name]) return;
+      st.prevPose = st.lastPose || null; st.waited = 0;
+      st.clip = { name, t: 0, dur: CLIPS[name].dur, from: st.yaw, to, then, done, blendIn: 0 };
     },
     tick(dt) {
       st.t += dt;
+      let q;
       if (st.clip) {
-        const c = st.clip; c.t += dt; c.blendIn = Math.min(1, c.blendIn + dt / 0.2);
-        let q = c.name === 'turn' ? turn(c.t, c.from, c.to) : wave(c.t);
-        if (c.name !== 'turn') q.yaw = st.yaw;
-        if (c.blendIn < 1 && st.prevPose && c.from0 === undefined) { const y = q.yaw; q = mix(st.prevPose, q, smooth(c.blendIn)); q.yaw = y; }
+        const c = st.clip; c.t += dt; c.blendIn = Math.min(1, c.blendIn + dt / 0.22);
+        q = c.name === 'turn' ? turn(c.t, c.from, c.to) : CLIPS[c.name].fn(c.t);
+        if (c.name !== 'turn') {
+          // mientras tanto, el giro del cuerpo sigue su muelle
+          const a = (st.yawTarget - st.yaw) * 90 - st.yawVel * 13; st.yawVel += a * dt; st.yaw += st.yawVel * dt; q.yaw = st.yaw;
+        }
+        if (c.blendIn < 1 && st.prevPose) { const y = q.yaw; q = mix(st.prevPose, q, smooth(c.blendIn)); q.yaw = y; }
         if (c.name === 'turn') { st.yaw = q.yaw; st.yawTarget = c.to; st.yawVel = 0; }
         if (c.t >= c.dur) { st.clip = null; st.prevPose = q; st.prev = null; st.cur = c.then; st.k = 0; const f = c.done; if (f) f(); }
-        st.lastPose = q;
-        return q;
+      } else {
+        if (st.k < 1) st.k = Math.min(1, st.k + dt / 0.34);
+        // giro con muelle amortiguado: se pasa un poco y vuelve, como un giro de verdad
+        const a = (st.yawTarget - st.yaw) * 90 - st.yawVel * 13;
+        st.yawVel += a * dt; st.yaw += st.yawVel * dt;
+        q = poseOf(st.cur);
+        if (st.k < 1) { const from = st.prevPose || (st.prev ? poseOf(st.prev) : q); q = mix(from, q, smooth(st.k)); }
+        else st.prevPose = null;
+        q.yaw = st.yaw;
+        // en reposo, un gesto suelto de vez en cuando
+        if (fidget && st.cur === 'idle' && st.k >= 1) {
+          st.waited += dt;
+          if (st.waited > st.nextFidget) { st.nextFidget = 7 + Math.random() * 7; st.lastPose = q; api.play(FIDGETS[st.fi++ % FIDGETS.length], { then: 'idle' }); }
+        } else st.waited = 0;
       }
-      if (st.k < 1) st.k = Math.min(1, st.k + dt / 0.32);
-      // giro con muelle amortiguado: se pasa un poco y vuelve, como un giro de verdad
-      const a = (st.yawTarget - st.yaw) * 90 - st.yawVel * 13;
-      st.yawVel += a * dt; st.yaw += st.yawVel * dt;
-      let q = poseOf(st.cur);
-      if (st.k < 1) { const from = st.prevPose || (st.prev ? poseOf(st.prev) : q); q = mix(from, q, smooth(st.k)); }
-      else st.prevPose = null;
-      q.yaw = st.yaw;
       st.lastPose = q;
+      // la mirada se suma al final (no entra en las mezclas): cabeza, y algo de cuello y pecho
+      const kk = 1 - Math.exp(-dt * 6), want = LOOKS[api.state] ?? 0;
+      st.look[0] += (st.lookTo[0] - st.look[0]) * kk; st.look[1] += (st.lookTo[1] - st.look[1]) * kk; st.lookW += (want - st.lookW) * (1 - Math.exp(-dt * 5));
+      if (st.lookW > 0.01 && (Math.abs(st.look[0]) > 0.05 || Math.abs(st.look[1]) > 0.05)) {
+        const w = st.lookW, y = st.look[0] * w, x = st.look[1] * w; q = { ...q };
+        q.Head = addV(q.Head, { y: 0.58 * y, x: 0.7 * x }); q.Neck = addV(q.Neck, { y: 0.26 * y, x: 0.2 * x }); q.Spine2 = addV(q.Spine2, { y: 0.16 * y });
+      }
       return q;
     },
     busy() { return !!st.clip || st.k < 1 || Math.abs(st.yawTarget - st.yaw) > 0.3 || Math.abs(st.yawVel) > 0.3; }

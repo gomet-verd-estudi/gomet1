@@ -9,13 +9,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4 }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
   const load = (u) => new THREE.TextureLoader().loadAsync(u);
-  const [gltf, tex, bump, foldTex, texB] = await Promise.all([gltfBuffer ? new GLTFLoader().parseAsync(gltfBuffer, '') : new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null, textureBlink ? load(textureBlink) : null]);
-  for (const t of [tex, texB]) { if (!t) continue; t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; } // colores puros, sin mezclas en los bordes
+  const [gltf, tex, bump, foldTex, texB, texT] = await Promise.all([gltfBuffer ? new GLTFLoader().parseAsync(gltfBuffer, '') : new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null, textureBlink ? load(textureBlink) : null, textureTalk ? load(textureTalk) : null]);
+  for (const t of [tex, texB, texT]) { if (!t) continue; t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; } // colores puros, sin mezclas en los bordes
   bump.flipY = false; bump.colorSpace = THREE.NoColorSpace;
   if (foldTex) { foldTex.flipY = false; foldTex.colorSpace = THREE.NoColorSpace; }
   const root = gltf.scene; scene.add(root);
@@ -128,6 +128,12 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       if (r.z) turn(n, AX.z, r.z); if (r.y) turn(n, AX.y, r.y); if (r.x) turn(n, AX.x, r.x);
       B[n].updateMatrixWorld(true);
     }
+    // giros en los ejes propios de cada hueso (torsión del antebrazo, muñeca, dedos): { Hueso: { x, y, z } } en grados
+    if (p.local) for (const n in p.local) { const b = B[n], r = p.local[n]; if (!b) continue; if (r.z) b.rotateZ(r.z * Math.PI / 180); if (r.y) b.rotateY(r.y * Math.PI / 180); if (r.x) b.rotateX(r.x * Math.PI / 180); }
+    // manos: el modelo trae el pulgar levantado; por defecto se cierra en puño. thumb: { Left, Right } de 0 (puño) a 1
+    // (pulgar arriba). En la mano derecha el pulgar lo mueve la cadena «Pinky» (así lo dejó el auto-rig).
+    { const tu = p.thumb || {}, a = 35 * (1 - (tu.Left || 0)) * Math.PI / 180, b = 45 * (1 - (tu.Right || 0)) * Math.PI / 180;
+      for (const k of [1, 2, 3]) { if (a && B['LeftHandThumb' + k]) B['LeftHandThumb' + k].rotateX(a); if (b && B['RightHandPinky' + k]) B['RightHandPinky' + k].rotateX(b); } }
     root.updateMatrixWorld(true);
     // piernas por cinemática inversa: el tobillo va a su sitio y la rodilla mira al polo (delante)
     if (p.legs) for (const side of ['Left', 'Right']) { const L = p.legs[side]; if (L) ik2(B[side + 'UpLeg'], B[side + 'Leg'], B[side + 'Foot'], L.ankle, L.pole, p.legs.w ?? 1); }
@@ -143,7 +149,9 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       const pitch = Math.atan2(_t.y - _h.y, Math.hypot(_t.x - _h.x, _t.z - _h.z)) * 180 / Math.PI;
       turn(side + 'Foot', AX.x, pitch + t); B[side + 'Foot'].updateMatrixWorld(true);
     }
-    if (p.reach) for (const side of ['Left', 'Right']) if (p.reach[side]) reach(side, p.reach[side], p.reach[side + 'Pole'], p.reach.w ?? 1);
+    if (p.reach) for (const side of ['Left', 'Right']) { const r = p.reach[side]; if (r) reach(side, r.at, r.pole, r.w ?? 1); }
+    // torsión del antebrazo sobre su eje después del alcance (hacia dónde mira el puño), sin mover la muñeca
+    if (p.twist) for (const side of ['Left', 'Right']) { const t = p.twist[side]; if (t && B[side + 'ForeArm']) B[side + 'ForeArm'].rotateY(t * Math.PI / 180); }
     // pies en el suelo: el pie más bajo apoya siempre en el suelo (de ahí sale el sube y baja natural del paso)
     root.position.y = restFoot * (1 - sq) - footMin() + (p.hop || 0) * size.y;
     root.updateMatrixWorld(true);
@@ -280,7 +288,9 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   // calidad del suavizado (si el equipo no llega, se baja: 2 → 1,5 → 1)
   const quality = (v) => { if (v === undefined) return ss; ss = v; resize(lastW, lastH); return ss; };
   // parpadeo: la misma textura con los ojos cerrados
-  const blink = (on) => { flatMat.map = on && texB ? texB : tex; };
+  // la cara: la misma textura con los ojos cerrados ('blink') o con la boca abierta ('talk')
+  const face = (n) => { flatMat.map = (n === 'blink' && texB) || (n === 'talk' && texT) || tex; };
+  const blink = (on) => face(on ? 'blink' : 'open');
   // píxeles CSS por unidad del mundo, para pasar el desplazamiento del pie a la pantalla
   const _pj = new THREE.Vector3();
   // punto del espacio del personaje → píxeles CSS del lienzo
@@ -289,5 +299,5 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const project = (x, y, z) => toPx(root.localToWorld(_pj.set(x, y, z)));
   const projectWorld = (x, y, z) => toPx(_pj.set(x, y, z));
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, face, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
 }

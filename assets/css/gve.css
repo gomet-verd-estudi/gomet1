@@ -1163,6 +1163,13 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .m-bubble::after { content: ''; position: absolute; right: 18px; bottom: -11px; width: 18px; height: 18px; background: var(--paper); border-right: 2.2px solid var(--midori); border-bottom: 2.2px solid var(--midori);
   transform: skewX(28deg) rotate(45deg) scale(.7); }
 .m-bubble.say { opacity: 1; transform: none; }
+.m-bubble .off { visibility: hidden; }   /* lo que aún no ha dicho: ocupa su sitio, sin verse */
+.m-say { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* tocarlo: da un saltito y repite el consejo (solo el cuerpo es sensible; lo demás deja pasar el puntero) */
+.m-hit { position: absolute; left: 27%; right: 27%; top: 6%; bottom: 9%; padding: 0; border: 0; background: none; border-radius: 45% 45% 30% 30%;
+  cursor: pointer; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+.m-hit:focus-visible { outline: 2px solid var(--midori); outline-offset: 4px; }
+.mascot.wait .m-hit { display: none; }
 @media (max-width: 900px) {
   .obra { --m-w: 128px; }
   .obra .mascot-wrap { --m-r: 2px; --m-b: calc(34px - var(--m-w) * .17); }

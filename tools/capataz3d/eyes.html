@@ -102,7 +102,13 @@ paint(open, glints, WHITE);
 // ojos cerrados de risa: un arco hacia arriba, como en la mascota original
 const lids = [...texels(band(arc(L - 22, L + 22, EY + 2, 16, 16), 12), L - 30, EY - 22, L + 30, EY + 12), ...texels(band(arc(R - 22, R + 22, EY + 2, 16, 16), 12), R - 30, EY - 22, R + 30, EY + 12)];
 paint(shut, lids, DARK);
+// 4) boca abierta (al hablar): una mancha de tinta bajo el centro del bigote, que al alternar con la cara normal
+// hace que mueva la boca
+const talk = new ImageData(new Uint8ClampedArray(open.data), S, S);
+const MX = +(new URLSearchParams(location.search).get('mx') || 298), MY = +(new URLSearchParams(location.search).get('my') || 350);
+const mouth = texels(ell(MX, MY + 4, 30, 23), MX - 34, MY - 22, MX + 34, MY + 30);
+paint(talk, mouth, DARK);
 const toURL = (D) => { g.putImageData(D, 0, 0); return cv.toDataURL('image/png'); };
-window.OUT = { open: toURL(open), shut: toURL(shut), counts: { erase: erase.length, eyes: eyes.length, brows: brows.length, lids: lids.length } };
+window.OUT = { open: toURL(open), shut: toURL(shut), talk: toURL(talk), counts: { erase: erase.length, eyes: eyes.length, brows: brows.length, lids: lids.length } };
 window.DONE = true;
 </script></body></html>

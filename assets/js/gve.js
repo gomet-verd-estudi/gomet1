@@ -85,29 +85,52 @@
       if (!running) { running = true; requestAnimationFrame(frame); }
     }
     // El capataz en 3D (assets/js/capataz3d.js, se carga después del contenido; mientras, se ve su imagen fija).
-    // Al hacer scroll tira de la cuerda de una polea colgada de la cabecera: es él quien sube y baja la página
-    // (hacia abajo recoge cuerda mano sobre mano; hacia arriba la deja correr). Al parar suelta la cuerda, se vuelve
-    // hacia quien lee y dice en su bocadillo el dato de la lámina; luego descansa, respirando.
-    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), canvas = $('.cp-canvas', obra);
+    // Espera con los brazos en jarra (respira, cambia el peso de pierna, mira la obra, se coloca el casco) y sigue
+    // el cursor con la cabeza. Al hacer scroll tira de la cuerda de una polea colgada de la cabecera: es él quien
+    // sube y baja la página. Al parar suelta la cuerda, se vuelve hacia quien lee y dice el dato de la lámina con el
+    // gesto que le va (señala la obra, pulgar arriba o en jarra), moviendo la boca mientras el texto se escribe.
+    // Al tocarlo da un saltito y lo repite; en la última lámina celebra el fin de obra.
+    const mascot = $('.mascot', obra), bubble = $('.m-bubble', obra), canvas = $('.cp-canvas', obra), hit = $('.m-hit', obra), voice = $('.m-say', obra);
+    const GESTO = [0, 2, 0, 1, 0, 2, 0, 1, 2, 1, 1];   // por lámina: 0 señala la obra · 1 pulgar arriba · 2 en jarra
     let say = () => {}, haul = () => {};
-    let cap = null, lastY = scrollY, idleT = 0, sayT = 0, live = true;
+    let cap = null, lastY = scrollY, idleT = 0, sayT = 0, typeT = 0, live = true, cheered = false, moved = 0;
+    // el texto se escribe letra a letra; lo que falta ocupa ya su sitio (invisible), así el bocadillo no cambia de tamaño
+    const type = (t) => {
+      clearInterval(typeT); typeT = 0;
+      if (voice) voice.textContent = t;   // para lectores de pantalla, la frase entera de una vez
+      const on = document.createElement('span'), off = document.createElement('span'); off.className = 'off';
+      bubble.replaceChildren(on, off);
+      if (reduce || !cap) { on.textContent = t; return; }
+      let n = 0; off.textContent = t; cap.speak(true);
+      typeT = setInterval(() => {
+        n = Math.min(t.length, n + 1); on.textContent = t.slice(0, n); off.textContent = t.slice(n);
+        if (n >= t.length) { clearInterval(typeT); typeT = 0; cap.speak(false); }
+      }, 30);
+    };
+    const hush = () => { clearInterval(typeT); typeT = 0; if (cap) cap.speak(false); bubble.classList.remove('say'); };
     const talk = () => {
       const i = Math.max(0, lastActive), t = panels[i] && panels[i].dataset.tip;
-      if (!t || !html.classList.contains('snap')) { if (cap) { cap.set('idle'); cap.face(0); } return; }
-      if (cap) { cap.face(0); cap.set('talk'); }
-      bubble.textContent = t;
+      if (!t || !html.classList.contains('snap')) { hush(); if (cap) { cap.set('idle'); cap.face(0); } return; }
+      if (cap) {
+        cap.face(0); cap.set('talk', GESTO[i] === undefined ? 2 : GESTO[i]);
+        if (i === panels.length - 1 && !cheered) { cheered = true; cap.react('cheer'); }   // ¡obra terminada!
+      }
+      type(t); moved = 0;
       bubble.classList.remove('say'); void bubble.offsetWidth; bubble.classList.add('say');
-      clearTimeout(sayT); sayT = setTimeout(() => { bubble.classList.remove('say'); if (cap) cap.set('idle'); }, 6500);
+      clearTimeout(sayT); sayT = setTimeout(() => { hush(); if (cap) cap.set('idle'); }, 6500 + t.length * 30);
     };
     say = talk;
     let entering = false;
     haul = () => {
       const y = scrollY, dy = y - lastY; lastY = y;
       if (!live || Math.abs(dy) < 0.5 || entering) return;
+      // los microajustes al encajar la lámina no le hacen soltar la frase: hace falta moverse de verdad
+      moved += Math.abs(dy); if (moved < 28 && bubble.classList.contains('say')) return;
       if (cap && !reduce) cap.haul(dy);
-      bubble.classList.remove('say');
-      clearTimeout(idleT); idleT = setTimeout(say, 420);
+      hush();
+      clearTimeout(idleT); idleT = setTimeout(() => { moved = 0; say(); }, 420);
     };
+    if (hit) hit.addEventListener('click', () => { if (entering) return; talk(); if (cap) cap.react('hop'); });
     if (mascot && canvas) {
       mascot.classList.add('wait'); // hasta que entra, no se ve (sin JavaScript se ve la imagen fija)
       const boot = () => {
