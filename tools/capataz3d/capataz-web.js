@@ -6,13 +6,13 @@
 import { createCapataz } from './capataz3d.js';
 import { director, stride, setRig, ROPE_Z, ropePerPhase } from './capataz-anim.js';
 
-const INK = '#0A9651';
+const INK = '#1B1919';   // el contorno del muñeco (y de su cuerda y su polea)
 // La polea cuelga de la línea de la cabecera; la cuerda baja por su lado izquierdo hasta las manos y el suelo,
 // y el otro ramal sube hasta la cabecera: tirando de ella, él sube y baja la página.
 const PULLEY = `<svg class="m-pulley" viewBox="-15 -30 34 42" aria-hidden="true"><g fill="none" stroke="${INK}" stroke-linecap="round">
 <path d="M0 -30V0" stroke-width="1.8"/>
-<g class="m-wheel"><circle r="9" fill="#F4EFE6" stroke-width="2.4"/><path d="M0 -8.6V8.6M-7.4 -4.3L7.4 4.3M-7.4 4.3L7.4 -4.3" stroke-width="1.5"/><circle r="2.2" fill="${INK}" stroke="none"/></g>
-<path d="M-9 0A9 9 0 0 1 9 0V-30" style="stroke-width:var(--rw)"/></g></svg>`;
+<g class="m-wheel"><circle r="9" fill="#C9CDD2" stroke-width="2.4"/><path d="M0 -8.6V8.6M-7.4 -4.3L7.4 4.3M-7.4 4.3L7.4 -4.3" stroke-width="1.5"/><circle r="2.2" fill="${INK}" stroke="none"/></g>
+<path d="M-9 0A9 9 0 0 1 9 0V-30" style="stroke-width:var(--rwo)"/><path d="M-9 0A9 9 0 0 1 9 0V-30" stroke="#E3BF7C" style="stroke-width:var(--rw)"/></g></svg>`;
 
 function webgl() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
@@ -29,7 +29,7 @@ function modelSource(base, spec) {
   });
 }
 
-window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, reduce = false }) {
+window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, reduce = false }) {
   if (!webgl()) throw new Error('sin WebGL');
   // Trazo suavizado: se dibuja al doble y se reduce (ss = 2), y el lienzo va a la densidad de la pantalla hasta 1,75x
   // (más no se distingue a este tamaño y cuesta el doble). Sin mapa de relieve: solo las líneas del modelo y los
@@ -37,28 +37,33 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
   const dpr = Math.max(1, Math.min(1.75, window.devicePixelRatio || 1));
   const C = await createCapataz({
     canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', textureTalk: base + 'color-habla.png', relief: base + 'plano.png', folds: base + 'pliegues.png',
-    line, fine, fineThreshold: 2.0, background: null, ss: 2, reliefScale: 0
+    line, fine, fineThreshold: 2.4, background: null, ss: 2, reliefScale: 0,
+    colour: true, ink: INK   // a color: las tintas planas de la textura, con contorno oscuro
   });
   C.renderer.setPixelRatio(dpr);
   setRig(C.rig); // los pasos se planean con las medidas reales de las piernas
   const D = director({ faceYaw: 40, fidget: !reduce });   // con movimiento reducido, sin gestos sueltos
   const fit = () => {
     const r = canvas.getBoundingClientRect(); if (r.width < 2 || r.height < 2) return;
-    // el trazo se mide para el muñeco de escritorio (238 px de alto) y escala con él: en móvil no engorda
-    C.setLineScale(Math.max(.55, Math.min(1.15, r.height / 238)));
+    // el contorno (fino, para que el color mande) se mide para 238 px de alto y escala con el muñeco: en móvil no engorda
+    C.setLineScale(Math.max(.7, Math.min(1.15, r.height / 238)));
     C.resize(r.width, r.height); C.view({ zoom: 0.9, cy: -0.03 }); dirty = true;
     // distancia del muñeco a la línea de la cabecera (el envoltorio es pegajoso: no cambia con el scroll)
     offTop = wrap ? host.offsetTop : r.top;
+    const gy = C.projectWorld(0, C.floor, 0)[1], sw = r.width * 0.46, sh = sw * 0.15;
+    shadow.style.cssText = `left:${((r.width - sw) / 2).toFixed(1)}px;top:${(gy - sh * 0.55).toFixed(1)}px;width:${sw.toFixed(1)}px;height:${sh.toFixed(1)}px`;
   };
   let dirty = true, raf = 0, last = 0, running = false, slow = 16;
   // Entrada caminando: el cuerpo avanza exactamente lo que el paso planea (los pies apoyados quedan quietos en la página)
   let ent = null;
   const host = canvas.closest('.mascot') || canvas;
   const place = (x) => { host.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; };
+  // sombra de contacto bajo los pies (se encoge cuando salta)
+  const shadow = document.createElement('i'); shadow.className = 'm-shadow'; shadow.setAttribute('aria-hidden', 'true');
   // ---- la cuerda (dibujo en la página, detrás del lienzo: las manos quedan por delante) ----
   const wrap = canvas.closest('.mascot-wrap');
   const ropeEl = document.createElement('div'); ropeEl.className = 'm-rope'; ropeEl.setAttribute('aria-hidden', 'true');
-  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + PULLEY; host.prepend(ropeEl);
+  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + PULLEY; host.prepend(ropeEl); host.prepend(shadow);
   const ropeLine = ropeEl.firstChild, pulley = ropeEl.lastChild, wheel = pulley.querySelector('.m-wheel');
   const HAUL_YAW = -90; // de perfil, mirando hacia la página
   let rope = 0, ropeTarget = 0, units = 0, offTop = 0, lastHaul = 0;
@@ -71,7 +76,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
     const [x, ground] = C.projectWorld(sx, 0, sz);
     const rw = Math.max(2.4, Math.min(5, ppu * 0.022)), R = rw * 3, k = R / 9;   // grosor de la cuerda y radio de la polea
     const top = -offTop + 30 * k, full = Math.max(0, ground - top), h = full * ease(rope);
-    ropeEl.style.setProperty('--rw', (rw / k).toFixed(2));
+    ropeEl.style.setProperty('--rw', (rw / k).toFixed(2)); ropeEl.style.setProperty('--rwo', ((rw + 2) / k).toFixed(2));
     ropeLine.style.cssText = `width:${rw.toFixed(2)}px;height:${h.toFixed(1)}px;transform:translate(${(x - rw / 2).toFixed(1)}px,${top.toFixed(1)}px);background-position:0 ${(units * ppu).toFixed(1)}px`;
     pulley.style.cssText = `width:${(34 * k).toFixed(1)}px;height:${(42 * k).toFixed(1)}px;transform:translate(${(x - 6 * k).toFixed(1)}px,${(top - 30 * k).toFixed(1)}px);opacity:${Math.min(1, rope * 2.5).toFixed(2)}`;
     wheel.style.transform = `rotate(${(units * ppu / R * 180 / Math.PI).toFixed(1)}deg)`;
@@ -110,7 +115,8 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.7, fine = 0.8, re
       D.advance(dp); ent.x += dp * stride(ent.k) * C.pxPerUnit(); ent.left -= dp;
       if (ent.left <= 1e-6) { ent.walking = false; ent.settle = ent.x; ent.st = 0; ent.end(); }
     }
-    C.pose(D.tick(dt));
+    const q = D.tick(dt); C.pose(q);
+    const up = Math.min(1, (q.hop || 0) * 9); shadow.style.transform = up > 0.01 ? `scale(${(1 - 0.45 * up).toFixed(3)})` : ''; shadow.style.opacity = up > 0.01 ? (1 - 0.5 * up).toFixed(2) : '';
     if (ent && !ent.walking) { ent.st = Math.min(1, ent.st + dt / 0.5); ent.x = ent.settle * (1 - ent.st * ent.st * (3 - 2 * ent.st)); if (ent.st >= 1) { ent = null; } }
     if (ent) place(ent.x); else if (host.style.transform) place(0);
     if (rope > 0 || ropeTarget > 0) drawRope(dt);

@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4 }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4, colour = false, palette = null }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
@@ -187,16 +187,20 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const rt = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1), minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
   const rtD = new THREE.WebGLRenderTarget(1, 1);
   const hex = (h) => { const v = parseInt(h.slice(1), 16); return [(v >> 16 & 255) / 255, (v >> 8 & 255) / 255, (v & 255) / 255]; };
+  // colores de la textura: guantes, casco, piel, camisa, peto, punto del casco, botas y rasgos
+  const PAL = ['#FFFFFF', '#FFCB2B', '#F4C2A4', '#2EA648', '#1F63D6', '#146E3C', '#3A3A3A', '#1B1919'];
   const U = {
     tColor: { value: rt.texture }, tDepth: { value: rt.depthTexture }, tDetail: { value: rtD.texture },
     px: { value: new THREE.Vector2() }, line: { value: line }, fine: { value: fine }, fineT: { value: fineThreshold },
-    ink: { value: new THREE.Vector3(...hex(ink)) }, fillC: { value: new THREE.Vector3(...hex(fill || '#000000')) }, useFill: { value: fill ? 1 : 0 }, riso: { value: riso }, res: { value: new THREE.Vector2(1, 1) }, bg: { value: new THREE.Vector4(...(background ? hex(background) : [0, 0, 0]), background ? 1 : 0) }
+    ink: { value: new THREE.Vector3(...hex(ink)) }, fillC: { value: new THREE.Vector3(...hex(fill || '#000000')) }, useFill: { value: fill ? 1 : 0 }, riso: { value: riso }, colour: { value: colour ? 1 : 0 },
+    // a color: los ocho colores de la textura (src) y con cuál se pinta cada uno (dst); el contorno va en `ink`
+    src: { value: PAL.map((c) => new THREE.Vector3(...hex(c))) }, dst: { value: PAL.map((c) => new THREE.Vector3(...hex((palette && palette[c]) || c))) }, res: { value: new THREE.Vector2(1, 1) }, bg: { value: new THREE.Vector4(...(background ? hex(background) : [0, 0, 0]), background ? 1 : 0) }
   };
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
     uniforms: U,
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
     fragmentShader: `
-      uniform sampler2D tColor, tDepth, tDetail; uniform vec2 px; uniform float line, fine, fineT, useFill, riso; uniform vec3 ink, fillC; uniform vec4 bg; uniform vec2 res; varying vec2 vUv;
+      uniform sampler2D tColor, tDepth, tDetail; uniform vec2 px; uniform float line, fine, fineT, useFill, riso, colour; uniform vec3 src[8], dst[8]; uniform vec3 ink, fillC; uniform vec4 bg; uniform vec2 res; varying vec2 vUv;
       // ---- risografía: ruido fijo en el papel (no parpadea entre fotogramas) ----
       float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
       float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
@@ -211,6 +215,8 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       // colores de la paleta que van a línea (piel, blanco, amarillo, verde); lo que no es ni esto ni macizo es mezcla de borde
       bool isOpen(vec3 k){ return distance(k, vec3(0.957, 0.761, 0.643)) < 0.18 || distance(k, vec3(1.)) < 0.18 || distance(k, vec3(1.0, 0.796, 0.169)) < 0.18 || distance(k, vec3(0.180, 0.651, 0.282)) < 0.18; }
       bool isFill(vec3 k){ return distance(k, vec3(0.078, 0.431, 0.235)) < 0.1 || distance(k, vec3(0.122, 0.388, 0.839)) < 0.18 || distance(k, vec3(0.227)) < 0.1 || distance(k, vec3(0.106, 0.098, 0.098)) < 0.1; }
+      // a color: cada punto se pinta con el color exacto de su zona (tintas planas, sin mezclas ni degradados)
+      vec3 flat3(vec3 k){ float bd = 9.; vec3 b = k; for (int i = 0; i < 8; i++) { float e = distance(k, src[i]); if (e < bd) { bd = e; b = dst[i]; } } return b; }
       vec4 shade(){
         float d0 = d(vec2(0.)); vec3 c0 = c(vec2(0.)); bool f0 = d0 < 1. && isFill(c0);
         bool skin0 = distance(c0, vec3(0.957, 0.761, 0.643)) < 0.16;
@@ -225,12 +231,14 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
           // los rasgos de la cara (ojos, cejas, bigote) son masas de tinta sin contorno alrededor: no se engordan
           // (y en la piel, nada macizo lleva contorno: los bordes suavizados de los rasgos salen en gris o verde oscuro)
           bool feat = !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035 && (distance(cc, vec3(0.106, 0.098, 0.098)) < 0.1 || (skin0 && isFill(cc)));
+          // a color, el punto del casco tampoco lleva contorno (ni desde fuera ni desde dentro): es una mancha limpia
+          if (colour > .5 && dd < 1. && abs(dd - d0) < 0.0035 && (distance(cc, vec3(0.078, 0.431, 0.235)) < 0.1 || distance(c0, vec3(0.078, 0.431, 0.235)) < 0.1)) feat = true;
           // ni a través de ellos: si entre este punto y la muestra hay un rasgo, lo de detrás (el brillo del ojo, el casco
           // tras la patilla) no cuenta; si no, salen anillos de puntos alrededor de los rasgos
           if (e && !feat && !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035) {
             if (distance(c(o * .5), vec3(0.106, 0.098, 0.098)) < 0.1 || distance(c(o * .25), vec3(0.106, 0.098, 0.098)) < 0.1 || distance(c(o * .75), vec3(0.106, 0.098, 0.098)) < 0.1) feat = true;
           }
-          if (e && !feat) { if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
+          if (e && !feat) { if (colour > .5) edge = true; else if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
         }
         if (edge) { return vec4(ink, 1.); }
         if (d0 >= 1.) { return bg; }
@@ -249,7 +257,10 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
         float f = length(gx) + length(gy);
         float k = max(fo(vec2(0.)), max(max(fo(vec2(q.x, 0.)), fo(vec2(-q.x, 0.))), max(fo(vec2(0., q.y)), fo(vec2(0., -q.y)))));
         bool quiet = distance(c0, vec3(0.957, 0.761, 0.643)) < 0.16 || distance(c0, vec3(1.0, 0.796, 0.169)) < 0.16 || distance(c0, vec3(0.227)) < 0.12 || distance(c0, vec3(0.180, 0.651, 0.282)) < 0.16 || distance(c0, vec3(0.106, 0.098, 0.098)) < 0.1;
-        bool fl = (f > fineT && !quiet) || k > 0.35;
+        // (en las botas y en los rasgos negros no se dibujan pliegues: ahí solo salían motas)
+        bool dark0 = distance(c0, vec3(0.227)) < 0.12 || distance(c0, vec3(0.106, 0.098, 0.098)) < 0.1;
+        bool fl = (f > fineT && !quiet) || (k > 0.35 && !dark0);
+        if (colour > .5) { return vec4(fl ? ink : flat3(c0), 1.); }
         if (useFill < 0.5) { return vec4(fl ? ink : c0, 1.); }
         // tinta maciza con los detalles calados en papel; fuera de lo macizo, papel con los detalles en tinta
         if (f0) { return vec4(fl ? paper : ink, 1.); }

@@ -15,6 +15,7 @@ const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (t) => t * t * (3 - 2 * t);
 const eio = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const win = (t, a, b) => clamp((t - a) / (b - a));
+const back = (t) => { const c = 1.25, u = t - 1; return 1 + (c + 1) * u * u * u + c * u * u; };   // llega, se pasa un 5 % y vuelve
 const bump = (t, a, b) => { const u = win(t, a, b); return Math.sin(Math.PI * u); };
 
 // De pie como un capataz: pies al frente, piernas algo cerradas, brazos caídos con el codo suelto y los puños a los
@@ -50,15 +51,16 @@ export function add(base, extra) {
   return o;
 }
 const mixP = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
-export function mix(a, b, k) {
+export function mix(a, b, k, kb = k) {
+  // kb: factor para ángulos y alcances de los brazos (puede pasarse de 1: remate elástico); k: para pies, pelvis y manos
   const o = {};
   for (const n of keys(a, b)) {
     if (SPECIAL.has(n)) continue;
     const x = a[n], y = b[n];
     if (typeof x === 'number' || typeof y === 'number') { o[n] = (x || 0) + ((y || 0) - (x || 0)) * k; continue; }
-    o[n] = mixV(x, y, k);
+    o[n] = mixV(x, y, kb);
   }
-  if (a.local || b.local) { o.local = {}; for (const n of keys(a.local, b.local)) o.local[n] = mixV(a.local?.[n], b.local?.[n], k); }
+  if (a.local || b.local) { o.local = {}; for (const n of keys(a.local, b.local)) o.local[n] = mixV(a.local?.[n], b.local?.[n], kb); }
   // pulgares: 0 puño, 1 arriba
   if (a.thumb || b.thumb) o.thumb = { Left: (a.thumb?.Left || 0) + ((b.thumb?.Left || 0) - (a.thumb?.Left || 0)) * k, Right: (a.thumb?.Right || 0) + ((b.thumb?.Right || 0) - (a.thumb?.Right || 0)) * k };
   // hacia dónde mira el pulgar de cada mano: se mezcla la dirección (y el peso, si una pose no la lleva)
@@ -83,7 +85,7 @@ export function mix(a, b, k) {
     o.reach = {};
     for (const s of ['Left', 'Right']) {
       const x = a.reach?.[s], y = b.reach?.[s];
-      if (x && y) o.reach[s] = { at: mixP(x.at, y.at, k), pole: mixP(x.pole, y.pole, k), w: (x.w ?? 1) + ((y.w ?? 1) - (x.w ?? 1)) * k };
+      if (x && y) o.reach[s] = { at: mixP(x.at, y.at, kb), pole: mixP(x.pole, y.pole, k), w: (x.w ?? 1) + ((y.w ?? 1) - (x.w ?? 1)) * k };
       else if (y) o.reach[s] = { ...y, w: k * (y.w ?? 1) }; else if (x) o.reach[s] = { ...x, w: (1 - k) * (x.w ?? 1) };
     }
   }
@@ -178,12 +180,17 @@ export function walk(p, k = 1) {
 
 /* De pie con los pies plantados: la pelvis puede mecerse, bajar o adelantarse sin que los pies se muevan (las piernas
    llegan por cinemática inversa). Así cambia el peso de pierna o se agacha sin patinar. */
-function stand({ sway = 0, dip = 0, fwd = 0 } = {}) {
-  const H = RIG.H, ax = 0.135 * H, az = RIG.hips[2] + 0.061 * H, dy = RIG.hips[1] - RIG.Left.hip[1];
-  const top = (R, x) => { const L = (R.thigh + R.shin) * 0.985, dx = x - (R.hip[0] + sway), dz = az - (R.hip[2] + fwd); return RIG.floor + R.ah + Math.sqrt(Math.max(0, L * L - dx * dx - dz * dz)) + dy; };
-  const y = Math.min(top(RIG.Left, ax), top(RIG.Right, -ax)) - dip;
-  const pole = (x) => [x, RIG.Left.hip[1] * 0.5, 0.4 * H];
-  return { hip: [RIG.hips[0] + sway, y, RIG.hips[2] + fwd], Left: { ankle: [ax, RIG.floor + RIG.Left.ah, az], pole: pole(ax * 1.5) }, Right: { ankle: [-ax, RIG.floor + RIG.Right.ah, az], pole: pole(-ax * 1.5) } };
+function legsAt(ankL, ankR, { sway = 0, dip = 0, fwd = 0 } = {}) {
+  const H = RIG.H, dy = RIG.hips[1] - RIG.Left.hip[1];
+  const top = (R, a) => { const L = (R.thigh + R.shin) * 0.985, dx = a[0] - (R.hip[0] + sway), dz = a[2] - (R.hip[2] + fwd); return a[1] + Math.sqrt(Math.max(0, L * L - dx * dx - dz * dz)) + dy; };
+  const y = Math.min(top(RIG.Left, ankL), top(RIG.Right, ankR)) - dip;
+  const pole = (a, s) => [a[0] + s * 0.03 * H, RIG.Left.hip[1] * 0.5, a[2] + 0.36 * H];
+  return { hip: [RIG.hips[0] + sway, y, RIG.hips[2] + fwd], Left: { ankle: ankL, pole: pole(ankL, 1) }, Right: { ankle: ankR, pole: pole(ankR, -1) } };
+}
+const FOOT_X = 0.135, FOOT_Z = 0.061;   // dónde pisa cada pie de pie (en alturas, respecto a la pelvis)
+function stand(o) {
+  const H = RIG.H, ax = FOOT_X * H, az = RIG.hips[2] + FOOT_Z * H;
+  return legsAt([ax, RIG.floor + RIG.Left.ah, az], [-ax, RIG.floor + RIG.Right.ah, az], o);
 }
 const TOES = { Left: 6, Right: -6 };   // de pie, las puntas un poco abiertas
 // brazos en jarra: los puños en la cintura y los codos fuera (la postura de quien mira cómo va la obra)
@@ -266,23 +273,38 @@ export function haul(p) {
   return q;
 }
 
-/* Girarse hacia quien mira, como una persona: primero la cabeza, luego el torso y al final la cadera, recolocando
-   los pies con dos pasitos; antes, una pequeña anticipación (se agacha un poco) y al final se pasa y vuelve. */
-export const TURN = 1.1;
+/* Girarse como una persona, con los pies plantados: primero la cabeza, luego el pecho y al final la cadera. Los pies
+   no patinan: cada uno se queda donde está (en el suelo, no respecto al cuerpo) hasta que le toca dar su paso; abre
+   primero el del lado hacia el que gira y luego recoge el otro. Antes, una pequeña anticipación (se agacha un poco);
+   al final se pasa un pelo y vuelve. Las piernas van por cinemática inversa, en el espacio del cuerpo que gira. */
+export const TURN = 1.15;
 export function turn(t, from, to) {
-  const d = to - from;
-  const head = from + d * eio(win(t, 0.0, 0.5)), chest = from + d * eio(win(t, 0.12, 0.7)), hips = from + d * eio(win(t, 0.25, 0.95));
-  const settle = 1 + 0.06 * Math.sin(Math.PI * win(t, 0.8, 1.1)) * (1 - win(t, 0.95, 1.1)); // se pasa un poco y vuelve
-  const stepL = bump(t, 0.32, 0.6), stepR = bump(t, 0.58, 0.88);
+  const d = to - from, H = RIG.H, rad = Math.PI / 180;
+  const head = from + d * eio(win(t, 0.0, 0.5)), chest = from + d * eio(win(t, 0.12, 0.7));
+  const settle = 1 + 0.05 * Math.sin(Math.PI * win(t, 0.82, 1.15)) * (1 - win(t, 0.98, 1.15)); // se pasa un poco y vuelve
+  const yaw = from + d * eio(win(t, 0.2, 0.92)) * settle;
+  // d < 0: gira hacia su derecha → abre el pie derecho; d > 0: el izquierdo
+  const lead = d < 0 ? 'Right' : 'Left';
+  const step = { [lead]: eio(win(t, 0.16, 0.5)), [lead === 'Left' ? 'Right' : 'Left']: eio(win(t, 0.52, 0.9)) };
+  const air = { Left: Math.sin(Math.PI * step.Left), Right: Math.sin(Math.PI * step.Right) };
+  const az = RIG.hips[2] + FOOT_Z * H, c = Math.cos(yaw * rad), sn = Math.sin(yaw * rad);
+  const ank = {}, sole = {}, sy = {};
+  for (const [side, sx] of [['Left', 1], ['Right', -1]]) {
+    const px = sx * FOOT_X * H, k = step[side], f = (from + d * k) * rad;          // rumbo del pie en el suelo
+    // dónde pisa en el suelo: su sitio de siempre, girado al rumbo que lleva; y de vuelta al espacio del cuerpo
+    const wx = px * Math.cos(f) + az * Math.sin(f), wz = -px * Math.sin(f) + az * Math.cos(f);
+    ank[side] = [wx * c - wz * sn, RIG.floor + RIG[side].ah + 0.034 * H * air[side], wx * sn + wz * c];
+    sy[side] = (from + d * k) - yaw + TOES[side]; sole[side] = 7 * air[side];
+  }
+  const antic = bump(t, 0, 0.26), sway = 0.012 * H * (air[lead === 'Left' ? 'Right' : 'Left'] - air[lead]) * (lead === 'Left' ? -1 : 1);
   const q = add(BASE, {
-    Spine: { y: (chest - hips) * 0.6 }, Spine2: { y: (chest - hips) * 0.4 },
+    Spine: { y: (chest - yaw) * 0.6 }, Spine2: { y: (chest - yaw) * 0.4 },
     Head: { y: head - chest, x: -2 },
-    LeftUpLeg: { x: -12 * stepL }, LeftLeg: { x: 26 * stepL }, LeftFoot: { x: -10 * stepL },
-    RightUpLeg: { x: -12 * stepR }, RightLeg: { x: 26 * stepR }, RightFoot: { x: -10 * stepR },
-    LeftArm: { x: 6 * bump(t, 0.2, 0.9) }, RightArm: { x: -6 * bump(t, 0.2, 0.9) },
-    squash: 0.03 * bump(t, 0, 0.25) - 0.015 * bump(t, 0.25, 0.5)
+    LeftArm: { x: 7 * bump(t, 0.2, 0.9), z: 4 * bump(t, 0.2, 0.9) }, RightArm: { x: -7 * bump(t, 0.2, 0.9), z: -4 * bump(t, 0.2, 0.9) },
+    squash: 0.02 * antic
   });
-  q.yaw = from + d * eio(win(t, 0.25, 0.95)) * settle;
+  q.legs = legsAt(ank.Left, ank.Right, { sway, dip: 0.012 * H * antic + 0.006 * H * (air.Left + air.Right) });
+  q.sole = sole; q.soleYaw = sy; q.yaw = yaw;
   return q;
 }
 
@@ -385,7 +407,8 @@ export function director({ faceYaw = 40, fidget = true } = {}) {
     variant(v) { st.variant = v; },
     get current() { return st.cur; },
     face(dir) { st.yawTarget = dir > 0 ? faceYaw : dir < 0 ? -faceYaw : 12; },
-    yawTo(deg, snap = false) { st.yawTarget = deg; if (snap) { st.yaw = deg; st.yawVel = 0; } },
+    // un giro grande y rápido (ponerse a tirar de la cuerda) se da con un saltito: los pies no patinan en el suelo
+    yawTo(deg, snap = false) { if (!snap && Math.abs(deg - st.yaw) > 50) st.spin = 0; st.yawTarget = deg; if (snap) { st.yaw = deg; st.yawVel = 0; } },
     // hacia dónde mira: giro (+ a su izquierda, la derecha de la pantalla) y cabeceo (+ arriba), en grados
     look(yaw, pitch) { st.lookTo[0] = yaw; st.lookTo[1] = pitch; },
     // pieza con principio y fin; al acabar vuelve a 'then' (con transición) y llama a done
@@ -408,12 +431,12 @@ export function director({ faceYaw = 40, fidget = true } = {}) {
         if (c.name === 'turn') { st.yaw = q.yaw; st.yawTarget = c.to; st.yawVel = 0; }
         if (c.t >= c.dur) { st.clip = null; st.prevPose = q; st.prev = null; st.cur = c.then; st.k = 0; const f = c.done; if (f) f(); }
       } else {
-        if (st.k < 1) st.k = Math.min(1, st.k + dt / 0.34);
+        if (st.k < 1) st.k = Math.min(1, st.k + dt / 0.4);
         // giro con muelle amortiguado: se pasa un poco y vuelve, como un giro de verdad
         const a = (st.yawTarget - st.yaw) * 90 - st.yawVel * 13;
         st.yawVel += a * dt; st.yaw += st.yawVel * dt;
         q = poseOf(st.cur);
-        if (st.k < 1) { const from = st.prevPose || (st.prev ? poseOf(st.prev) : q); q = mix(from, q, smooth(st.k)); }
+        if (st.k < 1) { const from = st.prevPose || (st.prev ? poseOf(st.prev) : q); q = mix(from, q, smooth(st.k), back(st.k)); }
         else st.prevPose = null;
         q.yaw = st.yaw;
         // en reposo, un gesto suelto de vez en cuando
@@ -421,6 +444,10 @@ export function director({ faceYaw = 40, fidget = true } = {}) {
           st.waited += dt;
           if (st.waited > st.nextFidget) { st.nextFidget = 7 + Math.random() * 7; st.lastPose = q; api.play(FIDGETS[st.fi++ % FIDGETS.length], { then: 'idle' }); }
         } else st.waited = 0;
+      }
+      if (st.spin !== undefined && st.spin !== null) {
+        st.spin += dt; const u = st.spin / 0.36;
+        if (u >= 1) st.spin = null; else { q = { ...q, hop: (q.hop || 0) + 0.03 * Math.sin(Math.PI * u), squash: (q.squash || 0) - 0.025 * Math.sin(Math.PI * u) + 0.03 * bump(u, 0.8, 1.15) }; }
       }
       st.lastPose = q;
       // la mirada se suma al final (no entra en las mezclas): cabeza, y algo de cuello y pecho

@@ -1154,8 +1154,10 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .m-rope { position: absolute; left: 0; top: 0; width: 0; height: 0; display: none; }
 .m-rope.on { display: block; }
 .m-rope-line { position: absolute; left: 0; top: 0; border-radius: 0 0 9px 9px; will-change: transform;
-  background: repeating-linear-gradient(-62deg, #0A9651 0 2.3px, #F4EFE6 2.3px 3.4px); }
+  background: repeating-linear-gradient(-62deg, #1B1919 0 1.1px, #E3BF7C 1.1px 3.6px); box-shadow: -1px 0 0 #1B1919, 1px 0 0 #1B1919; }
 .m-pulley { position: absolute; left: 0; top: 0; display: block; max-width: none; overflow: visible; }
+.m-shadow { position: absolute; border-radius: 50%; background: rgba(27, 25, 25, .13); transform-origin: 50% 50%; pointer-events: none; }
+.mascot:not(.is-3d) .m-shadow { display: none; }
 /* el bocadillo */
 .m-bubble { position: absolute; right: calc(var(--m-w) * .25); bottom: calc(100% + 14px); width: max-content; max-width: 250px; margin: 0; padding: 11px 14px 12px; background: var(--paper);
   border: 2.2px solid var(--midori); border-radius: 18px; color: var(--midori); font-size: .9rem; font-weight: 700; line-height: 1.18;

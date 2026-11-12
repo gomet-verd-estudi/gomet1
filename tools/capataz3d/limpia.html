@@ -1,0 +1,102 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head>
+<body><canvas id="c"></canvas><script type="module">
+// Limpia la textura de color SOBRE EL MUÑECO: la textura viene troceada en cientos de trocitos, así que los vecinos en
+// la imagen no son vecinos en el modelo. Aquí se mira el muñeco desde muchos ángulos; cada mota (una mancha pequeña de
+// un color rodeada por otro) se localiza en pantalla y se repinta en la textura con el color que la rodea.
+// Se respetan los detalles de verdad: brillos de los ojos, ojos y cejas, botones. ?tex=entrada.png
+import * as THREE from 'three';
+import { createCapataz } from './capataz3d.js';
+const q = new URLSearchParams(location.search), SRC = q.get('tex') || './clean-eyes.png';
+const PAL = [[255, 255, 255], [255, 203, 43], [244, 194, 164], [46, 166, 72], [31, 99, 214], [20, 110, 60], [58, 58, 58], [27, 25, 25]];
+const [W_, Y_, S_, G_, B_, DG, GR, K_] = [0, 1, 2, 3, 4, 5, 6, 7];
+const C = await createCapataz({ canvas: document.getElementById('c'), url: './model.glb', texture: SRC, relief: './relief.png' });
+const N = 900; C.renderer.setPixelRatio(1); C.resize(N, N); C.pose({});
+const img = new Image(); img.src = SRC; await img.decode();
+const S = img.width, cv = document.createElement('canvas'); cv.width = cv.height = S;
+const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+const data = g.getImageData(0, 0, S, S), d = data.data;
+const tex = new Uint8Array(S * S);   // índice de color de cada texel
+for (let i = 0; i < S * S; i++) { let b = 0, bd = 1e9; for (let k = 0; k < 8; k++) { const e = Math.abs(d[i * 4] - PAL[k][0]) + Math.abs(d[i * 4 + 1] - PAL[k][1]) + Math.abs(d[i * 4 + 2] - PAL[k][2]); if (e < bd) { bd = e; b = k; } } tex[i] = b; }
+// pasada de coordenadas de textura en la GPU: cada píxel guarda su (u, v) en 16 bits por canal; fondo = blanco
+const uvMat = new THREE.ShaderMaterial({
+  vertexShader: `#include <common>
+#include <skinning_pars_vertex>
+varying vec2 vU;
+void main(){ vU = uv;
+#include <skinbase_vertex>
+#include <begin_vertex>
+#include <skinning_vertex>
+#include <project_vertex>
+}`,
+  fragmentShader: `varying vec2 vU; void main(){ vec2 h = floor(vU * 255.) / 255.; vec2 l = fract(vU * 255.); gl_FragColor = vec4(h.x, l.x, h.y, l.y); }`,
+  blending: THREE.NoBlending
+});
+const rt = new THREE.WebGLRenderTarget(N, N); const buf = new Uint8Array(N * N * 4), bufN = new Uint8Array(N * N * 4);
+// y una pasada de normales: solo se juzga lo que se ve de frente (de refilón, una zona grande parece una mota)
+const nMat = new THREE.MeshNormalMaterial(), NZ = new Float32Array(N * N);
+const U = new Float32Array(N * N), V = new Float32Array(N * N), I = new Int8Array(N * N);
+function look(yaw, pitch) {
+  C.view({ yaw, pitch, zoom: 0.95, cy: 0 });
+  const keep = C.mesh.material; C.mesh.material = uvMat;
+  C.renderer.setRenderTarget(rt); C.renderer.setClearColor(0xffffff, 1); C.renderer.clear(); C.renderer.render(C.scene, C.camera); C.renderer.setRenderTarget(null);
+  C.renderer.readRenderTargetPixels(rt, 0, 0, N, N, buf);
+  C.mesh.material = nMat; C.renderer.setRenderTarget(rt); C.renderer.setClearColor(0x000000, 1); C.renderer.clear(); C.renderer.render(C.scene, C.camera); C.renderer.setRenderTarget(null);
+  C.mesh.material = keep; C.renderer.readRenderTargetPixels(rt, 0, 0, N, N, bufN);
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+    const i = ((N - 1 - y) * N + x) * 4, p = y * N + x; NZ[p] = bufN[i + 2] / 127.5 - 1;
+    if ((buf[i] === 255 && buf[i + 1] === 255 && buf[i + 2] === 255 && buf[i + 3] === 255) || NZ[p] < 0.45) { I[p] = -1; continue; }
+    U[p] = (buf[i] + buf[i + 1] / 255) / 255 * S; V[p] = (buf[i + 2] + buf[i + 3] / 255) / 255 * S;
+    I[p] = tex[Math.min(S - 1, Math.floor(V[p])) * S + Math.min(S - 1, Math.floor(U[p]))];
+  }
+}
+// ¿se queda esta mancha? (color, color que la rodea, área en píxeles de una vista de 900 px)
+function keep(i, dom, a) {
+  if (i === W_ && dom === K_) return true;              // brillo del ojo
+  if (i === K_ && dom === S_) return a >= 60;           // ojos y cejas
+  if (i === G_ && dom === DG) return false;             // el punto del casco, de un solo verde
+  if (dom === GR) return a >= 400;                      // nada pequeño en las botas
+  if (i === K_ && dom === Y_) return a >= 160;          // rayitas negras en el casco
+  return a >= 120;
+}
+const seen = new Int32Array(N * N), stack = new Int32Array(N * N); let stamp = 0, fixed = 0, spots = 0;
+function paint(u, v, r, k) {
+  const rr = Math.ceil(r);
+  for (let dy = -rr; dy <= rr; dy++) for (let dx = -rr; dx <= rr; dx++) {
+    if (dx * dx + dy * dy > r * r) continue;
+    const X = Math.floor(u + dx), Y = Math.floor(v + dy); if (X < 0 || Y < 0 || X >= S || Y >= S) continue;
+    const t = Y * S + X; if (tex[t] === k) continue; tex[t] = k; d[t * 4] = PAL[k][0]; d[t * 4 + 1] = PAL[k][1]; d[t * 4 + 2] = PAL[k][2]; d[t * 4 + 3] = 255; fixed++;
+  }
+}
+function sweep() {
+  seen.fill(0);
+  for (let p0 = 0; p0 < N * N; p0++) {
+    if (I[p0] < 0 || seen[p0]) continue;
+    const col = I[p0]; let n = 0, top = 0; stack[top++] = p0; seen[p0] = ++stamp; const comp = [];
+    const cnt = new Int32Array(9); let big = false;
+    while (top) {
+      const p = stack[--top]; if (!big) comp.push(p); if (++n > 3200) big = true;
+      const x = p % N, y = (p - x) / N;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+        if (!dx && !dy) continue; const xx = x + dx, yy = y + dy; if (xx < 0 || yy < 0 || xx >= N || yy >= N) { cnt[8]++; continue; }
+        const o = yy * N + xx;
+        if (I[o] === col) { if (!seen[o]) { seen[o] = stamp; stack[top++] = o; } } else cnt[I[o] < 0 ? 8 : I[o]]++;
+      }
+    }
+    if (big) continue;
+    let dom = 0, tot = 0; for (let k = 0; k < 9; k++) { tot += cnt[k]; if (k < 8 && cnt[k] > cnt[dom]) dom = k; }
+    // junto al borde de la figura no se toca (ahí una pieza pequeña puede ser el canto de otra)
+    if (!tot || cnt[8] / tot > 0.12 || cnt[dom] / tot < 0.8 || keep(col, dom, n)) continue;
+    let nz = 0; for (const p of comp) nz += NZ[p]; if (nz / comp.length < 0.8) continue;   // solo lo que se ve de frente
+    spots++;
+    for (const p of comp) { const x = p % N, o = x + 1 < N && I[p + 1] >= 0 ? p + 1 : p - 1; const r = Math.min(7, Math.hypot(U[o] - U[p], V[o] - V[p])); paint(U[p], V[p], r + 1.6, dom); I[p] = dom; }
+  }
+}
+const views = [];
+for (const pitch of [0, 30, -30, 60, -60]) for (let yaw = 0; yaw < 360; yaw += pitch === 0 ? 20 : 30) views.push([yaw, pitch]);
+views.push([0, 88], [0, -88]);
+for (let pass = 0; pass < 2; pass++) for (const [yaw, pitch] of views) { look(yaw, pitch); sweep(); }
+g.putImageData(data, 0, 0);
+window.OUT = { png: cv.toDataURL('image/png'), spots, fixed, views: views.length };
+window.DONE = true;
+</script></body></html>
