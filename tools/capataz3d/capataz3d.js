@@ -180,6 +180,20 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     _qd.setFromAxisAngle(_ha, ang * w); F.getWorldQuaternion(_qw); F.parent.getWorldQuaternion(_qp);
     F.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); F.updateMatrixWorld(true);
   }
+  // Dobla la muñeca para que la mano apunte hacia `to` (dirección en el espacio del personaje), sin retorcerla: solo
+  // el giro más corto desde donde apuntaba, y como mucho `max` grados (más allá la malla se pliega mal).
+  const _hd = new THREE.Vector3(), _ht = new THREE.Vector3();
+  function pointHand(side, to, w = 1, max = 75) {
+    const H = B[side + 'Hand'], M = B[side + 'HandMiddle1'] || B[side + 'HandMiddle2']; if (!H || !M || w <= 0) return;
+    H.updateWorldMatrix(true, true);
+    H.getWorldPosition(_H); _hd.copy(M.getWorldPosition(_E)).sub(_H).normalize();
+    root.getWorldQuaternion(_rq); _ht.set(to[0], to[1], to[2]).applyQuaternion(_rq).normalize();
+    const ang = Math.acos(Math.max(-1, Math.min(1, _hd.dot(_ht)))); if (ang < 1e-4) return;
+    const k = Math.min(1, max * Math.PI / 180 / ang) * w;
+    _hx.crossVectors(_hd, _ht); if (_hx.lengthSq() < 1e-10) return; _hx.normalize();
+    _qd.setFromAxisAngle(_hx, ang * k); H.getWorldQuaternion(_qw); H.parent.getWorldQuaternion(_qp);
+    H.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); H.updateMatrixWorld(true);
+  }
   function pose(p = {}) {
     rest.forEach((q, b) => b.quaternion.copy(q)); B.Hips.position.copy(restPos);
     root.position.set(0, 0, 0); root.rotation.set(0, (p.yaw || 0) * Math.PI / 180, 0);
@@ -223,7 +237,8 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     }
     if (p.reach) for (const side of ['Left', 'Right']) { const r = p.reach[side]; if (r) reach(side, r.at, r.pole, r.w ?? 1); }
     // hacia dónde mira el pulgar de cada mano: hands: { Left: { thumb: [x, y, z], w }, Right: … }
-    if (p.hands) for (const side of ['Left', 'Right']) { const h = p.hands[side]; if (h) rollHand(side, h.thumb, h.w ?? 1); }
+    // y, si hace falta, hacia dónde apunta la mano doblando la muñeca: point: [x, y, z], pw
+    if (p.hands) for (const side of ['Left', 'Right']) { const h = p.hands[side]; if (!h) continue; if (h.thumb) rollHand(side, h.thumb, h.w ?? 1); if (h.point) pointHand(side, h.point, h.pw ?? 1); }
     // pies en el suelo: el pie más bajo apoya siempre en el suelo (de ahí sale el sube y baja natural del paso)
     root.position.y = restFoot * (1 - sq) - footMin() + (p.hop || 0) * size.y;
     root.updateMatrixWorld(true);
