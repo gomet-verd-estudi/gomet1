@@ -112,6 +112,31 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     return o;
   })();
   const _hp = new THREE.Vector3(), _hc = new THREE.Vector3();
+  // Orientación de las manos. El auto-rig dejó los dedos de la mano derecha al revés que los de la izquierda (su
+  // cadena «Pinky» es la que está en el pulgar), así que no vale girar las dos igual: se mide en cada mano hacia
+  // dónde queda el pulgar (perpendicular al antebrazo) y se guarda en el espacio del hueso de la mano.
+  const THUMB = {};
+  for (const [side, tip] of [['Left', 'LeftHandThumb4'], ['Right', 'RightHandPinky4']]) {
+    const H = B[side + 'Hand'], F = B[side + 'ForeArm'], T = B[tip] || B[tip.replace('4', '3')]; if (!H || !F || !T) continue;
+    const h = H.getWorldPosition(new THREE.Vector3()), a = h.clone().sub(F.getWorldPosition(new THREE.Vector3())).normalize();
+    const v = T.getWorldPosition(new THREE.Vector3()).sub(h); v.addScaledVector(a, -v.dot(a)).normalize();
+    THUMB[side] = v.applyQuaternion(H.getWorldQuaternion(new THREE.Quaternion()).invert());
+  }
+  const _ha = new THREE.Vector3(), _hcur = new THREE.Vector3(), _hw = new THREE.Vector3(), _hx = new THREE.Vector3(), _rq = new THREE.Quaternion();
+  // gira la mano sobre el eje del antebrazo (pronación/supinación, en la muñeca: la manga no se retuerce) hasta que
+  // el lado del pulgar mire hacia `to` (dirección en el espacio del personaje); la palma y el dorso salen solos
+  function rollHand(side, to, w = 1) {
+    const H = B[side + 'Hand'], F = B[side + 'ForeArm'], tl = THUMB[side]; if (!H || !F || !tl || w <= 0) return;
+    H.updateWorldMatrix(true, false);
+    H.getWorldPosition(_H); F.getWorldPosition(_E); _ha.subVectors(_H, _E).normalize();
+    H.getWorldQuaternion(_qw); _hcur.copy(tl).applyQuaternion(_qw); _hcur.addScaledVector(_ha, -_hcur.dot(_ha));
+    root.getWorldQuaternion(_rq); _hw.set(to[0], to[1], to[2]).applyQuaternion(_rq); _hw.addScaledVector(_ha, -_hw.dot(_ha));
+    if (_hcur.lengthSq() < 1e-8 || _hw.lengthSq() < 1e-8) return;
+    _hcur.normalize(); _hw.normalize();
+    const ang = Math.atan2(_ha.dot(_hx.crossVectors(_hcur, _hw)), _hcur.dot(_hw));
+    _qd.setFromAxisAngle(_ha, ang * w); H.parent.getWorldQuaternion(_qp);
+    H.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); H.updateMatrixWorld(true);
+  }
   function pose(p = {}) {
     rest.forEach((q, b) => b.quaternion.copy(q)); B.Hips.position.copy(restPos);
     root.position.set(0, 0, 0); root.rotation.set(0, (p.yaw || 0) * Math.PI / 180, 0);
@@ -150,8 +175,8 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       turn(side + 'Foot', AX.x, pitch + t); B[side + 'Foot'].updateMatrixWorld(true);
     }
     if (p.reach) for (const side of ['Left', 'Right']) { const r = p.reach[side]; if (r) reach(side, r.at, r.pole, r.w ?? 1); }
-    // torsión del antebrazo sobre su eje después del alcance (hacia dónde mira el puño), sin mover la muñeca
-    if (p.twist) for (const side of ['Left', 'Right']) { const t = p.twist[side]; if (t && B[side + 'ForeArm']) B[side + 'ForeArm'].rotateY(t * Math.PI / 180); }
+    // hacia dónde mira el pulgar de cada mano: hands: { Left: { thumb: [x, y, z], w }, Right: … }
+    if (p.hands) for (const side of ['Left', 'Right']) { const h = p.hands[side]; if (h) rollHand(side, h.thumb, h.w ?? 1); }
     // pies en el suelo: el pie más bajo apoya siempre en el suelo (de ahí sale el sube y baja natural del paso)
     root.position.y = restFoot * (1 - sq) - footMin() + (p.hop || 0) * size.y;
     root.updateMatrixWorld(true);

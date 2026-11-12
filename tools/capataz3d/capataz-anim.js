@@ -18,7 +18,7 @@ const win = (t, a, b) => clamp((t - a) / (b - a));
 const bump = (t, a, b) => { const u = win(t, a, b); return Math.sin(Math.PI * u); };
 
 // De pie como un capataz: pies al frente, piernas algo cerradas, brazos caídos con el codo suelto y los puños a los
-// lados de la cadera, con los nudillos hacia delante (local: torsión del antebrazo sobre su eje).
+// lados de la cadera. hands: hacia dónde mira el pulgar de cada mano (el motor gira la muñeca; la palma sale sola).
 export const BASE = {
   LeftUpLeg: { z: -12, y: -42 }, RightUpLeg: { z: 12, y: 42 },
   LeftLeg: { z: 4 }, RightLeg: { z: -4 },
@@ -27,9 +27,10 @@ export const BASE = {
   LeftArm: { z: -72, x: -12 }, RightArm: { z: 42, x: -12 },
   LeftForeArm: { x: -34 }, RightForeArm: { x: -34 },
   Spine: { x: 2 }, Head: { x: -3 },
-  local: { LeftForeArm: { y: -60 }, RightForeArm: { y: 60 } }
+  // con los brazos caídos, el pulgar mira al frente y la palma al muslo
+  hands: { Left: { thumb: [0, 0, 1] }, Right: { thumb: [0, 0, 1] } }
 };
-const SPECIAL = new Set(['reach', 'sole', 'legs', 'soleYaw', 'local', 'thumb', 'face', 'twist']);
+const SPECIAL = new Set(['reach', 'sole', 'legs', 'soleYaw', 'local', 'thumb', 'face', 'hands']);
 const addV = (a, b) => ({ x: (a?.x || 0) + (b?.x || 0), y: (a?.y || 0) + (b?.y || 0), z: (a?.z || 0) + (b?.z || 0) });
 const mixV = (a, b, k) => ({ x: (a?.x || 0) + ((b?.x || 0) - (a?.x || 0)) * k, y: (a?.y || 0) + ((b?.y || 0) - (a?.y || 0)) * k, z: (a?.z || 0) + ((b?.z || 0) - (a?.z || 0)) * k });
 const keys = (a, b) => new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
@@ -43,7 +44,9 @@ export function add(base, extra) {
     o[k] = addV(a, b);
   }
   if (base.local || extra.local) { o.local = {}; for (const n of keys(base.local, extra.local)) o.local[n] = addV(base.local?.[n], extra.local?.[n]); }
-  for (const k of ['reach', 'sole', 'legs', 'soleYaw', 'thumb', 'face', 'twist']) { const v = extra[k] ?? base[k]; if (v !== undefined) o[k] = v; }
+  for (const k of ['reach', 'sole', 'legs', 'soleYaw', 'thumb', 'face']) { const v = extra[k] ?? base[k]; if (v !== undefined) o[k] = v; }
+  // las manos, una a una: la segunda pose puede cambiar solo una
+  if (base.hands || extra.hands) o.hands = { Left: extra.hands?.Left ?? base.hands?.Left, Right: extra.hands?.Right ?? base.hands?.Right };
   return o;
 }
 const mixP = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
@@ -58,7 +61,15 @@ export function mix(a, b, k) {
   if (a.local || b.local) { o.local = {}; for (const n of keys(a.local, b.local)) o.local[n] = mixV(a.local?.[n], b.local?.[n], k); }
   // pulgares: 0 puño, 1 arriba
   if (a.thumb || b.thumb) o.thumb = { Left: (a.thumb?.Left || 0) + ((b.thumb?.Left || 0) - (a.thumb?.Left || 0)) * k, Right: (a.thumb?.Right || 0) + ((b.thumb?.Right || 0) - (a.thumb?.Right || 0)) * k };
-  for (const f of ['twist']) if (a[f] || b[f]) o[f] = { Left: (a[f]?.Left || 0) + ((b[f]?.Left || 0) - (a[f]?.Left || 0)) * k, Right: (a[f]?.Right || 0) + ((b[f]?.Right || 0) - (a[f]?.Right || 0)) * k };
+  // hacia dónde mira el pulgar de cada mano: se mezcla la dirección (y el peso, si una pose no la lleva)
+  if (a.hands || b.hands) {
+    o.hands = {};
+    for (const s of ['Left', 'Right']) {
+      const x = a.hands?.[s], y = b.hands?.[s];
+      if (x && y) o.hands[s] = { thumb: mixP(x.thumb, y.thumb, k), w: (x.w ?? 1) + ((y.w ?? 1) - (x.w ?? 1)) * k };
+      else if (y) o.hands[s] = { ...y, w: k * (y.w ?? 1) }; else if (x) o.hands[s] = { ...x, w: (1 - k) * (x.w ?? 1) };
+    }
+  }
   // la planta del pie respecto al suelo (sin indicar, plana)
   if (a.sole || b.sole) { const sa = a.sole || {}, sb = b.sole || {}; o.sole = { Left: (sa.Left || 0) + ((sb.Left || 0) - (sa.Left || 0)) * k, Right: (sa.Right || 0) + ((sb.Right || 0) - (sa.Right || 0)) * k }; }
   const sy = k < 0.5 ? a.soleYaw : b.soleYaw; if (sy) o.soleYaw = sy;
@@ -176,8 +187,10 @@ function stand({ sway = 0, dip = 0, fwd = 0 } = {}) {
 }
 const TOES = { Left: 6, Right: -6 };   // de pie, las puntas un poco abiertas
 // brazos en jarra: los puños en la cintura y los codos fuera (la postura de quien mira cómo va la obra)
-const JARRA = { LeftArm: { z: 10, x: 12 }, RightArm: { z: -10, x: 12 }, LeftForeArm: { x: -10, z: -30 }, RightForeArm: { x: -10, z: 30 }, local: { LeftForeArm: { y: -10 }, RightForeArm: { y: 10 } } };
-const JARRA_L = { LeftArm: JARRA.LeftArm, LeftForeArm: JARRA.LeftForeArm, local: { LeftForeArm: JARRA.local.LeftForeArm } };
+// (la palma contra la cadera, el dorso hacia fuera y el lado del pulgar arriba y al frente, como unos puños en la cintura)
+const JL = [-0.4, 0.6, 0.5], JR = [0.4, 0.6, 0.5], BRIM = [0.55, -0.15, -0.6];   // en la cintura (izq. y dcha.); saludando en el ala del casco
+const JARRA = { LeftArm: { z: 10, x: 12 }, RightArm: { z: -10, x: 12 }, LeftForeArm: { x: -10, z: -30 }, RightForeArm: { x: -10, z: 30 }, hands: { Left: { thumb: JL }, Right: { thumb: JR } } };
+const JARRA_L = { LeftArm: JARRA.LeftArm, LeftForeArm: JARRA.LeftForeArm, hands: { Left: { thumb: JL } } };
 const hold = (x, g = 2.4) => Math.tanh(g * x) / Math.tanh(g);   // una onda con pausas en los extremos
 
 // Reposo: en jarra, respira (pecho y hombros), cambia el peso de una pierna a otra con pausas y mira alrededor
@@ -208,13 +221,13 @@ export function talk(t, v = 0) {
   if (v === 0) {
     // mira hacia la obra (a su derecha) al empezar cada frase y vuelve a quien lee
     const look = bump(t % 4.2, 0.1, 1.5);
-    q.Head.y = -26 * look; q.Neck = { y: -8 * look }; q.Spine = addV(q.Spine, { z: -5 });
-    q.reach = { Right: { at: [-0.34, 0.66 + 0.02 * beat, 0.04 + 0.01 * em], pole: [-0.3, 0.2, -0.1] } };
-    q.thumb = { Right: 1 };
+    q.Head.y = -26 * look; q.Neck = { y: -8 * look }; q.Spine = addV(q.Spine, { z: -4 });
+    q.reach = { Right: { at: [-0.27 - 0.03 * em, 0.66 + 0.01 * beat, 0.07], pole: [-0.35, 0.3, -0.05] } };
+    q.hands.Right = { thumb: [-1, 0.2, 0] }; q.thumb = { Right: 1 };
   } else if (v === 1) {
     q.Head.y = 5;
     q.reach = { Right: { at: [-0.22, 0.6 + 0.025 * em, 0.18 + 0.015 * em], pole: [-0.35, 0.3, 0] } };
-    q.twist = { Right: -100 }; q.thumb = { Right: 1 };
+    q.hands.Right = { thumb: [0, 1, 0] }; q.thumb = { Right: 1 };
   } else {
     q.Head.y = 6 * S(t * f / 4); q.LeftArm = addV(q.LeftArm, { z: 2 * em }); q.RightArm = addV(q.RightArm, { z: -2 * em });
   }
@@ -249,6 +262,7 @@ export function haul(p) {
     squash: 0.03 * pull
   });
   q.reach = { Left: { at: hand(p, 1), pole: [0.3, 0.3, -0.12] }, Right: { at: hand(p + 0.5, -1), pole: [-0.3, 0.3, -0.12] } };
+  q.hands = { Left: { thumb: [0, 1, 0] }, Right: { thumb: [0, 1, 0] } };
   return q;
 }
 
@@ -279,13 +293,13 @@ export function greet(t) {
   const up = eio(win(t, 0.08, 0.5)), out = eio(win(t, 1.05, 1.45)), back = eio(win(t, 2.05, 2.5));
   const antic = bump(t, 0, 0.22), tip = bump(t, 0.45, 1.05), H = RIG.H;
   const brim = [-0.17, 0.79 - 0.018 * tip, 0.07], thumb = [-0.22, 0.62, 0.18], hip = [-0.2, 0.5, 0.06];
-  const at = mixP(mixP(mixP(hip, brim, up), thumb, out), hip, back);
+  const at = mixP(mixP(mixP(hip, brim, up), thumb, out), hip, back), dir = mixP(mixP(mixP(JR, BRIM, up), [0, 1, 0], out), JR, back);
   const q = add(add(BASE, JARRA), {
     Spine: { z: -3 * up * (1 - out), x: -1.5 * tip }, Spine2: { y: 4 * up * (1 - back) },
     Head: { x: -3 - 9 * tip, z: 4 * up * (1 - out), y: 4 * out * (1 - back) }
   });
   q.reach = { Right: { at, pole: mixP([-0.45, 0.6, -0.1], [-0.35, 0.3, 0], out), w: Math.min(1, up * 4) * (1 - back) } };
-  q.twist = { Right: -100 * out * (1 - back) }; q.thumb = { Right: out * (1 - back) };
+  q.hands.Right = { thumb: dir }; q.thumb = { Right: out * (1 - back) };
   q.legs = stand({ dip: 0.012 * H * antic + 0.004 * H * tip }); q.soleYaw = TOES;
   return q;
 }
@@ -302,7 +316,7 @@ export function cheer(t) {
   });
   const pump = 0.012 * S(win(t, 0.74, 1.4) * 2) * up;
   q.reach = { Left: { at: [0.2, 0.9 + pump, 0.04], pole: [0.5, 0.6, -0.1], w: up }, Right: { at: [-0.2, 0.9 + pump, 0.04], pole: [-0.5, 0.6, -0.1], w: up } };
-  q.thumb = { Left: up, Right: up };
+  q.hands = { Left: { thumb: mixP(JL, [-1, 0.2, 0], up) }, Right: { thumb: mixP(JR, [1, 0.2, 0], up) } };
   q.legs = stand({ dip: 0.03 * H * crouch + 0.02 * H * land }); q.soleYaw = TOES;
   return q;
 }
@@ -313,7 +327,7 @@ export function hop(t) {
   const crouch = bump(t, 0, 0.22), air = win(t, 0.18, 0.5), land = bump(t, 0.48, 0.72), H = RIG.H;
   const up = eio(win(t, 0.1, 0.32)) * (1 - eio(win(t, 0.72, 1.0)));
   const q = add(add(BASE, JARRA), { Head: { x: -3 + 4 * crouch - 4 * up }, squash: 0.04 * crouch - 0.03 * Math.sin(Math.PI * air) + 0.04 * land, hop: 0.045 * Math.sin(Math.PI * air) });
-  q.reach = { Right: { at: [-0.22, 0.62, 0.18], pole: [-0.35, 0.3, 0], w: up } }; q.twist = { Right: -100 * up }; q.thumb = { Right: up };
+  q.reach = { Right: { at: [-0.22, 0.62, 0.18], pole: [-0.35, 0.3, 0], w: up } }; q.hands.Right = { thumb: mixP(JR, [0, 1, 0], up) }; q.thumb = { Right: up };
   q.legs = stand({ dip: 0.02 * H * crouch + 0.014 * H * land }); q.soleYaw = TOES;
   return q;
 }
@@ -331,7 +345,7 @@ export function hat(t) {
   const up = eio(win(t, 0.05, 0.5)) * (1 - eio(win(t, 1.45, 2.0))), fix = S(win(t, 0.55, 1.4) * 1.5) * bump(t, 0.5, 1.45);
   const q = add(add(BASE, JARRA), { Head: { x: -3 - 4 * up, z: 4 * fix }, Spine: { z: -2 * up } });
   q.reach = { Right: { at: [-0.17, 0.8 + 0.012 * fix, 0.07], pole: [-0.45, 0.6, -0.1], w: up } };
-  q.twist = { Right: -20 * up };
+  q.hands.Right = { thumb: mixP(JR, BRIM, up) };
   q.legs = stand(); q.soleYaw = TOES;
   return q;
 }
