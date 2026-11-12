@@ -123,19 +123,20 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     THUMB[side] = v.applyQuaternion(H.getWorldQuaternion(new THREE.Quaternion()).invert());
   }
   const _ha = new THREE.Vector3(), _hcur = new THREE.Vector3(), _hw = new THREE.Vector3(), _hx = new THREE.Vector3(), _rq = new THREE.Quaternion();
-  // gira la mano sobre el eje del antebrazo (pronación/supinación, en la muñeca: la manga no se retuerce) hasta que
-  // el lado del pulgar mire hacia `to` (dirección en el espacio del personaje); la palma y el dorso salen solos
+  // Gira el antebrazo entero sobre su eje (desde el codo) hasta que el lado del pulgar mire hacia `to` (dirección en
+  // el espacio del personaje). El guante y su puño giran de una pieza, rígidos: la malla no admite girar la muñeca
+  // (el puño se retuerce contra el puño de la manga). La palma y el dorso salen solos.
   function rollHand(side, to, w = 1) {
     const H = B[side + 'Hand'], F = B[side + 'ForeArm'], tl = THUMB[side]; if (!H || !F || !tl || w <= 0) return;
-    H.updateWorldMatrix(true, false);
+    F.updateWorldMatrix(true, true);
     H.getWorldPosition(_H); F.getWorldPosition(_E); _ha.subVectors(_H, _E).normalize();
     H.getWorldQuaternion(_qw); _hcur.copy(tl).applyQuaternion(_qw); _hcur.addScaledVector(_ha, -_hcur.dot(_ha));
     root.getWorldQuaternion(_rq); _hw.set(to[0], to[1], to[2]).applyQuaternion(_rq); _hw.addScaledVector(_ha, -_hw.dot(_ha));
     if (_hcur.lengthSq() < 1e-8 || _hw.lengthSq() < 1e-8) return;
     _hcur.normalize(); _hw.normalize();
     const ang = Math.atan2(_ha.dot(_hx.crossVectors(_hcur, _hw)), _hcur.dot(_hw));
-    _qd.setFromAxisAngle(_ha, ang * w); H.parent.getWorldQuaternion(_qp);
-    H.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); H.updateMatrixWorld(true);
+    _qd.setFromAxisAngle(_ha, ang * w); F.getWorldQuaternion(_qw); F.parent.getWorldQuaternion(_qp);
+    F.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); F.updateMatrixWorld(true);
   }
   function pose(p = {}) {
     rest.forEach((q, b) => b.quaternion.copy(q)); B.Hips.position.copy(restPos);
@@ -155,9 +156,10 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     }
     // giros en los ejes propios de cada hueso (torsión del antebrazo, muñeca, dedos): { Hueso: { x, y, z } } en grados
     if (p.local) for (const n in p.local) { const b = B[n], r = p.local[n]; if (!b) continue; if (r.z) b.rotateZ(r.z * Math.PI / 180); if (r.y) b.rotateY(r.y * Math.PI / 180); if (r.x) b.rotateX(r.x * Math.PI / 180); }
-    // manos: el modelo trae el pulgar levantado; por defecto se cierra en puño. thumb: { Left, Right } de 0 (puño) a 1
-    // (pulgar arriba). En la mano derecha el pulgar lo mueve la cadena «Pinky» (así lo dejó el auto-rig).
-    { const tu = p.thumb || {}, a = 35 * (1 - (tu.Left || 0)) * Math.PI / 180, b = 45 * (1 - (tu.Right || 0)) * Math.PI / 180;
+    // manos: el modelo trae el pulgar levantado; por defecto baja a descansar sobre el puño. thumb: { Left, Right } de
+    // 0 (puño) a 1 (pulgar arriba). Solo se pliega hasta donde el guante sigue limpio (más allá, la malla se arruga):
+    // 21° en la izquierda y 29° en la derecha, donde el pulgar lo mueve la cadena «Pinky» (así lo dejó el auto-rig).
+    { const tu = p.thumb || {}, a = 21 * (1 - (tu.Left || 0)) * Math.PI / 180, b = 29 * (1 - (tu.Right || 0)) * Math.PI / 180;
       for (const k of [1, 2, 3]) { if (a && B['LeftHandThumb' + k]) B['LeftHandThumb' + k].rotateX(a); if (b && B['RightHandPinky' + k]) B['RightHandPinky' + k].rotateX(b); } }
     root.updateMatrixWorld(true);
     // piernas por cinemática inversa: el tobillo va a su sitio y la rodilla mira al polo (delante)

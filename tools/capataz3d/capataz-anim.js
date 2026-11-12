@@ -229,8 +229,9 @@ export function talk(t, v = 0) {
     // mira hacia la obra (a su derecha) al empezar cada frase y vuelve a quien lee
     const look = bump(t % 4.2, 0.1, 1.5);
     q.Head.y = -26 * look; q.Neck = { y: -8 * look }; q.Spine = addV(q.Spine, { z: -4 });
-    q.reach = { Right: { at: [-0.27 - 0.03 * em, 0.66 + 0.01 * beat, 0.07], pole: [-0.35, 0.3, -0.05] } };
-    q.hands.Right = { thumb: [-1, 0.2, 0] }; q.thumb = { Right: 1 };
+    // (el antebrazo va vertical, con el codo abajo: así el pulgar, que sale de lado, puede apuntar hacia la obra)
+    q.reach = { Right: { at: [-0.27 - 0.022 * em, 0.72 + 0.008 * beat, 0.07], pole: [-0.32, 0.2, -0.1] } };
+    q.hands.Right = { thumb: [-1, 0.25, 0] }; q.thumb = { Right: 1 };
   } else if (v === 1) {
     q.Head.y = 5;
     q.reach = { Right: { at: [-0.22, 0.6 + 0.025 * em, 0.18 + 0.015 * em], pole: [-0.35, 0.3, 0] } };
