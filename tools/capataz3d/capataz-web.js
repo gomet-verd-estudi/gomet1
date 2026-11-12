@@ -32,13 +32,15 @@ function modelSource(base, spec) {
 window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, reduce = false }) {
   if (!webgl()) throw new Error('sin WebGL');
   // Trazo suavizado: se dibuja al doble y se reduce (ss = 2), y el lienzo va a la densidad de la pantalla hasta 1,75x
-  // (más no se distingue a este tamaño y cuesta el doble). Sin mapa de relieve: solo las líneas del modelo y los
-  // pliegues dibujados, sin el ruido de motas que daba el relieve.
+  // (más no se distingue a este tamaño y cuesta el doble). El color sale de una textura de siete tintas planas; el
+  // contorno separa las prendas, y los rasgos de la cara (cejas, ojos, bigote, sonrisa) van sin contorno.
   const dpr = Math.max(1, Math.min(1.75, window.devicePixelRatio || 1));
   const C = await createCapataz({
-    canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', textureTalk: base + 'color-habla.png', relief: base + 'plano.png', folds: base + 'pliegues.png',
-    line, fine, fineThreshold: 2.4, background: null, ss: 2, reliefScale: 0,
-    colour: true, ink: INK   // a color: las tintas planas de la textura, con contorno oscuro
+    canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', textureTalk: base + 'color-habla.png', relief: base + 'plano.png', folds: null, flipY: true,
+    line, fine, fineThreshold: 2.4, background: null, ss: 2, reliefScale: 0, skinLines: 3,
+    colour: true, ink: INK,   // a color: las tintas planas de la textura, con contorno oscuro
+    //         piel       peto       negro      casco      camisa     pelo       blanco   (1 piel, 2 rasgo de la cara)
+    palette: { colours: ['#C8AA9B', '#2367C7', '#151313', '#C9B55C', '#42A645', '#4A150B', '#F4F4F2'], roles: [1, 0, 2, 0, 0, 2, 2] }
   });
   C.renderer.setPixelRatio(dpr);
   setRig(C.rig); // los pasos se planean con las medidas reales de las piernas

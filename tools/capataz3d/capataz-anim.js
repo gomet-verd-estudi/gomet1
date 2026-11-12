@@ -18,16 +18,13 @@ const win = (t, a, b) => clamp((t - a) / (b - a));
 const back = (t) => { const c = 1.25, u = t - 1; return 1 + (c + 1) * u * u * u + c * u * u; };   // llega, se pasa un 5 % y vuelve
 const bump = (t, a, b) => { const u = win(t, a, b); return Math.sin(Math.PI * u); };
 
-// De pie como un capataz: pies al frente, piernas algo cerradas, brazos caídos con el codo suelto y los puños a los
-// lados de la cadera. hands: hacia dónde mira el pulgar de cada mano (el motor gira la muñeca; la palma sale sola).
+// De pie, desde la pose neutra del motor (brazos en cruz, piernas rectas, pies al frente): los brazos caídos a los
+// lados con el codo suelto y las manos algo al frente. hands: hacia dónde mira el pulgar de cada mano.
 export const BASE = {
-  LeftUpLeg: { z: -12, y: -42 }, RightUpLeg: { z: 12, y: 42 },
-  LeftLeg: { z: 4 }, RightLeg: { z: -4 },
-  LeftFoot: { y: -22 }, RightFoot: { y: 22 },
-  // el modelo no tiene los brazos simétricos en reposo (+8° y −22°): ambos quedan a 64° bajo la horizontal
-  LeftArm: { z: -72, x: -12 }, RightArm: { z: 42, x: -12 },
-  LeftForeArm: { x: -34 }, RightForeArm: { x: -34 },
-  Spine: { x: 2 }, Head: { x: -3 },
+  LeftArm: { z: -66, x: -10 }, RightArm: { z: 66, x: -10 },
+  LeftForeArm: { x: -26 }, RightForeArm: { x: -26 },
+  LeftUpLeg: { z: 7 }, RightUpLeg: { z: -7 },
+  Spine: { x: 1 }, Head: { x: -2 },
   // con los brazos caídos, el pulgar mira al frente y la palma al muslo
   hands: { Left: { thumb: [0, 0, 1] }, Right: { thumb: [0, 0, 1] } }
 };
@@ -105,12 +102,13 @@ export function mix(a, b, k, kb = k) {
    pierna que apoya y gira con la que avanza; el pecho contrarresta y los brazos van en oposición.
    p ∈ [0, 1): fase del ciclo de dos pasos; p = 0.25: pisa la izquierda; p = 0.75: la derecha. */
 // medidas del modelo en reposo (unidades del mundo); capataz-web las cambia por las que mide el motor (setRig)
-let RIG = { H: 0.978, floor: 0, hips: [0.002, 0.433, -0.014],
-  Left: { hip: [0.06, 0.415, -0.014], thigh: 0.19, shin: 0.197, ah: 0.063, back: 0.026, F: 0.15 },
-  Right: { hip: [-0.056, 0.415, -0.014], thigh: 0.19, shin: 0.197, ah: 0.063, back: 0.034, F: 0.2 } };
+let RIG = { H: 0.978, floor: 0, hips: [0, 0.361, 0], head: [0, 0.69, 0.019], top: 0.978, chest: [0, 0.541, 0.004],
+  Left: { hip: [0.076, 0.33, 0.004], thigh: 0.142, shin: 0.153, ah: 0.055, back: 0.028, F: 0.163, shoulder: [0.111, 0.609, -0.011], upper: 0.091, fore: 0.092 },
+  Right: { hip: [-0.076, 0.33, 0.004], thigh: 0.142, shin: 0.153, ah: 0.055, back: 0.028, F: 0.163, shoulder: [-0.111, 0.609, -0.011], upper: 0.091, fore: 0.098 } };
 export function setRig(r) { if (r && r.Left && r.Right) RIG = r; }
 const STANCE = 0.6;
-const stepLen = (k) => 0.3 * RIG.H * (0.85 + 0.15 * k);    // largo de un paso (≈ 0,3 de la altura, como unas piernas cortas)
+const LEG = () => RIG.Left.thigh + RIG.Left.shin;
+const stepLen = (k) => 0.78 * LEG() * (0.85 + 0.15 * k);   // largo de un paso: unas tres cuartas partes de la pierna
 export const stride = (k = 1) => 2 * stepLen(k);           // lo que avanza el cuerpo en un ciclo (dos pasos)
 const ease = (t) => t * t * (3 - 2 * t);
 // tobillo y ángulo de la planta (+ punta arriba) de un pie apoyado, a partir del punto que toca el suelo
@@ -136,7 +134,7 @@ function foot(side, q, k) {
   const B0 = planted(R, zc, cyc, 0, hs), B0b = planted(R, zc, cyc, e, hs);
   const v0z = (A0.z - A0b.z) / e * sw, v0y = (A0.y - A0b.y) / e * sw, v1z = (B0b.z - B0.z) / e * sw, v1y = (B0b.y - B0.y) / e * sw;
   const h00 = 2 * t ** 3 - 3 * t * t + 1, h10 = t ** 3 - 2 * t * t + t, h01 = -2 * t ** 3 + 3 * t * t, h11 = t ** 3 - t * t;
-  const lift = 0.05 * RIG.H * Math.min(1.25, k) * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.1)), 2);
+  const lift = 0.13 * LEG() * Math.min(1.25, k) * Math.pow(Math.sin(Math.PI * Math.min(1, t * 1.1)), 2);
   return {
     air: true,
     z: h00 * A0.z + h10 * v0z + h01 * B0.z + h11 * v1z,
@@ -149,7 +147,7 @@ const smin = (a, b, r) => -r * Math.log(Math.exp(-a / r) + Math.exp(-b / r));
 export function walk(p, k = 1) {
   const qL = p - 0.25, qR = p + 0.25, cL = C(qL);
   const fL = foot('Left', qL, k), fR = foot('Right', qR, k);
-  const track = 0.095 * RIG.H, H = RIG.H;
+  const track = RIG.Left.hip[0] + 0.022 * RIG.H, H = RIG.H;
   const ankL = [track, fL.y, fL.z], ankR = [-track, fR.y, fR.z];
   // pelvis: tan alta como dejan las piernas (algo flexionadas), con su balanceo lateral
   const sway = 0.011 * H * C(p - 0.5), fwd = 0.012 * H;
@@ -169,7 +167,7 @@ export function walk(p, k = 1) {
     Head: { y: -1 * C(qL - 0.16), x: -lean * 0.7 + 1.2 * S(2 * p - 0.2) },
     // los brazos cuelgan más que en reposo y van en oposición a las piernas; el antebrazo llega tarde
     LeftArm: { x: 2 + B * C(qL - 0.03), z: 2 * load }, RightArm: { x: 2 + B * C(qR - 0.03), z: -2 * load },
-    LeftForeArm: { x: 12 - 18 * Math.max(0, -C(qL - 0.1)) }, RightForeArm: { x: 12 - 18 * Math.max(0, -C(qR - 0.1)) },
+    LeftForeArm: { x: 6 - 18 * Math.max(0, -C(qL - 0.1)) }, RightForeArm: { x: 6 - 18 * Math.max(0, -C(qR - 0.1)) },
     LeftHand: { x: 5 * C(qL - 0.18) }, RightHand: { x: 5 * C(qR - 0.18) }
   });
   const pole = (x) => [x, RIG.Left.hip[1] * 0.5, 0.4 * H];
@@ -187,59 +185,64 @@ function legsAt(ankL, ankR, { sway = 0, dip = 0, fwd = 0 } = {}) {
   const pole = (a, s) => [a[0] + s * 0.03 * H, RIG.Left.hip[1] * 0.5, a[2] + 0.36 * H];
   return { hip: [RIG.hips[0] + sway, y, RIG.hips[2] + fwd], Left: { ankle: ankL, pole: pole(ankL, 1) }, Right: { ankle: ankR, pole: pole(ankR, -1) } };
 }
-const FOOT_X = 0.135, FOOT_Z = 0.061;   // dónde pisa cada pie de pie (en alturas, respecto a la pelvis)
+const FOOT_X = 0.105, FOOT_Z = 0.004;   // dónde pisa cada pie de pie (en alturas, respecto a la pelvis)
 function stand(o) {
   const H = RIG.H, ax = FOOT_X * H, az = RIG.hips[2] + FOOT_Z * H;
   return legsAt([ax, RIG.floor + RIG.Left.ah, az], [-ax, RIG.floor + RIG.Right.ah, az], o);
 }
 const TOES = { Left: 6, Right: -6 };   // de pie, las puntas un poco abiertas
-// brazos en jarra: los puños en la cintura y los codos fuera (la postura de quien mira cómo va la obra)
-// (la palma contra la cadera, el dorso hacia fuera y el lado del pulgar arriba y al frente, como unos puños en la cintura)
-const JL = [-0.4, 0.6, 0.5], JR = [0.4, 0.6, 0.5], BRIM = [0.55, -0.15, -0.6];   // en la cintura (izq. y dcha.); saludando en el ala del casco
-const JARRA = { LeftArm: { z: 10, x: 12 }, RightArm: { z: -10, x: 12 }, LeftForeArm: { x: -10, z: -30 }, RightForeArm: { x: -10, z: 30 }, hands: { Left: { thumb: JL }, Right: { thumb: JR } } };
-const JARRA_L = { LeftArm: JARRA.LeftArm, LeftForeArm: JARRA.LeftForeArm, hands: { Left: { thumb: JL } } };
+// Dónde llega la mano: un punto respecto al hombro, en largos de brazo (hacia fuera, arriba, al frente). Así los gestos
+// valen para cualquier modelo: este tiene los brazos cortos y las manos grandes, y no llega a la cintura ni a la cara.
+const ARM = (side) => RIG[side].upper + RIG[side].fore;
+const hand_ = (side, o) => { const s = RIG[side].shoulder, sx = side === 'Left' ? 1 : -1, L = ARM(side); return [s[0] + sx * o[0] * L, s[1] + o[1] * L, s[2] + o[2] * L]; };
+const elbow = (side, out, y, z = 0) => [(side === 'Left' ? 1 : -1) * out, y, z];   // hacia dónde apunta el codo
 const hold = (x, g = 2.4) => Math.tanh(g * x) / Math.tanh(g);   // una onda con pausas en los extremos
+const FWD = [0, 0, 1];   // el pulgar al frente: la mano caída, con la palma hacia el muslo
 
-// Reposo: en jarra, respira (pecho y hombros), cambia el peso de una pierna a otra con pausas y mira alrededor
+// Reposo: brazos caídos y sueltos; respira (pecho y hombros), cambia el peso de una pierna a otra con pausas, mira
+// alrededor y las manos se mecen un poco
 export function idle(t) {
   const br = S(t / 3.6), sh = hold(S(t / 12.5)), lk = S(t / 9.1 + 0.2), H = RIG.H;
-  const q = add(add(BASE, JARRA), {
-    LeftArm: { z: 1.6 * br }, RightArm: { z: -1.6 * br }, LeftShoulder: { z: 1.4 * br }, RightShoulder: { z: -1.4 * br },
-    Hips: { z: -3.4 * sh }, Spine: { z: 2.2 * sh }, Spine2: { x: 1.6 * br, z: 1.2 * sh },
+  const q = add(BASE, {
+    LeftArm: { z: 1.8 * br + 1.5 * sh, x: 2 * S(t / 5.3) }, RightArm: { z: -1.8 * br + 1.5 * sh, x: 2 * S(t / 5.3 + 0.4) },
+    LeftForeArm: { x: -3 * br }, RightForeArm: { x: -3 * br },
+    LeftShoulder: { z: 1.4 * br }, RightShoulder: { z: -1.4 * br },
+    Hips: { z: -3 * sh }, Spine: { z: 2 * sh }, Spine2: { x: 1.6 * br, z: 1.1 * sh },
     Neck: { x: -0.8 * br }, Head: { y: 7 * lk, x: 1.2 * S(t / 4.7), z: -1.2 * sh }
   });
-  q.legs = stand({ sway: 0.024 * H * sh, dip: 0.003 * H * (1 - br) + 0.006 * H * Math.abs(sh) });
+  q.legs = stand({ sway: 0.02 * H * sh, dip: 0.003 * H * (1 - br) + 0.005 * H * Math.abs(sh) });
   q.soleYaw = TOES;
   return q;
 }
 
 /* Hablar, con tres maneras de explicarse (v):
-   0 «señala»: el puño derecho a un lado con el pulgar hacia la obra, y la cabeza va de la obra a quien lee;
-   1 «pulgar»: pulgar arriba hacia quien lee, con un asentimiento (visto bueno);
-   2 «en jarra»: los puños en la cintura, asiente y se balancea, como quien da un parte.
-   El izquierdo queda siempre en la cintura. El cuerpo marca el ritmo de la frase. */
+   0 «presenta la obra»: el brazo derecho extendido hacia ella con la palma abierta, y la cabeza va de la obra a quien lee;
+   1 «explica»: las dos manos delante con las palmas hacia arriba, marcando el ritmo una y otra;
+   2 «da el parte»: los brazos caídos, asiente y se balancea.
+   El cuerpo marca el ritmo de la frase. */
 export function talk(t, v = 0) {
   const f = 1.45, beat = S(t * f), nod = S(t * f - 0.12), em = pos(S(t * f)), H = RIG.H;
-  const q = add(add(BASE, v === 2 ? JARRA : JARRA_L), {
-    Spine: { x: -2 + 1.5 * beat, z: v === 2 ? 0 : 2 }, Spine2: { y: v === 0 ? -6 : v === 1 ? 4 : 0, x: 1 * em },
+  const q = add(BASE, {
+    Spine: { x: -1.5 + 1.2 * beat }, Spine2: { y: v === 0 ? -6 : 0, x: 1 * em },
     LeftShoulder: { z: 1.2 * em }, RightShoulder: { z: -1.2 * em },
-    Head: { x: -3 + 4 * nod, z: v === 2 ? 2 * S(t * f / 2) : -2 }
+    Head: { x: -2 + 4 * nod, z: v === 2 ? 2 * S(t * f / 2) : 0 }
   });
+  q.hands = { Left: { thumb: FWD }, Right: { thumb: FWD } };
   if (v === 0) {
     // mira hacia la obra (a su derecha) al empezar cada frase y vuelve a quien lee
     const look = bump(t % 4.2, 0.1, 1.5);
-    q.Head.y = -26 * look; q.Neck = { y: -8 * look }; q.Spine = addV(q.Spine, { z: -4 });
-    // (el antebrazo va vertical, con el codo abajo: así el pulgar, que sale de lado, puede apuntar hacia la obra)
-    q.reach = { Right: { at: [-0.27 - 0.022 * em, 0.72 + 0.008 * beat, 0.07], pole: [-0.32, 0.2, -0.1] } };
-    q.hands.Right = { thumb: [-1, 0.25, 0] }; q.thumb = { Right: 1 };
+    q.Head.y = -24 * look; q.Neck = { y: -8 * look }; q.Spine = addV(q.Spine, { z: -4 });
+    q.reach = { Right: { at: hand_('Right', [0.93 + 0.03 * em, 0.22 + 0.05 * beat, 0.2]), pole: elbow('Right', 0.3, 0.2, -0.1) } };
+    q.hands.Right = { thumb: [0, 1, 0.25] };   // la palma, abierta hacia quien mira
   } else if (v === 1) {
-    q.Head.y = 5;
-    q.reach = { Right: { at: [-0.22, 0.6 + 0.025 * em, 0.18 + 0.015 * em], pole: [-0.35, 0.3, 0] } };
-    q.hands.Right = { thumb: [0, 1, 0] }; q.thumb = { Right: 1 };
+    const l = S(t * f), r = S(t * f + 0.5);
+    q.reach = { Left: { at: hand_('Left', [0.5, -0.42 + 0.07 * l, 0.72]), pole: elbow('Left', 0.5, 0.2, -0.1) }, Right: { at: hand_('Right', [0.5, -0.42 + 0.07 * r, 0.72]), pole: elbow('Right', 0.5, 0.2, -0.1) } };
+    q.hands = { Left: { thumb: [1, 0.35, 0.2] }, Right: { thumb: [-1, 0.35, 0.2] } };   // palmas hacia arriba
+    q.Head.y = 5 * S(t * f / 2);
   } else {
-    q.Head.y = 6 * S(t * f / 4); q.LeftArm = addV(q.LeftArm, { z: 2 * em }); q.RightArm = addV(q.RightArm, { z: -2 * em });
+    q.Head.y = 6 * S(t * f / 4); q.LeftArm = addV(q.LeftArm, { z: 3 * em, x: -4 * em }); q.RightArm = addV(q.RightArm, { z: -3 * em, x: -4 * em });
   }
-  q.legs = stand({ sway: 0.006 * H * S(t * f / 2), dip: 0.008 * H * em });
+  q.legs = stand({ sway: 0.006 * H * S(t * f / 2), dip: 0.007 * H * em });
   q.soleYaw = TOES;
   return q;
 }
@@ -248,29 +251,36 @@ export function talk(t, v = 0) {
    agarra arriba y baja tirando (medio ciclo) mientras la otra suelta, sube por fuera y vuelve a agarrar. Al hacer
    scroll hacia arriba la fase va al revés: la mano que agarra sube con la cuerda (la deja subir) y la otra baja.
    Postura de tirar: pierna cercana adelantada y flexionada, la otra atrás, cuerpo echado atrás en cada tirón. */
-export const ROPE_HI = 0.68, ROPE_LO = 0.40, ROPE_Z = 0.25;
+export const ROPE_HI = 0.624, ROPE_LO = 0.514, ROPE_Z = 0.165;
 export const ropePerPhase = 2 * (ROPE_HI - ROPE_LO); // cuerda que corre por cada ciclo de fase
+// (la muñeca va antes de la cuerda y a su lado: lo que agarra es la palma, y las manos son grandes. Los brazos son
+// cortos: tira echado hacia atrás, con los brazos casi estirados, y así la cabeza y el casco no tocan la cuerda)
 function hand(p, side) {
-  const t = ((p % 1) + 1) % 1;
-  if (t < 0.5) { const u = t / 0.5; return [0, ROPE_HI - (ROPE_HI - ROPE_LO) * u, ROPE_Z]; } // agarrada, tira
+  const t = ((p % 1) + 1) % 1, x = side * 0.04, z = ROPE_Z - 0.068;
+  if (t < 0.5) { const u = t / 0.5; return [x, ROPE_HI - (ROPE_HI - ROPE_LO) * u, z]; } // agarrada, tira
   const u = (t - 0.5) / 0.5, e = u * u * (3 - 2 * u), a = Math.sin(Math.PI * u);
-  return [side * 0.06 * a, ROPE_LO + (ROPE_HI - ROPE_LO) * e, ROPE_Z - 0.025 * a];              // suelta, sube pegada al cuerpo
+  return [x + side * 0.035 * a, ROPE_LO + (ROPE_HI - ROPE_LO) * e, z - 0.035 * a];         // suelta, sube pegada al cuerpo
 }
 export function haul(p) {
   const pull = Math.pow(Math.abs(Math.sin(Math.PI * 2 * p)), 0.8); // dos tirones por ciclo, uno por mano
   const tug = Math.sin(Math.PI * 4 * p - 0.6);                       // rebote del cuerpo en cada tirón
+  const side = Math.sin(Math.PI * 2 * p), H = RIG.H;                 // qué mano tira (+ izquierda)
   const q = add(BASE, {
-    RightUpLeg: { x: -24 }, RightLeg: { x: 22 + 6 * pull }, RightFoot: { x: -8 },
-    LeftUpLeg: { x: 20 }, LeftLeg: { x: 6 + 4 * pull }, LeftFoot: { x: -18 },
-    // inclinado hacia la cuerda; en cada tirón se echa atrás
-    Hips: { x: -6 + 5 * pull, y: 3 * Math.sin(Math.PI * 2 * p) },
-    // (de perfil mirando a la izquierda: pecho y cara un poco abiertos hacia quien mira)
-    Spine: { x: -8 + 7 * pull }, Spine1: { x: -3 + 3 * pull, y: 6 }, Spine2: { y: 6 },
-    Head: { x: -4 - 3 * tug, y: 22 },
-    squash: 0.03 * pull
+    // echado hacia atrás desde la cadera, colgándose de la cuerda; en cada tirón se echa un poco más y gira el pecho
+    // hacia la mano que tira
+    Hips: { x: -9 - 3 * pull }, Spine: { x: -3 - 2 * pull, y: 4 * side }, Spine1: { y: 5 + 4 * side }, Spine2: { y: 5 + 3 * side },
+    // los hombros, adelantados (los brazos no dan más de sí)
+    LeftShoulder: { y: -12 }, RightShoulder: { y: 12 },
+    // mira arriba, a la polea, y un poco hacia quien lee (está de perfil, mirando a la izquierda)
+    Neck: { x: -3 }, Head: { x: -5 - 3 * tug, y: 20 },
+    squash: 0.02 * pull
   });
-  q.reach = { Left: { at: hand(p, 1), pole: [0.3, 0.3, -0.12] }, Right: { at: hand(p + 0.5, -1), pole: [-0.3, 0.3, -0.12] } };
-  q.hands = { Left: { thumb: [0, 1, 0] }, Right: { thumb: [0, 1, 0] } };
+  // plantado en zancada: un pie adelantado y el otro atrás; con cada tirón dobla las rodillas
+  const tr = RIG.Left.hip[0] + 0.02 * H, ah = RIG.floor + RIG.Left.ah;
+  q.legs = legsAt([tr, ah, 0.1 * H], [-tr, ah, -0.085 * H], { fwd: -0.004 * H, dip: 0.01 * H + 0.022 * H * pull });
+  q.soleYaw = { Left: 4, Right: -12 };
+  q.reach = { Left: { at: hand(p, 1), pole: [0.5, 0.1, -0.2] }, Right: { at: hand(p + 0.5, -1), pole: [-0.5, 0.1, -0.2] } };
+  q.hands = { Left: { thumb: [0, 1, 0] }, Right: { thumb: [0, 1, 0] } };   // las palmas enfrentadas, abrazando la cuerda
   return q;
 }
 
@@ -309,48 +319,45 @@ export function turn(t, from, to) {
   return q;
 }
 
-/* Saludar tocándose el casco: se agacha un pelo (anticipación), lleva el puño derecho al ala, inclina la cabeza y
-   el casco con él, y lo remata con el pulgar arriba hacia quien lee antes de volver a la cintura. */
+/* Saludar con la mano: se agacha un pelo (anticipación), levanta el brazo derecho con la palma abierta hacia quien
+   lee, la agita tres veces (el antebrazo va de lado a lado con el codo quieto), ladea la cabeza y lo baja. */
 export const GREET = 2.5;
 export function greet(t) {
-  const up = eio(win(t, 0.08, 0.5)), out = eio(win(t, 1.05, 1.45)), back = eio(win(t, 2.05, 2.5));
-  const antic = bump(t, 0, 0.22), tip = bump(t, 0.45, 1.05), H = RIG.H;
-  const brim = [-0.17, 0.79 - 0.018 * tip, 0.07], thumb = [-0.22, 0.62, 0.18], hip = [-0.2, 0.5, 0.06];
-  const at = mixP(mixP(mixP(hip, brim, up), thumb, out), hip, back), dir = mixP(mixP(mixP(JR, BRIM, up), [0, 1, 0], out), JR, back);
-  const q = add(add(BASE, JARRA), {
-    Spine: { z: -3 * up * (1 - out), x: -1.5 * tip }, Spine2: { y: 4 * up * (1 - back) },
-    Head: { x: -3 - 9 * tip, z: 4 * up * (1 - out), y: 4 * out * (1 - back) }
-  });
-  q.reach = { Right: { at, pole: mixP([-0.45, 0.6, -0.1], [-0.35, 0.3, 0], out), w: Math.min(1, up * 4) * (1 - back) } };
-  q.hands.Right = { thumb: dir }; q.thumb = { Right: out * (1 - back) };
-  q.legs = stand({ dip: 0.012 * H * antic + 0.004 * H * tip }); q.soleYaw = TOES;
+  const up = eio(win(t, 0.08, 0.5)) * (1 - eio(win(t, 2.0, 2.5))), antic = bump(t, 0, 0.22), H = RIG.H;
+  const w = Math.sin(win(t, 0.45, 2.0) * Math.PI * 6) * bump(t, 0.4, 2.05);
+  const q = add(BASE, { Spine: { z: -3 * up, x: -1 * up }, Spine2: { y: 4 * up }, Head: { x: -2 - 2 * up, z: 4 * up + 2 * w * up, y: 3 * up } });
+  q.reach = { Right: { at: hand_('Right', [0.62 + 0.2 * w, 0.72 - 0.06 * Math.abs(w), 0.18]), pole: elbow('Right', 0.5, 0.35, -0.05), w: up } };
+  q.hands = { Left: { thumb: FWD }, Right: { thumb: mixP(FWD, [1, 0.2, 0], up) } };   // la palma hacia quien mira
+  q.legs = stand({ dip: 0.012 * H * antic, sway: 0.006 * H * up }); q.soleYaw = TOES;
   return q;
 }
 
-/* Celebrar (fin de obra): se agacha, salta con los dos puños arriba y cae amortiguando; aguanta un momento y baja. */
+/* Celebrar (fin de obra): se agacha, salta con los dos brazos arriba y las manos abiertas, y cae amortiguando;
+   aguanta un momento y baja. */
 export const CHEER = 1.9;
 export function cheer(t) {
   const crouch = bump(t, 0, 0.34), air = win(t, 0.3, 0.74), land = bump(t, 0.72, 1.02), H = RIG.H;
   const up = eio(win(t, 0.16, 0.44)) * (1 - eio(win(t, 1.4, 1.9)));
-  const q = add(add(BASE, JARRA), {
-    Spine: { x: 3 * crouch - 3 * up }, Head: { x: -3 + 5 * crouch - 6 * up },
+  const q = add(BASE, {
+    Spine: { x: 3 * crouch - 3 * up }, Head: { x: -2 + 5 * crouch - 6 * up },
     squash: 0.05 * crouch - 0.04 * Math.sin(Math.PI * air) + 0.05 * land,
     hop: 0.085 * Math.sin(Math.PI * air)
   });
-  const pump = 0.012 * S(win(t, 0.74, 1.4) * 2) * up;
-  q.reach = { Left: { at: [0.2, 0.9 + pump, 0.04], pole: [0.5, 0.6, -0.1], w: up }, Right: { at: [-0.2, 0.9 + pump, 0.04], pole: [-0.5, 0.6, -0.1], w: up } };
-  q.hands = { Left: { thumb: mixP(JL, [-1, 0.2, 0], up) }, Right: { thumb: mixP(JR, [1, 0.2, 0], up) } };
+  const pump = 0.08 * S(win(t, 0.74, 1.4) * 2) * up;
+  q.reach = { Left: { at: hand_('Left', [0.5, 0.84 + pump, 0.06]), pole: elbow('Left', 0.6, 0.5, -0.1), w: up }, Right: { at: hand_('Right', [0.5, 0.84 + pump, 0.06]), pole: elbow('Right', 0.6, 0.5, -0.1), w: up } };
+  q.hands = { Left: { thumb: mixP(FWD, [-1, 0.2, 0], up) }, Right: { thumb: mixP(FWD, [1, 0.2, 0], up) } };   // palmas al frente
   q.legs = stand({ dip: 0.03 * H * crouch + 0.02 * H * land }); q.soleYaw = TOES;
   return q;
 }
 
-/* Respuesta a un toque: un saltito con el pulgar arriba. */
+/* Respuesta a un toque: un saltito levantando la mano. */
 export const HOP = 1.0;
 export function hop(t) {
   const crouch = bump(t, 0, 0.22), air = win(t, 0.18, 0.5), land = bump(t, 0.48, 0.72), H = RIG.H;
   const up = eio(win(t, 0.1, 0.32)) * (1 - eio(win(t, 0.72, 1.0)));
-  const q = add(add(BASE, JARRA), { Head: { x: -3 + 4 * crouch - 4 * up }, squash: 0.04 * crouch - 0.03 * Math.sin(Math.PI * air) + 0.04 * land, hop: 0.045 * Math.sin(Math.PI * air) });
-  q.reach = { Right: { at: [-0.22, 0.62, 0.18], pole: [-0.35, 0.3, 0], w: up } }; q.hands.Right = { thumb: mixP(JR, [0, 1, 0], up) }; q.thumb = { Right: up };
+  const q = add(BASE, { Head: { x: -2 + 4 * crouch - 4 * up }, squash: 0.04 * crouch - 0.03 * Math.sin(Math.PI * air) + 0.04 * land, hop: 0.045 * Math.sin(Math.PI * air) });
+  q.reach = { Right: { at: hand_('Right', [0.62, 0.72, 0.18]), pole: elbow('Right', 0.5, 0.35, -0.05), w: up } };
+  q.hands = { Left: { thumb: FWD }, Right: { thumb: mixP(FWD, [1, 0.2, 0], up) } };
   q.legs = stand({ dip: 0.02 * H * crouch + 0.014 * H * land }); q.soleYaw = TOES;
   return q;
 }
@@ -360,21 +367,21 @@ export function hop(t) {
 export const PEEK = 2.8, HAT = 2.0, ROCK = 2.4;
 export function peek(t) {
   const k = eio(win(t, 0, 0.6)) * (1 - eio(win(t, 2.1, 2.8))), H = RIG.H;
-  const q = add(add(BASE, JARRA), { Spine: { y: -8 * k, z: -2 * k }, Spine2: { y: -10 * k }, Neck: { y: -10 * k }, Head: { y: -24 * k, x: -3 + 2 * k + 2 * bump(t, 1.0, 1.9) } });
+  const q = add(BASE, { Spine: { y: -8 * k, z: -2 * k }, Spine2: { y: -10 * k }, Neck: { y: -10 * k }, Head: { y: -24 * k, x: -2 + 2 * k + 2 * bump(t, 1.0, 1.9) } });
   q.legs = stand({ sway: -0.014 * H * k, dip: 0.004 * H * k }); q.soleYaw = TOES;
   return q;
 }
 export function hat(t) {
   const up = eio(win(t, 0.05, 0.5)) * (1 - eio(win(t, 1.45, 2.0))), fix = S(win(t, 0.55, 1.4) * 1.5) * bump(t, 0.5, 1.45);
-  const q = add(add(BASE, JARRA), { Head: { x: -3 - 4 * up, z: 4 * fix }, Spine: { z: -2 * up } });
-  q.reach = { Right: { at: [-0.17, 0.8 + 0.012 * fix, 0.07], pole: [-0.45, 0.6, -0.1], w: up } };
-  q.hands.Right = { thumb: mixP(JR, BRIM, up) };
+  const q = add(BASE, { Head: { x: -2 - 4 * up, z: 4 * fix }, Spine: { z: -2 * up } });
+  q.reach = { Right: { at: hand_('Right', [0.3, 0.9 + 0.04 * fix, 0.22]), pole: elbow('Right', 0.6, 0.45, -0.1), w: up } };
+  q.hands = { Left: { thumb: FWD }, Right: { thumb: mixP(FWD, [0.6, -0.3, -0.6], up) } };
   q.legs = stand(); q.soleYaw = TOES;
   return q;
 }
 export function rock(t) {
   const r = S(win(t, 0.1, 2.3) * 2) * bump(t, 0, 2.4), H = RIG.H;   // + de puntillas, − sobre los talones
-  const q = add(add(BASE, JARRA), { Spine: { x: -1.5 * r }, Head: { x: -3 + 1.5 * r }, LeftArm: { z: 2 * pos(r) }, RightArm: { z: -2 * pos(r) } });
+  const q = add(BASE, { Spine: { x: -1.5 * r }, Head: { x: -2 + 1.5 * r }, LeftArm: { z: 2 * pos(r), x: 3 * r }, RightArm: { z: -2 * pos(r), x: 3 * r } });
   q.legs = stand({ fwd: 0.012 * H * r }); q.soleYaw = TOES;
   q.sole = { Left: r > 0 ? 13 * r : 9 * r, Right: r > 0 ? 13 * r : 9 * r };
   return q;

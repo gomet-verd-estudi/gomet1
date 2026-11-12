@@ -9,18 +9,37 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4, colour = false, palette = null }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4, colour = false, palette = null, flipY = false, height = 0.978, thumbs = { Left: 'LeftHandThumb', Right: 'RightHandThumb' }, fist = null, skinLines = 1.6 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
   const load = (u) => new THREE.TextureLoader().loadAsync(u);
   const [gltf, tex, bump, foldTex, texB, texT] = await Promise.all([gltfBuffer ? new GLTFLoader().parseAsync(gltfBuffer, '') : new GLTFLoader().loadAsync(url), load(texture), load(relief), folds ? load(folds) : null, textureBlink ? load(textureBlink) : null, textureTalk ? load(textureTalk) : null]);
-  for (const t of [tex, texB, texT]) { if (!t) continue; t.flipY = false; t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; } // colores puros, sin mezclas en los bordes
+  for (const t of [tex, texB, texT]) { if (!t) continue; t.flipY = flipY; t.colorSpace = THREE.SRGBColorSpace; t.generateMipmaps = false; t.minFilter = THREE.NearestFilter; t.magFilter = THREE.NearestFilter; } // colores puros, sin mezclas en los bordes
   bump.flipY = false; bump.colorSpace = THREE.NoColorSpace;
   if (foldTex) { foldTex.flipY = false; foldTex.colorSpace = THREE.NoColorSpace; }
-  const root = gltf.scene; scene.add(root);
+  // El modelo va dentro de `root`, que es el espacio del personaje: y arriba, z al frente, pies en el suelo (y = 0),
+  // la pelvis sobre el origen y la altura fijada. Cada modelo viene a su manera (este, tumbado y en centímetros), así
+  // que se coloca solo a partir del esqueleto: arriba es de la pelvis a la cabeza y el frente, hacia donde van las puntas.
+  const inner = gltf.scene, root = new THREE.Group(); root.add(inner); scene.add(root);
   let mesh = null;
-  root.traverse((o) => { if (o.isMesh) { o.frustumCulled = false; mesh = o; } });
+  inner.traverse((o) => { if (o.isMesh) { o.frustumCulled = false; mesh = o; } });
+  const B = {}; inner.traverse((o) => { if (o.isBone) B[o.name.replace(/^mixamorig:?/, '')] = o; });
+  {
+    inner.updateMatrixWorld(true);
+    const P = (n) => B[n].getWorldPosition(new THREE.Vector3());
+    const snap = (v) => { const a = [Math.abs(v.x), Math.abs(v.y), Math.abs(v.z)], i = a.indexOf(Math.max(...a)); return new THREE.Vector3(i === 0 ? Math.sign(v.x) : 0, i === 1 ? Math.sign(v.y) : 0, i === 2 ? Math.sign(v.z) : 0); };
+    const up = snap(P('Head').sub(P('Hips')));
+    const toes = P('LeftToeBase').add(P('RightToeBase')).sub(P('LeftFoot')).sub(P('RightFoot')); toes.addScaledVector(up, -toes.dot(up));
+    const fwd = snap(toes), side = new THREE.Vector3().crossVectors(up, fwd);
+    inner.quaternion.premultiply(new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(side, up, fwd).transpose()));
+    inner.updateMatrixWorld(true); mesh.computeBoundingBox();
+    let bb = new THREE.Box3().setFromObject(inner);
+    inner.scale.multiplyScalar(height / (bb.max.y - bb.min.y)); inner.updateMatrixWorld(true);
+    bb = new THREE.Box3().setFromObject(inner); const hp = P('Hips');
+    inner.position.x -= hp.x; inner.position.z -= hp.z; inner.position.y -= bb.min.y; inner.updateMatrixWorld(true);
+    mesh.computeBoundingBox();
+  }
   const flatMat = new THREE.MeshBasicMaterial({ map: tex });
   // pasada de detalle: normales con relieve en RGB y el mapa de pliegues dibujados en A
   const detailMat = new THREE.MeshNormalMaterial({ normalMap: bump, normalScale: new THREE.Vector2(reliefScale, reliefScale) });
@@ -34,8 +53,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const box = new THREE.Box3().setFromObject(root); const size = box.getSize(new THREE.Vector3()); const center = box.getCenter(new THREE.Vector3());
 
   // ---- huesos y pose ----
-  const B = {}; root.traverse((o) => { if (o.isBone) B[o.name.replace(/^mixamorig:?/, '')] = o; });
-  const rest = new Map(); Object.values(B).forEach((b) => rest.set(b, b.quaternion.clone()));
+  const rest = new Map();
   const restPos = B.Hips.position.clone();
   const _q = new THREE.Quaternion(), _pw = new THREE.Quaternion(), _rw = new THREE.Quaternion(), _ax = new THREE.Vector3(), _s = new THREE.Vector3(), _v = new THREE.Vector3();
   // gira el hueso alrededor de un eje del personaje (x: adelante/atrás, y: girar, z: de lado), aunque el personaje esté girado
@@ -59,6 +77,8 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     const heel = new THREE.Vector3(a.x, floor, a.z).addScaledVector(fwd, -len * 0.3), toe = new THREE.Vector3(b.x, floor, b.z).addScaledVector(fwd, len * 0.45);
     SOLE.push({ bone: F, at: F.worldToLocal(heel) }, { bone: T, at: T.worldToLocal(toe) });
   }
+  const NORMAL = {};
+  for (const side of ['Left', 'Right']) if (B[side + 'Foot']) NORMAL[side] = new THREE.Vector3(0, 1, 0).applyQuaternion(B[side + 'Foot'].getWorldQuaternion(new THREE.Quaternion()).invert());
   const soleY = (s) => s.bone.localToWorld(_v.copy(s.at)).y;
   const _h = new THREE.Vector3(), _t = new THREE.Vector3();
   const footMin = () => Math.min(...SOLE.map(soleY));
@@ -108,19 +128,41 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       const hip = g(side + 'UpLeg'), knee = g(side + 'Leg'), ank = g(side + 'Foot'), toe = g(side + 'ToeBase');
       const len = Math.hypot(toe.x - ank.x, toe.z - ank.z);
       o[side] = { hip: hip.toArray(), thigh: hip.distanceTo(knee), shin: knee.distanceTo(ank), ah: ank.y - floor, back: len * 0.3, F: len * 1.75 };
+      // brazos: el hombro, y lo que miden el brazo y el antebrazo (para colocar los gestos al alcance de la mano)
+      const sh = g(side + 'Arm'), el = g(side + 'ForeArm'), wr = g(side + 'Hand');
+      o[side].shoulder = sh.toArray(); o[side].upper = sh.distanceTo(el); o[side].fore = el.distanceTo(wr);
     }
+    o.head = g('Head').toArray(); o.top = box.max.y; o.chest = g('Spine2').toArray();
     return o;
   })();
   const _hp = new THREE.Vector3(), _hc = new THREE.Vector3();
-  // Orientación de las manos. El auto-rig dejó los dedos de la mano derecha al revés que los de la izquierda (su
-  // cadena «Pinky» es la que está en el pulgar), así que no vale girar las dos igual: se mide en cada mano hacia
-  // dónde queda el pulgar (perpendicular al antebrazo) y se guarda en el espacio del hueso de la mano.
+  // Orientación de las manos. Los auto-rig no dejan las dos manos iguales, así que no vale girarlas igual: se mide en
+  // cada una hacia dónde queda el pulgar (perpendicular al antebrazo) y se guarda en el espacio del hueso de la mano.
   const THUMB = {};
-  for (const [side, tip] of [['Left', 'LeftHandThumb4'], ['Right', 'RightHandPinky4']]) {
-    const H = B[side + 'Hand'], F = B[side + 'ForeArm'], T = B[tip] || B[tip.replace('4', '3')]; if (!H || !F || !T) continue;
+  for (const side of ['Left', 'Right']) {
+    const H = B[side + 'Hand'], F = B[side + 'ForeArm'], T = B[thumbs[side] + '4'] || B[thumbs[side] + '3'] || B[thumbs[side] + '2']; if (!H || !F || !T) continue;
     const h = H.getWorldPosition(new THREE.Vector3()), a = h.clone().sub(F.getWorldPosition(new THREE.Vector3())).normalize();
     const v = T.getWorldPosition(new THREE.Vector3()).sub(h); v.addScaledVector(a, -v.dot(a)).normalize();
     THUMB[side] = v.applyQuaternion(H.getWorldQuaternion(new THREE.Quaternion()).invert());
+  }
+  // Pose neutra común: cada modelo viene posado a su manera (este, en aspa), así que antes de animar se lleva a una
+  // misma pose de partida: brazos en cruz, piernas rectas hacia abajo y pies al frente con la planta plana. Los ángulos
+  // de las animaciones se cuentan desde aquí y valen para cualquier modelo.
+  {
+    const V = THREE.Vector3, Q = THREE.Quaternion, wp = (b) => b.getWorldPosition(new V());
+    const setW = (b, qw) => { b.parent.getWorldQuaternion(_qp); b.quaternion.copy(_qp.invert().multiply(qw)); b.updateMatrixWorld(true); };
+    const aimTo = (b, c, dir) => { if (!b || !c) return; const from = wp(c).sub(wp(b)).normalize(); setW(b, new Q().setFromUnitVectors(from, dir).multiply(b.getWorldQuaternion(new Q()))); };
+    root.updateMatrixWorld(true);
+    for (const [side, sx] of [['Left', 1], ['Right', -1]]) {
+      const X = new V(sx, 0, 0), D = new V(0, -1, 0), Yax = new V(0, 1, 0);
+      aimTo(B[side + 'Arm'], B[side + 'ForeArm'], X); aimTo(B[side + 'ForeArm'], B[side + 'Hand'], X); aimTo(B[side + 'Hand'], B[side + 'HandMiddle1'], X);
+      const F = B[side + 'Foot'], T = B[side + 'ToeBase'], f0 = F.getWorldQuaternion(new Q()), t = wp(T).sub(wp(F)), yaw = Math.atan2(t.x, t.z);
+      aimTo(B[side + 'UpLeg'], B[side + 'Leg'], D); aimTo(B[side + 'Leg'], F, D);
+      // el pie mira al frente: la pierna entera gira desde la cadera la mayor parte y el tobillo el resto (así la bota no se retuerce)
+      setW(B[side + 'UpLeg'], new Q().setFromAxisAngle(Yax, -yaw * 0.65).multiply(B[side + 'UpLeg'].getWorldQuaternion(new Q())));
+      setW(F, new Q().setFromAxisAngle(Yax, -yaw).multiply(f0));
+    }
+    Object.values(B).forEach((b) => rest.set(b, b.quaternion.clone()));
   }
   const _ha = new THREE.Vector3(), _hcur = new THREE.Vector3(), _hw = new THREE.Vector3(), _hx = new THREE.Vector3(), _rq = new THREE.Quaternion();
   // Gira el antebrazo entero sobre su eje (desde el codo) hasta que el lado del pulgar mire hacia `to` (dirección en
@@ -156,25 +198,28 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     }
     // giros en los ejes propios de cada hueso (torsión del antebrazo, muñeca, dedos): { Hueso: { x, y, z } } en grados
     if (p.local) for (const n in p.local) { const b = B[n], r = p.local[n]; if (!b) continue; if (r.z) b.rotateZ(r.z * Math.PI / 180); if (r.y) b.rotateY(r.y * Math.PI / 180); if (r.x) b.rotateX(r.x * Math.PI / 180); }
-    // manos: el modelo trae el pulgar levantado; por defecto baja a descansar sobre el puño. thumb: { Left, Right } de
-    // 0 (puño) a 1 (pulgar arriba). Solo se pliega hasta donde el guante sigue limpio (más allá, la malla se arruga):
-    // 21° en la izquierda y 29° en la derecha, donde el pulgar lo mueve la cadena «Pinky» (así lo dejó el auto-rig).
-    { const tu = p.thumb || {}, a = 21 * (1 - (tu.Left || 0)) * Math.PI / 180, b = 29 * (1 - (tu.Right || 0)) * Math.PI / 180;
-      for (const k of [1, 2, 3]) { if (a && B['LeftHandThumb' + k]) B['LeftHandThumb' + k].rotateX(a); if (b && B['RightHandPinky' + k]) B['RightHandPinky' + k].rotateX(b); } }
+    // manos: cuánto se cierra cada una, de 0 (como viene, abierta) a 1 (puño). fist (opción): por mano, qué huesos
+    // de los dedos giran, sobre qué eje propio y cuántos grados a puño cerrado
+    if (fist && p.grip) for (const side of ['Left', 'Right']) {
+      const g = p.grip[side], f = fist[side]; if (!g || !f) continue;
+      for (const [name, ax, deg] of f) { const b = B[name]; if (!b) continue; const a = deg * g * Math.PI / 180; if (ax === 'x') b.rotateX(a); else if (ax === 'y') b.rotateY(a); else b.rotateZ(a); }
+    }
     root.updateMatrixWorld(true);
     // piernas por cinemática inversa: el tobillo va a su sitio y la rodilla mira al polo (delante)
     if (p.legs) for (const side of ['Left', 'Right']) { const L = p.legs[side]; if (L) ik2(B[side + 'UpLeg'], B[side + 'Leg'], B[side + 'Foot'], L.ankle, L.pole, p.legs.w ?? 1); }
-    // planta del pie a un ángulo exacto respecto al suelo (− punta arriba): talón al pisar, plano al cargar, punta al despegar
-    // (por defecto, plana: el modelo de base deja las botas 9° de puntillas)
+    // Planta del pie: primero plana del todo (la normal de la suela hacia arriba, así tampoco queda de canto cuando la
+    // pierna se abre), luego el rumbo si se pide (al andar, la bota al frente) y al final el cabeceo (− punta arriba:
+    // talón al pisar, plano al cargar, punta al despegar).
     for (const [k, side] of [[0, 'Left'], [1, 'Right']]) {
-      const t = (p.sole && p.sole[side]) || 0; if (!SOLE[2 * k]) continue;
-      const hs = () => { root.worldToLocal(SOLE[2 * k].bone.localToWorld(_h.copy(SOLE[2 * k].at))); root.worldToLocal(SOLE[2 * k + 1].bone.localToWorld(_t.copy(SOLE[2 * k + 1].at))); };
-      hs();
-      // al andar, la bota apunta al frente (si no, el talón y la punta no caen donde se planean y el pie patina)
+      const F = B[side + 'Foot'], t = (p.sole && p.sole[side]) || 0; if (!F || !SOLE[2 * k] || !NORMAL[side]) continue;
+      F.getWorldQuaternion(_qw); _hx.copy(NORMAL[side]).applyQuaternion(_qw); root.getWorldQuaternion(_rq); _hw.set(0, 1, 0).applyQuaternion(_rq);
+      _qd.setFromUnitVectors(_hx.normalize(), _hw); F.parent.getWorldQuaternion(_qp); F.quaternion.copy(_qp.invert().multiply(_qd.multiply(_qw))); F.updateMatrixWorld(true);
       const yw = p.soleYaw && p.soleYaw[side];
-      if (yw !== undefined) { turn(side + 'Foot', AX.y, yw - Math.atan2(_t.x - _h.x, _t.z - _h.z) * 180 / Math.PI); B[side + 'Foot'].updateMatrixWorld(true); hs(); }
-      const pitch = Math.atan2(_t.y - _h.y, Math.hypot(_t.x - _h.x, _t.z - _h.z)) * 180 / Math.PI;
-      turn(side + 'Foot', AX.x, pitch + t); B[side + 'Foot'].updateMatrixWorld(true);
+      if (yw !== undefined) {
+        root.worldToLocal(SOLE[2 * k].bone.localToWorld(_h.copy(SOLE[2 * k].at))); root.worldToLocal(SOLE[2 * k + 1].bone.localToWorld(_t.copy(SOLE[2 * k + 1].at)));
+        turn(side + 'Foot', AX.y, yw - Math.atan2(_t.x - _h.x, _t.z - _h.z) * 180 / Math.PI); F.updateMatrixWorld(true);
+      }
+      if (t) { turn(side + 'Foot', AX.x, t); F.updateMatrixWorld(true); }
     }
     if (p.reach) for (const side of ['Left', 'Right']) { const r = p.reach[side]; if (r) reach(side, r.at, r.pole, r.w ?? 1); }
     // hacia dónde mira el pulgar de cada mano: hands: { Left: { thumb: [x, y, z], w }, Right: … }
@@ -189,20 +234,26 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const rt = new THREE.WebGLRenderTarget(1, 1, { depthTexture: new THREE.DepthTexture(1, 1), minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
   const rtD = new THREE.WebGLRenderTarget(1, 1);
   const hex = (h) => { const v = parseInt(h.slice(1), 16); return [(v >> 16 & 255) / 255, (v >> 8 & 255) / 255, (v & 255) / 255]; };
-  // colores de la textura: guantes, casco, piel, camisa, peto, punto del casco, botas y rasgos
-  const PAL = ['#FFFFFF', '#FFCB2B', '#F4C2A4', '#2EA648', '#1F63D6', '#146E3C', '#3A3A3A', '#1B1919'];
+  // paleta: { colours: ['#…'], roles: [0 | 1 | 2], paint: ['#…'] (opcional: con qué se pinta cada uno) }
+  const PALV = (() => {
+    const P = palette || { colours: ['#FFFFFF', '#FFCB2B', '#F4C2A4', '#2EA648', '#1F63D6', '#146E3C', '#3A3A3A', '#1B1919'], roles: [0, 0, 1, 0, 0, 0, 0, 2] };
+    const pad = (a, f) => Array.from({ length: 16 }, (_, i) => f(a[Math.min(i, a.length - 1)]));
+    return { n: P.colours.length, src: pad(P.colours, (c) => new THREE.Vector3(...hex(c))), dst: pad(P.paint || P.colours, (c) => new THREE.Vector3(...hex(c))), role: pad(P.roles, (r) => r) };
+  })();
   const U = {
     tColor: { value: rt.texture }, tDepth: { value: rt.depthTexture }, tDetail: { value: rtD.texture },
     px: { value: new THREE.Vector2() }, line: { value: line }, fine: { value: fine }, fineT: { value: fineThreshold },
     ink: { value: new THREE.Vector3(...hex(ink)) }, fillC: { value: new THREE.Vector3(...hex(fill || '#000000')) }, useFill: { value: fill ? 1 : 0 }, riso: { value: riso }, colour: { value: colour ? 1 : 0 },
-    // a color: los ocho colores de la textura (src) y con cuál se pinta cada uno (dst); el contorno va en `ink`
-    src: { value: PAL.map((c) => new THREE.Vector3(...hex(c))) }, dst: { value: PAL.map((c) => new THREE.Vector3(...hex((palette && palette[c]) || c))) }, res: { value: new THREE.Vector2(1, 1) }, bg: { value: new THREE.Vector4(...(background ? hex(background) : [0, 0, 0]), background ? 1 : 0) }
+    // a color: los colores de la textura (src), con cuál se pinta cada uno (dst) y su papel (role: 0 ropa y objetos,
+    // 1 piel, 2 rasgo: cejas, ojos, bigote, dientes, pelo… que van sin contorno sobre la piel); el contorno va en `ink`
+    src: { value: PALV.src }, dst: { value: PALV.dst }, role: { value: PALV.role }, npal: { value: PALV.n }, skinK: { value: skinLines },
+    res: { value: new THREE.Vector2(1, 1) }, bg: { value: new THREE.Vector4(...(background ? hex(background) : [0, 0, 0]), background ? 1 : 0) }
   };
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
     uniforms: U,
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
     fragmentShader: `
-      uniform sampler2D tColor, tDepth, tDetail; uniform vec2 px; uniform float line, fine, fineT, useFill, riso, colour; uniform vec3 src[8], dst[8]; uniform vec3 ink, fillC; uniform vec4 bg; uniform vec2 res; varying vec2 vUv;
+      uniform sampler2D tColor, tDepth, tDetail; uniform vec2 px; uniform float line, fine, fineT, useFill, riso, colour; uniform vec3 src[16], dst[16]; uniform float role[16]; uniform int npal; uniform float skinK; uniform vec3 ink, fillC; uniform vec4 bg; uniform vec2 res; varying vec2 vUv;
       // ---- risografía: ruido fijo en el papel (no parpadea entre fotogramas) ----
       float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
       float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
@@ -217,8 +268,34 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       // colores de la paleta que van a línea (piel, blanco, amarillo, verde); lo que no es ni esto ni macizo es mezcla de borde
       bool isOpen(vec3 k){ return distance(k, vec3(0.957, 0.761, 0.643)) < 0.18 || distance(k, vec3(1.)) < 0.18 || distance(k, vec3(1.0, 0.796, 0.169)) < 0.18 || distance(k, vec3(0.180, 0.651, 0.282)) < 0.18; }
       bool isFill(vec3 k){ return distance(k, vec3(0.078, 0.431, 0.235)) < 0.1 || distance(k, vec3(0.122, 0.388, 0.839)) < 0.18 || distance(k, vec3(0.227)) < 0.1 || distance(k, vec3(0.106, 0.098, 0.098)) < 0.1; }
-      // a color: cada punto se pinta con el color exacto de su zona (tintas planas, sin mezclas ni degradados)
-      vec3 flat3(vec3 k){ float bd = 9.; vec3 b = k; for (int i = 0; i < 8; i++) { float e = distance(k, src[i]); if (e < bd) { bd = e; b = dst[i]; } } return b; }
+      // ---- a color: tintas planas con contorno ----
+      // cada punto es del color de la paleta más cercano al de la textura: se pinta con su tinta exacta
+      int pal(vec3 k){ float bd = 9.; int b = 0; for (int i = 0; i < 16; i++) { if (i >= npal) break; float e = distance(k, src[i]); if (e < bd) { bd = e; b = i; } } return b; }
+      vec4 shadeColour(){
+        float d0 = d(vec2(0.)); int i0 = pal(c(vec2(0.))); float r0 = d0 < 1. ? role[i0] : 0.;
+        // contorno: silueta, piezas que se tapan y cambio de color. Entre la piel y un rasgo (o entre dos rasgos) no hay
+        // contorno: son manchas limpias. Y desde la piel no se mira a través de un rasgo (lo de detrás no cuenta).
+        bool edge = false;
+        for (int i = 0; i < 12; i++) {
+          float a = float(i) * 0.5235988; vec2 o = vec2(cos(a), sin(a)) * px * line; float dd = d(o);
+          if ((d0 < 1.) != (dd < 1.)) { edge = true; break; }
+          if (d0 >= 1.) continue;
+          if (abs(dd - d0) > 0.0035) { edge = true; break; }
+          int ii = pal(c(o)); if (ii == i0) continue;
+          bool soft = r0 > .5 && role[ii] > .5;
+          if (!soft && r0 > .5 && r0 < 1.5) soft = role[pal(c(o * .5))] > 1.5 || role[pal(c(o * .25))] > 1.5 || role[pal(c(o * .75))] > 1.5;
+          if (!soft) { edge = true; break; }
+        }
+        if (edge) return vec4(ink, 1.);
+        if (d0 >= 1.) return bg;
+        // trazo fino: arrugas y pliegues del propio modelo (no en la piel ni en los rasgos)
+        vec2 q = px * fine;
+        vec3 tl = n(vec2(-q.x, q.y)), tc = n(vec2(0., q.y)), tr = n(q), ml = n(vec2(-q.x, 0.)), mr = n(vec2(q.x, 0.)), bl = n(-q), bc = n(vec2(0., -q.y)), br = n(vec2(q.x, -q.y));
+        vec3 gx = (tr + 2. * mr + br) - (tl + 2. * ml + bl), gy = (tl + 2. * tc + tr) - (bl + 2. * bc + br);
+        // (en la piel, solo los pliegues marcados: los dedos y las orejas; en los rasgos, ninguno)
+        bool fl = r0 < 1.5 && length(gx) + length(gy) > (r0 > .5 ? fineT * skinK : fineT);
+        return vec4(fl ? ink : dst[i0], 1.);
+      }
       vec4 shade(){
         float d0 = d(vec2(0.)); vec3 c0 = c(vec2(0.)); bool f0 = d0 < 1. && isFill(c0);
         bool skin0 = distance(c0, vec3(0.957, 0.761, 0.643)) < 0.16;
@@ -233,14 +310,12 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
           // los rasgos de la cara (ojos, cejas, bigote) son masas de tinta sin contorno alrededor: no se engordan
           // (y en la piel, nada macizo lleva contorno: los bordes suavizados de los rasgos salen en gris o verde oscuro)
           bool feat = !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035 && (distance(cc, vec3(0.106, 0.098, 0.098)) < 0.1 || (skin0 && isFill(cc)));
-          // a color, el punto del casco tampoco lleva contorno (ni desde fuera ni desde dentro): es una mancha limpia
-          if (colour > .5 && dd < 1. && abs(dd - d0) < 0.0035 && (distance(cc, vec3(0.078, 0.431, 0.235)) < 0.1 || distance(c0, vec3(0.078, 0.431, 0.235)) < 0.1)) feat = true;
           // ni a través de ellos: si entre este punto y la muestra hay un rasgo, lo de detrás (el brillo del ojo, el casco
           // tras la patilla) no cuenta; si no, salen anillos de puntos alrededor de los rasgos
           if (e && !feat && !f0 && d0 < 1. && dd < 1. && abs(dd - d0) < 0.0035) {
             if (distance(c(o * .5), vec3(0.106, 0.098, 0.098)) < 0.1 || distance(c(o * .25), vec3(0.106, 0.098, 0.098)) < 0.1 || distance(c(o * .75), vec3(0.106, 0.098, 0.098)) < 0.1) feat = true;
           }
-          if (e && !feat) { if (colour > .5) edge = true; else if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
+          if (e && !feat) { if (f0 && dd < 1. && isFill(cc)) knock = true; else if (!f0 || dd >= 1. || isOpen(cc)) edge = true; }
         }
         if (edge) { return vec4(ink, 1.); }
         if (d0 >= 1.) { return bg; }
@@ -262,7 +337,6 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
         // (en las botas y en los rasgos negros no se dibujan pliegues: ahí solo salían motas)
         bool dark0 = distance(c0, vec3(0.227)) < 0.12 || distance(c0, vec3(0.106, 0.098, 0.098)) < 0.1;
         bool fl = (f > fineT && !quiet) || (k > 0.35 && !dark0);
-        if (colour > .5) { return vec4(fl ? ink : flat3(c0), 1.); }
         if (useFill < 0.5) { return vec4(fl ? ink : c0, 1.); }
         // tinta maciza con los detalles calados en papel; fuera de lo macizo, papel con los detalles en tinta
         if (f0) { return vec4(fl ? paper : ink, 1.); }
@@ -271,7 +345,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       void main(){
         vec2 fc = vUv * res;
         P = vUv + (vec2(vn(fc / 2.3), vn(fc / 2.3 + 17.)) - .5) * px * .55 * riso;
-        vec4 o = shade();
+        vec4 o = colour > .5 ? shadeColour() : shade();
         if (riso < .01) { gl_FragColor = o; return; }
         // cuánta tinta hay: 1 donde el color es la tinta
         float ink01 = o.a < .01 ? 0. : clamp(1. - distance(o.rgb, ink) / max(.001, distance(fillC, ink)), 0., 1.);

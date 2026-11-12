@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head>
+<body><canvas id="c"></canvas><script type="module">
+// Las caras del capataz, pintadas sobre la textura de colores planos: además de la normal, una con los ojos cerrados
+// (parpadeo) y otra con la boca abierta (al hablar). Las formas se dibujan en la vista frontal (600 × 600, zoom 3.2) y
+// se llevan a la textura a través del modelo, así quedan pegadas a la cabeza. ?glb=…&tex=…
+import * as THREE from 'three';
+import { createCapataz } from './capataz3d.js';
+const q = new URLSearchParams(location.search), SRC = q.get('tex') || './nuevo/plana.png';
+const SKIN = [200, 170, 155], DARK = [21, 19, 19], WHITE = [244, 244, 242];
+const VIEW = { yaw: 0, zoom: 3.2, cy: 0.25 };
+const C = await createCapataz({ canvas: document.getElementById('c'), url: q.get('glb') || './nuevo/modelo.glb', texture: SRC, relief: './relief.png', flipY: true });
+C.renderer.setPixelRatio(1); C.resize(600, 600); C.pose({}); C.view(VIEW);
+const img = new Image(); img.src = SRC; await img.decode();
+const S = img.width, cv = document.createElement('canvas'); cv.width = cv.height = S;
+const g = cv.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+const base = g.getImageData(0, 0, S, S);
+// pasada de coordenadas de textura en la GPU: cada píxel guarda su (u, v) en 16 bits por canal; fondo = blanco
+const SS = 2, W = 600 * SS;
+const uvMat = new THREE.ShaderMaterial({
+  vertexShader: `#include <common>
+#include <skinning_pars_vertex>
+varying vec2 vU;
+void main(){ vU = uv;
+#include <skinbase_vertex>
+#include <begin_vertex>
+#include <skinning_vertex>
+#include <project_vertex>
+}`,
+  fragmentShader: `varying vec2 vU; void main(){ vec2 h = floor(vU * 255.) / 255.; vec2 l = fract(vU * 255.); gl_FragColor = vec4(h.x, l.x, h.y, l.y); }`,
+  blending: THREE.NoBlending
+});
+const rtUV = new THREE.WebGLRenderTarget(W, W); const buf = new Uint8Array(W * W * 4);
+{ const keep = C.mesh.material; C.mesh.material = uvMat;
+  C.renderer.setRenderTarget(rtUV); C.renderer.setClearColor(0xffffff, 1); C.renderer.clear(); C.renderer.render(C.scene, C.camera); C.renderer.setRenderTarget(null);
+  C.mesh.material = keep; C.renderer.readRenderTargetPixels(rtUV, 0, 0, W, W, buf); }
+// (x, y) en la vista de 600 px, y hacia abajo; el búfer va de abajo arriba. La textura va volteada (v = 1 arriba)
+const uvAt = (x, y) => {
+  const X = Math.round(x * SS), Y = W - 1 - Math.round(y * SS); if (X < 0 || Y < 0 || X >= W || Y >= W) return null;
+  const i = (Y * W + X) * 4; if (buf[i] === 255 && buf[i + 1] === 255 && buf[i + 2] === 255 && buf[i + 3] === 255) return null;
+  return [(buf[i] + buf[i + 1] / 255) / 255 * S, (1 - (buf[i + 2] + buf[i + 3] / 255) / 255) * S];
+};
+function texels(inside, x0, y0, x1, y1) {
+  const out = [];
+  for (let y = y0; y <= y1; y += 0.5) for (let x = x0; x <= x1; x += 0.5) {
+    if (!inside(x, y)) continue; const a = uvAt(x, y); if (!a) continue;
+    const b = uvAt(x + 1, y); const r = b ? Math.min(6, Math.hypot(b[0] - a[0], b[1] - a[1])) : 2;
+    out.push([a[0], a[1], r]);
+  }
+  return out;
+}
+function paint(data, pts, rgb, test) {
+  for (const [u, v, r] of pts) {
+    const rr = Math.max(1, r * 0.6);
+    for (let dy = -Math.ceil(rr); dy <= Math.ceil(rr); dy++) for (let dx = -Math.ceil(rr); dx <= Math.ceil(rr); dx++) {
+      if (dx * dx + dy * dy > rr * rr) continue;
+      const X = Math.floor(u + dx), Y = Math.floor(v + dy); if (X < 0 || Y < 0 || X >= S || Y >= S) continue;
+      const i = (Y * S + X) * 4; if (test && !test(data.data, i)) continue;
+      data.data[i] = rgb[0]; data.data[i + 1] = rgb[1]; data.data[i + 2] = rgb[2]; data.data[i + 3] = 255;
+    }
+  }
+}
+const near = (c, t = 40) => (d, i) => Math.abs(d[i] - c[0]) + Math.abs(d[i + 1] - c[1]) + Math.abs(d[i + 2] - c[2]) < t;
+const isDark = near(DARK), isSkin = near(SKIN);
+const ell = (cx, cy, rx, ry) => (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+const band = (pts, w) => (x, y) => { // trazo grueso a lo largo de una polilínea
+  for (let k = 1; k < pts.length; k++) { const [ax, ay] = pts[k - 1], [bx, by] = pts[k]; const dx = bx - ax, dy = by - ay, L = dx * dx + dy * dy;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L)); if (Math.hypot(x - ax - t * dx, y - ay - t * dy) <= w / 2) return true; }
+  return false;
+};
+const arc = (x0, x1, y, h, n = 12) => Array.from({ length: n + 1 }, (_, k) => { const t = k / n; return [x0 + (x1 - x0) * t, y - h * Math.sin(Math.PI * t)]; });
+const copy = (D) => new ImageData(new Uint8ClampedArray(D.data), S, S);
+const n = (k, d) => (q.has(k) ? +q.get(k) : d);
+// los ojos (dos puntos negros) y la boca (sonrisa blanca bajo el bigote), en la vista de 600 px
+const L = [n('lx', 217), n('ly', 192)], R = [n('rx', 378), n('ry', 193)], M = [n('mx', 299), n('my', 322)];
+// 1) ojos cerrados: se borra el punto y queda la línea del párpado, curvada hacia abajo
+const shut = copy(base);
+for (const [x, y] of [L, R]) {
+  paint(shut, texels(ell(x, y, 29, 27), x - 30, y - 28, x + 30, y + 28).map(([u, v, r]) => [u, v, r + 2]), SKIN, isDark);
+  paint(shut, texels(band(arc(x - 19, x + 19, y + 2, -8, 14), 11), x - 26, y - 6, x + 26, y + 18), DARK);
+}
+// 2) boca abierta: bajo los dientes se abre la boca (tinta) hasta media barbilla; al alternar con la cara normal, habla
+const talk = copy(base);
+paint(talk, texels((x, y) => ell(M[0], M[1] + 14, 47, 30)(x, y) && y > M[1] - 22, M[0] - 50, M[1] - 22, M[0] + 50, M[1] + 46), DARK, isSkin);
+const toURL = (D) => { g.putImageData(D, 0, 0); return cv.toDataURL('image/png'); };
+window.OUT = { shut: toURL(shut), talk: toURL(talk) };
+window.DONE = true;
+</script></body></html>

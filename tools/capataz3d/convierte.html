@@ -1,0 +1,29 @@
+<!doctype html><html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js","three/addons/":"./node_modules/three/examples/jsm/"}}</script></head>
+<body><script type="module">
+// Convierte el FBX de Tripo (malla + esqueleto Mixamo) a GLB, sin texturas (la de color se trata aparte)
+// e informa de lo que trae: mallas, huesos, tamaños. ?fbx=nuevo/modelo.fbx
+import * as THREE from 'three';
+import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
+import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+const src = new URLSearchParams(location.search).get('fbx') || 'nuevo/modelo.fbx';
+const mgr = new THREE.LoadingManager(); mgr.setURLModifier((u) => (/\.(png|jpe?g)$/i.test(u) ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' : u));
+const fbx = await new FBXLoader(mgr).loadAsync(src);
+const info = { meshes: [], bones: 0, scale: fbx.scale.toArray(), children: fbx.children.map((c) => `${c.type}:${c.name}`) };
+fbx.updateMatrixWorld(true);
+fbx.traverse((o) => {
+  if (o.isBone) info.bones++;
+  if (o.isMesh) {
+    const g = o.geometry; g.computeBoundingBox();
+    const b = new THREE.Box3().setFromObject(o);
+    info.meshes.push({ name: o.name, skinned: !!o.isSkinnedMesh, verts: g.attributes.position.count, tris: (g.index ? g.index.count : g.attributes.position.count) / 3, attrs: Object.keys(g.attributes), mats: (Array.isArray(o.material) ? o.material : [o.material]).map((m) => `${m.type}:${m.name}:${m.color ? m.color.getHexString() : ''}:${m.map ? 'map' : '-'}`), groups: g.groups.length,
+      box: [b.min.toArray().map((x) => +x.toFixed(2)), b.max.toArray().map((x) => +x.toFixed(2))], bonesInSkin: o.skeleton ? o.skeleton.bones.length : 0 });
+    // sin texturas en el GLB
+    for (const m of (Array.isArray(o.material) ? o.material : [o.material])) { m.map = null; m.normalMap = null; m.specularMap = null; m.emissiveMap = null; }
+  }
+});
+const glb = await new GLTFExporter().parseAsync(fbx, { binary: true, onlyVisible: false });
+let s = ''; const u = new Uint8Array(glb); for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000));
+window.OUT = { info, glb: btoa(s), bytes: u.length };
+window.DONE = true;
+</script></body></html>

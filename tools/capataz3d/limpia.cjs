@@ -1,7 +1,7 @@
 // node limpia.cjs entrada.png salida.png  (rutas relativas a web/)
 const { chromium } = require('playwright'); const fs = require('fs');
 (async () => {
-  const D = '/tmp/claude-0/-home-user/4d61fb76-d589-5f2f-bba2-89221db77b9b/scratchpad/m3d/web/';
+  const D = __dirname + '/';   // la carpeta de trabajo que se sirve en :8790
   const [src, dst] = process.argv.slice(2);
   const b = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage(); const errs = []; p.on('pageerror', (e) => errs.push(e.message));
