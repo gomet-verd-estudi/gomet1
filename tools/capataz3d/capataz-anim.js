@@ -256,10 +256,10 @@ export const ropePerPhase = 2 * (ROPE_HI - ROPE_LO); // cuerda que corre por cad
 // (la muñeca va antes de la cuerda y a su lado: lo que agarra es la palma, y las manos son grandes. Los brazos son
 // cortos: tira echado hacia atrás, con los brazos casi estirados, y así la cabeza y el casco no tocan la cuerda)
 function hand(p, side) {
-  const t = ((p % 1) + 1) % 1, x = side * 0.04, z = ROPE_Z - 0.068;
+  const t = ((p % 1) + 1) % 1, x = side * 0.07, z = ROPE_Z - 0.068;   // cada mano, a su lado de la cuerda
   if (t < 0.5) { const u = t / 0.5; return [x, ROPE_HI - (ROPE_HI - ROPE_LO) * u, z]; } // agarrada, tira
   const u = (t - 0.5) / 0.5, e = u * u * (3 - 2 * u), a = Math.sin(Math.PI * u);
-  return [x + side * 0.035 * a, ROPE_LO + (ROPE_HI - ROPE_LO) * e, z - 0.035 * a];         // suelta, sube pegada al cuerpo
+  return [x + side * 0.03 * a, ROPE_LO + (ROPE_HI - ROPE_LO) * e, z - 0.035 * a];         // suelta, sube pegada al cuerpo
 }
 export function haul(p) {
   const pull = Math.pow(Math.abs(Math.sin(Math.PI * 2 * p)), 0.8); // dos tirones por ciclo, uno por mano

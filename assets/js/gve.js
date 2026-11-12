@@ -150,10 +150,11 @@
           // con movimiento reducido no entra caminando, pero respira, parpadea y gesticula al hablar
           if (reduce || !live) { c.face(0); c.start(); setTimeout(say, 600); }
           else {
-            // entra caminando de perfil desde el margen izquierdo, se gira hacia quien lee, saluda y habla
+            // entra caminando de perfil por el margen derecho (el que tiene al lado: llega enseguida), se gira hacia
+            // quien lee, saluda y habla
             const r = mascot.getBoundingClientRect();
             entering = true; clearTimeout(idleT);
-            c.enter(r.left + r.width * 0.75).then(() => { entering = false; lastY = scrollY; say(); });
+            c.enter(Math.max(r.width * 0.7, innerWidth - r.left - r.width * 0.12)).then(() => { entering = false; lastY = scrollY; say(); });
           }
           if ('IntersectionObserver' in window) new IntersectionObserver((es) => es.forEach((e) => {
             live = e.isIntersecting; if (live) cap.start(); else cap.stop();

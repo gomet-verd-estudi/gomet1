@@ -50,6 +50,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
     // el contorno (fino, para que el color mande) se mide para 238 px de alto y escala con el muñeco: en móvil no engorda
     C.setLineScale(Math.max(.7, Math.min(1.15, r.height / 238)));
     C.resize(r.width, r.height); C.view({ zoom: 0.9, cy: -0.03 }); dirty = true;
+    if (front.width !== canvas.width || front.height !== canvas.height) { front.width = canvas.width; front.height = canvas.height; frontOn = false; }
     // distancia del muñeco a la línea de la cabecera (el envoltorio es pegajoso: no cambia con el scroll)
     offTop = wrap ? host.offsetTop : r.top;
     const gy = C.projectWorld(0, C.floor, 0)[1], sw = r.width * 0.46, sh = sw * 0.15;
@@ -62,10 +63,15 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
   const place = (x) => { host.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; };
   // sombra de contacto bajo los pies (se encoge cuando salta)
   const shadow = document.createElement('i'); shadow.className = 'm-shadow'; shadow.setAttribute('aria-hidden', 'true');
-  // ---- la cuerda (dibujo en la página, detrás del lienzo: las manos quedan por delante) ----
+  // ---- la cuerda: un dibujo de la página metido ENTRE dos capas del muñeco. Debajo, el lienzo con el muñeco entero;
+  // encima de la cuerda, otro lienzo con solo lo que queda más cerca que ella (la mano de este lado, su brazo, la bota
+  // adelantada). Así se ve pasar entre las manos: por delante de una y por detrás de la otra. ----
   const wrap = canvas.closest('.mascot-wrap');
   const ropeEl = document.createElement('div'); ropeEl.className = 'm-rope'; ropeEl.setAttribute('aria-hidden', 'true');
-  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + PULLEY; host.prepend(ropeEl); host.prepend(shadow);
+  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + PULLEY; host.prepend(shadow); canvas.after(ropeEl);
+  const front = document.createElement('canvas'); front.className = 'cp-front'; front.setAttribute('aria-hidden', 'true'); ropeEl.after(front);
+  const fctx = front.getContext('2d'); let frontOn = false;
+  const split = { depth: 0, copy() { fctx.clearRect(0, 0, front.width, front.height); fctx.drawImage(canvas, 0, 0, front.width, front.height); } };
   const ropeLine = ropeEl.firstChild, pulley = ropeEl.lastChild, wheel = pulley.querySelector('.m-wheel');
   const HAUL_YAW = -90; // de perfil, mirando hacia la página
   let rope = 0, ropeTarget = 0, units = 0, offTop = 0, lastHaul = 0;
@@ -114,7 +120,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
     // el último paso frena (como al llegar a un sitio); el cuerpo avanza lo mismo que la fase, así que los pies no patinan
     if (ent && ent.walking) {
       const dp = Math.min(dt / ent.cycle * (0.45 + 0.55 * ease(Math.min(1, ent.left / 0.6))), ent.left);
-      D.advance(dp); ent.x += dp * stride(ent.k) * C.pxPerUnit(); ent.left -= dp;
+      D.advance(dp); ent.x += ent.dir * dp * stride(ent.k) * C.pxPerUnit(); ent.left -= dp;
       if (ent.left <= 1e-6) { ent.walking = false; ent.settle = ent.x; ent.st = 0; ent.end(); }
     }
     const q = D.tick(dt); C.pose(q);
@@ -122,7 +128,14 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
     if (ent && !ent.walking) { ent.st = Math.min(1, ent.st + dt / 0.5); ent.x = ent.settle * (1 - ent.st * ent.st * (3 - 2 * ent.st)); if (ent.st >= 1) { ent = null; } }
     if (ent) place(ent.x); else if (host.style.transform) place(0);
     if (rope > 0 || ropeTarget > 0) drawRope(dt);
-    C.render();
+    if (rope > 0) {
+      // la cuerda cuelga en un punto fijo delante de él; lo que está más cerca que ese punto va en la capa de delante
+      const a = HAUL_YAW * Math.PI / 180; split.depth = C.depthOf(Math.sin(a) * ROPE_Z, 0.5, Math.cos(a) * ROPE_Z);
+      C.render(split); frontOn = true;
+    } else {
+      if (frontOn) { fctx.clearRect(0, 0, front.width, front.height); frontOn = false; }
+      C.render();
+    }
   };
   // largo de un paso en píxeles: para empezar fuera de la pantalla y acabar justo en su sitio
   const stepPx = (k) => Math.max(1, stride(k) / 2 * C.pxPerUnit());
@@ -171,12 +184,13 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
     stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; },
     // con movimiento reducido: una sola imagen por cambio de estado
     still(state = 'idle') { D.set(state); for (let i = 0; i < 30; i++) D.tick(1 / 30); draw(0); },
-    // entra caminando de perfil desde `dist` píxeles a la izquierda, se gira hacia quien lee y saluda tocándose el casco
+    // entra caminando de perfil desde `dist` píxeles a la derecha (el margen de la pantalla, que le queda al lado: llega
+    // en cuatro pasos), se gira hacia quien lee y saluda con la mano
     enter(dist) {
       return new Promise((resolve) => {
         const E = 1.1, step = stepPx(E), n = Math.max(2, Math.ceil(dist / step));
-        D.yawTo(90, true); D.setEnergy(E); D.set('walk'); D.setPhase(0);
-        ent = { x: -n * step, k: E, left: n * 0.5, cycle: 0.8, walking: true, end: () => {
+        D.yawTo(-90, true); D.setEnergy(E); D.set('walk'); D.setPhase(0);
+        ent = { x: n * step, dir: -1, k: E, left: n * 0.5, cycle: 0.8, walking: true, end: () => {
           D.setEnergy(1);
           D.play('turn', { to: 12, then: 'idle', done: () => D.play('greet', { then: 'idle', done: resolve }) });
         } };

@@ -363,10 +363,29 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   // Suavizado: todo se dibuja a `ss` veces la resolución del lienzo y se reduce promediando (con ss = 2, una sola lectura
   // con filtro lineal en el centro de cada píxel promedia exactamente los 2 × 2 de dentro). Colores premultiplicados.
   const rtPost = new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+  // Además puede sacar solo «lo de delante»: lo que queda más cerca de la cámara que una profundidad dada (con su
+  // contorno). Sirve para intercalar algo de la página entre dos capas del muñeco: la cuerda pasa por detrás de una
+  // mano y por delante de la otra.
+  const DU = { t: { value: rtPost.texture }, tD: { value: rt.depthTexture }, front: { value: 0 }, cut: { value: 0 }, rad: { value: 1 }, px: U.px };
   const down = new THREE.Scene(); down.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
-    uniforms: { t: { value: rtPost.texture } },
+    uniforms: DU,
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
-    fragmentShader: 'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor = texture2D(t, vUv); }',
+    fragmentShader: `uniform sampler2D t, tD; uniform float front, cut, rad; uniform vec2 px; varying vec2 vUv;
+      void main(){
+        vec4 c = texture2D(t, vUv);
+        if (front > .5) {
+          // (en cada uno de los 2 × 2 puntos de dentro del píxel: ¿está delante, o a un contorno de algo que lo está?)
+          float m = 0.;
+          for (int j = 0; j < 4; j++) {
+            vec2 s = vUv + (vec2(mod(float(j), 2.), floor(float(j) / 2.)) - .5) * px;
+            float f = texture2D(tD, s).x < cut ? 1. : 0.;
+            for (int i = 0; i < 12; i++) { float a = float(i) * 0.5235988; if (texture2D(tD, s + vec2(cos(a), sin(a)) * px * rad).x < cut) f = 1.; }
+            m += f * .25;
+          }
+          c *= m;
+        }
+        gl_FragColor = c;
+      }`,
     depthTest: false, depthWrite: false, blending: THREE.NoBlending
   })));
 
@@ -389,13 +408,20 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     rt.setSize(W, H); rtD.setSize(W, H); rtPost.setSize(W, H); U.px.value.set(1 / W, 1 / H); U.res.value.set(W, H);
     U.line.value = Math.max(1, line * r * lineScale); U.fine.value = Math.max(.75, fine * r * lineScale);
   }
-  function render() {
+  const _pj = new THREE.Vector3();
+  // split = { depth, copy }: antes de la imagen completa saca la capa de delante (lo más cercano que `depth`) y llama a
+  // copy() para que quien la quiera se la lleve del lienzo; después deja en el lienzo la imagen completa.
+  function render(split) {
     renderer.setClearColor(0x000000, 0);
     mesh.material = flatMat; renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, cam);
     mesh.material = detailMat; renderer.setRenderTarget(rtD); renderer.setClearColor(0x8080ff, 1); renderer.clear(); renderer.render(scene, cam);
     mesh.material = flatMat; renderer.setRenderTarget(rtPost); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(post, postCam);
-    renderer.setRenderTarget(null); renderer.clear(); renderer.render(down, postCam);
+    renderer.setRenderTarget(null);
+    if (split) { DU.front.value = 1; DU.cut.value = split.depth; DU.rad.value = U.line.value; renderer.clear(); renderer.render(down, postCam); split.copy(); DU.front.value = 0; }
+    renderer.clear(); renderer.render(down, postCam);
   }
+  // profundidad (0 cerca … 1 lejos, como la guarda la cámara) de un punto del mundo
+  const depthOf = (x, y, z) => (_pj.set(x, y, z).project(cam).z + 1) / 2;
   const set = (k, v) => { U[k].value = v; };
   // calidad del suavizado (si el equipo no llega, se baja: 2 → 1,5 → 1)
   const quality = (v) => { if (v === undefined) return ss; ss = v; resize(lastW, lastH); return ss; };
@@ -404,12 +430,11 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const face = (n) => { flatMat.map = (n === 'blink' && texB) || (n === 'talk' && texT) || tex; };
   const blink = (on) => face(on ? 'blink' : 'open');
   // píxeles CSS por unidad del mundo, para pasar el desplazamiento del pie a la pantalla
-  const _pj = new THREE.Vector3();
   // punto del espacio del personaje → píxeles CSS del lienzo
   // de un punto (del personaje o del mundo) a píxeles CSS del lienzo
   const toPx = (v) => { v.project(cam); const c = renderer.domElement; return [(v.x + 1) / 2 * c.clientWidth, (1 - v.y) / 2 * c.clientHeight]; };
   const project = (x, y, z) => toPx(root.localToWorld(_pj.set(x, y, z)));
   const projectWorld = (x, y, z) => toPx(_pj.set(x, y, z));
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, face, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, depthOf, set, blink, face, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
 }

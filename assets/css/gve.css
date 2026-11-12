@@ -1191,7 +1191,9 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 /* El capataz: la ilustración original como un único trazado, deformado por su esqueleto (capataz.js) */
 /* el capataz en 3D: un lienzo transparente; hasta que carga (o sin WebGL), su imagen fija en el mismo sitio */
 .mascot { aspect-ratio: 352 / 440; }
-.mascot .cp-poster, .mascot .cp-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.mascot .cp-poster, .mascot .cp-canvas, .mascot .cp-front { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* la cuerda va entre los dos lienzos: el de debajo lleva el muñeco entero y el de encima, solo lo que queda delante de ella */
+.mascot .cp-front { pointer-events: none; }
 .mascot .cp-canvas { opacity: 0; transition: opacity .25s ease; }
 .mascot.is-3d .cp-canvas { opacity: 1; }
 .mascot.is-3d .cp-poster { visibility: hidden; }
