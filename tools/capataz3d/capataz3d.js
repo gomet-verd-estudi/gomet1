@@ -9,7 +9,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4, colour = false, palette = null, flipY = false, height = 0.978, thumbs = { Left: 'LeftHandThumb', Right: 'RightHandThumb' }, fist = null, skinLines = 1.6 }) {
+export async function createCapataz({ canvas, url, gltfBuffer = null, texture, textureBlink = null, textureTalk = null, relief, folds = null, line = 3, fine = 1, fineThreshold = 1.0, ink = '#0A9651', fill = '#F4EFE6', background = null, riso = 0, ss = 2, reliefScale = 1.4, colour = false, palette = null, flipY = false, height = 0.978, thumbs = { Left: 'LeftHandThumb', Right: 'RightHandThumb' }, fist = null, skinLines = 1.6, depthEdge = 0.175 }) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, preserveDrawingBuffer: true });
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
   const scene = new THREE.Scene();
@@ -57,11 +57,17 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const restPos = B.Hips.position.clone();
   const _q = new THREE.Quaternion(), _pw = new THREE.Quaternion(), _rw = new THREE.Quaternion(), _ax = new THREE.Vector3(), _s = new THREE.Vector3(), _v = new THREE.Vector3();
   // gira el hueso alrededor de un eje del personaje (x: adelante/atrás, y: girar, z: de lado), aunque el personaje esté girado
+  // Los brazos cuelgan del pecho: sus ejes van con él. Si el pecho se retuerce (al girarse, al mirar a un lado), los
+  // brazos se abren, cierran y balancean respecto al torso, no respecto a los pies; si no, un brazo caído acababa
+  // estirado en cuanto el pecho giraba.
+  const ARMS = /^(Left|Right)(Shoulder|Arm|ForeArm|Hand)$/, _cw = new THREE.Quaternion(); let chestRest = null;
   function turn(name, axis, deg) {
     const b = B[name]; if (!b || !deg) return;
     root.getWorldQuaternion(_rw); b.parent.getWorldQuaternion(_pw);
-    _pw.premultiply(_rw.invert());
-    _ax.copy(axis).applyQuaternion(_pw.invert()).normalize();
+    _rw.invert(); _pw.premultiply(_rw);
+    _ax.copy(axis);
+    if (chestRest && B.Spine2 && ARMS.test(name)) { B.Spine2.getWorldQuaternion(_cw).premultiply(_rw).multiply(chestRest); _ax.applyQuaternion(_cw); }
+    _ax.applyQuaternion(_pw.invert()).normalize();
     b.quaternion.premultiply(_q.setFromAxisAngle(_ax, deg * Math.PI / 180));
   }
   root.updateMatrixWorld(true);
@@ -163,6 +169,8 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
       setW(F, new Q().setFromAxisAngle(Yax, -yaw).multiply(f0));
     }
     Object.values(B).forEach((b) => rest.set(b, b.quaternion.clone()));
+    // (el pecho en reposo, respecto al personaje: lo que se haya girado desde aquí es lo que arrastra a los brazos)
+    if (B.Spine2) { root.updateMatrixWorld(true); chestRest = B.Spine2.getWorldQuaternion(new THREE.Quaternion()).premultiply(root.getWorldQuaternion(new THREE.Quaternion()).invert()).invert(); }
   }
   const _ha = new THREE.Vector3(), _hcur = new THREE.Vector3(), _hw = new THREE.Vector3(), _hx = new THREE.Vector3(), _rq = new THREE.Quaternion();
   // Gira el antebrazo entero sobre su eje (desde el codo) hasta que el lado del pulgar mire hacia `to` (dirección en
@@ -261,14 +269,14 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     ink: { value: new THREE.Vector3(...hex(ink)) }, fillC: { value: new THREE.Vector3(...hex(fill || '#000000')) }, useFill: { value: fill ? 1 : 0 }, riso: { value: riso }, colour: { value: colour ? 1 : 0 },
     // a color: los colores de la textura (src), con cuál se pinta cada uno (dst) y su papel (role: 0 ropa y objetos,
     // 1 piel, 2 rasgo: cejas, ojos, bigote, dientes, pelo… que van sin contorno sobre la piel); el contorno va en `ink`
-    src: { value: PALV.src }, dst: { value: PALV.dst }, role: { value: PALV.role }, npal: { value: PALV.n }, skinK: { value: skinLines },
+    src: { value: PALV.src }, dst: { value: PALV.dst }, role: { value: PALV.role }, npal: { value: PALV.n }, skinK: { value: skinLines }, dEdge: { value: depthEdge / 49.99 },
     res: { value: new THREE.Vector2(1, 1) }, bg: { value: new THREE.Vector4(...(background ? hex(background) : [0, 0, 0]), background ? 1 : 0) }
   };
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
     uniforms: U,
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
     fragmentShader: `
-      uniform sampler2D tColor, tDepth, tDetail; uniform vec2 px; uniform float line, fine, fineT, useFill, riso, colour; uniform vec3 src[16], dst[16]; uniform float role[16]; uniform int npal; uniform float skinK; uniform vec3 ink, fillC; uniform vec4 bg; uniform vec2 res; varying vec2 vUv;
+      uniform sampler2D tColor, tDepth, tDetail; uniform vec2 px; uniform float line, fine, fineT, useFill, riso, colour; uniform vec3 src[16], dst[16]; uniform float role[16]; uniform int npal; uniform float skinK, dEdge; uniform vec3 ink, fillC; uniform vec4 bg; uniform vec2 res; varying vec2 vUv;
       // ---- risografía: ruido fijo en el papel (no parpadea entre fotogramas) ----
       float h21(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
       float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
@@ -295,7 +303,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
           float a = float(i) * 0.5235988; vec2 o = vec2(cos(a), sin(a)) * px * line; float dd = d(o);
           if ((d0 < 1.) != (dd < 1.)) { edge = true; break; }
           if (d0 >= 1.) continue;
-          if (abs(dd - d0) > 0.0035) { edge = true; break; }
+          if (abs(dd - d0) > dEdge) { edge = true; break; }
           int ii = pal(c(o)); if (ii == i0) continue;
           bool soft = r0 > .5 && role[ii] > .5;
           if (!soft && r0 > .5 && r0 < 1.5) soft = role[pal(c(o * .5))] > 1.5 || role[pal(c(o * .25))] > 1.5 || role[pal(c(o * .75))] > 1.5;
@@ -320,7 +328,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
         for (int i = 0; i < 12; i++) {
           float a = float(i) * 0.5235988; vec2 o = vec2(cos(a), sin(a)) * px * line;
           float dd = d(o); vec3 cc = c(o);
-          bool e = (d0 < 1.) != (dd < 1.) || (d0 < 1. && abs(dd - d0) > 0.0035) || (d0 < 1. && distance(cc, c0) > 0.22);
+          bool e = (d0 < 1.) != (dd < 1.) || (d0 < 1. && abs(dd - d0) > dEdge) || (d0 < 1. && distance(cc, c0) > 0.22);
 
           // los rasgos de la cara (ojos, cejas, bigote) son masas de tinta sin contorno alrededor: no se engordan
           // (y en la piel, nada macizo lleva contorno: los bordes suavizados de los rasgos salen en gris o verde oscuro)
@@ -339,7 +347,7 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
           for (int r = 1; r <= 2; r++) for (int i = 0; i < 12; i++) {
             float a = float(i) * 0.5235988; vec2 o = vec2(cos(a), sin(a)) * px * fine * 1.25 * float(r);
             float dd = d(o); vec3 cc = c(o);
-            if (abs(dd - d0) > 0.0035 || distance(cc, c0) > 0.15) { return vec4(paper, 1.); }
+            if (abs(dd - d0) > dEdge || distance(cc, c0) > 0.15) { return vec4(paper, 1.); }
           }
         }
         // trazo fino: relieve (Sobel sobre normales) y pliegues dibujados
@@ -378,29 +386,10 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   // Suavizado: todo se dibuja a `ss` veces la resolución del lienzo y se reduce promediando (con ss = 2, una sola lectura
   // con filtro lineal en el centro de cada píxel promedia exactamente los 2 × 2 de dentro). Colores premultiplicados.
   const rtPost = new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
-  // Además puede sacar solo «lo de delante»: lo que queda más cerca de la cámara que una profundidad dada (con su
-  // contorno). Sirve para intercalar algo de la página entre dos capas del muñeco: la cuerda pasa por detrás de una
-  // mano y por delante de la otra.
-  const DU = { t: { value: rtPost.texture }, tD: { value: rt.depthTexture }, front: { value: 0 }, cut: { value: 0 }, rad: { value: 1 }, px: U.px };
   const down = new THREE.Scene(); down.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
-    uniforms: DU,
+    uniforms: { t: { value: rtPost.texture } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }',
-    fragmentShader: `uniform sampler2D t, tD; uniform float front, cut, rad; uniform vec2 px; varying vec2 vUv;
-      void main(){
-        vec4 c = texture2D(t, vUv);
-        if (front > .5) {
-          // (en cada uno de los 2 × 2 puntos de dentro del píxel: ¿está delante, o a un contorno de algo que lo está?)
-          float m = 0.;
-          for (int j = 0; j < 4; j++) {
-            vec2 s = vUv + (vec2(mod(float(j), 2.), floor(float(j) / 2.)) - .5) * px;
-            float f = texture2D(tD, s).x < cut ? 1. : 0.;
-            for (int i = 0; i < 12; i++) { float a = float(i) * 0.5235988; if (texture2D(tD, s + vec2(cos(a), sin(a)) * px * rad).x < cut) f = 1.; }
-            m += f * .25;
-          }
-          c *= m;
-        }
-        gl_FragColor = c;
-      }`,
+    fragmentShader: 'uniform sampler2D t; varying vec2 vUv; void main(){ gl_FragColor = texture2D(t, vUv); }',
     depthTest: false, depthWrite: false, blending: THREE.NoBlending
   })));
 
@@ -424,19 +413,13 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
     U.line.value = Math.max(1, line * r * lineScale); U.fine.value = Math.max(.75, fine * r * lineScale);
   }
   const _pj = new THREE.Vector3();
-  // split = { depth, copy }: antes de la imagen completa saca la capa de delante (lo más cercano que `depth`) y llama a
-  // copy() para que quien la quiera se la lleve del lienzo; después deja en el lienzo la imagen completa.
-  function render(split) {
+  function render() {
     renderer.setClearColor(0x000000, 0);
     mesh.material = flatMat; renderer.setRenderTarget(rt); renderer.clear(); renderer.render(scene, cam);
     mesh.material = detailMat; renderer.setRenderTarget(rtD); renderer.setClearColor(0x8080ff, 1); renderer.clear(); renderer.render(scene, cam);
     mesh.material = flatMat; renderer.setRenderTarget(rtPost); renderer.setClearColor(0x000000, 0); renderer.clear(); renderer.render(post, postCam);
-    renderer.setRenderTarget(null);
-    if (split) { DU.front.value = 1; DU.cut.value = split.depth; DU.rad.value = U.line.value; renderer.clear(); renderer.render(down, postCam); split.copy(); DU.front.value = 0; }
-    renderer.clear(); renderer.render(down, postCam);
+    renderer.setRenderTarget(null); renderer.clear(); renderer.render(down, postCam);
   }
-  // profundidad (0 cerca … 1 lejos, como la guarda la cámara) de un punto del mundo
-  const depthOf = (x, y, z) => (_pj.set(x, y, z).project(cam).z + 1) / 2;
   const set = (k, v) => { U[k].value = v; };
   // calidad del suavizado (si el equipo no llega, se baja: 2 → 1,5 → 1)
   const quality = (v) => { if (v === undefined) return ss; ss = v; resize(lastW, lastH); return ss; };
@@ -451,5 +434,5 @@ export async function createCapataz({ canvas, url, gltfBuffer = null, texture, t
   const project = (x, y, z) => toPx(root.localToWorld(_pj.set(x, y, z)));
   const projectWorld = (x, y, z) => toPx(_pj.set(x, y, z));
   const pxPerUnit = () => renderer.domElement.clientHeight / (cam.top - cam.bottom);
-  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, depthOf, set, blink, face, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
+  return { renderer, scene, root, mesh, camera: cam, bones: B, size, center, pose, view, resize, render, set, blink, face, setLineScale, quality, project, projectWorld, floor: restFoot, rig, soles: () => SOLE.map(soleY), soleX: () => SOLE.map((s) => s.bone.localToWorld(_v.copy(s.at)).x), planted, pxPerUnit, materials: { flatMat, detailMat } };
 }

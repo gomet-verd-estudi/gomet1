@@ -4,7 +4,7 @@
  * start(), stop(), enter(dist), feet().
  */
 import { createCapataz } from './capataz3d.js';
-import { director, stride, setRig, ROPE_Z, ropePerPhase } from './capataz-anim.js';
+import { director, stride, setRig, ROPE_Z, HAUL_YAW, ropePerPhase } from './capataz-anim.js';
 
 const INK = '#1B1919';   // el contorno del muñeco (y de su cuerda y su polea)
 // La polea cuelga de la línea de la cabecera; la cuerda baja por su lado izquierdo hasta las manos y el suelo,
@@ -13,6 +13,12 @@ const PULLEY = `<svg class="m-pulley" viewBox="-15 -30 34 42" aria-hidden="true"
 <path d="M0 -30V0" stroke-width="1.8"/>
 <g class="m-wheel"><circle r="9" fill="#C9CDD2" stroke-width="2.4"/><path d="M0 -8.6V8.6M-7.4 -4.3L7.4 4.3M-7.4 4.3L7.4 -4.3" stroke-width="1.5"/><circle r="2.2" fill="${INK}" stroke="none"/></g>
 <path d="M-9 0A9 9 0 0 1 9 0V-30" style="stroke-width:var(--rwo)"/><path d="M-9 0A9 9 0 0 1 9 0V-30" stroke="#E3BF7C" style="stroke-width:var(--rw)"/></g></svg>`;
+
+// El cabo que sobra, recogido en el suelo al pie de la cuerda: tres vueltas vistas de lado.
+const COIL = `<svg class="m-coil" viewBox="0 0 30 14" aria-hidden="true"><g fill="none" stroke-linecap="round">
+<path d="M3 10.5c0-2.2 5.4-3.6 12-3.6s12 1.4 12 3.6-5.4 2.6-12 2.6S3 12.700 3 10.500Z" stroke="${INK}" stroke-width="3.4"/><path d="M3 10.5c0-2.2 5.4-3.6 12-3.6s12 1.4 12 3.6-5.4 2.6-12 2.6S3 12.700 3 10.500Z" stroke="#E3BF7C" stroke-width="2"/>
+<path d="M5 7.4c0-2 4.500-3.300 10-3.300s10 1.300 10 3.300" stroke="${INK}" stroke-width="3.4"/><path d="M5 7.4c0-2 4.500-3.300 10-3.300s10 1.300 10 3.300" stroke="#E3BF7C" stroke-width="2"/>
+<path d="M8 4.6c0-1.700 3.200-2.700 7-2.700 2 0 3.800.3 5.100.8" stroke="${INK}" stroke-width="3.4"/><path d="M8 4.6c0-1.700 3.200-2.700 7-2.700 2 0 3.800.3 5.100.8" stroke="#E3BF7C" stroke-width="2"/></g></svg>`;
 
 function webgl() {
   try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
@@ -37,7 +43,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
   const dpr = Math.max(1, Math.min(1.75, window.devicePixelRatio || 1));
   const C = await createCapataz({
     canvas, ...(await modelSource(base, canvas.dataset.model)), texture: base + 'color.png', textureBlink: base + 'color-parpadeo.png', textureTalk: base + 'color-habla.png', relief: base + 'plano.png', folds: null, flipY: true,
-    line, fine, fineThreshold: 2.4, background: null, ss: 2, reliefScale: 0, skinLines: 3,
+    line, fine, fineThreshold: 2.4, background: null, ss: 2, reliefScale: 0, skinLines: 3, depthEdge: 0.05,
     colour: true, ink: INK,   // a color: las tintas planas de la textura, con contorno oscuro
     //         piel       peto       negro      casco      camisa     pelo       blanco   (1 piel, 2 rasgo de la cara)
     palette: { colours: ['#C8AA9B', '#2367C7', '#151313', '#C9B55C', '#42A645', '#4A150B', '#F4F4F2'], roles: [1, 0, 2, 0, 0, 2, 2] }
@@ -50,7 +56,6 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
     // el contorno (fino, para que el color mande) se mide para 238 px de alto y escala con el muñeco: en móvil no engorda
     C.setLineScale(Math.max(.7, Math.min(1.15, r.height / 238)));
     C.resize(r.width, r.height); C.view({ zoom: 0.9, cy: -0.03 }); dirty = true;
-    if (front.width !== canvas.width || front.height !== canvas.height) { front.width = canvas.width; front.height = canvas.height; frontOn = false; }
     // distancia del muñeco a la línea de la cabecera (el envoltorio es pegajoso: no cambia con el scroll)
     offTop = wrap ? host.offsetTop : r.top;
     const gy = C.projectWorld(0, C.floor, 0)[1], sw = r.width * 0.46, sh = sw * 0.15;
@@ -63,31 +68,50 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
   const place = (x) => { host.style.transform = x ? `translateX(${x.toFixed(1)}px)` : ''; };
   // sombra de contacto bajo los pies (se encoge cuando salta)
   const shadow = document.createElement('i'); shadow.className = 'm-shadow'; shadow.setAttribute('aria-hidden', 'true');
-  // ---- la cuerda: un dibujo de la página metido ENTRE dos capas del muñeco. Debajo, el lienzo con el muñeco entero;
-  // encima de la cuerda, otro lienzo con solo lo que queda más cerca que ella (la mano de este lado, su brazo, la bota
-  // adelantada). Así se ve pasar entre las manos: por delante de una y por detrás de la otra. ----
+  // ---- la cuerda: un dibujo de la página, partido en dos a la altura de las manos. Cuelga delante de él y solo la
+  // tocan las manos: la del fondo agarra arriba y la de este lado, abajo. Desde la polea hasta la mano de este lado va
+  // POR DELANTE del lienzo (pasa por delante de la mano del fondo); de ahí al suelo va POR DETRÁS (la tapa la mano de
+  // este lado). Las dos partes son la misma línea, una entera detrás y otra recortada delante: casan al píxel. ----
   const wrap = canvas.closest('.mascot-wrap');
   const ropeEl = document.createElement('div'); ropeEl.className = 'm-rope'; ropeEl.setAttribute('aria-hidden', 'true');
-  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + PULLEY; host.prepend(shadow); canvas.after(ropeEl);
-  const front = document.createElement('canvas'); front.className = 'cp-front'; front.setAttribute('aria-hidden', 'true'); ropeEl.after(front);
-  const fctx = front.getContext('2d'); let frontOn = false;
-  const split = { depth: 0, copy() { fctx.clearRect(0, 0, front.width, front.height); fctx.drawImage(canvas, 0, 0, front.width, front.height); } };
-  const ropeLine = ropeEl.firstChild, pulley = ropeEl.lastChild, wheel = pulley.querySelector('.m-wheel');
-  const HAUL_YAW = -90; // de perfil, mirando hacia la página
-  let rope = 0, ropeTarget = 0, units = 0, offTop = 0, lastHaul = 0;
+  ropeEl.innerHTML = '<i class="m-rope-line"></i>' + COIL + PULLEY; host.prepend(ropeEl); host.prepend(shadow);
+  const ropeLine = ropeEl.firstChild, pulley = ropeEl.lastChild, wheel = pulley.querySelector('.m-wheel'), coil = ropeEl.children[1];
+  const ropeTop = document.createElement('div'); ropeTop.className = 'm-rope m-rope-top'; ropeTop.setAttribute('aria-hidden', 'true');
+  ropeTop.innerHTML = '<b class="m-rope-clip"><i class="m-rope-line"></i></b>'; canvas.after(ropeTop);
+  const clip = ropeTop.firstChild, lineTop = clip.firstChild;
+  let rope = 0, ropeTarget = 0, units = 0, offTop = 0, lastHaul = 0, grab = 0;
   const ease = (t) => t * t * (3 - 2 * t);
+  const _hv = C.bones.Hips.position.clone();
+  // por dónde entra la cuerda en la mano de este lado (px desde lo alto del lienzo): el canto de arriba de esa mano
+  const nearTop = () => {
+    let y = 1e9;
+    for (const n of ['LeftHand', 'LeftHandIndex1', 'LeftHandIndex2', 'LeftHandMiddle1']) { const b = C.bones[n]; if (b) y = Math.min(y, C.projectWorld(...b.getWorldPosition(_hv).toArray())[1]); }
+    return y - C.pxPerUnit() * 0.03;
+  };
   function drawRope(dt) {
     rope = ropeTarget > rope ? Math.min(ropeTarget, rope + dt / 0.3) : Math.max(ropeTarget, rope - dt / 0.35);
-    if (rope <= 0) { if (ropeEl.classList.contains('on')) ropeEl.classList.remove('on'); return; }
-    if (!ropeEl.classList.contains('on')) ropeEl.classList.add('on');
+    if (rope <= 0) { if (ropeEl.classList.contains('on')) { ropeEl.classList.remove('on'); ropeTop.classList.remove('on'); } return; }
+    if (!ropeEl.classList.contains('on')) { ropeEl.classList.add('on'); ropeTop.classList.add('on'); }
+    // (la distancia a la línea de la cabecera se mide cada vez: en el móvil cambia cuando asoma la barra del navegador)
+    offTop = wrap ? host.offsetTop : canvas.getBoundingClientRect().top;
     const ppu = C.pxPerUnit(), sx = Math.sin(HAUL_YAW * Math.PI / 180) * ROPE_Z, sz = Math.cos(HAUL_YAW * Math.PI / 180) * ROPE_Z;
     const [x, ground] = C.projectWorld(sx, 0, sz);
-    const rw = Math.max(2.4, Math.min(5, ppu * 0.022)), R = rw * 3, k = R / 9;   // grosor de la cuerda y radio de la polea
+    const rw = Math.max(3, Math.min(5, ppu * 0.024)), R = rw * 3, k = R / 9;   // grosor de la cuerda y radio de la polea
     const top = -offTop + 30 * k, full = Math.max(0, ground - top), h = full * ease(rope);
     ropeEl.style.setProperty('--rw', (rw / k).toFixed(2)); ropeEl.style.setProperty('--rwo', ((rw + 2) / k).toFixed(2));
-    ropeLine.style.cssText = `width:${rw.toFixed(2)}px;height:${h.toFixed(1)}px;transform:translate(${(x - rw / 2).toFixed(1)}px,${top.toFixed(1)}px);background-position:0 ${(units * ppu).toFixed(1)}px`;
+    const size = `width:${rw.toFixed(2)}px;height:${h.toFixed(1)}px;background-position:0 ${(units * ppu).toFixed(1)}px`;
+    ropeLine.style.cssText = `${size};transform:translate(${(x - rw / 2).toFixed(1)}px,${top.toFixed(1)}px)`;
+    // delante del lienzo solo mientras la tiene agarrada (de perfil, con las manos en ella); si no, toda por detrás
+    const holding = D.state === 'haul' && Math.abs(D.yaw - HAUL_YAW) < 14;
+    grab = holding ? Math.min(1, grab + dt / 0.12) : 0;
+    const cut = grab >= 1 ? Math.max(0, Math.min(h, nearTop() - top)) : 0;
+    clip.style.cssText = `width:${(rw + 8).toFixed(2)}px;height:${cut.toFixed(1)}px;transform:translate(${(x - rw / 2 - 4).toFixed(1)}px,${top.toFixed(1)}px)`;
+    lineTop.style.cssText = `${size};transform:translate(4px,0)`;
     pulley.style.cssText = `width:${(34 * k).toFixed(1)}px;height:${(42 * k).toFixed(1)}px;transform:translate(${(x - 6 * k).toFixed(1)}px,${(top - 30 * k).toFixed(1)}px);opacity:${Math.min(1, rope * 2.5).toFixed(2)}`;
     wheel.style.transform = `rotate(${(units * ppu / R * 180 / Math.PI).toFixed(1)}deg)`;
+    // el cabo que sobra, recogido en el suelo: aparece cuando la cuerda ya ha bajado del todo
+    const ck = rw / 3.2, on = Math.max(0, Math.min(1, (rope - 0.85) / 0.15));
+    coil.style.cssText = `width:${(30 * ck).toFixed(1)}px;height:${(14 * ck).toFixed(1)}px;transform:translate(${(x - 17 * ck).toFixed(1)}px,${(ground - 11.5 * ck).toFixed(1)}px);opacity:${on.toFixed(2)}`;
   }
   // parpadeo: cada 2,5–5,5 s, 0,13 s con los ojos cerrados; a veces dos seguidos
   let blinkAt = 2 + Math.random() * 2, clock = 0, shut = false;
@@ -128,14 +152,7 @@ window.GVECapataz3D = async function ({ canvas, base, line = 1.2, fine = 0.5, re
     if (ent && !ent.walking) { ent.st = Math.min(1, ent.st + dt / 0.5); ent.x = ent.settle * (1 - ent.st * ent.st * (3 - 2 * ent.st)); if (ent.st >= 1) { ent = null; } }
     if (ent) place(ent.x); else if (host.style.transform) place(0);
     if (rope > 0 || ropeTarget > 0) drawRope(dt);
-    if (rope > 0) {
-      // la cuerda cuelga en un punto fijo delante de él; lo que está más cerca que ese punto va en la capa de delante
-      const a = HAUL_YAW * Math.PI / 180; split.depth = C.depthOf(Math.sin(a) * ROPE_Z, 0.5, Math.cos(a) * ROPE_Z);
-      C.render(split); frontOn = true;
-    } else {
-      if (frontOn) { fctx.clearRect(0, 0, front.width, front.height); frontOn = false; }
-      C.render();
-    }
+    C.render();
   };
   // largo de un paso en píxeles: para empezar fuera de la pantalla y acabar justo en su sitio
   const stepPx = (k) => Math.max(1, stride(k) / 2 * C.pxPerUnit());
