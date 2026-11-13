@@ -1155,7 +1155,10 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 .m-rope.on { display: block; }
 .m-rope-line { position: absolute; left: 0; top: 0; border-radius: 0 0 9px 9px; will-change: transform;
   background: repeating-linear-gradient(-62deg, #1B1919 0 1.1px, #E3BF7C 1.1px 3.6px); box-shadow: -1px 0 0 #1B1919, 1px 0 0 #1B1919; }
-.m-pulley { position: absolute; left: 0; top: 0; display: block; max-width: none; overflow: visible; }
+.m-pulley, .m-coil { position: absolute; left: 0; top: 0; display: block; max-width: none; overflow: visible; }
+/* la misma cuerda, por delante del muñeco, recortada de la polea a la mano que la tapa (el resto va por detrás) */
+.m-rope-top { pointer-events: none; }
+.m-rope-clip { position: absolute; left: 0; top: 0; overflow: hidden; will-change: transform; }
 .m-shadow { position: absolute; border-radius: 50%; background: rgba(27, 25, 25, .13); transform-origin: 50% 50%; pointer-events: none; }
 .mascot:not(.is-3d) .m-shadow { display: none; }
 /* el bocadillo */
@@ -1191,9 +1194,7 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
 /* El capataz: la ilustración original como un único trazado, deformado por su esqueleto (capataz.js) */
 /* el capataz en 3D: un lienzo transparente; hasta que carga (o sin WebGL), su imagen fija en el mismo sitio */
 .mascot { aspect-ratio: 352 / 440; }
-.mascot .cp-poster, .mascot .cp-canvas, .mascot .cp-front { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-/* la cuerda va entre los dos lienzos: el de debajo lleva el muñeco entero y el de encima, solo lo que queda delante de ella */
-.mascot .cp-front { pointer-events: none; }
+.mascot .cp-poster, .mascot .cp-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .mascot .cp-canvas { opacity: 0; transition: opacity .25s ease; }
 .mascot.is-3d .cp-canvas { opacity: 1; }
 .mascot.is-3d .cp-poster { visibility: hidden; }
