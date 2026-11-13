@@ -28,7 +28,7 @@ export const BASE = {
   // con los brazos caídos, el pulgar mira al frente y la palma al muslo
   hands: { Left: { thumb: [0, 0, 1] }, Right: { thumb: [0, 0, 1] } }
 };
-const SPECIAL = new Set(['reach', 'sole', 'legs', 'soleYaw', 'local', 'thumb', 'face', 'hands']);
+const SPECIAL = new Set(['reach', 'sole', 'legs', 'soleYaw', 'local', 'thumb', 'face', 'hands', 'grip']);
 const addV = (a, b) => ({ x: (a?.x || 0) + (b?.x || 0), y: (a?.y || 0) + (b?.y || 0), z: (a?.z || 0) + (b?.z || 0) });
 const mixV = (a, b, k) => ({ x: (a?.x || 0) + ((b?.x || 0) - (a?.x || 0)) * k, y: (a?.y || 0) + ((b?.y || 0) - (a?.y || 0)) * k, z: (a?.z || 0) + ((b?.z || 0) - (a?.z || 0)) * k });
 const keys = (a, b) => new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
@@ -42,7 +42,7 @@ export function add(base, extra) {
     o[k] = addV(a, b);
   }
   if (base.local || extra.local) { o.local = {}; for (const n of keys(base.local, extra.local)) o.local[n] = addV(base.local?.[n], extra.local?.[n]); }
-  for (const k of ['reach', 'sole', 'legs', 'soleYaw', 'thumb', 'face']) { const v = extra[k] ?? base[k]; if (v !== undefined) o[k] = v; }
+  for (const k of ['reach', 'sole', 'legs', 'soleYaw', 'thumb', 'face', 'grip']) { const v = extra[k] ?? base[k]; if (v !== undefined) o[k] = v; }
   // las manos, una a una: la segunda pose puede cambiar solo una
   if (base.hands || extra.hands) o.hands = { Left: extra.hands?.Left ?? base.hands?.Left, Right: extra.hands?.Right ?? base.hands?.Right };
   return o;
@@ -60,6 +60,8 @@ export function mix(a, b, k, kb = k) {
   if (a.local || b.local) { o.local = {}; for (const n of keys(a.local, b.local)) o.local[n] = mixV(a.local?.[n], b.local?.[n], kb); }
   // pulgares: 0 puño, 1 arriba
   if (a.thumb || b.thumb) o.thumb = { Left: (a.thumb?.Left || 0) + ((b.thumb?.Left || 0) - (a.thumb?.Left || 0)) * k, Right: (a.thumb?.Right || 0) + ((b.thumb?.Right || 0) - (a.thumb?.Right || 0)) * k };
+  // cuánto se cierra cada mano (0 abierta, 1 puño)
+  if (a.grip || b.grip) o.grip = { Left: (a.grip?.Left || 0) + ((b.grip?.Left || 0) - (a.grip?.Left || 0)) * k, Right: (a.grip?.Right || 0) + ((b.grip?.Right || 0) - (a.grip?.Right || 0)) * k };
   // hacia dónde mira el pulgar de cada mano: se mezcla la dirección (y el peso, si una pose no la lleva)
   if (a.hands || b.hands) {
     o.hands = {};
@@ -254,52 +256,64 @@ export function talk(t, v = 0) {
 }
 
 /* Tirar de la cuerda (de perfil): la página sube o baja porque él la mueve. p ∈ [0, 1) es la fase.
-   La cuerda cuelga delante de él, sin rozarle la tripa ni las botas: solo la tocan las manos. Cada mano trabaja a su
-   altura y no se cruzan: la del fondo (derecha) agarra arriba y la de este lado (izquierda), abajo. Así, de perfil, se
-   ven siempre las dos y se ve la cuerda pasar entre ellas: por delante de la de arriba y por detrás de la de abajo.
-   Se turnan: una baja tirando (medio ciclo) mientras la otra suelta y sube a por más cuerda. Al hacer scroll hacia
-   arriba la fase va al revés: la mano que agarra sube con la cuerda (la deja correr).
-   Tira con todo el cuerpo: los hombros se balancean (sube el de la mano que busca cuerda, baja el de la que tira),
-   dobla las rodillas cuando tira la mano de abajo y mira arriba, a la polea. */
+   Mano sobre mano, como se iza de verdad con una polea: una mano agarra arriba, por encima del hombro, y baja tirando
+   hasta la cintura; antes de que suelte, la otra ya ha subido por fuera y ha agarrado por encima de ella. Dos tirones
+   largos por ciclo, uno por mano.
+   Tira con el cuerpo, no solo con los brazos: al buscar cuerda se estira (sube ese hombro, se yergue) y al tirar deja
+   caer el peso (dobla las rodillas, baja ese hombro, el codo se recoge hacia abajo y atrás). Mira arriba, a la polea.
+   La cuerda cuelga delante de él, sin rozarle la tripa ni las botas: solo la tocan las manos, una a cada lado.
+   Al hacer scroll hacia arriba la fase va al revés: la mano agarrada sube con la cuerda (la deja correr). */
 export const ROPE_Z = 0.2, HAUL_YAW = -90;
-const PULL = 0.062, GRIP = { Right: 0.71, Left: 0.55 };   // recorrido de un tirón y altura a la que agarra cada muñeca
-export const ropePerPhase = 2 * PULL; // cuerda que corre por cada ciclo de fase
-const ROPE_X = 0.07;                  // cada mano, a su lado de la cuerda
+const HI = 0.72, LO = 0.49, STROKE = HI - LO;   // de dónde a dónde baja la muñeca en cada tirón
+const HOLD = 0.56;                              // parte del ciclo que cada mano va agarrada (algo más de la mitad: se relevan sin soltar)
+export const ropePerPhase = STROKE / HOLD;      // cuerda que corre por cada ciclo de fase (la mano agarrada va a su velocidad)
+const ROPE_X = 0.07;                            // cada mano, a su lado de la cuerda
 function hand(p, name) {
-  const t = ((p % 1) + 1) % 1, side = name === 'Left' ? 1 : -1, x = side * ROPE_X, z = ROPE_Z - 0.066, top = GRIP[name];
-  if (t < 0.5) { const u = t / 0.5; return { at: [x, top - PULL * u, z], k: u, grip: 1 }; }                       // agarrada, tira
-  const u = (t - 0.5) / 0.5, e = u * u * (3 - 2 * u), a = Math.sin(Math.PI * u);
-  return { at: [x + side * 0.012 * a, top - PULL * (1 - e), z - 0.02 * a], k: 1 - e, grip: 1 - a };               // suelta y sube
+  // (la muñeca va antes de la cuerda: lo que la agarra es la palma; con la mano cerrada, el puño queda más corto)
+  const t = ((p % 1) + 1) % 1, side = name === 'Left' ? 1 : -1, x = side * ROPE_X, zOpen = ROPE_Z - 0.066, zFist = ROPE_Z - 0.044;
+  if (t < HOLD) {                                // agarrada: baja con la cuerda; el esfuerzo crece pronto y afloja al final
+    const u = t / HOLD, g = Math.min(1, u / 0.08);
+    return { at: [x, HI - STROKE * u, zOpen + (zFist - zOpen) * g], y: HI - STROKE * u, grip: g, effort: Math.pow(Math.sin(Math.PI * Math.pow(u, 0.8)), 0.9) };
+  }
+  // suelta abajo, se separa de la cuerda, sube por fuera (rápida a media altura) y llega arriba un pelo por encima
+  // antes de cerrarse sobre ella
+  const u = (t - HOLD) / (1 - HOLD), e = u * u * (3 - 2 * u), away = Math.sin(Math.PI * Math.pow(u, 0.85)), over = 0.018 * bump(u, 0.55, 1);
+  const y = LO + STROKE * e + over, g = Math.max(0, 1 - 12 * Math.min(u, 1 - u));
+  return { at: [x + side * 0.02 * away, y, zOpen + (zFist - zOpen) * g - 0.05 * away], y, grip: g, effort: 0 };
 }
 const rotY = (v, deg) => { const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return [v[0] * c + v[2] * s, v[1], -v[0] * s + v[2] * c]; };
 // yaw: hacia dónde mira ahora el cuerpo. La cuerda no se mueve del sitio: mientras él se gira hacia ella (o se pasa un
 // poco al llegar), las manos van al punto fijo donde cuelga, no a uno que gire con él; y hasta que no está casi de
 // perfil no la agarra.
 export function haul(p, yaw = HAUL_YAW) {
-  const R = hand(p, 'Right'), L = hand(p + 0.5, 'Left'), H = RIG.H;   // k: cuánto ha bajado cada mano (0 arriba, 1 abajo)
-  const sway = L.k - R.k;                                              // +1: la de abajo ha tirado y la de arriba busca cuerda
-  const tug = Math.sin(Math.PI * 4 * p - 0.9);                         // el rebote de cada tirón, un poco después
+  const R = hand(p, 'Right'), L = hand(p + 0.5, 'Left'), H = RIG.H;
+  // el tirón en curso: 0 cuando una mano agarra arriba (el cuerpo, estirado), 1 a medio tirón (el peso, abajo); suave,
+  // sin golpes al relevarse las manos
+  const effort = 0.5 - 0.5 * Math.cos(4 * Math.PI * p);
+  const sway = (L.y - R.y) / STROKE;                           // +1: la mano de este lado arriba y la del fondo abajo
+  const up = (y) => Math.max(0, Math.min(1, (y - 0.63) / 0.1)); // cuánto pasa esa mano del hombro
+  const pullSide = R.effort > L.effort ? -1 : 1;               // qué lado tira ahora
   const q = add(BASE, {
-    // erguido, un punto echado atrás; con el tirón de la mano de abajo se sienta sobre las piernas
-    Hips: { x: -4 - 3 * L.k }, Spine: { x: -2.5 - 1.5 * L.k, y: 3 * sway },
-    // los hombros se balancean: sube el de la mano que busca cuerda y baja el de la que tira
-    Spine1: { y: 4 + 3 * sway }, Spine2: { y: 4 + 2 * sway, z: -9 * sway },
-    // adelantados (los brazos no dan más de sí)
-    LeftShoulder: { y: -14, z: -5 * L.k }, RightShoulder: { y: 14, z: -7 * (1 - R.k) },
+    // erguido; al tirar deja caer el peso y se echa un punto atrás, al buscar cuerda se yergue
+    Hips: { x: -1 - 4 * effort }, Spine: { x: 1.5 - 3 * effort, y: 3 * pullSide * effort },
+    // los hombros se balancean con las manos: sube el de la que busca cuerda, baja el de la que tira
+    Spine1: { y: 3 + 2 * pullSide * effort }, Spine2: { y: 3, z: 11 * sway },
+    LeftShoulder: { y: -12, z: 10 * up(L.y) }, RightShoulder: { y: 12, z: -10 * up(R.y) },
     // mira arriba, a la polea, y un poco hacia quien lee (está de perfil, mirando a la izquierda); la cabeza acusa el tirón
-    Neck: { x: -4, z: 2 * sway }, Head: { x: -9 - 2.5 * tug, y: 20, z: 3 * sway }
+    Neck: { x: -5 + 2 * effort, z: -3 * sway }, Head: { x: -13 + 5 * effort, y: 18, z: -5 * sway }
   });
-  // plantado detrás de la cuerda, un pie algo más atrás; las rodillas ceden con cada tirón
+  // plantado detrás de la cuerda, un pie algo más atrás; las rodillas ceden con cada tirón y se estiran al relevo
   const tr = RIG.Left.hip[0] + 0.02 * H, ah = RIG.floor + RIG.Left.ah;
-  q.legs = legsAt([tr, ah, -0.004 * H], [-tr, ah, -0.1 * H], { fwd: -0.034 * H, dip: 0.003 * H + 0.017 * H * L.k + 0.005 * H * R.k + 0.003 * H * tug });
+  q.legs = legsAt([tr, ah, 0.004 * H], [-tr, ah, -0.105 * H], { fwd: -0.028 * H + 0.008 * H * effort, sway: 0.006 * H * pullSide * effort, dip: 0.002 * H + 0.036 * H * effort });
   q.soleYaw = { Left: 3, Right: -10 };
-  // las manos, al punto fijo donde cuelga la cuerda
+  // las manos, al punto fijo donde cuelga la cuerda; el codo, hacia abajo y atrás
   const d = HAUL_YAW - yaw, near = Math.max(0, Math.min(1, 1 - (Math.abs(d) - 12) / 45)), w = near * near * (3 - 2 * near);
   const T = (v) => (Math.abs(d) < 0.01 ? v : rotY(v, d));
-  q.reach = { Left: { at: T(L.at), pole: T([0.5, 0.05, -0.25]), w }, Right: { at: T(R.at), pole: T([-0.5, -0.25, -0.15]), w } };
+  q.reach = { Left: { at: T(L.at), pole: T([0.45, -0.55, -0.3]), w }, Right: { at: T(R.at), pole: T([-0.45, -0.55, -0.3]), w } };
   // las palmas enfrentadas, abrazando la cuerda; las muñecas se doblan para que las dos manos apunten al frente,
   // venga el antebrazo de arriba o de abajo: así la palma cae siempre sobre la cuerda
-  q.hands = { Left: { thumb: T([0, 1, 0]), point: T([-0.12, 0.1, 1]), w, pw: w }, Right: { thumb: T([0, 1, 0]), point: T([0.12, -0.05, 1]), w, pw: w } };
+  q.hands = { Left: { thumb: T([0, 1, 0]), point: T([-0.12, 0.1, 1]), w, pw: w }, Right: { thumb: T([0, 1, 0]), point: T([0.12, 0.1, 1]), w, pw: w } };
+  q.grip = { Left: L.grip * w, Right: R.grip * w };
   return q;
 }
 
