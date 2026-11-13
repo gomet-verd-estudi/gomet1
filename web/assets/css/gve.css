@@ -1153,10 +1153,11 @@ html.gliding { scroll-snap-type: none !important; scroll-behavior: auto !importa
    la página. La cuerda va detrás del lienzo (sus manos quedan por delante) y su trenzado corre con el scroll. */
 .m-rope { position: absolute; left: 0; top: 0; width: 0; height: 0; display: none; }
 .m-rope.on { display: block; }
-.m-rope-line { position: absolute; left: 0; top: 0; border-radius: 0 0 9px 9px; will-change: transform;
-  background: repeating-linear-gradient(-62deg, #1B1919 0 1.1px, #E3BF7C 1.1px 3.6px); box-shadow: -1px 0 0 #1B1919, 1px 0 0 #1B1919; }
-.m-pulley, .m-coil { position: absolute; left: 0; top: 0; display: block; max-width: none; overflow: visible; }
-/* la misma cuerda, por delante del muñeco, recortada de la polea a la mano que la tapa (el resto va por detrás) */
+.m-rope-line { position: absolute; left: 0; top: 0; will-change: transform;
+  /* verde del estudio, con las hebras y el canto en su verde oscuro; baja hasta cortarse en el borde inferior */
+  background: repeating-linear-gradient(-62deg, var(--midori-d, #00733F) 0 1.1px, var(--midori, #00A95C) 1.1px 3.6px); box-shadow: -1px 0 0 var(--midori-d, #00733F), 1px 0 0 var(--midori-d, #00733F); }
+.m-pulley { position: absolute; left: 0; top: 0; display: block; max-width: none; overflow: visible; }
+/* la misma cuerda, por delante del muñeco, en dos recortes: por encima y por debajo de la mano que la tapa */
 .m-rope-top { pointer-events: none; }
 .m-rope-clip { position: absolute; left: 0; top: 0; overflow: hidden; will-change: transform; }
 .m-shadow { position: absolute; border-radius: 50%; background: rgba(27, 25, 25, .13); transform-origin: 50% 50%; pointer-events: none; }
