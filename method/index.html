@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gomet Verd Estudi — Method</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grey: #a6a6ab;
+    --ink: #8b8b90;
+    --line: #d4d4d7;
+    --bg: #ececed;
+    --paper: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Archivo", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; }
+
+  /* Top bar */
+  header {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 22px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .gve { display: inline-flex; }
+  .gve span {
+    width: 22px; height: 22px; display: grid; place-items: center;
+    border: 1.5px solid var(--grey); border-radius: 4px; margin-left: -1.5px;
+    font-size: 11px; font-weight: 500; color: var(--grey); letter-spacing: 0;
+  }
+  .gve span:first-child { margin-left: 0; }
+  .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+  .title b { font-weight: 700; }
+  .tools { display: flex; align-items: center; gap: 8px; }
+  .count { font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; font-weight: 500; }
+  button {
+    font: inherit; color: var(--ink); background: transparent; cursor: pointer;
+    border: 1.5px solid var(--grey); border-radius: 999px; height: 30px; padding: 0 12px;
+    display: inline-flex; align-items: center; gap: 6px; letter-spacing: .08em; text-transform: uppercase; font-size: 11px;
+    transition: background .15s, color .15s;
+  }
+  button:hover, button:focus-visible { background: var(--grey); color: #fff; outline: none; }
+  button.icon { width: 30px; padding: 0; justify-content: center; }
+  button svg { width: 14px; height: 14px; }
+
+  /* Stage */
+  .stage { position: relative; display: grid; place-items: center; padding: 6px 22px; min-height: 0; }
+  .frame {
+    position: relative; aspect-ratio: 16 / 9; width: min(100%, calc((100vh - 140px) * 16 / 9));
+    background: var(--paper); box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 18px 50px -24px rgba(0,0,0,.28);
+    overflow: hidden; user-select: none; -webkit-user-select: none;
+  }
+  .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; transition: opacity .18s ease; }
+  .frame img.hidden { opacity: 0; }
+  .hit { position: absolute; top: 0; bottom: 0; width: 50%; cursor: pointer; background: transparent; border: 0; border-radius: 0; height: auto; padding: 0; }
+  .hit:hover, .hit:focus-visible { background: transparent; }
+  .hit.prev { left: 0; cursor: w-resize; } .hit.next { right: 0; cursor: e-resize; }
+  .nav { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; background: rgba(255,255,255,.85); }
+  .nav.prev { left: 8px; } .nav.next { right: 8px; }
+  .stage:not(:hover) .nav { opacity: 0; }
+  @media (hover: none) { .nav { display: none; } }
+
+  /* Progress */
+  footer { padding: 10px 22px 16px; display: flex; align-items: center; gap: 16px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+  .bar { flex: 1; height: 1.5px; background: var(--line); position: relative; }
+  .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--grey); transition: width .2s ease; }
+  .section { white-space: nowrap; font-weight: 500; }
+  .hint { white-space: nowrap; opacity: .8; }
+  @media (max-width: 700px) { .hint, .title .long { display: none; } header, footer { padding-left: 14px; padding-right: 14px; } .stage { padding: 4px 10px; } }
+
+  /* Overview */
+  .overview {
+    position: fixed; inset: 0; background: rgba(236,236,237,.97); z-index: 10; overflow: auto;
+    padding: 70px 22px 40px; display: none;
+  }
+  .overview.open { display: block; }
+  .overview .close { position: fixed; top: 14px; right: 22px; }
+  .group { max-width: 1400px; margin: 0 auto 28px; }
+  .group h3 {
+    font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 700;
+    border-top: 1.5px solid var(--grey); padding-top: 10px; margin-bottom: 12px; display: flex; gap: 10px; align-items: center;
+  }
+  .group h3 span { font-weight: 500; }
+  .thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+  .thumb { position: relative; display: block; aspect-ratio: 16/9; background: #fff; border: 1.5px solid transparent; cursor: pointer; padding: 0; border-radius: 0; height: auto; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb em { position: absolute; left: 6px; bottom: 6px; font-style: normal; font-size: 10px; background: rgba(255,255,255,.9); padding: 2px 6px; border-radius: 999px; color: var(--ink); letter-spacing: .06em; }
+  .thumb:hover, .thumb:focus-visible { background: #fff; border-color: var(--grey); }
+  .thumb.current { border-color: var(--ink); }
+  :fullscreen .app header, :fullscreen .app footer { opacity: 0; transition: opacity .2s; }
+  :fullscreen .app:hover header, :fullscreen .app:hover footer { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="brand">
+      <span class="gve" aria-label="GVE"><span>G</span><span>V</span><span>E</span></span>
+      <span class="title"><b>Gomet Verd Estudi</b><span class="long"> · Method — How we work</span></span>
+    </div>
+    <div class="tools">
+      <span class="count" id="count">01 / 39</span>
+      <button id="gridBtn" aria-label="All slides" title="All slides (G)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="1.5" width="5" height="5"/><rect x="9.5" y="1.5" width="5" height="5"/><rect x="1.5" y="9.5" width="5" height="5"/><rect x="9.5" y="9.5" width="5" height="5"/></svg>
+        <span>Index</span>
+      </button>
+      <button class="icon" id="fsBtn" aria-label="Full screen" title="Full screen (F)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <button class="icon nav prev" id="prevBtn" aria-label="Previous slide">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 3L5 8l5 5"/></svg>
+    </button>
+    <div class="frame" id="frame">
+      <img id="slide" alt="" draggable="false">
+      <button class="hit prev" id="hitPrev" aria-label="Previous slide" tabindex="-1"></button>
+      <button class="hit next" id="hitNext" aria-label="Next slide" tabindex="-1"></button>
+    </div>
+    <button class="icon nav next" id="nextBtn" aria-label="Next slide">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg>
+    </button>
+  </main>
+
+  <footer>
+    <span class="section" id="section">Cover</span>
+    <div class="bar"><i id="progress"></i></div>
+    <span class="hint">← → to navigate · F full screen</span>
+  </footer>
+</div>
+
+<div class="overview" id="overview" role="dialog" aria-label="All slides">
+  <button class="close" id="closeBtn">Close</button>
+  <div id="groups"></div>
+</div>
+
+<script>
+(function () {
+  var TITLES = ["Cover","Introduction","What usually happens","The building","Workshop — The ground","Brief","Strategy — The site","Opportunity","Target","Competitors","Concept — The foundations","Fundamentals","Values","Archetype","Concept — The core idea","Manifesto","System — The structure","Pillars","Registers","Applications — The floors","Floors","Final artwork — Utilities and finishes","Final artwork — Preparing and testing","Handover — The keys","Keys — Turnkey","Maintenance — The building in use","Maintenance — Looking after the building","Phases and sign-offs","Judgment","Crossover","Curation","Evidence","Result","Ecosystem — Who builds","Ecosystem — Phase by phase","Together","Questions","Let's start","Thank you"];
+  var SECTIONS = [["Cover",1,1],["Introduction",2,4],["Understand",5,10],["Define",11,19],["Build",20,25],["Maintain",26,27],["Sign-offs",28,28],["Judgment",29,33],["Ecosystem",34,35],["Working together",36,38],["Closing",39,39]];
+  var N = TITLES.length;
+  var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+  var src = function (i) { return "slides/s" + pad(i) + ".webp"; };
+  var thumb = function (i) { return "slides/t" + pad(i) + ".webp"; };
+  var sectionOf = function (i) { for (var k = 0; k < SECTIONS.length; k++) if (i >= SECTIONS[k][1] && i <= SECTIONS[k][2]) return SECTIONS[k][0]; return ""; };
+
+  var img = document.getElementById("slide");
+  var countEl = document.getElementById("count");
+  var sectionEl = document.getElementById("section");
+  var progress = document.getElementById("progress");
+  var overview = document.getElementById("overview");
+  var cache = {};
+  var cur = 1;
+
+  function preload(i) { if (i < 1 || i > N || cache[i]) return; var im = new Image(); im.src = src(i); cache[i] = im; }
+
+  function fromHash() {
+    var m = /^#slide-(\d+)$/.exec(location.hash || "");
+    var n = m ? parseInt(m[1], 10) : 1;
+    return Math.min(N, Math.max(1, n));
+  }
+
+  function show(i, updateHash) {
+    i = Math.min(N, Math.max(1, i));
+    cur = i;
+    img.classList.add("hidden");
+    var next = new Image();
+    next.onload = function () { if (cur === i) { img.src = next.src; img.alt = "Slide " + i + ": " + TITLES[i - 1]; img.classList.remove("hidden"); } };
+    next.src = src(i);
+    countEl.textContent = pad(i) + " / " + N;
+    sectionEl.textContent = sectionOf(i);
+    progress.style.width = ((i - 1) / (N - 1) * 100) + "%";
+    document.title = "Gomet Verd Estudi — Method · " + TITLES[i - 1];
+    if (updateHash) { try { history.replaceState(null, "", "#slide-" + i); } catch (e) { location.hash = "slide-" + i; } }
+    preload(i + 1); preload(i - 1); preload(i + 2);
+    var thumbs = document.querySelectorAll(".thumb");
+    for (var t = 0; t < thumbs.length; t++) thumbs[t].classList.toggle("current", +thumbs[t].dataset.i === i);
+  }
+  function go(d) { show(cur + d, true); }
+
+  // Overview
+  var groups = document.getElementById("groups");
+  SECTIONS.forEach(function (s) {
+    var g = document.createElement("section"); g.className = "group";
+    var h = document.createElement("h3"); h.innerHTML = s[0] + " <span>" + pad(s[1]) + (s[2] > s[1] ? "–" + pad(s[2]) : "") + "</span>";
+    var grid = document.createElement("div"); grid.className = "thumbs";
+    for (var i = s[1]; i <= s[2]; i++) {
+      (function (i) {
+        var b = document.createElement("button"); b.className = "thumb"; b.dataset.i = i; b.setAttribute("aria-label", "Go to slide " + i + ": " + TITLES[i - 1]);
+        var im = document.createElement("img"); im.loading = "lazy"; im.src = thumb(i); im.alt = "";
+        var em = document.createElement("em"); em.textContent = pad(i);
+        b.appendChild(im); b.appendChild(em);
+        b.addEventListener("click", function () { closeOverview(); show(i, true); });
+        grid.appendChild(b);
+      })(i);
+    }
+    g.appendChild(h); g.appendChild(grid); groups.appendChild(g);
+  });
+  function openOverview() { overview.classList.add("open"); var c = overview.querySelector(".thumb.current"); if (c) c.scrollIntoView({ block: "center" }); }
+  function closeOverview() { overview.classList.remove("open"); }
+
+  // Fullscreen
+  function toggleFs() {
+    try {
+      var el = document.documentElement;
+      if (!document.fullscreenElement) { var p = (el.requestFullscreen || el.webkitRequestFullscreen).call(el); if (p && p.catch) p.catch(function () {}); }
+      else { var q = (document.exitFullscreen || document.webkitExitFullscreen).call(document); if (q && q.catch) q.catch(function () {}); }
+    } catch (e) {}
+  }
+
+  document.getElementById("prevBtn").addEventListener("click", function () { go(-1); });
+  document.getElementById("nextBtn").addEventListener("click", function () { go(1); });
+  document.getElementById("hitPrev").addEventListener("click", function () { go(-1); });
+  document.getElementById("hitNext").addEventListener("click", function () { go(1); });
+  document.getElementById("gridBtn").addEventListener("click", openOverview);
+  document.getElementById("closeBtn").addEventListener("click", closeOverview);
+  document.getElementById("fsBtn").addEventListener("click", toggleFs);
+
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var k = e.key;
+    if (overview.classList.contains("open")) { if (k === "Escape" || k === "g" || k === "G") { closeOverview(); e.preventDefault(); } return; }
+    if (k === "ArrowRight" || k === "ArrowDown" || k === "PageDown" || k === " ") { go(1); e.preventDefault(); }
+    else if (k === "ArrowLeft" || k === "ArrowUp" || k === "PageUp") { go(-1); e.preventDefault(); }
+    else if (k === "Home") { show(1, true); e.preventDefault(); }
+    else if (k === "End") { show(N, true); e.preventDefault(); }
+    else if (k === "f" || k === "F") { toggleFs(); }
+    else if (k === "g" || k === "G") { openOverview(); }
+  });
+
+  // Swipe
+  var sx = null, sy = null;
+  var frame = document.getElementById("stage");
+  frame.addEventListener("touchstart", function (e) { var t = e.touches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
+  frame.addEventListener("touchend", function (e) {
+    if (sx === null) return; var t = e.changedTouches[0]; var dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1);
+    sx = sy = null;
+  });
+
+  window.addEventListener("hashchange", function () { var n = fromHash(); if (n !== cur) show(n, false); });
+  show(fromHash(), false);
+})();
+</script>
+</body>
+</html>
