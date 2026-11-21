@@ -56,17 +56,17 @@ window.DECK_I18N = (function () {
       ["h", "We stay close"],
       ["p", "If you want, we stay by your side as the brand grows: we check new pieces and extend it without losing what makes it yours."]
     ]),
-    P(31, 31, "How we decide", "Judgment", "[Judgment]", "Judgment", [
+    P(31, 31, "How we decide", "", "[Judgment]", "Judgment", [
       ["img", "v31", "Every option filtered by relevance, ownability and viability down to one solution"],
       ["h", "We try a lot, we keep one"],
       ["p", "Every proposal faces three questions: does it fit what you're after? Is it yours alone? Does it work in real life? And we always tell you why."]
     ]),
-    P(34, 34, "Who does it", "The team", "[Team]", "Team", [
+    P(34, 34, "Who does it", "", "[Team]", "Team", [
       ["img", "v34", "The core team with audiovisual, social media, web development and production specialists"],
       ["h", "One team, one person to talk to"],
       ["p", "Our team does the bulk. When video, web or production is needed, trusted specialists join, and we coordinate them all."]
     ]),
-    P(38, 38, "The first step", "Let's start", "[Let's start]", "Let's start", [
+    P(38, 38, "The first step", "", "[Let's start]", "Let's start", [
       ["img", "v38", "The empty site, where everything starts"],
       ["h", "It all starts with a conversation"],
       ["p", "A [3]-hour meeting with the people who decide. Within [2] weeks you have the plan and the schedule."]
@@ -120,17 +120,17 @@ window.DECK_I18N = (function () {
       ["h", "Seguimos cerca"],
       ["p", "Si queréis, os acompañamos mientras la marca crece: revisamos las piezas nuevas y la ampliamos sin que pierda lo que la hace vuestra."]
     ]),
-    P(31, 31, "Cómo decidimos", "Criterio", "[Criterio]", "Criterio", [
+    P(31, 31, "Cómo decidimos", "", "[Criterio]", "Criterio", [
       ["img", "v31", "Todas las opciones filtradas por pertinencia, propiedad y viabilidad hasta una sola solución"],
       ["h", "Probamos mucho, nos quedamos con una"],
       ["p", "Cada propuesta pasa tres preguntas: ¿encaja con lo que buscáis?, ¿es solo vuestra?, ¿funciona en la vida real? Y siempre os explicamos por qué."]
     ]),
-    P(34, 34, "Quién lo hace", "El equipo", "[Equipo]", "Equipo", [
+    P(34, 34, "Quién lo hace", "", "[Equipo]", "Equipo", [
       ["img", "v34", "El equipo base con especialistas en audiovisual, redes sociales, desarrollo web y producción"],
       ["h", "Un equipo y una sola persona de contacto"],
       ["p", "Nuestro equipo hace el grueso. Cuando hace falta vídeo, web o producción, se suman especialistas de confianza y lo coordinamos todo nosotros."]
     ]),
-    P(38, 38, "El primer paso", "Empezamos", "[Empezamos]", "Empezamos", [
+    P(38, 38, "El primer paso", "", "[Empezamos]", "Empezamos", [
       ["img", "v38", "El solar vacío, donde empieza todo"],
       ["h", "Todo empieza con una conversación"],
       ["p", "Una reunión de [3] horas con quienes deciden. En [2] semanas tenéis el plan y el calendario."]
