@@ -13,7 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=15">
+<link rel="stylesheet" href="kit.css?v=16">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -122,8 +122,7 @@
   .tw { position: absolute; left: 0; right: 0; top: 0; height: var(--wh, 100vh); padding-top: calc(var(--hd) + 3vh); pointer-events: none; z-index: 1; }
   .hd2 { position: sticky; top: calc(var(--hd) + 3vh); pointer-events: auto; }
   .hsp { flex: none; height: var(--hdh, 0px); }
-  .lam-foot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); column-gap: var(--pad); align-items: start; position: relative; padding-top: 20px; }
-  .lam-foot::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 8px; background: repeating-linear-gradient(-45deg, var(--g) 0 4px, transparent 4px 8px); }
+  .lam-foot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); column-gap: var(--pad); align-items: start; position: relative; padding-top: 8px; }
   .lam-foot > * { grid-area: auto; grid-row: 1; }
   .lam-foot .hl { grid-column: 1; }
   .lam-foot .lead { grid-column: 2; }
@@ -273,9 +272,8 @@
     .hole { min-height: 30vh; min-height: 30svh; }
     .tw { padding-top: calc(var(--hd) + 18px); }
     .hd2 { top: calc(var(--hd) + 18px); }
-    .lam-foot { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding-top: 16px; }
+    .lam-foot { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding-top: 6px; }
     .pl::before { height: 10px; background: repeating-linear-gradient(-45deg, var(--g) 0 4.5px, transparent 4.5px 9px); }
-    .lam-foot::before { height: 6px; background: repeating-linear-gradient(-45deg, var(--g) 0 3px, transparent 3px 6px); }
     .lam-foot > .hl, .lam-foot > .lead, .lam-foot > .legend, .lam-foot:not(.has-lg) > .lead { grid-column: 1; grid-row: auto; }
     .lam-foot .legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 16px; }
     .lam-foot .legend .n { width: 19px; height: 19px; font-size: 10px; border-width: 1.5px; }
@@ -328,10 +326,10 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="data.js?v=15"></script>
-<script src="data-es.js?v=15"></script>
-<script src="kit.js?v=15"></script>
-<script src="pillars3d.js?v=15"></script>
+<script src="data.js?v=16"></script>
+<script src="data-es.js?v=16"></script>
+<script src="kit.js?v=16"></script>
+<script src="pillars3d.js?v=16"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
