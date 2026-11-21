@@ -326,10 +326,63 @@
   .is-locked, .is-locked body { overflow: hidden; }
 
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+  /* ---------- Animated drawings ---------- */
+  .ast { position: relative; overflow: hidden; }
+  .ast > img { position: absolute; max-width: none; display: block; pointer-events: none; user-select: none; -webkit-user-select: none; }
+  .ast.wait > img { opacity: 0; }
+  .dov { position: absolute; inset: 0; pointer-events: none; }
+  .dov.off { visibility: hidden; }
+  .rp[hidden] { display: none; }
+  .rp { position: absolute; z-index: 3; background: rgba(255,255,255,.92); }
+  .frame .rp { right: 12px; bottom: 12px; }
+  @media (hover: hover) { .stage:not(:hover) .frame .rp { opacity: 0; } }
+  .afig { position: relative; margin-top: 32px; }
+  .afoot { display: flex; align-items: flex-start; gap: 12px; margin-top: 14px; }
+  .afoot .caps { margin-top: 0; flex: 1; }
+  .afoot .ctl { display: flex; gap: 6px; margin-left: auto; flex: none; }
+  .afoot .ctl > button { position: static; width: 30px; height: 30px; padding: 0; justify-content: center; border-width: 1px; opacity: 1; background: #fff; }
+  .split .vis .afig { margin-top: 0; }
+  .caps { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .caps li { display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--grey); border: 1px solid var(--line); border-radius: 999px; padding: 6px 11px; opacity: .45; transition: opacity .35s, color .35s, border-color .35s; }
+  .caps li i { font-style: normal; font-weight: 500; letter-spacing: .02em; }
+  .caps li.on { opacity: 1; color: var(--ink); border-color: var(--grey); }
+  @keyframes a-fade { from { opacity: 0; } }
+  @keyframes a-out { to { opacity: 0; } }
+  @keyframes a-drop { from { opacity: 0; transform: translateY(calc(var(--u, 1) * -64px)); } 40% { opacity: 1; } }
+  @keyframes a-lift { from { opacity: 0; transform: translateY(calc(var(--u, 1) * 44px)); } }
+  @keyframes a-rise { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes a-down { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes a-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes a-pop { 0% { opacity: 0; transform: scale(.35); } 65% { opacity: 1; transform: scale(1.08); } 100% { transform: scale(1); } }
+  @keyframes a-grow { from { opacity: 0; transform: scale(.86); } }
+  @keyframes a-shoveL { 0% { opacity: 0; transform: translateX(calc(var(--u, 1) * -110px)); } 55% { opacity: 1; transform: translateX(calc(var(--u, 1) * 16px)); } 78% { transform: translateX(calc(var(--u, 1) * -7px)); } 100% { transform: none; } }
+  @keyframes a-shoveR { 0% { opacity: 0; transform: translateX(calc(var(--u, 1) * 110px)); } 55% { opacity: 1; transform: translateX(calc(var(--u, 1) * -16px)); } 78% { transform: translateX(calc(var(--u, 1) * 7px)); } 100% { transform: none; } }
+  @keyframes a-slideL { from { opacity: 0; transform: translateX(calc(var(--u, 1) * -80px)); } }
+  @keyframes a-slideR { from { opacity: 0; transform: translateX(calc(var(--u, 1) * 80px)); } }
+  @keyframes a-blink { 0% { opacity: 0; } 18% { opacity: 1; } 32% { opacity: .1; } 48% { opacity: 1; } 62% { opacity: .15; } 100% { opacity: 1; } }
+
+  /* reveal for the diagrams rebuilt in HTML */
+  .rv .rv-i { opacity: 0; transform: translateY(12px); transition: opacity .55s ease, transform .55s cubic-bezier(.2,.8,.2,1); transition-delay: calc(var(--i, 0) * 120ms); }
+  .rv .rv-o { opacity: 0; transition: opacity .55s ease; transition-delay: calc(var(--i, 0) * 120ms); }
+  .rv.in .rv-i { opacity: 1; transform: none; }
+  .rv.in .rv-o { opacity: 1; }
+  .map.rv .d.rv-i { transform: translate(-50%, -50%) scale(0); transition-timing-function: ease, cubic-bezier(.3,1.5,.5,1); }
+  .map.rv.in .d.rv-i { transform: translate(-50%, -50%) scale(1); }
+  .map.rv .op { opacity: 0; transition: opacity .9s ease 1.8s; }
+  .map.rv.in .op { opacity: 1; }
+  .rings.rv ellipse { transform-box: fill-box; transform-origin: center; transform: scale(.3); opacity: 0; transition: transform .8s cubic-bezier(.2,.8,.2,1), opacity .6s ease; }
+  .rings.rv ellipse:nth-child(2) { transition-delay: .35s; }
+  .rings.rv .o { transition-delay: .7s; }
+  .rings.rv.in ellipse { transform: none; opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .ast > img { animation: none !important; } .ast.wait > img { opacity: 1; } .caps li { opacity: 1; } }
+
   @media print {
     .hdr, .deck, .overview, .lb, .crumb .vs, .zm { display: none !important; }
     .is-deck .read { display: block !important; }
     .sl { break-inside: avoid-page; }
+    .ast > img { animation: none !important; opacity: 1 !important; clip-path: none !important; transform: none !important; }
+    .rv .rv-i, .rv .rv-o, .rings.rv ellipse, .map.rv .op { opacity: 1 !important; transform: none !important; }
+    .rp, .afig .zm, .afoot .ctl { display: none !important; }
   }
 </style>
 </head>
@@ -363,8 +416,10 @@
     </button>
     <div class="frame" id="frame">
       <img id="slide" alt="" draggable="false">
+      <div class="ast dov off" id="dov" data-w="1920" aria-hidden="true"></div>
       <button class="hit prev" id="hitPrev" aria-label="Previous slide" tabindex="-1"></button>
       <button class="hit next" id="hitNext" aria-label="Next slide" tabindex="-1"></button>
+      <button class="icon rp" id="rpBtn" type="button" aria-label="Replay the animation" title="Replay (R)" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9M2.5 2.5v3h3"/></svg></button>
     </div>
     <button class="icon nav next" id="nextBtn" aria-label="Next slide">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3l5 5-5 5"/></svg>
@@ -373,7 +428,7 @@
   <footer class="dfoot">
     <span class="section" id="dSection">Cover</span>
     <div class="prog"><i id="progDeck"></i></div>
-    <span class="hint">← → to navigate · F full screen · V read view</span>
+    <span class="hint">← → to navigate · R replay · F full screen · V read view</span>
   </footer>
 </div>
 
@@ -390,6 +445,7 @@
 </div>
 
 <script src="data.js"></script>
+<script src="anim.js"></script>
 <script>
 (function () {
   var D = window.DECK, SZ = window.VSIZE || {}, N = D.length;
@@ -415,14 +471,52 @@
       '<button class="zm" type="button" aria-label="Enlarge drawing" data-zoombtn>' + ZOOM + '</button></figure>';
   }
 
+  /* --- animated drawings (layers exported from Figma) --- */
+  var A = window.ANIM || {}, RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches, curN = 0;
+  var REPLAY = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9M2.5 2.5v3h3"/></svg>';
+  var EASE = { drop: "cubic-bezier(.2,.9,.25,1)", lift: "cubic-bezier(.2,.9,.25,1)", pop: "cubic-bezier(.3,1.3,.5,1)", grow: "cubic-bezier(.2,.8,.2,1)",
+    shoveL: "cubic-bezier(.3,.9,.3,1)", shoveR: "cubic-bezier(.3,.9,.3,1)", slideL: "cubic-bezier(.2,.8,.2,1)", slideR: "cubic-bezier(.2,.8,.2,1)",
+    rise: "cubic-bezier(.55,0,.2,1)", down: "cubic-bezier(.55,0,.2,1)", wipe: "cubic-bezier(.6,0,.25,1)", fade: "ease", blink: "linear" };
+  function apath(n, f) { return "anim/s" + pad(n) + "/" + f; }
+  function layersHTML(n, ox, oy, W, H) {
+    return A[n].p.map(function (p) { var r = p[1];
+      return '<img src="' + apath(n, p[0]) + '" data-l="' + p[2] + '" alt="" draggable="false" decoding="async" style="left:' + ((r[0] - ox) / W * 100).toFixed(4) + '%;top:' + ((r[1] - oy) / H * 100).toFixed(4) +
+        '%;width:' + (r[2] / W * 100).toFixed(4) + '%;height:' + (r[3] / H * 100).toFixed(4) + '%">'; }).join("");
+  }
+  function afig(n, id, alt) {
+    var a = A[n], vb = a.vb, s = SZ[id] || [0, 0];
+    var caps = a.c.length ? '<ol class="caps" aria-hidden="true">' + a.c.map(function (c, k) { return '<li data-t="' + c[1] + '"><i>' + pad(k + 1) + '</i>' + esc(c[0]) + '</li>'; }).join("") + '</ol>' : "";
+    return '<figure class="afig" data-anim="' + n + '"><div class="ast' + (RM ? "" : " wait") + '" role="img" aria-label="' + esc(alt || "") + '" data-w="' + vb[2] + '" style="aspect-ratio:' + vb[2] + ' / ' + vb[3] + '">' +
+      layersHTML(n, vb[0], vb[1], vb[2], vb[3]) + '</div>' +
+      '<div class="afoot">' + caps + '<div class="ctl"><button class="icon rp" type="button" aria-label="Replay the animation" title="Replay">' + REPLAY + '</button>' +
+      '<button class="zm" type="button" aria-label="Enlarge drawing" title="Enlarge" data-zoom="v/' + id + '.webp" data-w="' + s[0] + '" data-h="' + s[1] + '" data-alt="' + esc(alt || "") + '">' + ZOOM + '</button></div></div></figure>';
+  }
+  function play(stage, n, capsEl) {
+    var a = A[n]; if (!a || !stage) return;
+    stage.classList.remove("wait");
+    (stage._t || []).forEach(clearTimeout); stage._t = [];
+    var imgs = stage.querySelectorAll("img[data-l]"), lis = capsEl ? capsEl.querySelectorAll("li") : [];
+    if (RM) { Array.prototype.forEach.call(lis, function (li) { li.classList.add("on"); }); return; }
+    Array.prototype.forEach.call(imgs, function (im) { im.style.animation = "none"; });
+    void stage.offsetWidth;
+    Array.prototype.forEach.call(imgs, function (im) {
+      var l = im.getAttribute("data-l"), t = a.t[l]; if (!t) return;
+      var v = "a-" + t[0] + " " + t[2] + "ms " + (EASE[t[0]] || "ease") + " " + t[1] + "ms both";
+      if (a.h[l] != null) v += ", a-out 300ms linear " + a.h[l] + "ms forwards";
+      im.style.animation = v;
+    });
+    Array.prototype.forEach.call(lis, function (li) { li.classList.remove("on"); stage._t.push(setTimeout(function () { li.classList.add("on"); }, +li.getAttribute("data-t") + 250)); });
+  }
+  var ro = window.ResizeObserver ? new ResizeObserver(function (es) { es.forEach(function (e) { var el = e.target; el.style.setProperty("--u", (el.clientWidth / +el.getAttribute("data-w")).toFixed(4)); }); }) : null;
+
   /* --- drawings rebuilt as HTML so they stay legible on phones --- */
   function rings() {
-    return '<div class="rings" role="img" aria-label="Three concentric circles: primary in the centre, secondary around it, tertiary outside">' +
+    return '<div class="rings rv" role="img" aria-label="Three concentric circles: primary in the centre, secondary around it, tertiary outside">' +
       '<svg viewBox="0 0 682 300" preserveAspectRatio="none" aria-hidden="true">' +
       '<ellipse class="o" cx="341" cy="150" rx="330" ry="140" vector-effect="non-scaling-stroke"/>' +
       '<ellipse cx="341" cy="150" rx="226" ry="94" vector-effect="non-scaling-stroke"/>' +
       '<ellipse class="i" cx="341" cy="150" rx="116" ry="48" vector-effect="non-scaling-stroke"/></svg>' +
-      '<span style="top:12%">Tertiary</span><span style="top:26.5%">Secondary</span><span style="top:50%">Primary</span></div>';
+      '<span class="rv-o" style="top:12%;--i:7">Tertiary</span><span class="rv-o" style="top:26.5%;--i:4">Secondary</span><span class="rv-o" style="top:50%;--i:1">Primary</span></div>';
   }
   function map() {
     var W = 1140, H = 702, cx = 570, cy = 354, t = "";
@@ -431,35 +525,35 @@
     var comp = [[373,124],[233,258],[625,194],[877,178],[972,284],[110,412],[345,476],[167,553],[317,610],[524,530],[681,418]];
     var bench = [[972,92],[737,265]];
     var p = function (a) { return "left:" + (a[0] / W * 100).toFixed(2) + "%;top:" + (a[1] / H * 100).toFixed(2) + "%"; };
-    var h = '<div class="map" role="img" aria-label="Positioning map from functional to emotional and from accessible to exclusive. Competitors cluster on the functional side and in the exclusive-emotional corner; the accessible-emotional quadrant is the open space for your brand.">' +
+    var h = '<div class="map rv" role="img" aria-label="Positioning map from functional to emotional and from accessible to exclusive. Competitors cluster on the functional side and in the exclusive-emotional corner; the accessible-emotional quadrant is the open space for your brand.">' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><rect class="op" x="570" y="354" width="560" height="321"/>' +
       '<path class="ax" vector-effect="non-scaling-stroke" d="M10 ' + cy + 'H1130M' + cx + ' 40V665' + t + '"/></svg>';
-    comp.forEach(function (a) { h += '<i class="d" style="' + p(a) + '"></i>'; });
-    bench.forEach(function (a) { h += '<i class="d b" style="' + p(a) + '"></i>'; });
+    comp.forEach(function (a, k) { h += '<i class="d rv-i" style="' + p(a) + ';--i:' + (k + 2) + '"></i>'; });
+    bench.forEach(function (a, k) { h += '<i class="d b rv-i" style="' + p(a) + ';--i:' + (k + 13) + '"></i>'; });
     h += '<span class="pill" style="' + p([570, 26]) + '">Exclusive</span><span class="pill" style="' + p([570, 683]) + '">Accessible</span>' +
       '<span class="pill w" style="top:' + (324 / H * 100).toFixed(2) + '%">Functional</span><span class="pill e" style="top:' + (324 / H * 100).toFixed(2) + '%">Emotional</span>' +
-      '<span class="pill" style="' + p([939, 552]) + '">Your brand</span><span class="open">[The open space]</span></div>' +
+      '<span class="pill rv-o" style="' + p([939, 552]) + ';--i:17">Your brand</span><span class="open rv-o" style="--i:17">[The open space]</span></div>' +
       '<div class="lg"><span><b class="m f"></b>Competitors</span><span><b class="m o"></b>Benchmarks</span></div>';
     return h;
   }
   var PHASES = ["Workshop","Strategy","Concept","System","Applications","Final artwork","Handover","Maintenance"];
   function timeline() {
-    var acts = { 0: "Understand", 2: "Define", 4: "Build", 7: "Maintain" }, so = [1, 2, 3, 4, 5], h = '<ol class="tl" aria-label="The eight phases in four acts, with a sign-off between phases">';
+    var acts = { 0: "Understand", 2: "Define", 4: "Build", 7: "Maintain" }, so = [1, 2, 3, 4, 5], k = 0, h = '<ol class="tl rv" aria-label="The eight phases in four acts, with a sign-off between phases">';
     PHASES.forEach(function (ph, i) {
-      if (acts[i]) h += '<li class="act">' + acts[i] + '</li>';
-      h += '<li class="ph">' + img("p" + (i + 1), "") + '<div><b><i>' + pad(i + 1) + '</i>' + ph + '</b><span>[__ weeks]</span></div></li>';
-      if (so.indexOf(i) >= 0) h += '<li class="so-r"><span class="so">' + CHECK + '</span>Sign-off with you</li>';
+      if (acts[i]) h += '<li class="act rv-o" style="--i:' + (k++) + '">' + acts[i] + '</li>';
+      h += '<li class="ph rv-i" style="--i:' + (k++) + '">' + img("p" + (i + 1), "") + '<div><b><i>' + pad(i + 1) + '</i>' + ph + '</b><span>[__ weeks]</span></div></li>';
+      if (so.indexOf(i) >= 0) h += '<li class="so-r rv-i" style="--i:' + (k++) + '"><span class="so">' + CHECK + '</span>Sign-off with you</li>';
     });
     return h + '</ol>';
   }
   var TRUSS = [["Business data","Listening and intuition"],["Market and competitors","Cultural reading and references"],["Semantic analysis","Conceptual exploration"],["Legibility tests","Formal exploration and curation"],["Usage tests by format","Art direction"],["Production tests","Craft and detail"],["Files and documentation","Brand story"],["Consistency audit","New ideas on the structure"]];
   function truss() {
-    var h = '<div class="tr" role="table" aria-label="Technical and creative work in each phase"><div class="tr-h" role="row"><span role="columnheader">Technical</span><span></span><span role="columnheader">Creative</span></div>';
+    var h = '<div class="tr rv" role="table" aria-label="Technical and creative work in each phase"><div class="tr-h" role="row"><span role="columnheader">Technical</span><span></span><span role="columnheader">Creative</span></div>';
     TRUSS.forEach(function (r, i) {
       var a = i % 2 ? 40 : 4, b = i % 2 ? 4 : 40;
       var d = (i === 0 ? "M4 0H40" : "") + "M4 0V100M40 0V100M" + a + " 0L" + b + " 100M4 100H40";
       var so = (i >= 1 && i <= 5) ? '<span class="so ' + (i % 2 ? "l" : "r") + '">' + CHECK + '</span>' : "";
-      h += '<div class="tr-r" role="row"><div class="tr-t" role="cell"><i>' + pad(i + 1) + '</i>' + r[0] + '</div>' +
+      h += '<div class="tr-r rv-i" role="row" style="--i:' + i + '"><div class="tr-t" role="cell"><i>' + pad(i + 1) + '</i>' + r[0] + '</div>' +
         '<div class="tr-m" aria-hidden="true"><svg viewBox="0 0 44 100" preserveAspectRatio="none"><path vector-effect="non-scaling-stroke" d="' + d + '"/></svg>' + so + '</div>' +
         '<div class="tr-c" role="cell">' + r[1] + '</div></div>';
     });
@@ -469,11 +563,11 @@
     var cols = ["Core team", "Social media", "Video", "Web dev.", "Production", "You"];
     var marks = ["LLLLLLLL", "-T--L--T", "---TLT--", "----TL-T", "-----L-T", "TSSSSSTT"];
     var mk = { L: '<b class="m f" title="Leads"></b>', T: '<b class="m o" title="Takes part"></b>', S: '<b class="m c" title="Signs off">' + CHECK + '</b>', "-": "" };
-    var h = '<table class="mx"><thead><tr><th><span class="sr">Phase</span></th>';
+    var h = '<table class="mx rv"><thead><tr><th><span class="sr">Phase</span></th>';
     cols.forEach(function (c, j) { h += '<th' + (j === 5 ? ' class="you"' : '') + '><span>' + c + '</span></th>'; });
     h += '</tr></thead><tbody>';
     PHASES.forEach(function (ph, i) {
-      h += '<tr><th scope="row"><i>' + pad(i + 1) + '</i>' + ph + '</th>';
+      h += '<tr class="rv-o" style="--i:' + i + '"><th scope="row"><i>' + pad(i + 1) + '</i>' + ph + '</th>';
       marks.forEach(function (m, j) { h += '<td' + (j === 0 ? ' class="ln"' : '') + '>' + mk[m.charAt(i)] + '</td>'; });
       h += '</tr>';
     });
@@ -495,7 +589,7 @@
       case "rule": return '<hr class="rl">';
       case "note": return '<p class="nt">' + esc(b[1]) + '</p>';
       case "quote": return '<blockquote class="qt">' + esc(b[1]) + '</blockquote>';
-      case "img": return b[1] === "v09" ? rings() : b[1] === "v10" ? map() : fig(b[1], b[2]);
+      case "img": return b[1] === "v09" ? rings() : b[1] === "v10" ? map() : (A[curN] && curN !== 18) ? afig(curN, b[1], b[2]) : fig(b[1], b[2]);
       case "wide": return wide(b[1], b[2]);
       case "items": return '<div class="its">' + b[1].map(function (it) { return '<div class="it"><b>' + esc(it[0]) + '</b><p>' + esc(it[1]) + '</p></div>'; }).join("") + '</div>';
       case "table":
@@ -504,7 +598,7 @@
       case "meta": return '<div class="mt">' + b[1].map(function (m) { return '<span>' + esc(m) + '</span>'; }).join("") + '</div>';
       case "steps": return '<ol class="st">' + b[1].map(function (s) { return '<li><i>' + s[0] + '</i><b>' + esc(s[1]) + '</b><p>' + esc(s[2]) + '</p></li>'; }).join("") + '</ol>';
       case "qa": return '<div class="qa">' + b[1].map(function (q) { return '<div><b>' + esc(q[0]) + '</b><p>' + esc(q[1]) + '</p></div>'; }).join("") + '</div>';
-      case "pillars": return '<div class="pl">' + b[1].map(function (p) { return '<div><span class="lbl-s">' + esc(p[1]) + '</span><div class="pi">' + img(p[0], "") + '</div><p>' + esc(p[2]) + '</p></div>'; }).join("") + '</div>';
+      case "pillars": return '<div class="pl rv">' + b[1].map(function (p, k) { return '<div class="rv-i" style="--i:' + (k * 2) + '"><span class="lbl-s">' + esc(p[1]) + '</span><div class="pi">' + img(p[0], "") + '</div><p>' + esc(p[2]) + '</p></div>'; }).join("") + '</div>';
       case "legend": return '<div class="lg"><span><b class="m f"></b>' + b[1][0] + '</span><span><b class="m o"></b>' + b[1][1] + '</span><span><b class="m c">' + CHECK + '</b>' + b[1][2] + '</span></div>';
       case "contact": return '<div class="it ct"><b>Contact</b><a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a><a href="tel:+34684450515">+34 684 450 515</a><a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi</a></div>';
     }
@@ -512,7 +606,7 @@
   }
 
   function section(s, i) {
-    var n = i + 1;
+    var n = i + 1; curN = n;
     if (s.kind === "cover") {
       return '<section class="cover" id="slide-1" data-n="1" aria-label="Cover">' +
         '<span class="reg tl">' + REG + '</span><span class="reg tr">' + REG + '</span><span class="reg bl">' + REG + '</span><span class="reg br">' + REG + '</span>' +
@@ -558,19 +652,33 @@
   }
 
   /* deck */
-  var slideImg = $("slide"), cache = {};
+  var slideImg = $("slide"), dov = $("dov"), rpBtn = $("rpBtn"), deckTok = 0, cache = {};
   var srcOf = function (n) { return "slides/s" + pad(n) + ".webp"; };
-  function preload(n) { if (n < 1 || n > N || cache[n]) return; var im = new Image(); im.src = srcOf(n); cache[n] = im; }
+  function loadImg(src) {
+    if (!cache[src]) cache[src] = new Promise(function (res) { var im = new Image(); im.onload = im.onerror = function () { res(im); }; im.src = src; });
+    return cache[src];
+  }
+  function assets(n) { var a = RM ? null : A[n]; return a ? [apath(n, "bg.webp")].concat(a.p.map(function (p) { return apath(n, p[0]); })) : [srcOf(n)]; }
+  function preload(n) { if (n >= 1 && n <= N) assets(n).forEach(loadImg); }
   function show(n) {
     cur = Math.min(N, Math.max(1, n));
-    slideImg.classList.add("hidden");
-    var target = srcOf(cur), im = new Image();
-    im.onload = im.onerror = function () { if (slideImg.getAttribute("data-src") === target) { slideImg.src = target; slideImg.classList.remove("hidden"); } };
-    slideImg.setAttribute("data-src", target); slideImg.alt = "Slide " + cur + ": " + nameOf(cur);
-    im.src = target;
+    var tok = ++deckTok, k = cur, list = assets(k), animated = list.length > 1;
+    slideImg.classList.add("hidden"); dov.classList.add("off"); rpBtn.hidden = true;
+    slideImg.alt = "Slide " + k + ": " + nameOf(k);
+    Promise.all(list.map(loadImg)).then(function () {
+      if (tok !== deckTok) return;
+      slideImg.src = list[0]; slideImg.classList.remove("hidden");
+      if (animated) {
+        dov.innerHTML = layersHTML(k, 0, 0, 1920, 1080);
+        dov.style.setProperty("--u", (dov.clientWidth / 1920).toFixed(4));
+        dov.classList.remove("off"); play(dov, k); rpBtn.hidden = false;
+      } else dov.innerHTML = "";
+    });
     preload(cur + 1); preload(cur - 1);
     setHash(cur); paint();
   }
+  rpBtn.onclick = function () { play(dov, cur); };
+  if (ro) ro.observe(dov);
   function go(n) { if (mode === "deck") show(n); else scrollToSlide(n); }
 
   /* read */
@@ -587,6 +695,15 @@
     es.forEach(function (e) { if (e.isIntersecting) { var n = +e.target.getAttribute("data-n"); if (n !== cur) { cur = n; setHash(cur); paint(); } } });
   }, { rootMargin: "-40% 0px -59% 0px" });
   Array.prototype.forEach.call(document.querySelectorAll("#read [data-n]"), function (el) { io.observe(el); });
+  var aio = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      if (!e.isIntersecting) return; var f = e.target; aio.unobserve(f);
+      if (f.classList.contains("rv")) f.classList.add("in");
+      else play(f.querySelector(".ast"), +f.getAttribute("data-anim"), f.querySelector(".caps"));
+    });
+  }, { threshold: 0.3 });
+  Array.prototype.forEach.call(document.querySelectorAll("#read .afig"), function (f) { aio.observe(f); if (ro) ro.observe(f.querySelector(".ast")); });
+  Array.prototype.forEach.call(document.querySelectorAll("#read .rv"), function (f) { if (RM) f.classList.add("in"); else aio.observe(f); });
 
   function setMode(m) {
     if (m === mode) return;
@@ -627,8 +744,10 @@
   $("read").addEventListener("click", function (e) {
     var b = e.target.closest("[data-slide]");
     if (b) { var n = +b.getAttribute("data-slide"); openLb(srcOf(n), 1920, 1080, "Slide " + pad(n) + " · " + nameOf(n), true); return; }
+    var rb = e.target.closest(".afig .rp");
+    if (rb) { var f = rb.closest(".afig"); play(f.querySelector(".ast"), +f.getAttribute("data-anim"), f.querySelector(".caps")); return; }
     var z = e.target.closest("[data-zoom]") || (e.target.closest("[data-zoombtn]") && e.target.closest(".fig").querySelector("[data-zoom]"));
-    if (z) openLb(z.getAttribute("data-zoom"), +z.getAttribute("data-w"), +z.getAttribute("data-h"), z.alt, false);
+    if (z) openLb(z.getAttribute("data-zoom"), +z.getAttribute("data-w"), +z.getAttribute("data-h"), z.alt || z.getAttribute("data-alt") || "", false);
   });
 
   /* ---------- controls ---------- */
@@ -659,6 +778,7 @@
     else if (k === "Home") show(1);
     else if (k === "End") show(N);
     else if (k === "f" || k === "F") toggleFs();
+    else if ((k === "r" || k === "R") && !rpBtn.hidden) play(dov, cur);
   });
   var sx = null, sy = null;
   $("stage").addEventListener("touchstart", function (e) { var t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
