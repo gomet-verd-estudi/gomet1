@@ -583,6 +583,8 @@
     };
     st.finish = () => { cancelAnimationFrame(st.raf); k.set(dur + 1); };
     st.reset = () => { cancelAnimationFrame(st.raf); k.set(0); };
+    // driven by scroll: p 0–1 is how far the reader has gone through the drawing's block
+    st.seek = (p) => { cancelAnimationFrame(st.raf); k.set(p >= 1 ? dur + 1 : Math.max(0, p) * dur); };
     return st;
   }
 
