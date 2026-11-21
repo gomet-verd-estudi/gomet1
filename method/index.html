@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "17"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "18"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=17">
+<link rel="stylesheet" href="kit.css?v=18">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -317,7 +317,7 @@
 
 <div class="ix" id="ix" role="dialog" aria-modal="true" aria-label="All plates">
   <div class="ix-l">
-    <p class="cnt"><span id="ixHow">How we work</span><span>(39)</span></p>
+    <p class="cnt"><span id="ixHow">How we work</span><span id="ixN">(39)</span></p>
     <p id="ixIntro">A brand is built like a building: in order, on ground we know, and with you in every decision.</p>
     <p id="ixStudio" style="margin-top:2.3em">Gomet Verd Estudi — Branding and art direction. Valencia · Barcelona</p>
   </div>
@@ -330,10 +330,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="data.js?v=17"></script>
-<script src="data-es.js?v=17"></script>
-<script src="kit.js?v=17"></script>
-<script src="pillars3d.js?v=17"></script>
+<script src="content.js?v=18"></script>
+<script src="kit.js?v=18"></script>
+<script src="pillars3d.js?v=18"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -397,7 +396,7 @@
     }
   };
   var TX = I18N[LANG], ES = LANG === "es";
-  var D = ES && window.DECK_ES ? window.DECK_ES : window.DECK, N = D.length, KIT = window.GVE_KIT;
+  var D = window.DECK_I18N[LANG], N = D.length, KIT = window.GVE_KIT;
   document.documentElement.lang = LANG; document.title = TX.title;
   var root = document.documentElement, $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -406,6 +405,7 @@
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var each = function (sel, fn, ctx) { Array.prototype.forEach.call((ctx || document).querySelectorAll(sel), fn); };
   var SECTIONS = [[1,1],[2,4],[5,10],[11,19],[20,25],[26,27],[28,28],[29,33],[34,35],[36,38],[39,39]].map(function (r, i) { return [TX.sections[i], r[0], r[1]]; });
+  // sections follow the original slide numbers (each plate keeps its num)
   var sectionOf = function (n) { for (var i = 0; i < SECTIONS.length; i++) if (n >= SECTIONS[i][1] && n <= SECTIONS[i][2]) return SECTIONS[i][0]; return ""; };
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var CHECK = '<svg viewBox="0 0 20 20" class="gv-s" aria-hidden="true"><circle cx="10" cy="10" r="9.2"/><path d="M5.8 10.3l2.8 2.8 5.6-6"/></svg>';
@@ -514,7 +514,7 @@
         case "img":
           if (b[1] === "v09") stage = '<div class="stage dg" aria-hidden="true">' + rings() + '</div>';
           else if (b[1] === "v10") stage = '<div class="stage dg" aria-hidden="true">' + map() + '</div>';
-          else if (KIT && KIT.has(n)) stage = '<div class="stage" aria-hidden="true"><div class="draw" data-scene="' + n + '"></div></div><p class="sr">' + esc(b[2] || "") + '</p>';
+          else if (KIT && KIT.has(s.scene)) stage = '<div class="stage" aria-hidden="true"><div class="draw" data-scene="' + s.scene + '"></div></div><p class="sr">' + esc(b[2] || "") + '</p>';
           break;
         case "wide": dr = b[1] === "v28" ? timeline() : b[1] === "v30" ? truss() : matrix(lgd); break;
         case "legend": lgd = b[1]; break;
@@ -542,20 +542,20 @@
     });
     flush();
     var st = !!stage;
-    var legend = LEGEND[n] && stage.indexOf("data-scene") > 0 ? '<ol class="legend">' + LEGEND[n].map(function (t, k) { return '<li data-i="' + (k + 1) + '"><span class="n">' + (k + 1) + '</span>' + esc(t) + '</li>'; }).join("") + '</ol>' : "";
+    var legend = LEGEND[s.scene] && stage.indexOf("data-scene") > 0 ? '<ol class="legend">' + LEGEND[s.scene].map(function (t, k) { return '<li data-i="' + (k + 1) + '"><span class="n">' + (k + 1) + '</span>' + esc(t) + '</li>'; }).join("") + '</ol>' : "";
     var leadH = lead.join("");
     var right = st ? (leadH ? '<div class="lead xx">' + leadH + '</div>' : "")
       : dr ? '<div class="dr">' + dr + '</div>' + (leadH ? '<div class="lead xx">' + leadH + '</div>' : "")
       : (leadH ? '<div class="dr lead">' + leadH + '</div>' : "");
-    var head = '<div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span>' + (ES ? '' : '<button class="vs sc" type="button" data-slide="' + n + '" title="' + TX.viewSlide + '">' + SLIDEIC + '<span>' + TX.slide + ' ' + pad(n) + '</span></button>') + '</div>' +
+    var head = '<div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span>' + (ES ? '' : '<button class="vs sc" type="button" data-slide="' + s.num + '" data-name="' + esc(s.name) + '" title="' + TX.viewSlide + '">' + SLIDEIC + '<span>' + TX.slide + ' ' + pad(s.num) + '</span></button>') + '</div>' +
       '<div class="pl-top"><h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2><p class="num" aria-hidden="true">' + pad(n) + '<small>/' + N + '</small></p></div>';
     var flow = (st
       ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
-        '<div class="pin" style="--run:' + RUN(n) + 'svh;--runv:' + RUN(n) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
+        '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
       : head + (hl || right || legend ? '<div class="pl-body two">' + hl + right + legend + '</div>' : '')) + pillars +
       (rows.length ? '<div class="kv">' + rows.join("") + '</div>' : '') +
       (foot.length ? '<div class="pl-foot sc">' + foot.join("") + '</div>' : '');
-    return '<section class="pl' + (st ? ' st' : '') + '" id="slide-' + n + '" data-n="' + n + '">' + (st ? '<div class="track">' + stage + '</div>' : '') + '<div class="flow">' + flow + '</div></section>';
+    return '<section class="pl' + (st ? ' st' : '') + '" id="slide-' + n + '" data-n="' + n + '" data-scene="' + (s.scene || 0) + '">' + (st ? '<div class="track">' + stage + '</div>' : '') + '<div class="flow">' + flow + '</div></section>';
   }
   $("read").innerHTML = D.map(plate).join("");
 
@@ -564,7 +564,7 @@
   // The drawing follows that number with a soft lag, so the build glides instead of jumping.
   var scrubs = [];
   each(".pl.st", function (sec) {
-    var sg = sec.querySelector(".stage"), sc = { sec: sec, n: +sec.getAttribute("data-n"), kind: "", cur: 0, target: 0, apply: null, ready: false, mount: null, top: 0, run: 0 };
+    var sg = sec.querySelector(".stage"), sc = { sec: sec, n: +sec.getAttribute("data-scene"), kind: "", cur: 0, target: 0, apply: null, ready: false, mount: null, top: 0, run: 0 };
     var draw = sg.querySelector("[data-scene]"), pil = sg.querySelectorAll("[data-pillar]"), ring = sg.querySelector('[data-dg="rings"]'), mp = sg.querySelector('[data-dg="map"]');
     sc.kind = draw ? "scene" : pil.length ? "pil" : ring ? "rings" : "map";
     if (draw) {
@@ -696,7 +696,7 @@
   $("read").addEventListener("pointerout", hover(false));
   $("read").addEventListener("click", function (e) {
     var vs = e.target.closest("[data-slide]");
-    if (vs) { var n = +vs.getAttribute("data-slide"); openLb("slides/s" + pad(n) + ".webp", TX.slide + " " + pad(n) + " · " + (D[n - 1].name || "")); }
+    if (vs) { var n = +vs.getAttribute("data-slide"); openLb("slides/s" + pad(n) + ".webp", TX.slide + " " + pad(n) + " · " + (vs.getAttribute("data-name") || "")); }
   });
 
   /* ---------- where we are ---------- */
@@ -722,8 +722,8 @@
 
   /* ---------- index ---------- */
   var ix = $("ix"), g = "";
-  for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '">' + (ES ? '<span class="tnum">' + pad(n) + '</span>' : '<img loading="lazy" src="slides/t' + pad(n) + '.webp" alt="" width="480" height="270">') + '<span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(sectionOf(n)) + '</span></span></button>';
-  $("ixGrid").innerHTML = g;
+  for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '">' + (ES ? '<span class="tnum">' + pad(n) + '</span>' : '<img loading="lazy" src="slides/t' + pad(D[n - 1].num) + '.webp" alt="" width="480" height="270">') + '<span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(sectionOf(D[n - 1].num)) + '</span></span></button>';
+  $("ixGrid").innerHTML = g; $("ixN").textContent = "(" + N + ")";
   $("home").setAttribute("aria-label", TX.home); $("ixBtn").setAttribute("aria-label", TX.plates); $("ixBtn").title = TX.platesKey; $("ix").setAttribute("aria-label", TX.plates);
   $("talk").textContent = TX.talk; $("ixHow").textContent = TX.how; $("ixIntro").textContent = TX.intro; $("ixStudio").textContent = TX.studio;
   $("ixClose").textContent = TX.close; $("lbClose").textContent = TX.close; $("lb").setAttribute("aria-label", TX.original);
