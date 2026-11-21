@@ -13,7 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=12">
+<link rel="stylesheet" href="kit.css?v=13">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -114,6 +114,11 @@
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) + 3vh) 0 3vh; }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
+  /* the title waits at the top: it stays sticky after the sheet lets go, until the text below comes up to
+     its usual distance; from there title and text travel together, as one block */
+  .tw { position: absolute; left: 0; right: 0; top: 0; height: var(--wh, 100vh); padding-top: calc(var(--hd) + 3vh); pointer-events: none; z-index: 1; }
+  .hd2 { position: sticky; top: calc(var(--hd) + 3vh); pointer-events: auto; }
+  .hsp { flex: none; height: var(--hdh, 0px); }
   .lam-foot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); column-gap: var(--pad); align-items: start; padding-top: 12px; border-top: 1px solid var(--g0); }
   .lam-foot > * { grid-area: auto; grid-row: 1; }
   .lam-foot .hl { grid-column: 1; }
@@ -256,6 +261,8 @@
     .kv-v { margin-top: .12em; }
     .lam { padding: calc(var(--hd) + 18px) 0 2vh; }
     .hole { min-height: 30vh; min-height: 30svh; }
+    .tw { padding-top: calc(var(--hd) + 18px); }
+    .hd2 { top: calc(var(--hd) + 18px); }
     .lam-foot { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding-top: 10px; }
     .lam-foot > .hl, .lam-foot > .lead, .lam-foot > .legend, .lam-foot:not(.has-lg) > .lead { grid-column: 1; grid-row: auto; }
     .lam-foot .legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 16px; }
@@ -274,7 +281,7 @@
     .mx thead th:first-child { width: 38%; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
-  @media print { .top, .corner, .prog, .ix, .lb, .vs { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
+  @media print { .top, .corner, .prog, .ix, .lb, .vs { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .tw { position: static; height: auto; } .hd2 { position: static; } .hsp { display: none; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
 </style>
 </head>
 <body>
@@ -309,9 +316,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="data.js?v=12"></script>
-<script src="data-es.js?v=12"></script>
-<script src="kit.js?v=12"></script>
+<script src="data.js?v=13"></script>
+<script src="data-es.js?v=13"></script>
+<script src="kit.js?v=13"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -528,7 +535,8 @@
     var head = '<div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span>' + (ES ? '' : '<button class="vs sc" type="button" data-slide="' + n + '" title="' + TX.viewSlide + '">' + SLIDEIC + '<span>' + TX.slide + ' ' + pad(n) + '</span></button>') + '</div>' +
       '<div class="pl-top"><h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2><p class="num" aria-hidden="true">' + pad(n) + '<small>/' + N + '</small></p></div>';
     var flow = (st
-      ? '<div class="pin" style="--run:' + RUN(n) + 'svh;--runv:' + RUN(n) + 'vh"><div class="lam">' + head + '<div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
+      ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
+        '<div class="pin" style="--run:' + RUN(n) + 'svh;--runv:' + RUN(n) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
       : head + (hl || right || legend ? '<div class="pl-body two">' + hl + right + legend + '</div>' : '')) + pillars +
       (rows.length ? '<div class="kv">' + rows.join("") + '</div>' : '') +
       (foot.length ? '<div class="pl-foot sc">' + foot.join("") + '</div>' : '');
@@ -597,14 +605,20 @@
   }
   var GAP_TEXT = 28, GAP_END = 28; // paper between the last text and the drawing, and under the drawing
   function holes() {
-    scrubs.forEach(function (sc) {
-      var sec = sc.sec, h = sec.querySelector(".hole"), pin = sec.querySelector(".pin"), lam = sec.querySelector(".lam"), tr = sec.querySelector(".track");
+    var heads = scrubs.map(function (sc) { return sc.sec.querySelector(".hd2").offsetHeight; });
+    scrubs.forEach(function (sc, i) { sc.sec.style.setProperty("--hdh", heads[i] + "px"); });
+    var gap = Math.min(56, Math.max(26, innerHeight * 0.045)); // the usual distance between a title and its text
+    scrubs.forEach(function (sc, i) {
+      var sec = sc.sec, h = sec.querySelector(".hole"), pin = sec.querySelector(".pin"), lam = sec.querySelector(".lam"), tr = sec.querySelector(".track"), ft = sec.querySelector(".lam-foot");
       sc.ht = Math.round(h.offsetTop + 6); sc.hh = Math.max(120, Math.round(h.offsetHeight - 12)); sc.run = pin.offsetHeight - lam.offsetHeight;
+      // the title's rail ends where the text below meets it: from there they scroll away together
+      var padTop = h.offsetTop - heads[i];
+      sc.wh = Math.round(Math.max(padTop + heads[i], sc.run + ft.offsetTop - gap));
       var ch = drawingHeight(sc, tr.clientWidth, sc.hh);
       // when the plate lets go, the drawing sits at the very end of the block, over blank paper
       sc.pb = Math.round(ch + GAP_TEXT + GAP_END); sc.tb = -Math.round(Math.max(0, (sc.hh - ch) / 2 - GAP_END));
     });
-    scrubs.forEach(function (sc) { var st = sc.sec.style; st.setProperty("--ht", sc.ht + "px"); st.setProperty("--hh", sc.hh + "px"); st.setProperty("--pb", sc.pb + "px"); st.setProperty("--tb", sc.tb + "px"); });
+    scrubs.forEach(function (sc) { var st = sc.sec.style; st.setProperty("--ht", sc.ht + "px"); st.setProperty("--hh", sc.hh + "px"); st.setProperty("--pb", sc.pb + "px"); st.setProperty("--tb", sc.tb + "px"); st.setProperty("--wh", sc.wh + "px"); });
   }
   function measure() {
     // the phone's address bar changes the height all the time: only a real resize (width, or rotating) re-lays the sheets
