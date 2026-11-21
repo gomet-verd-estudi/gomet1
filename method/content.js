@@ -13,8 +13,8 @@ window.DECK_I18N = (function () {
   var en = [
     P(1, 0, "", "", "", "Cover", [["cover"]], "cover"),
     P(2, 0, "Introduction", "How we work", "[Method]", "Introduction", [
-      ["lead", "A brand is built like a building"],
-      ["caps", "In order, on solid ground, and with you in every decision."]
+      ["mf", "A brand is built like a building. We start from the ground, raise it floor by floor, and nothing goes up without your sign-off.",
+        ["In order", "On solid ground", "With you in every decision"], ["8 phases", "4 acts", "1 building"]]
     ]),
     P(3, 3, "Method", "What usually happens", "[Method]", "The façade", [
       ["h", "Many brands start with the façade"],
@@ -205,8 +205,8 @@ window.DECK_I18N = (function () {
   var es = [
     P(1, 0, "", "", "", "Portada", [["cover"]], "cover"),
     P(2, 0, "Introducción", "Cómo trabajamos", "[Método]", "Introducción", [
-      ["lead", "Una marca se construye como un edificio"],
-      ["caps", "Con orden, sobre terreno firme y con vosotros en cada decisión."]
+      ["mf", "Una marca se construye como un edificio. Empezamos por el suelo, la levantamos planta a planta y nada sube sin vuestro visto bueno.",
+        ["Con orden", "Sobre terreno firme", "Con vosotros en cada decisión"], ["8 fases", "4 actos", "1 edificio"]]
     ]),
     P(3, 3, "Método", "Lo que suele pasar", "[Método]", "La fachada", [
       ["h", "Muchas marcas empiezan por la fachada"],
