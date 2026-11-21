@@ -181,7 +181,7 @@
       svg.setAttribute('viewBox', `${(cx - r.width / s / 2).toFixed(1)} ${(cy - r.height / s / 2).toFixed(1)} ${(r.width / s).toFixed(1)} ${(r.height / s).toFixed(1)}`);
       const ms = Math.min(1.6, (r.width < 520 ? 0.82 : 1) / s);
       k.marks.forEach((q) => q.g.setAttribute('transform', `translate(${q.x.toFixed(1)} ${q.y.toFixed(1)}) scale(${ms.toFixed(3)})`));
-      const st = svg.style; st.setProperty('--k', s.toFixed(3)); st.setProperty('--thin', (1.05 / s).toFixed(3)); st.setProperty('--outer', (2.6 / s).toFixed(3)); st.setProperty('--pwo', (2.4 / s).toFixed(3)); st.setProperty('--dd', (4 / s).toFixed(2));
+      const w = k.sw || 1, st = svg.style; st.setProperty('--k', s.toFixed(3)); st.setProperty('--thin', (1.05 * w / s).toFixed(3)); st.setProperty('--outer', (2.6 * w / s).toFixed(3)); st.setProperty('--pwo', (2.4 * w / s).toFixed(3)); st.setProperty('--dd', (4 * Math.max(0.6, w) / s).toFixed(2));
     };
     return k;
   }
@@ -563,6 +563,7 @@
     svg.setAttribute('aria-hidden', 'true');
     host.appendChild(svg);
     const k = Kit(svg);
+    k.sw = opts.sw || 1;
     const dur = build(k);
     const st = { k, dur, raf: 0, t0: 0, playing: false };
     k.frame(opts.pad);
@@ -593,6 +594,6 @@
     mount: (host, n, opts) => mount(host, SCENES[n], opts),
     pillar: (host, name, opts) => mount(host, PILLARS[name], Object.assign({ pad: 10 }, opts)),
     // a small, already finished building at the end of phase `ph`, for the timeline
-    phaseIcon: (host, ph) => mount(host, (k) => { obra(k, phaseAt(ph + 1, 0, 0.001), { upto: ph, from: ph }); return 0.01; }, { final: true, pad: 4 })
+    phaseIcon: (host, ph) => mount(host, (k) => { obra(k, phaseAt(ph + 1, 0, 0.001), { upto: ph, from: ph }); return 0.01; }, { final: true, pad: 4, sw: 0.42 })
   };
 })();
