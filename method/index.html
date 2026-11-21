@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "19"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "20"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=19">
+<link rel="stylesheet" href="kit.css?v=20">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -52,6 +52,13 @@
   .pill svg { width: 13px; height: 13px; }
   .pill:hover, .pill:focus-visible { box-shadow: 0 0 0 1.5px var(--mi) inset; color: var(--mi); outline: none; }
   .tr2 { display: inline-flex; align-items: center; gap: 8px; }
+  /* the method itself is the running header: four acts spread across the width, the one you are in underlined */
+  .acts { flex: 1 1 auto; display: flex; justify-content: space-between; margin: 0 clamp(20px, 7vw, 160px); }
+  .acts a { color: var(--g); text-decoration: none; background: var(--white); padding: 4px 5px; margin: 0 -5px; border-radius: 3px; white-space: nowrap;
+    text-decoration-line: underline; text-decoration-color: transparent; text-decoration-thickness: 2px; text-underline-offset: 6px; transition: text-decoration-color .3s, color .2s; }
+  .acts a i { font-style: normal; font-weight: 300; margin-right: .5em; letter-spacing: 0; }
+  .acts a.on { text-decoration-color: var(--mi); }
+  .acts a:hover { color: var(--mi); }
   .lng { display: inline-flex; align-items: center; height: 34px; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1.5px var(--g) inset; }
   .lng a { display: grid; place-items: center; min-width: 32px; height: 28px; padding: 0 6px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--g); text-decoration: none; }
   .lng a.on { background: var(--g); color: var(--white); }
@@ -83,6 +90,8 @@
   .dr { grid-area: dr; min-width: 0; }
   .xx { grid-area: xx; margin-top: 1.4em; max-width: 26em; }
   .lead p + p, .kv-v p + p { margin-top: .8em; }
+  .lead > p:first-child, .mf-p { position: relative; }
+  .lead > p:first-child::before, .mf-p::before { content: ""; position: absolute; left: -.7em; top: .34em; width: .4em; height: .4em; border-radius: 50%; background: var(--mi); }
   .legend { grid-area: lg; list-style: none; margin-top: 1.1em; font-weight: 700; }
   .legend li { display: flex; align-items: center; gap: .45em; padding: 1px 0; line-height: 1.02; cursor: default; }
   .legend .n { flex: none; width: 22px; height: 22px; display: inline-grid; place-items: center; border: 2px solid var(--g); border-radius: 50%; font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; transition: background .2s, color .2s; }
@@ -156,6 +165,18 @@
   .pil .pd { position: relative; aspect-ratio: 1 / 1; margin-bottom: 18px; }
   .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
   .pil h3 { margin-bottom: .5em; }
+
+  /* the opener: two scales only. A small, dense paragraph on the left axis; three statements, huge, on the centre axis,
+     each under its own thin number, printed over the small type in multiply */
+  .mf { padding-bottom: clamp(72px, 14vh, 160px); }
+  .mf-p { margin-top: clamp(26px, 5vh, 60px); max-width: 44em; text-wrap: pretty; }
+  .mf-side { margin-top: 1.1em; line-height: 1.25; }
+  .mf-side span { display: block; }
+  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: calc(var(--fs) * -2.7);
+    font-weight: 900; font-stretch: 62%; text-transform: uppercase; font-size: clamp(56px, 9.2vw, 176px); line-height: .8; letter-spacing: -.01em; }
+  .mf-st li { text-wrap: balance; }
+  .mf-st li + li { margin-top: .08em; }
+  .mf-st i { display: block; font-style: normal; font-weight: 200; font-size: .62em; line-height: .9; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 
   /* cover and closing */
   .cover { min-height: 100vh; min-height: 100svh; display: grid; grid-template-rows: auto 1fr auto; padding-bottom: clamp(32px, 6vh, 72px); border-top: 0; }
@@ -252,6 +273,7 @@
   .tile .cap span:last-child { opacity: .8; text-align: right; }
   .tile.cur { outline: 2px solid var(--mi); outline-offset: 2px; }
   .ix-x { position: fixed; top: 11px; right: var(--pad); z-index: 41; }
+  @media (max-width: 899px) { .ix { padding-top: 56px; } .lb .bar { height: 56px; } .lb .sc2 { top: 56px; } }
   @media (max-width: 899px) { .ix.open { display: block; } .ix-l { position: static; margin-bottom: 24px; } }
 
   /* the original slide */
@@ -264,8 +286,10 @@
 
   /* ---------- phones and tablets ---------- */
   @media (max-width: 899px) {
-    :root { --fs: 18.5px; --hd: 52px; }
-    .top { background: linear-gradient(var(--white) 62%, rgba(255, 255, 255, 0)); }
+    :root { --fs: 18.5px; --hd: 76px; }
+    .top { flex-wrap: wrap; align-content: flex-start; padding-top: 9px; background: linear-gradient(var(--white) 78%, rgba(255, 255, 255, 0)); }
+    .acts { order: 3; flex: 0 0 100%; margin: 9px 0 0; font-size: 10px; letter-spacing: .13em; }
+    .acts a i { display: none; }
     .pl { padding-top: calc(var(--hd) + 18px); }
     .two { grid-template-columns: minmax(0, 1fr); }
     .pl-body { grid-template-areas: "hl" "dr" "lg" "xx"; grid-template-rows: auto; }
@@ -294,6 +318,7 @@
     .ttl { font-size: min(19vw, 140px, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .44))); }
     .num { display: none; }
     .cover .logo { width: 100%; }
+    .mf-st { font-size: clamp(46px, 14.4vw, 76px); }
     .closing .giant { font-size: 13.6vw; }
     .mx tbody th { font-size: 16px; }
     .mx thead th:first-child { width: 38%; }
@@ -306,6 +331,7 @@
 <div class="prog" id="prog"></div>
 <header class="top">
   <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
+  <nav class="acts sc" id="acts" aria-label="Acts"></nav>
   <div class="tr2">
   <nav class="lng" aria-label="Language / Idioma"><a href="?lang=en" data-l="en" hreflang="en" lang="en">EN</a><a href="?lang=es" data-l="es" hreflang="es" lang="es">ES</a></nav>
   <button class="pill" id="ixBtn" aria-label="All plates" title="All plates (G)">
@@ -334,9 +360,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=19"></script>
-<script src="kit.js?v=19"></script>
-<script src="pillars3d.js?v=19"></script>
+<script src="content.js?v=20"></script>
+<script src="kit.js?v=20"></script>
+<script src="pillars3d.js?v=20"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -490,6 +516,13 @@
       return '<section class="pl cover" id="slide-1" data-n="1"><div class="pl-meta sc"><span>Gomet Verd Estudi</span><span>' + TX.how + '</span></div>' +
         '<img class="logo" src="logo-gve.svg" alt="Gomet Verd Estudi — Always WIPing [Working In Play]" width="1374" height="240">' +
         '<div class="bot sc"><span>' + TX.tag + '</span><a class="cue" href="#slide-2">' + TX.scroll + '</a></div></section>';
+    }
+    if (s.blocks[0] && s.blocks[0][0] === "mf") {
+      var mf = s.blocks[0];
+      return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
+        '<h2 class="sr">' + esc(s.title) + '</h2><p class="mf-p">' + esc(mf[1]) + '</p>' +
+        '<p class="mf-side sc">' + mf[3].map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</p>' +
+        '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li><i>' + (k + 1) + '</i>' + esc(t) + '</li>'; }).join("") + '</ol></section>';
     }
     if (s.kind === "closing") {
       return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + TX.closing + '</span></div>' +
@@ -716,8 +749,13 @@
   /* ---------- where we are ---------- */
   var cur = 1, lockUntil = 0;
   var setHash = function (n) { try { history.replaceState(null, "", location.pathname + location.search + "#slide-" + n); } catch (e) {} };
+  var ACT = D.map(function (s) { var m = /^(?:Phase|Fase) 0?(\d)/.exec(s.sub || ""); if (!m) return -1; var ph = +m[1]; return ph <= 2 ? 0 : ph <= 4 ? 1 : ph <= 7 ? 2 : 3; });
+  $("acts").innerHTML = TX.acts.map(function (a, k) { return '<a href="#slide-' + (ACT.indexOf(k) + 1) + '" data-a="' + k + '"><i>' + (k + 1) + '</i>' + esc(a) + '</a>'; }).join("");
+  $("acts").setAttribute("aria-label", ES ? "Actos" : "Acts");
   function paint() {
     $("count").textContent = pad(cur) + " / " + N;
+    var a = ACT[cur - 1];
+    each(".acts a", function (el) { var on = +el.getAttribute("data-a") === a; el.classList.toggle("on", on); if (on) el.setAttribute("aria-current", "step"); else el.removeAttribute("aria-current"); });
     each(".tile", function (t) { t.classList.toggle("cur", +t.getAttribute("data-n") === cur); });
   }
   var cio = new IntersectionObserver(function (es) {
