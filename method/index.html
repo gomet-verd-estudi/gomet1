@@ -13,7 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=13">
+<link rel="stylesheet" href="kit.css?v=14">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -138,6 +138,12 @@
   /* the four pillars: four drawings on the plate, four texts passing under them */
   .pil-st { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--pad); width: 100%; height: 100%; }
   .pil-st .draw { position: relative; inset: auto; }
+  .pil-st .lab { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; color: var(--mi); }
+  /* the pillars in 3D: white faces, green edges, like the rest of the drawings */
+  .p3 { position: absolute; left: 0; right: 0; top: 0; bottom: 22px; width: 100%; height: calc(100% - 22px); overflow: visible; }
+  .p3 path { stroke: var(--mi); stroke-width: 1.3px; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .p3 .fw { fill: #FFFFFF; } .p3 .fg { fill: var(--mi); } .p3 .f1 { fill: #6CC593; } .p3 .f2 { fill: #ABDABD; } .p3 .f3 { fill: #E1E9DB; }
+  .p3 .ln { fill: none; } .p3 .lt { stroke-width: .8px; opacity: .55; }
   .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px var(--pad); }
   .pil h3 { margin-bottom: .5em; }
 
@@ -316,9 +322,10 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="data.js?v=13"></script>
-<script src="data-es.js?v=13"></script>
-<script src="kit.js?v=13"></script>
+<script src="data.js?v=14"></script>
+<script src="data-es.js?v=14"></script>
+<script src="kit.js?v=14"></script>
+<script src="pillars3d.js?v=14"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -517,8 +524,8 @@
           break;
         case "qa": flush(); b[1].forEach(function (q) { rows.push(kvRow(esc(q[0]), '<p>' + esc(q[1]) + '</p>')); }); break;
         case "pillars":
-          var names = b[1].map(function (p) { var nm = p[1].toLowerCase(); return nm === "typography" ? "typo" : nm; });
-          stage = '<div class="stage wide" aria-hidden="true"><div class="pil-st">' + names.map(function (nm) { return '<div class="draw" data-pillar="' + nm + '"></div>'; }).join("") + '</div></div>';
+          var names = ["typo", "grid", "color", "imagery"];
+          stage = '<div class="stage" aria-hidden="true"><div class="pil-st">' + names.map(function (nm, i) { return '<div class="draw" data-pillar="' + nm + '"><span class="lab sc">' + esc(b[1][i][1]) + '</span></div>'; }).join("") + '</div></div>';
           pillars = '<div class="pil">' + b[1].map(function (p) { return '<div><h3 class="sc">' + esc(p[1]) + '</h3><p>' + esc(p[2]) + '</p></div>'; }).join("") + '</div>';
           break;
         case "meta": flush(); b[1].forEach(function (m) { foot.push('<span>' + (TX.gomet.test(m) ? '<b class="gm"></b>' : '') + esc(m) + '</span>'); }); break;
@@ -556,8 +563,10 @@
       sc.mount = function () { var m = KIT.mount(draw, +draw.getAttribute("data-scene")); sc.apply = function (p) { m.seek(p); }; };
     } else if (pil.length) {
       sc.mount = function () {
-        var ms = Array.prototype.map.call(pil, function (el) { return KIT.pillar(el, el.getAttribute("data-pillar")); });
-        sc.apply = function (p) { ms.forEach(function (m, k) { m.seek(clamp((p - k * 0.12) / 0.52)); }); };
+        var ms = Array.prototype.map.call(pil, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
+        // they come in one after the other as the sheet arrives; then they keep turning (see spin)
+        sc.apply = function (p) { ms.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((p + 0.3 - k * 0.08) / 0.42))); if (!spinning) m.render(T0, scrollY * 0.0012); }); };
+        sc.p3 = ms;
       };
     } else if (ring) {
       sc.mount = function () {
@@ -601,7 +610,7 @@
     if (sc.kind === "rings") return Math.min(w, hh * 2.1) * 300 / 682;
     if (sc.kind === "map") return Math.min(w, hh * 1.42) * 702 / 1140 + 34;
     if (innerWidth < 900) return hh;
-    var cw = (w - 3 * 24) / 4; return Math.max.apply(null, PIL_ASPECT.map(function (a) { return Math.min(hh, cw / a); }));
+    return Math.min(hh, (w - 3 * 24) / 4 + 22);
   }
   var GAP_TEXT = 28, GAP_END = 28; // paper between the last text and the drawing, and under the drawing
   function holes() {
@@ -630,7 +639,7 @@
     // …then write
     scrubs.forEach(function (sc, i) {
       var r = rs[i];
-      sc.near = r.bottom > -vh && r.top < vh * 2;
+      sc.near = r.bottom > -vh && r.top < vh * 2; sc.vis = r.bottom > 0 && r.top < vh;
       sc.target = RM ? 1 : progress(sc, r);
       if (sc.near && !sc.ready && KIT) { sc.mount(); sc.ready = true; sc.cur = sc.target; sc.apply(sc.cur); }
     });
@@ -648,8 +657,17 @@
     });
     if (moving) requestAnimationFrame(frame); else { running = false; lastT = 0; }
   }
+  var spinning = false, T0 = 0;
+  function spin(now) {
+    var live = scrubs.filter(function (sc) { return sc.p3 && sc.vis; });
+    if (!live.length || RM) { spinning = false; return; }
+    T0 = now / 1000;
+    live.forEach(function (sc) { sc.p3.forEach(function (m) { m.render(T0, scrollY * 0.0012); }); });
+    requestAnimationFrame(spin);
+  }
   function update() {
     measure();
+    if (!spinning && !RM && scrubs.some(function (sc) { return sc.p3 && sc.vis; })) { spinning = true; requestAnimationFrame(spin); }
     var h = document.documentElement.scrollHeight - vh; $("prog").style.width = (h > 0 ? scrollY / h * 100 : 0) + "%";
     if (!running) { running = true; requestAnimationFrame(frame); }
   }
