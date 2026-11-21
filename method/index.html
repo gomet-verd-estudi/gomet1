@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "24"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "25"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=24">
+<link rel="stylesheet" href="kit.css?v=25">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -328,10 +328,6 @@
   <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
   <div class="tr2">
   <nav class="lng" aria-label="Language / Idioma"><a href="?lang=en" data-l="en" hreflang="en" lang="en">EN</a><a href="?lang=es" data-l="es" hreflang="es" lang="es">ES</a></nav>
-  <button class="pill" id="ixBtn" aria-label="All plates" title="All plates (G)">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="5" height="5"/><rect x="9.5" y="1.5" width="5" height="5"/><rect x="1.5" y="9.5" width="5" height="5"/><rect x="9.5" y="9.5" width="5" height="5"/></svg>
-    <span id="count">01 / 34</span>
-  </button>
   </div>
 </header>
 <a class="corner l sc" id="talk" href="mailto:gometverdestudi@gmail.com">Let's talk</a>
@@ -354,9 +350,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=24"></script>
-<script src="kit.js?v=24"></script>
-<script src="pillars3d.js?v=24"></script>
+<script src="content.js?v=25"></script>
+<script src="kit.js?v=25"></script>
+<script src="pillars3d.js?v=25"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -753,7 +749,6 @@
   var cur = 1, lockUntil = 0;
   var setHash = function (n) { try { history.replaceState(null, "", location.pathname + location.search + "#slide-" + n); } catch (e) {} };
   function paint() {
-    $("count").textContent = pad(cur) + " / " + N;
     each(".tile", function (t) { t.classList.toggle("cur", +t.getAttribute("data-n") === cur); });
   }
   var cio = new IntersectionObserver(function (es) {
@@ -774,7 +769,7 @@
   var ix = $("ix"), g = "";
   for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '">' + (ES ? '<span class="tnum">' + pad(n) + '</span>' : '<img loading="lazy" src="slides/t' + pad(D[n - 1].num) + '.webp" alt="" width="480" height="270">') + '<span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(D[n - 1].sec || (n === 1 ? TX.sections[0] : TX.closing)) + '</span></span></button>';
   $("ixGrid").innerHTML = g; $("ixN").textContent = "(" + N + ")";
-  $("home").setAttribute("aria-label", TX.home); $("ixBtn").setAttribute("aria-label", TX.plates); $("ixBtn").title = TX.platesKey; $("ix").setAttribute("aria-label", TX.plates);
+  $("home").setAttribute("aria-label", TX.home); $("ix").setAttribute("aria-label", TX.plates);
   $("talk").textContent = TX.talk; $("ixHow").textContent = TX.how; $("ixIntro").textContent = TX.intro; $("ixStudio").textContent = TX.studio;
   $("ixClose").textContent = TX.close; $("lbClose").textContent = TX.close; $("lb").setAttribute("aria-label", TX.original);
   /* the language switch: the page reloads in the other language, on the same plate */
@@ -789,7 +784,6 @@
   function lock() { root.classList.toggle("is-locked", ix.classList.contains("open") || $("lb").classList.contains("open")); }
   function openIx() { ix.classList.add("open"); lock(); paint(); var c = ix.querySelector(".tile.cur"); if (c) c.scrollIntoView({ block: "center" }); }
   function closeIx() { ix.classList.remove("open"); lock(); }
-  $("ixBtn").onclick = function () { ix.classList.contains("open") ? closeIx() : openIx(); };
   $("ixClose").onclick = closeIx;
   $("ixGrid").addEventListener("click", function (e) { var t = e.target.closest(".tile"); if (t) { closeIx(); go(+t.getAttribute("data-n")); } });
 
