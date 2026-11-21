@@ -13,7 +13,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=10">
+<link rel="stylesheet" href="kit.css?v=12">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -47,6 +47,12 @@
     font-size: 14.5px; font-weight: 700; letter-spacing: .02em; color: var(--g); font-variant-numeric: tabular-nums; box-shadow: 0 0 0 1.5px var(--g) inset; }
   .pill svg { width: 13px; height: 13px; }
   .pill:hover, .pill:focus-visible { box-shadow: 0 0 0 1.5px var(--mi) inset; color: var(--mi); outline: none; }
+  .tr2 { display: inline-flex; align-items: center; gap: 8px; }
+  .lng { display: inline-flex; align-items: center; height: 34px; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1.5px var(--g) inset; }
+  .lng a { display: grid; place-items: center; min-width: 32px; height: 28px; padding: 0 6px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--g); text-decoration: none; }
+  .lng a.on { background: var(--g); color: var(--white); }
+  .lng a:not(.on):hover { color: var(--mi); }
+  .tile .tnum { display: flex; align-items: flex-end; height: 74px; padding: 8px 10px; font-weight: 200; font-stretch: 62%; font-size: 56px; line-height: .8; color: var(--g); }
   .corner { position: fixed; bottom: 9px; z-index: 30; color: var(--g); text-decoration: none; background: var(--white); padding: 4px 7px; border-radius: 4px; }
   .corner.l { left: max(var(--pad), env(safe-area-inset-left)); margin-left: -7px; }
   .corner.r { right: max(var(--pad), env(safe-area-inset-right)); margin-right: -7px; }
@@ -103,7 +109,8 @@
   .pl.st { padding-top: 0; }
   /* room at the end of the block the size of the drawing: when the plate finally lets go and leaves
      with the scroll, it travels over empty paper, never over the text */
-  .pl.st { padding-bottom: calc(var(--hh, 40vh) + 10vh); padding-bottom: calc(var(--hh, 40svh) + 10svh); }
+  .pl.st { padding-bottom: var(--pb, calc(var(--hh, 40vh) + 6vh)); }
+  .st .track { bottom: var(--tb, 0px); }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) + 3vh) 0 3vh; }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -195,7 +202,7 @@
   .tr-m .so { top: auto; bottom: 0; transform: translate(-50%, 50%); }
   .tr-m .so.l { left: 4px; } .tr-m .so.r { left: 40px; }
   .mx { width: 100%; border-collapse: collapse; margin-top: 2vh; table-layout: fixed; }
-  .mx thead th { vertical-align: bottom; padding: 0 2px 10px; text-align: center; font-weight: 800; }
+  .mx thead th { vertical-align: bottom; padding: 0 2px 10px; text-align: center; font-weight: 800; letter-spacing: .06em; font-size: 10px; overflow-wrap: anywhere; }
   .mx thead th:first-child { width: 34%; }
   .mx thead th.you { color: var(--mi); }
   .mx tbody th { text-align: left; font-weight: 500; padding: 9px 6px 9px 0; border-top: 1px solid var(--g0); }
@@ -273,22 +280,25 @@
 <body>
 <div class="prog" id="prog"></div>
 <header class="top">
-  <a class="gve" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
+  <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
+  <div class="tr2">
+  <nav class="lng" aria-label="Language / Idioma"><a href="?lang=en" data-l="en" hreflang="en" lang="en">EN</a><a href="?lang=es" data-l="es" hreflang="es" lang="es">ES</a></nav>
   <button class="pill" id="ixBtn" aria-label="All plates" title="All plates (G)">
     <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="1.5" width="5" height="5"/><rect x="9.5" y="1.5" width="5" height="5"/><rect x="1.5" y="9.5" width="5" height="5"/><rect x="9.5" y="9.5" width="5" height="5"/></svg>
     <span id="count">01 / 39</span>
   </button>
+  </div>
 </header>
-<a class="corner l sc" href="mailto:gometverdestudi@gmail.com">Let's talk</a>
+<a class="corner l sc" id="talk" href="mailto:gometverdestudi@gmail.com">Let's talk</a>
 <a class="corner r sc" href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">IG ↗</a>
 
 <main id="read"></main>
 
 <div class="ix" id="ix" role="dialog" aria-modal="true" aria-label="All plates">
   <div class="ix-l">
-    <p class="cnt"><span>How we work</span><span>(39)</span></p>
-    <p>A brand is built like a building: in order, on ground we know, and with you in every decision.</p>
-    <p style="margin-top:2.3em">Gomet Verd Estudi — Branding and art direction. Valencia · Barcelona</p>
+    <p class="cnt"><span id="ixHow">How we work</span><span>(39)</span></p>
+    <p id="ixIntro">A brand is built like a building: in order, on ground we know, and with you in every decision.</p>
+    <p id="ixStudio" style="margin-top:2.3em">Gomet Verd Estudi — Branding and art direction. Valencia · Barcelona</p>
   </div>
   <div class="ix-g" id="ixGrid"></div>
   <button class="pill ix-x" id="ixClose">Close</button>
@@ -299,48 +309,95 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="data.js?v=10"></script>
-<script src="kit.js?v=10"></script>
+<script src="data.js?v=12"></script>
+<script src="data-es.js?v=12"></script>
+<script src="kit.js?v=12"></script>
 <script>
 (function () {
-  var D = window.DECK, N = D.length, KIT = window.GVE_KIT;
+  /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
+  var LANG = (function () {
+    var q = /[?&]lang=(en|es)\b/.exec(location.search); if (q) return q[1];
+    try { var v = localStorage.getItem("gve-lang"); if (v === "en" || v === "es") return v; } catch (e) {}
+    return "en";
+  })();
+  var I18N = {
+    en: {
+      title: "Gomet Verd Estudi — How we work", home: "Gomet Verd Estudi — back to the start", plates: "All plates", platesKey: "All plates (G)",
+      talk: "Let's talk", how: "How we work", intro: "A brand is built like a building: in order, on ground we know, and with you in every decision.",
+      studio: "Gomet Verd Estudi — Branding and art direction. Valencia · Barcelona", close: "Close", original: "Original slide",
+      tag: "Branding and art direction · Valencia · Barcelona", scroll: "Scroll ↓",
+      closing: "Closing", thanks: "[Thank you]", thanksCh: 11, thanksLine: "For your attention, and for the build we are about to start together.",
+      email: "Email", phone: "Phone", studioK: "Studio", contact: "Contact", viewSlide: "View the original slide", slide: "Slide",
+      sections: ["Cover", "Introduction", "Understand", "Define", "Build", "Maintain", "Sign-offs", "Judgment", "Ecosystem", "Working together", "Closing"],
+      rings: ["Tertiary", "Secondary", "Primary"], ringsAria: "Three concentric circles: primary in the centre, secondary around it, tertiary outside",
+      map: ["Exclusive", "Accessible", "Functional", "Emotional", "Your brand", "[The open space]", "Competitors", "Benchmarks"],
+      mapAria: "Positioning map from functional to emotional and from accessible to exclusive; the accessible and emotional quarter is the open space for your brand.",
+      phases: ["Workshop", "Strategy", "Concept", "System", "Applications", "Final artwork", "Handover", "Maintenance"],
+      acts: ["Understand", "Define", "Build", "Maintain"], weeks: "[__ weeks]", signoff: "Sign-off with you",
+      tlAria: "The eight phases in four acts, with a sign-off between phases",
+      truss: [["Business data", "Listening and intuition"], ["Market and competitors", "Cultural reading and references"], ["Semantic analysis", "Conceptual exploration"], ["Legibility tests", "Formal exploration and curation"], ["Usage tests by format", "Art direction"], ["Production tests", "Craft and detail"], ["Files and documentation", "Brand story"], ["Consistency audit", "New ideas on the structure"]],
+      trussHead: ["Technical", "Creative"], trussAria: "Technical and creative work in each phase",
+      cols: ["Core team", "Social media", "Video", "Web dev.", "Production", "You"], marks: ["Leads", "Takes part", "Signs off"], phase: "Phase",
+      gomet: /sign-off|turnkey/i,
+      legend: {
+        3: ["Façade first", "Floors that don't fit", "No foundations"], 4: ["Site", "Foundations", "Structure", "Floors", "Utilities and finishes", "Keys"],
+        5: ["Competitors", "Industry", "Audience"], 7: ["Program", "Market space"], 11: ["Fundamentals", "Root concept"], 17: ["Typography", "Grid", "Color", "Imagery"],
+        20: ["Stationery", "Web", "Packaging", "Social media"], 22: ["Finishes", "Utilities", "Printer", "Screen", "Manufacturer"], 24: ["Keys", "Building manual"],
+        26: ["Reviews", "Adjustments", "Extensions"], 29: ["Calculation", "Design"], 31: ["Every option", "Is it relevant?", "Is it ownable?", "Is it viable?", "The solution"],
+        32: ["Up close", "At a distance", "In passing"], 33: ["Product", "Hospitality", "Culture"], 34: ["Core team", "Audiovisual", "Social media", "Web development", "Production"]
+      }
+    },
+    es: {
+      title: "Gomet Verd Estudi — Cómo trabajamos", home: "Gomet Verd Estudi — volver al inicio", plates: "Todas las láminas", platesKey: "Todas las láminas (G)",
+      talk: "Hablemos", how: "Cómo trabajamos", intro: "Una marca se construye como un edificio: con orden, sobre un terreno que conocemos y con vosotros en cada decisión.",
+      studio: "Gomet Verd Estudi — Branding y dirección de arte. Valencia · Barcelona", close: "Cerrar", original: "Diapositiva original",
+      tag: "Branding y dirección de arte · Valencia · Barcelona", scroll: "Desliza ↓",
+      closing: "Cierre", thanks: "[Gracias]", thanksCh: 9, thanksLine: "Por vuestra atención, y por la obra que estamos a punto de empezar juntos.",
+      email: "Email", phone: "Teléfono", studioK: "Estudio", contact: "Contacto", viewSlide: "Ver la diapositiva original", slide: "Diapositiva",
+      sections: ["Portada", "Introducción", "Entender", "Definir", "Construir", "Mantener", "Validaciones", "Criterio", "Ecosistema", "Trabajar juntos", "Cierre"],
+      rings: ["Terciario", "Secundario", "Primario"], ringsAria: "Tres círculos concéntricos: el primario en el centro, el secundario alrededor y el terciario fuera",
+      map: ["Exclusivo", "Accesible", "Funcional", "Emocional", "Vuestra marca", "[El espacio libre]", "Competidores", "Referentes"],
+      mapAria: "Mapa de posicionamiento de funcional a emocional y de accesible a exclusivo; el cuadrante accesible y emocional es el espacio libre para vuestra marca.",
+      phases: ["Workshop", "Estrategia", "Concepto", "Sistema", "Aplicaciones", "Artes finales", "Entrega", "Mantenimiento"],
+      acts: ["Entender", "Definir", "Construir", "Mantener"], weeks: "[__ semanas]", signoff: "Validación con vosotros",
+      tlAria: "Las ocho fases en cuatro actos, con una validación entre fases",
+      truss: [["Datos del negocio", "Escucha e intuición"], ["Mercado y competencia", "Lectura cultural y referentes"], ["Análisis semántico", "Exploración conceptual"], ["Pruebas de legibilidad", "Exploración formal y curaduría"], ["Pruebas de uso por formato", "Dirección de arte"], ["Pruebas de producción", "Oficio y detalle"], ["Archivos y documentación", "Relato de marca"], ["Auditoría de coherencia", "Ideas nuevas sobre la estructura"]],
+      trussHead: ["Técnico", "Creativo"], trussAria: "El trabajo técnico y el creativo en cada fase",
+      cols: ["Equipo fijo", "Redes sociales", "Vídeo", "Desarrollo web", "Producción", "Vosotros"], marks: ["Lidera", "Participa", "Valida"], phase: "Fase",
+      gomet: /validaci|llave en mano/i,
+      legend: {
+        3: ["La fachada primero", "Plantas que no encajan", "Sin cimientos"], 4: ["Solar", "Cimientos", "Estructura", "Plantas", "Instalaciones y remates", "Llaves"],
+        5: ["Competencia", "Sector", "Público"], 7: ["Programa", "Espacio en el mercado"], 11: ["Fundamentos", "Concepto raíz"], 17: ["Tipografía", "Retícula", "Color", "Imagen"],
+        20: ["Papelería", "Web", "Packaging", "Redes sociales"], 22: ["Remates", "Instalaciones", "Imprenta", "Pantalla", "Fabricante"], 24: ["Llaves", "Libro del edificio"],
+        26: ["Revisiones", "Ajustes", "Ampliaciones"], 29: ["Cálculo", "Proyecto"], 31: ["Todas las opciones", "¿Es pertinente?", "¿Es propia?", "¿Es viable?", "La solución"],
+        32: ["De cerca", "A distancia", "De pasada"], 33: ["Producto", "Hostelería", "Cultura"], 34: ["Equipo fijo", "Audiovisual", "Redes sociales", "Desarrollo web", "Producción"]
+      }
+    }
+  };
+  var TX = I18N[LANG], ES = LANG === "es";
+  var D = ES && window.DECK_ES ? window.DECK_ES : window.DECK, N = D.length, KIT = window.GVE_KIT;
+  document.documentElement.lang = LANG; document.title = TX.title;
   var root = document.documentElement, $ = function (id) { return document.getElementById(id); };
   var pad = function (n) { return (n < 10 ? "0" : "") + n; };
   var clamp = function (v, a, b) { return Math.max(a === undefined ? 0 : a, Math.min(b === undefined ? 1 : b, v)); };
   var eo = function (t) { return 1 - Math.pow(1 - t, 3); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
   var each = function (sel, fn, ctx) { Array.prototype.forEach.call((ctx || document).querySelectorAll(sel), fn); };
-  var SECTIONS = [["Cover",1,1],["Introduction",2,4],["Understand",5,10],["Define",11,19],["Build",20,25],["Maintain",26,27],["Sign-offs",28,28],["Judgment",29,33],["Ecosystem",34,35],["Working together",36,38],["Closing",39,39]];
+  var SECTIONS = [[1,1],[2,4],[5,10],[11,19],[20,25],[26,27],[28,28],[29,33],[34,35],[36,38],[39,39]].map(function (r, i) { return [TX.sections[i], r[0], r[1]]; });
   var sectionOf = function (n) { for (var i = 0; i < SECTIONS.length; i++) if (n >= SECTIONS[i][1] && n <= SECTIONS[i][2]) return SECTIONS[i][0]; return ""; };
   var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var CHECK = '<svg viewBox="0 0 20 20" class="gv-s" aria-hidden="true"><circle cx="10" cy="10" r="9.2"/><path d="M5.8 10.3l2.8 2.8 5.6-6"/></svg>';
   var SLIDEIC = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1.5" y="3.5" width="13" height="9"/></svg>';
 
   /* what each drawing points at, numbered as in the drawing */
-  var LEGEND = {
-    3: ["Façade first", "Floors that don't fit", "No foundations"],
-    4: ["Site", "Foundations", "Structure", "Floors", "Utilities and finishes", "Keys"],
-    5: ["Competitors", "Industry", "Audience"],
-    7: ["Program", "Market space"],
-    11: ["Fundamentals", "Root concept"],
-    17: ["Typography", "Grid", "Color", "Imagery"],
-    20: ["Stationery", "Web", "Packaging", "Social media"],
-    22: ["Finishes", "Utilities", "Printer", "Screen", "Manufacturer"],
-    24: ["Keys", "Building manual"],
-    26: ["Reviews", "Adjustments", "Extensions"],
-    29: ["Calculation", "Design"],
-    31: ["Every option", "Is it relevant?", "Is it ownable?", "Is it viable?", "The solution"],
-    32: ["Up close", "At a distance", "In passing"],
-    33: ["Product", "Hospitality", "Culture"],
-    34: ["Core team", "Audiovisual", "Social media", "Web development", "Production"]
-  };
+  var LEGEND = TX.legend;
 
   /* ---------- diagrams ---------- */
   function rings() {
-    return '<div class="rings" data-dg="rings" role="img" aria-label="Three concentric circles: primary in the centre, secondary around it, tertiary outside">' +
+    return '<div class="rings" data-dg="rings" role="img" aria-label="' + TX.ringsAria + '">' +
       '<svg viewBox="0 0 682 300" preserveAspectRatio="none" aria-hidden="true"><ellipse class="o" cx="341" cy="150" rx="330" ry="140" vector-effect="non-scaling-stroke"/>' +
       '<ellipse cx="341" cy="150" rx="226" ry="94" vector-effect="non-scaling-stroke"/><ellipse class="i" cx="341" cy="150" rx="116" ry="48" vector-effect="non-scaling-stroke"/></svg>' +
-      '<span class="sc" style="top:12%" data-t=".7">Tertiary</span><span class="sc" style="top:26.5%" data-t=".5">Secondary</span><span class="sc" style="top:50%" data-t=".3">Primary</span></div>';
+      '<span class="sc" style="top:12%" data-t=".7">' + TX.rings[0] + '</span><span class="sc" style="top:26.5%" data-t=".5">' + TX.rings[1] + '</span><span class="sc" style="top:50%" data-t=".3">' + TX.rings[2] + '</span></div>';
   }
   function map() {
     var W = 1140, H = 702, cx = 570, cy = 354, t = "";
@@ -348,31 +405,31 @@
     for (var y = 54; y <= 654; y += 40) if (Math.abs(y - cy) > 8) t += "M" + (cx - 5) + " " + y + "h10";
     var comp = [[373,124],[233,258],[625,194],[877,178],[972,284],[110,412],[345,476],[167,553],[317,610],[524,530],[681,418]], bench = [[972,92],[737,265]];
     var p = function (a) { return "left:" + (a[0] / W * 100).toFixed(2) + "%;top:" + (a[1] / H * 100).toFixed(2) + "%"; };
-    var h = '<div class="mapw" data-dg="map"><div class="map" role="img" aria-label="Positioning map from functional to emotional and from accessible to exclusive; the accessible and emotional quarter is the open space for your brand.">' +
+    var h = '<div class="mapw" data-dg="map"><div class="map" role="img" aria-label="' + TX.mapAria + '">' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><rect class="op" x="574" y="358" width="552" height="313" vector-effect="non-scaling-stroke" data-t=".74" style="opacity:0"/>' +
       '<path class="ax" pathLength="1" vector-effect="non-scaling-stroke" d="M10 ' + cy + 'H1130"/><path class="ax" pathLength="1" vector-effect="non-scaling-stroke" d="M' + cx + ' 40V665"/>' +
       '<path class="tk" vector-effect="non-scaling-stroke" d="' + t + '" data-t=".2" style="opacity:0"/></svg>';
     comp.forEach(function (a, k) { h += '<i class="d" style="' + p(a) + '" data-t="' + (0.24 + k * 0.035).toFixed(3) + '"></i>'; });
     bench.forEach(function (a, k) { h += '<i class="d b" style="' + p(a) + '" data-t="' + (0.65 + k * 0.04).toFixed(2) + '"></i>'; });
-    h += '<span class="pill2 sc" style="' + p([570, 26]) + '" data-t=".12">Exclusive</span><span class="pill2 sc" style="' + p([570, 683]) + '" data-t=".12">Accessible</span>' +
-      '<span class="pill2 sc w" style="top:' + (324 / H * 100).toFixed(2) + '%" data-t=".12">Functional</span><span class="pill2 sc e" style="top:' + (324 / H * 100).toFixed(2) + '%" data-t=".12">Emotional</span>' +
-      '<span class="pill2 sc you" style="' + p([850, 520]) + '" data-t=".82">Your brand</span><span class="open sc" data-t=".82">[The open space]</span></div>' +
-      '<div class="mlg sc"><span><b class="m f"></b>Competitors</span><span><b class="m o"></b>Benchmarks</span></div></div>';
+    h += '<span class="pill2 sc" style="' + p([570, 26]) + '" data-t=".12">' + TX.map[0] + '</span><span class="pill2 sc" style="' + p([570, 683]) + '" data-t=".12">' + TX.map[1] + '</span>' +
+      '<span class="pill2 sc w" style="top:' + (324 / H * 100).toFixed(2) + '%" data-t=".12">' + TX.map[2] + '</span><span class="pill2 sc e" style="top:' + (324 / H * 100).toFixed(2) + '%" data-t=".12">' + TX.map[3] + '</span>' +
+      '<span class="pill2 sc you" style="' + p([850, 520]) + '" data-t=".82">' + TX.map[4] + '</span><span class="open sc" data-t=".82">' + TX.map[5] + '</span></div>' +
+      '<div class="mlg sc"><span><b class="m f"></b>' + TX.map[6] + '</span><span><b class="m o"></b>' + TX.map[7] + '</span></div></div>';
     return h;
   }
-  var PHASES = ["Workshop","Strategy","Concept","System","Applications","Final artwork","Handover","Maintenance"];
+  var PHASES = TX.phases;
   function timeline() {
-    var acts = { 0: "Understand", 2: "Define", 4: "Build", 7: "Maintain" }, so = [1, 2, 3, 4, 5], h = '<ol class="tl" aria-label="The eight phases in four acts, with a sign-off between phases">';
+    var acts = { 0: TX.acts[0], 2: TX.acts[1], 4: TX.acts[2], 7: TX.acts[3] }, so = [1, 2, 3, 4, 5], h = '<ol class="tl" aria-label="' + TX.tlAria + '">';
     PHASES.forEach(function (ph, i) {
       if (acts[i]) h += '<li class="act sc rv-o">' + acts[i] + '</li>';
-      h += '<li class="ph rv-i"><span class="ico" data-ph="' + (i + 1) + '"></span><div><b><i>' + pad(i + 1) + '</i>' + ph + '</b><span>[__ weeks]</span></div></li>';
-      if (so.indexOf(i) >= 0) h += '<li class="so-r sc rv-i"><span class="so">' + CHECK + '</span>Sign-off with you</li>';
+      h += '<li class="ph rv-i"><span class="ico" data-ph="' + (i + 1) + '"></span><div><b><i>' + pad(i + 1) + '</i>' + ph + '</b><span>' + TX.weeks + '</span></div></li>';
+      if (so.indexOf(i) >= 0) h += '<li class="so-r sc rv-i"><span class="so">' + CHECK + '</span>' + TX.signoff + '</li>';
     });
     return h + '</ol>';
   }
-  var TRUSS = [["Business data","Listening and intuition"],["Market and competitors","Cultural reading and references"],["Semantic analysis","Conceptual exploration"],["Legibility tests","Formal exploration and curation"],["Usage tests by format","Art direction"],["Production tests","Craft and detail"],["Files and documentation","Brand story"],["Consistency audit","New ideas on the structure"]];
+  var TRUSS = TX.truss;
   function truss() {
-    var h = '<div class="tr" role="table" aria-label="Technical and creative work in each phase"><div class="tr-h sc" role="row"><span role="columnheader">Technical</span><span></span><span role="columnheader">Creative</span></div>';
+    var h = '<div class="tr" role="table" aria-label="' + TX.trussAria + '"><div class="tr-h sc" role="row"><span role="columnheader">' + TX.trussHead[0] + '</span><span></span><span role="columnheader">' + TX.trussHead[1] + '</span></div>';
     TRUSS.forEach(function (r, i) {
       var a = i % 2 ? 40 : 4, b = i % 2 ? 4 : 40, d = (i === 0 ? "M4 0H40" : "") + "M4 0V100M40 0V100M" + a + " 0L" + b + " 100M4 100H40";
       var so = (i >= 1 && i <= 5) ? '<span class="so ' + (i % 2 ? "l" : "r") + '">' + CHECK + '</span>' : "";
@@ -381,9 +438,9 @@
     return h + '</div>';
   }
   function matrix(lg) {
-    var cols = ["Core team", "Social media", "Video", "Web dev.", "Production", "You"], marks = ["LLLLLLLL", "-T--L--T", "---TLT--", "----TL-T", "-----L-T", "TSSSSSTT"];
-    var mk = { L: '<b class="m f" title="Leads"></b>', T: '<b class="m o" title="Takes part"></b>', S: '<b class="m c" title="Signs off">' + CHECK + '</b>', "-": "" };
-    var h = '<table class="mx"><thead><tr class="sc"><th><span class="sr">Phase</span></th>';
+    var cols = TX.cols, marks = ["LLLLLLLL", "-T--L--T", "---TLT--", "----TL-T", "-----L-T", "TSSSSSTT"];
+    var mk = { L: '<b class="m f" title="' + TX.marks[0] + '"></b>', T: '<b class="m o" title="' + TX.marks[1] + '"></b>', S: '<b class="m c" title="' + TX.marks[2] + '">' + CHECK + '</b>', "-": "" };
+    var h = '<table class="mx"><thead><tr class="sc"><th><span class="sr">' + TX.phase + '</span></th>';
     cols.forEach(function (c, j) { h += '<th' + (j === 5 ? ' class="you"' : '') + '><span>' + c + '</span></th>'; });
     h += '</tr></thead><tbody>';
     PHASES.forEach(function (ph, i) {
@@ -404,16 +461,16 @@
   function plate(s, i) {
     var n = i + 1;
     if (s.kind === "cover") {
-      return '<section class="pl cover" id="slide-1" data-n="1"><div class="pl-meta sc"><span>Gomet Verd Estudi</span><span>How we work</span></div>' +
+      return '<section class="pl cover" id="slide-1" data-n="1"><div class="pl-meta sc"><span>Gomet Verd Estudi</span><span>' + TX.how + '</span></div>' +
         '<img class="logo" src="logo-gve.svg" alt="Gomet Verd Estudi — Always WIPing [Working In Play]" width="1374" height="240">' +
-        '<div class="bot sc"><span>Branding and art direction · Valencia · Barcelona</span><a class="cue" href="#slide-2">Scroll ↓</a></div></section>';
+        '<div class="bot sc"><span>' + TX.tag + '</span><a class="cue" href="#slide-2">' + TX.scroll + '</a></div></section>';
     }
     if (s.kind === "closing") {
-      return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + pad(n) + '</span><span>Closing</span></div>' +
-        '<div class="pl-top"><h2 class="ttl" style="--ch:11">[Thank you]</h2></div>' +
-        '<div class="pl-body two"><p class="hl">For your attention, and for the build we are about to start together.</p></div>' +
-        '<div class="kv">' + kvRow("Email", '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>') + kvRow("Phone", '<a href="tel:+34684450515">+34 684 450 515</a>') +
-        kvRow("Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>') + kvRow("Studio", "Gomet Verd Estudi<br>Valencia · Barcelona") + '</div>' +
+      return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + TX.closing + '</span></div>' +
+        '<div class="pl-top"><h2 class="ttl" style="--ch:' + TX.thanksCh + '">' + TX.thanks + '</h2></div>' +
+        '<div class="pl-body two"><p class="hl">' + TX.thanksLine + '</p></div>' +
+        '<div class="kv">' + kvRow(TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>') + kvRow(TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>') +
+        kvRow("Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>') + kvRow(TX.studioK, "Gomet Verd Estudi<br>Valencia · Barcelona") + '</div>' +
         '<p class="giant" aria-hidden="true">[Gomet Verd Estudi]</p></section>';
     }
     var hl = "", lead = [], rows = [], foot = [], dr = "", stage = "", pillars = "", lgd = null, key = null, val = [];
@@ -457,8 +514,8 @@
           stage = '<div class="stage wide" aria-hidden="true"><div class="pil-st">' + names.map(function (nm) { return '<div class="draw" data-pillar="' + nm + '"></div>'; }).join("") + '</div></div>';
           pillars = '<div class="pil">' + b[1].map(function (p) { return '<div><h3 class="sc">' + esc(p[1]) + '</h3><p>' + esc(p[2]) + '</p></div>'; }).join("") + '</div>';
           break;
-        case "meta": flush(); b[1].forEach(function (m) { foot.push('<span>' + (/sign-off|turnkey/i.test(m) ? '<b class="gm"></b>' : '') + esc(m) + '</span>'); }); break;
-        case "contact": flush(); rows.push(kvRow("Contact", '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a><br><a href="tel:+34684450515">+34 684 450 515</a><br><a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>')); break;
+        case "meta": flush(); b[1].forEach(function (m) { foot.push('<span>' + (TX.gomet.test(m) ? '<b class="gm"></b>' : '') + esc(m) + '</span>'); }); break;
+        case "contact": flush(); rows.push(kvRow(TX.contact, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a><br><a href="tel:+34684450515">+34 684 450 515</a><br><a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>')); break;
       }
     });
     flush();
@@ -468,7 +525,7 @@
     var right = st ? (leadH ? '<div class="lead xx">' + leadH + '</div>' : "")
       : dr ? '<div class="dr">' + dr + '</div>' + (leadH ? '<div class="lead xx">' + leadH + '</div>' : "")
       : (leadH ? '<div class="dr lead">' + leadH + '</div>' : "");
-    var head = '<div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span><button class="vs sc" type="button" data-slide="' + n + '" title="View the original slide">' + SLIDEIC + '<span>Slide ' + pad(n) + '</span></button></div>' +
+    var head = '<div class="pl-meta sc"><span>' + pad(n) + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span>' + (ES ? '' : '<button class="vs sc" type="button" data-slide="' + n + '" title="' + TX.viewSlide + '">' + SLIDEIC + '<span>' + TX.slide + ' ' + pad(n) + '</span></button>') + '</div>' +
       '<div class="pl-top"><h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2><p class="num" aria-hidden="true">' + pad(n) + '<small>/' + N + '</small></p></div>';
     var flow = (st
       ? '<div class="pin" style="--run:' + RUN(n) + 'svh;--runv:' + RUN(n) + 'vh"><div class="lam">' + head + '<div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
@@ -484,13 +541,14 @@
   // The drawing follows that number with a soft lag, so the build glides instead of jumping.
   var scrubs = [];
   each(".pl.st", function (sec) {
-    var sg = sec.querySelector(".stage"), sc = { sec: sec, cur: 0, target: 0, apply: null, ready: false, mount: null, minT: 1.6, top: 0, run: 0 };
+    var sg = sec.querySelector(".stage"), sc = { sec: sec, n: +sec.getAttribute("data-n"), kind: "", cur: 0, target: 0, apply: null, ready: false, mount: null, top: 0, run: 0 };
     var draw = sg.querySelector("[data-scene]"), pil = sg.querySelectorAll("[data-pillar]"), ring = sg.querySelector('[data-dg="rings"]'), mp = sg.querySelector('[data-dg="map"]');
+    sc.kind = draw ? "scene" : pil.length ? "pil" : ring ? "rings" : "map";
     if (draw) {
-      sc.mount = function () { var m = KIT.mount(draw, +draw.getAttribute("data-scene")); sc.minT = Math.max(1.6, m.dur * 0.45); sc.apply = function (p) { m.seek(p); }; };
+      sc.mount = function () { var m = KIT.mount(draw, +draw.getAttribute("data-scene")); sc.apply = function (p) { m.seek(p); }; };
     } else if (pil.length) {
       sc.mount = function () {
-        var ms = Array.prototype.map.call(pil, function (el) { return KIT.pillar(el, el.getAttribute("data-pillar")); }); sc.minT = 2.2;
+        var ms = Array.prototype.map.call(pil, function (el) { return KIT.pillar(el, el.getAttribute("data-pillar")); });
         sc.apply = function (p) { ms.forEach(function (m, k) { m.seek(clamp((p - k * 0.12) / 0.52)); }); };
       };
     } else if (ring) {
@@ -526,12 +584,27 @@
     return 0.06 + 0.94 * clamp(-r.top / Math.max(1, sc.run * 0.88));
   }
   var lastW = 0, lastH = 0;
+  /* width / height of each drawing as it is framed (measured once from the kit), so the room left at the
+     end of a block fits the drawing itself, not the whole hole it sits in */
+  var ASPECT = { 3: 1.239, 4: 1.233, 5: 1.426, 7: 1.426, 11: 1.233, 17: 1.233, 20: 1.233, 22: 1.233, 24: 1.233, 26: 1.249, 29: 1.397, 31: 0.824, 32: 1.542, 33: 1.41, 34: 1.528, 36: 1.653, 38: 1.653 };
+  var PIL_ASPECT = [1.064, 1.619, 1.114, 0.891];
+  function drawingHeight(sc, w, hh) {
+    if (sc.kind === "scene") return Math.min(hh, w / (ASPECT[sc.n] || 1.3));
+    if (sc.kind === "rings") return Math.min(w, hh * 2.1) * 300 / 682;
+    if (sc.kind === "map") return Math.min(w, hh * 1.42) * 702 / 1140 + 34;
+    if (innerWidth < 900) return hh;
+    var cw = (w - 3 * 24) / 4; return Math.max.apply(null, PIL_ASPECT.map(function (a) { return Math.min(hh, cw / a); }));
+  }
+  var GAP_TEXT = 28, GAP_END = 28; // paper between the last text and the drawing, and under the drawing
   function holes() {
     scrubs.forEach(function (sc) {
-      var sec = sc.sec, h = sec.querySelector(".hole"), pin = sec.querySelector(".pin"), lam = sec.querySelector(".lam");
+      var sec = sc.sec, h = sec.querySelector(".hole"), pin = sec.querySelector(".pin"), lam = sec.querySelector(".lam"), tr = sec.querySelector(".track");
       sc.ht = Math.round(h.offsetTop + 6); sc.hh = Math.max(120, Math.round(h.offsetHeight - 12)); sc.run = pin.offsetHeight - lam.offsetHeight;
+      var ch = drawingHeight(sc, tr.clientWidth, sc.hh);
+      // when the plate lets go, the drawing sits at the very end of the block, over blank paper
+      sc.pb = Math.round(ch + GAP_TEXT + GAP_END); sc.tb = -Math.round(Math.max(0, (sc.hh - ch) / 2 - GAP_END));
     });
-    scrubs.forEach(function (sc) { sc.sec.style.setProperty("--ht", sc.ht + "px"); sc.sec.style.setProperty("--hh", sc.hh + "px"); });
+    scrubs.forEach(function (sc) { var st = sc.sec.style; st.setProperty("--ht", sc.ht + "px"); st.setProperty("--hh", sc.hh + "px"); st.setProperty("--pb", sc.pb + "px"); st.setProperty("--tb", sc.tb + "px"); });
   }
   function measure() {
     // the phone's address bar changes the height all the time: only a real resize (width, or rotating) re-lays the sheets
@@ -583,7 +656,7 @@
   $("read").addEventListener("pointerout", hover(false));
   $("read").addEventListener("click", function (e) {
     var vs = e.target.closest("[data-slide]");
-    if (vs) { var n = +vs.getAttribute("data-slide"); openLb("slides/s" + pad(n) + ".webp", "Slide " + pad(n) + " · " + (D[n - 1].name || "")); }
+    if (vs) { var n = +vs.getAttribute("data-slide"); openLb("slides/s" + pad(n) + ".webp", TX.slide + " " + pad(n) + " · " + (D[n - 1].name || "")); }
   });
 
   /* ---------- where we are ---------- */
@@ -609,8 +682,20 @@
 
   /* ---------- index ---------- */
   var ix = $("ix"), g = "";
-  for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '"><img loading="lazy" src="slides/t' + pad(n) + '.webp" alt="" width="480" height="270"><span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(sectionOf(n)) + '</span></span></button>';
+  for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '">' + (ES ? '<span class="tnum">' + pad(n) + '</span>' : '<img loading="lazy" src="slides/t' + pad(n) + '.webp" alt="" width="480" height="270">') + '<span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(sectionOf(n)) + '</span></span></button>';
   $("ixGrid").innerHTML = g;
+  $("home").setAttribute("aria-label", TX.home); $("ixBtn").setAttribute("aria-label", TX.plates); $("ixBtn").title = TX.platesKey; $("ix").setAttribute("aria-label", TX.plates);
+  $("talk").textContent = TX.talk; $("ixHow").textContent = TX.how; $("ixIntro").textContent = TX.intro; $("ixStudio").textContent = TX.studio;
+  $("ixClose").textContent = TX.close; $("lbClose").textContent = TX.close; $("lb").setAttribute("aria-label", TX.original);
+  /* the language switch: the page reloads in the other language, on the same plate */
+  each(".lng a", function (a) {
+    a.classList.toggle("on", a.getAttribute("data-l") === LANG); a.setAttribute("aria-current", a.getAttribute("data-l") === LANG ? "true" : "false");
+    a.addEventListener("click", function (e) {
+      e.preventDefault(); var l = a.getAttribute("data-l"); if (l === LANG) return;
+      try { localStorage.setItem("gve-lang", l); } catch (x) {}
+      location.href = location.pathname + "?lang=" + l + "#slide-" + cur;
+    });
+  });
   function lock() { root.classList.toggle("is-locked", ix.classList.contains("open") || $("lb").classList.contains("open")); }
   function openIx() { ix.classList.add("open"); lock(); paint(); var c = ix.querySelector(".tile.cur"); if (c) c.scrollIntoView({ block: "center" }); }
   function closeIx() { ix.classList.remove("open"); lock(); }

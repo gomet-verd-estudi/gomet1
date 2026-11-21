@@ -177,6 +177,7 @@
       const m = pad == null ? 16 : pad;
       const x0 = Math.min(...xs) - m, y0 = Math.min(...ys) - m, x1 = Math.max(...xs) + m, y1 = Math.max(...ys) + m;
       const s = Math.min(r.width / (x1 - x0), r.height / (y1 - y0));
+      k.aspect = (x1 - x0) / (y1 - y0);
       const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
       svg.setAttribute('viewBox', `${(cx - r.width / s / 2).toFixed(1)} ${(cy - r.height / s / 2).toFixed(1)} ${(r.width / s).toFixed(1)} ${(r.height / s).toFixed(1)}`);
       const ms = Math.min(1.6, (r.width < 520 ? 0.82 : 1) / s);
