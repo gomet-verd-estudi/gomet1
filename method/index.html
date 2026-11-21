@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "18"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "19"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,7 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=18">
+<link rel="stylesheet" href="kit.css?v=19">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -151,7 +151,10 @@
   .p3 path { stroke: var(--mi); stroke-width: 1.3px; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
   .p3 .fw { fill: #FFFFFF; } .p3 .fg { fill: var(--mi); } .p3 .f1 { fill: #6CC593; } .p3 .f2 { fill: #ABDABD; } .p3 .f3 { fill: #E1E9DB; }
   .p3 .ln { fill: none; } .p3 .lt { stroke-width: .8px; opacity: .55; }
-  .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px var(--pad); }
+  .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px var(--pad); margin-top: clamp(28px, 5vh, 56px); }
+  .pil figure { margin: 0; }
+  .pil .pd { position: relative; aspect-ratio: 1 / 1; margin-bottom: 18px; }
+  .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
   .pil h3 { margin-bottom: .5em; }
 
   /* cover and closing */
@@ -285,7 +288,8 @@
     .lam-foot .lead { font-size: 17px; }
     .st .flow > .kv, .st .flow > .pil { margin-top: 4vh; }
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
+    .pil .pd { margin-bottom: 12px; }
     .pl-meta .vs span { display: none; }
     .ttl { font-size: min(19vw, 140px, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .44))); }
     .num { display: none; }
@@ -330,9 +334,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=18"></script>
-<script src="kit.js?v=18"></script>
-<script src="pillars3d.js?v=18"></script>
+<script src="content.js?v=19"></script>
+<script src="kit.js?v=19"></script>
+<script src="pillars3d.js?v=19"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -532,9 +536,9 @@
           break;
         case "qa": flush(); b[1].forEach(function (q) { rows.push(kvRow(esc(q[0]), '<p>' + esc(q[1]) + '</p>')); }); break;
         case "pillars":
+          // the pillars travel with the page like the text: each drawing sits on top of its own text
           var names = ["typo", "grid", "color", "imagery"];
-          stage = '<div class="stage" aria-hidden="true"><div class="pil-st">' + names.map(function (nm, i) { return '<div class="draw" data-pillar="' + nm + '"><span class="lab sc">' + esc(b[1][i][1]) + '</span></div>'; }).join("") + '</div></div>';
-          pillars = '<div class="pil">' + b[1].map(function (p) { return '<div><h3 class="sc">' + esc(p[1]) + '</h3><p>' + esc(p[2]) + '</p></div>'; }).join("") + '</div>';
+          pillars = '<div class="pil">' + b[1].map(function (p, i) { return '<figure><div class="pd" data-pillar="' + names[i] + '" aria-hidden="true"></div><figcaption><h3 class="sc">' + esc(p[1]) + '</h3><p>' + esc(p[2]) + '</p></figcaption></figure>'; }).join("") + '</div>';
           break;
         case "meta": flush(); b[1].forEach(function (m) { foot.push('<span>' + (TX.gomet.test(m) ? '<b class="gm"></b>' : '') + esc(m) + '</span>'); }); break;
         case "contact": flush(); rows.push(kvRow(TX.contact, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a><br><a href="tel:+34684450515">+34 684 450 515</a><br><a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>')); break;
@@ -600,6 +604,9 @@
     }
     if (sc.mount) scrubs.push(sc);
   });
+  // the pillars are not pinned: they scroll with their text, grow in as they enter, and keep turning while seen
+  var pgs = [];
+  each(".pil", function (g) { pgs.push({ sec: g, els: g.querySelectorAll("[data-pillar]"), p3: null, vis: false, near: false }); });
   var rvs = Array.prototype.slice.call(document.querySelectorAll(".rv-i, .rv-o"));
   var vh = innerHeight, running = false, lastT = 0;
   // 0 → 0.06 while the block slides in; 0.06 → 1 while its sheet stands pinned at the top.
@@ -651,6 +658,13 @@
       sc.target = RM ? 1 : progress(sc, r);
       if (sc.near && !sc.ready && KIT) { sc.mount(); sc.ready = true; sc.cur = sc.target; sc.apply(sc.cur); }
     });
+    var prs = pgs.map(function (pg) { return pg.sec.getBoundingClientRect(); });
+    var pts = pgs.map(function (pg) { return Array.prototype.map.call(pg.els, function (el) { return el.getBoundingClientRect().top; }); });
+    pgs.forEach(function (pg, i) {
+      var r = prs[i]; pg.near = r.bottom > -vh && r.top < vh * 2; pg.vis = r.bottom > 0 && r.top < vh;
+      if (pg.near && !pg.p3 && window.GVE_P3D) pg.p3 = Array.prototype.map.call(pg.els, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
+      if (pg.p3) pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - pts[i][k]) / (vh * 0.3)))); if (RM || !spinning) m.render(T0 || 0, scrollY * 0.0012); });
+    });
     rvs.forEach(function (el, i) { var t = ts[i]; if (t < vh * 0.9) el.classList.add("in"); else if (t > vh * 0.97) el.classList.remove("in"); });
   }
   function frame(now) {
@@ -667,7 +681,7 @@
   }
   var spinning = false, T0 = 0;
   function spin(now) {
-    var live = scrubs.filter(function (sc) { return sc.p3 && sc.vis; });
+    var live = scrubs.concat(pgs).filter(function (sc) { return sc.p3 && sc.vis; });
     if (!live.length || RM) { spinning = false; return; }
     T0 = now / 1000;
     live.forEach(function (sc) { sc.p3.forEach(function (m) { m.render(T0, scrollY * 0.0012); }); });
@@ -675,7 +689,7 @@
   }
   function update() {
     measure();
-    if (!spinning && !RM && scrubs.some(function (sc) { return sc.p3 && sc.vis; })) { spinning = true; requestAnimationFrame(spin); }
+    if (!spinning && !RM && scrubs.concat(pgs).some(function (sc) { return sc.p3 && sc.vis; })) { spinning = true; requestAnimationFrame(spin); }
     var h = document.documentElement.scrollHeight - vh; $("prog").style.width = (h > 0 ? scrollY / h * 100 : 0) + "%";
     if (!running) { running = true; requestAnimationFrame(frame); }
   }
