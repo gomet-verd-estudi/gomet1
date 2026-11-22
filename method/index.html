@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "41"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "42"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -72,7 +72,6 @@
     /* the grey boxes are printed: a flat tint with a fine, real grain over it, dark and light specks drawn at three times the screen's density */
     /* the ink grain: laid over the whole page in "overlay", it leaves the white paper untouched and grains every grey: letters, lines, bands, stripes */
     --ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='i' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1.15 0 0 0 -0.075 1.15 0 0 0 -0.075 1.15 0 0 0 -0.075 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23i)'/%3E%3C/svg%3E");
-    --burn: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='b' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='-1.2 0 0 0 1.6 -1.2 0 0 0 1.6 -1.2 0 0 0 1.6 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23b)'/%3E%3C/svg%3E");
     --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='g3'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.45 0 0 0 0 0.47 3.2 0 0 0 -1.68'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23g3)'/%3E%3Cfilter id='g7'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1.0 0 0 0 0 1.0 0 0 0 0 1.02 -3.0 0 0 0 1.4'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23g7)'/%3E%3C/svg%3E") 0 0 / 120px 120px, var(--tint);
   }
   @media (min-width: 900px) { :root { --gut: 32px; } }
@@ -86,7 +85,7 @@
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ---------- chrome: small and fixed in the corners ---------- */
-  .prog { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: var(--mi); z-index: 32; }
+  .prog { position: fixed; top: 0; left: 0; height: 2px; width: 100%; background: var(--mi); z-index: 32; transform: scaleX(0); transform-origin: 0 0; will-change: transform; }
   /* the sheet's header row: a white band inside the frame, closed by a hairline, like the title row of a data sheet */
   .top { position: fixed; top: var(--fi); left: calc(var(--fi) + var(--gut)); right: var(--fi); height: calc(var(--hd) - var(--fi)); z-index: 30; display: flex; align-items: center; justify-content: space-between;
     background: var(--white); border-bottom: 1px solid var(--g);
@@ -128,7 +127,7 @@
   .pl-top { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: clamp(16px, 3.4vh, 38px); }
   .pno { font-weight: 200; font-stretch: 62%; font-size: clamp(30px, 3.4vw, 62px); line-height: .8; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-bottom: .1em; margin-right: -.55em; }
   .pno small { font-size: .34em; font-weight: 700; font-stretch: 100%; letter-spacing: .06em; vertical-align: top; margin-left: .2em; }
-  .ttl { font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), calc((100vw - var(--gut) - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
+  .ttl { font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), 25vh, calc((100vw - var(--gut) - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
   .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--pad); }
   .pl-body { margin-top: clamp(26px, 4.5vh, 56px); grid-template-areas: "hl dr" "lg dr" "xx dr"; grid-template-rows: auto auto 1fr; align-items: start; }
   .hl { grid-area: hl; font-size: clamp(25px, 2.35vw, 44px); line-height: .93; font-weight: 640; letter-spacing: -.015em; max-width: 13.5em; text-wrap: balance; }
@@ -173,17 +172,11 @@
   .sfoot { position: fixed; left: calc(var(--fi) + var(--gut)); right: var(--fi); bottom: var(--fi); height: 29px; z-index: 29; background: var(--white); border-top: 1px solid var(--g); pointer-events: none; }
   @media (max-width: 899px) { .vcode, .sfoot { display: none; } }
   @media (min-width: 900px) { .lam { padding-bottom: calc(var(--fi) + 29px + 2.2vh) !important; } .pl { padding-bottom: clamp(88px, 13vh, 150px); } }
-  /* the grain over the greys: one layer between the grey type and the green drawings (the drawings stay clean),
-     one over the sheet's chrome (header, footer, frame, gutter), one inside each sheet of thin paper */
-  .grain { position: fixed; inset: 0; z-index: 2; pointer-events: none; mix-blend-mode: overlay; background: var(--ink) 0 0 / 120px 120px; }
-  .grain.chrome { z-index: 33; --fb: calc(var(--fi) + 31px);
-    -webkit-mask: linear-gradient(#000 0 0) top / 100% var(--hd) no-repeat, linear-gradient(#000 0 0) bottom / 100% var(--fb) no-repeat,
-      linear-gradient(#000 0 0) left / calc(var(--fi) + var(--gut) + 2px) 100% no-repeat, linear-gradient(#000 0 0) right / calc(var(--fi) + 2px) 100% no-repeat;
-    mask: linear-gradient(#000 0 0) top / 100% var(--hd) no-repeat, linear-gradient(#000 0 0) bottom / 100% var(--fb) no-repeat,
-      linear-gradient(#000 0 0) left / calc(var(--fi) + var(--gut) + 2px) 100% no-repeat, linear-gradient(#000 0 0) right / calc(var(--fi) + 2px) 100% no-repeat; }
-  @media (max-width: 899px) { .grain.chrome { --fb: calc(var(--fi) + 2px); } }
-  /* inside the thin paper the grain can only burn: white where there is no ink, dark specks where there is */
-  .grain.in { position: absolute; z-index: 1; mix-blend-mode: color-burn; background: var(--burn) 0 0 / 120px 120px; }
+  /* the grain: one layer over the whole sheet in "overlay". White paper stays white; every ink takes the grain,
+     the greys (letters, lines, bands, stripes, chrome) and the greens (the building, the pillars, the marks) alike.
+     It is its own composited layer, fixed to the screen, so the browser never repaints it while the page moves */
+  .grain { position: fixed; inset: 0; z-index: 34; pointer-events: none; mix-blend-mode: overlay; background: var(--ink) 0 0 / 120px 120px;
+    transform: translateZ(0); will-change: transform; }
   /* on low-density screens one grain is one whole pixel: there it is printed lighter */
   @media (max-resolution: 1.5dppx), (-webkit-max-device-pixel-ratio: 1.5) { .grain { opacity: .6; } }
   /* a ruled table, frame to frame: a tinted bar of small bold labels on top, white cells under it, hairlines between */
@@ -253,13 +246,11 @@
      It starts right under the step's description: the step's foot and the sheet meet on the same rule */
   .obra > .pl.pil-after { z-index: 4; background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
     padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 10px 18px -16px rgba(16, 40, 28, .28); }
-  .pl.pil-after > .grain.in, .pl.pre .lam-foot > .grain.in { opacity: .6; }
   /* the step before a sheet: its description is already on the sheet. Its foot is lifted over the building and printed on the
      same thin paper, so when the pin lets go the foot and the sheet are one piece, from the description down */
   .obra > .pl.pre, .pl.pre > .flow { z-index: auto; }
   .pl.pre .lam { z-index: 4; }
   .pl.pre .lam-foot { background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); box-shadow: 0 -10px 18px -16px rgba(16, 40, 28, .28); }
-  .tab > .grain { padding: 0 !important; border: 0 !important; }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) - 1px) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -477,12 +468,30 @@
     .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
     .pil .pd { margin-bottom: 12px; }
     .pl-meta .vs span { display: none; }
-    .ttl { font-size: min(26vw, 150px, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); }
+    .ttl { font-size: min(26vw, 150px, 25vh, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); }
     .cover .logo { width: 100%; }
     .mf-st { font-size: clamp(46px, 14.4vw, 76px); margin-top: -.62em; }
     .closing .giant { font-size: 13.6vw; }
     .mx tbody th { font-size: 16px; }
     .mx thead th:first-child { width: 38%; }
+  }
+  /* a phone on its side (or a very short window): the pinned sheet has little height, so the title shrinks to the height,
+     and the foot goes back to two columns, the headline beside its text, so the drawing keeps its room */
+  @media (max-height: 520px) {
+    .ttl { font-size: min(clamp(46px, 12.6vw, 232px), 19vh, calc((100vw - var(--gut) - 2 * var(--pad)) / (var(--ch, 10) * .38))); }
+    .pno { font-size: max(18px, 6.5vh); }
+    .pl-top { margin-top: 8px; }
+    .pl-meta { min-height: 28px; padding-top: 5px; padding-bottom: 4px; }
+    .hole { min-height: 16vh; min-height: 16svh; }
+    .tab { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
+    .tab > .fl, .tab > .fl:first-child { grid-row: 1; display: block; }
+    .tab > :not(.fl) { grid-row: 2; padding-top: 7px; padding-bottom: 9px; }
+    .tab > :nth-child(2n) { border-left: 1px solid var(--g); }
+    .tab > :not(.fl) + :not(.fl) { border-top: 0; }
+    .tab > .fl { padding-top: 4px; padding-bottom: 3px; }
+    .tab .hl { font-size: 17px; }
+    .tab .lead { font-size: 15px; }
+    .lam { padding-bottom: 1vh; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
   @media print { .top, .corner, .prog, .ix, .lb, .vs, .sheet, .vcode, .sfoot, .grain { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .tw { position: static; height: auto; } .hd2 { position: static; } .hsp { display: none; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
@@ -504,7 +513,6 @@
 
 <main id="read"></main>
 <div class="grain" aria-hidden="true"></div>
-<div class="grain chrome" aria-hidden="true"></div>
 
 <div class="ix" id="ix" role="dialog" aria-modal="true" aria-label="All plates">
   <div class="ix-l">
@@ -521,9 +529,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=41"></script>
-<script src="kit.js?v=41"></script>
-<script src="pillars3d.js?v=41"></script>
+<script src="content.js?v=42"></script>
+<script src="kit.js?v=42"></script>
+<script src="pillars3d.js?v=42"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -771,7 +779,7 @@
       (rows.length ? '<div class="kv">' + rows.join("") + '</div>' : '') +
       (foot.length ? '<div class="pl-foot sc">' + foot.join("") + '</div>' : '');
     return '<section class="pl' + (st ? ' st' : '') + (ob ? ' ob' : '') + '" id="slide-' + n + '" data-n="' + n + '" data-scene="' + (s.scene || 0) + '"' + (ob ? ' data-ph="' + (+(/(\d+)$/.exec(s.sec) || [0, 0])[1]) + '"' : '') + '>' + (st && !ob ? '<div class="track">' + stage + '</div>' : '') + '<div class="flow">' + flow + '</div></section>' +
-      (st && pillars ? '<section class="pl pil-after" data-n="' + n + '"><div class="grain in" aria-hidden="true"></div>' + pillars + '</section>' : '');
+      (st && pillars ? '<section class="pl pil-after" data-n="' + n + '">' + pillars + '</section>' : '');
   }
   /* the eight steps are laid out over one single drawing: a building that stays put under them and grows,
      phase by phase, as each step's sheet pins; titles, texts and bands pass over it */
@@ -788,7 +796,7 @@
       var m = STEP.exec(s.sec), L = "ABCDEFGH"[+m[1] - 1];
       return '<tr><td><b class="chip">' + L + '</b></td><td>' + esc(s.sub) + '</td><td>' + esc(s.title.replace(/^\[|\]$/g, "")) + '</td><td>' + m[1] + '/8</td></tr>';
     }).join("");
-    return '<section class="pl pil-after parts" data-n="' + nLast + '"><div class="grain in" aria-hidden="true"></div><table class="parts-t"><caption class="sc">' + (ES ? "El edificio, pieza a pieza" : "The building, part by part") + '</caption>' +
+    return '<section class="pl pil-after parts" data-n="' + nLast + '"><table class="parts-t"><caption class="sc">' + (ES ? "El edificio, pieza a pieza" : "The building, part by part") + '</caption>' +
       '<thead class="sc"><tr><th></th><th>' + (ES ? "Pieza" : "Part") + '</th><th>' + (ES ? "Paso" : "Step") + '</th><th>' + (ES ? "Nº" : "No.") + '</th></tr></thead><tbody>' + rows + '</tbody></table></section>';
   }
   function obra(inner) {
@@ -801,8 +809,6 @@
     while (st && !st.classList.contains("ob")) st = st.previousElementSibling;
     if (!st) return;
     st.classList.add("pre");
-    var ft = st.querySelector(".lam-foot"), g = document.createElement("div");
-    g.className = "grain in"; g.setAttribute("aria-hidden", "true"); ft.appendChild(g);
   });
 
   /* ---------- the drawings move with the scroll ---------- */
@@ -881,7 +887,9 @@
     var m = Array.prototype.map.call(ts, function (t) { return [t, t.scrollWidth, t.parentNode.clientWidth, parseFloat(getComputedStyle(t).fontSize)]; });
     m.forEach(function (x) { if (x[1] > x[2]) x[0].style.fontSize = (x[3] * x[2] / x[1] * 0.98).toFixed(1) + "px"; });
   }
+  var relaid = true;
   function holes() {
+    relaid = true;
     fitTitles();
     var heads = scrubs.map(function (sc) { return sc.sec.querySelector(".hd2").offsetHeight; });
     scrubs.forEach(function (sc, i) { sc.sec.style.setProperty("--hdh", heads[i] + "px"); });
@@ -924,9 +932,11 @@
     }
     scrubs.forEach(function (sc) { var st = sc.sec.style; st.setProperty("--ht", sc.ht + "px"); st.setProperty("--hh", sc.hh + "px"); st.setProperty("--pb", sc.pb + "px"); st.setProperty("--tb", sc.tb + "px"); st.setProperty("--wh", sc.wh + "px"); });
   }
+  var docH = 0, PROG = $("prog");
   function measure() {
     // the phone's address bar changes the height all the time: only a real resize (width, or rotating) re-lays the sheets
     if (innerWidth !== lastW || Math.abs(innerHeight - lastH) > 160) { lastW = innerWidth; lastH = innerHeight; holes(); }
+    if (!docH || relaid) { docH = document.documentElement.scrollHeight; relaid = false; }
     vh = innerHeight;
     // read everything first…
     var rs = scrubs.map(function (sc) { return sc.sec.getBoundingClientRect(); });
@@ -949,7 +959,8 @@
     pgs.forEach(function (pg, i) {
       var r = prs[i]; pg.near = r.bottom > -vh && r.top < vh * 2; pg.vis = r.bottom > 0 && r.top < vh;
       if (pg.near && !pg.p3 && window.GVE_P3D) pg.p3 = Array.prototype.map.call(pg.els, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
-      if (pg.p3) pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - pts[i][k]) / (vh * 0.3)))); if (RM || !spinning) m.render(T0 || 0, scrollY * 0.0012); });
+      // only the pillars on screen are drawn; the others keep their place and are drawn again when they come back
+      if (pg.p3 && pg.near) pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - pts[i][k]) / (vh * 0.3)))); if (pg.vis && (RM || !spinning)) m.render(T0 || 0, scrollY * 0.0012); });
     });
     rvs.forEach(function (el, i) { var t = ts[i]; if (t < vh * 0.9) el.classList.add("in"); else if (t > vh * 0.97) el.classList.remove("in"); });
   }
@@ -971,9 +982,11 @@
     if (moving) requestAnimationFrame(frame); else { running = false; lastT = 0; }
   }
   var spinning = false, T0 = 0;
+  var odd = false;
   function spin(now) {
     var live = scrubs.concat(pgs).filter(function (sc) { return sc.p3 && sc.vis; });
     if (!live.length || RM) { spinning = false; return; }
+    odd = !odd; if (odd) { requestAnimationFrame(spin); return; }
     T0 = now / 1000;
     live.forEach(function (sc) { sc.p3.forEach(function (m) { m.render(T0, scrollY * 0.0012); }); });
     requestAnimationFrame(spin);
@@ -981,7 +994,7 @@
   function update() {
     measure();
     if (!spinning && !RM && scrubs.concat(pgs).some(function (sc) { return sc.p3 && sc.vis; })) { spinning = true; requestAnimationFrame(spin); }
-    var h = document.documentElement.scrollHeight - vh; $("prog").style.width = (h > 0 ? scrollY / h * 100 : 0) + "%";
+    var h = docH - vh; PROG.style.transform = "scaleX(" + (h > 0 ? Math.min(1, scrollY / h) : 0).toFixed(4) + ")";
     if (!running) { running = true; requestAnimationFrame(frame); }
   }
   // when we jump (index, keys, links) the drawings on the way are not replayed: they take their place at once
@@ -1059,7 +1072,6 @@
     var k = e.key;
     if (k === "Escape") { if (lb.classList.contains("open")) closeLb(); else closeIx(); return; }
     if (lb.classList.contains("open")) return;
-    if (k === "g" || k === "G") { ix.classList.contains("open") ? closeIx() : openIx(); return; }
     if (ix.classList.contains("open")) return;
     if (k === "ArrowRight") { e.preventDefault(); go(cur + 1, true); }
     else if (k === "ArrowLeft") { e.preventDefault(); go(cur - 1, true); }
@@ -1070,7 +1082,21 @@
   var m = /slide-(\d+)/.exec(location.hash);
   if (m && +m[1] > 1) { var target = +m[1]; requestAnimationFrame(function () { go(target); update(); }); if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (scrollY > 0) go(target); update(); }); }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { holes(); update(); });
-  window.addEventListener("load", function () { holes(); update(); });
+  window.addEventListener("load", function () { holes(); update(); idle(premount); });
+  /* every drawing is built ahead, while the page is idle, one at a time: the building, the three scenes and the pillars are
+     already there when the reader reaches them, so nothing is built in the middle of a scroll */
+  function idle(fn) { if (window.requestIdleCallback) requestIdleCallback(fn, { timeout: 900 }); else setTimeout(function () { fn(null); }, 140); }
+  function premount() {
+    var jobs = [];
+    if (OBR && KIT && KIT.building) jobs.push(function () { if (!bld) { bld = KIT.building(OBR.querySelector(".ob-stage .draw")); phCur = phTgt.slice(); obApply(); } });
+    scrubs.forEach(function (sc) { jobs.push(function () { if (!sc.ready && KIT) { sc.mount(); sc.ready = true; sc.cur = sc.target; sc.apply(sc.cur); } }); });
+    pgs.forEach(function (pg) { jobs.push(function () { if (!pg.p3 && window.GVE_P3D) pg.p3 = Array.prototype.map.call(pg.els, function (el) { var m = window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); m.show(0); m.render(0, 0); return m; }); }); });
+    if (!jobs.length) return;
+    (function next(dl) {
+      do { jobs.shift()(); } while (jobs.length && dl && dl.timeRemaining() > 6);
+      if (jobs.length) idle(next); else update();
+    })(null);
+  }
   paint(); update();
 })();
 </script>
