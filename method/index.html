@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "56"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "57"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=56" as="script">
-<link rel="preload" href="kit.js?v=56" as="script">
-<link rel="preload" href="pillars3d.js?v=56" as="script">
+<link rel="preload" href="content.js?v=57" as="script">
+<link rel="preload" href="kit.js?v=57" as="script">
+<link rel="preload" href="pillars3d.js?v=57" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -234,6 +234,9 @@
      Flowchart block arrows join the plates; every drawing is a figure in a ruled box with a typed caption (FIG. n);
      the callouts hang on curved leaders, as on a patent sheet; the pillars are catalogue cells with a part code;
      the folded sheets are numbered instruction lists. The technical hand is a monospace */
+  /* the thin paper of the pillars' step: one and the same sheet for the step's foot, its folded sheet and the pillars;
+     dense enough that the drawing underneath is only a faint shadow */
+  :root { --sheet: rgba(255, 255, 255, .9); }
   :root { --mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; }
   .pl:not(.cover):not(.pil-after)::after { content: ""; position: absolute; left: 50%; top: calc(14px + (var(--hd) - 15px - 26px) / 2); width: 26px; height: 26px; margin-left: -13px; z-index: 2; pointer-events: none;
     background: var(--arrow); -webkit-clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); }
@@ -296,6 +299,7 @@
   .pl .more-p { margin: 0 calc(var(--fi) - var(--pad)); }
   .more-p.open { grid-template-rows: 1fr; }
   .more-p.paper { z-index: 4; }
+  .more-p.paper .more-in { background: var(--sheet); }
   .more-p:not(.paper) .more-in { background: none; }
   .more-c { min-height: 0; overflow: hidden; }
   .more-p:not(.open) .more-c { visibility: hidden; transition: visibility 0s .5s; }
@@ -334,13 +338,13 @@
   /* the 3D pillars come on a sheet of thin paper laid over the drawing: white, but you can still make out the building under it */
   /* a light sheet, like thin paper: the building shows through it, softened; flat, it casts no shadow.
      It starts right under the step's description: the step's foot and the sheet meet on the same rule */
-  .obra > .pl.pil-after { z-index: 4; background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+  .obra > .pl.pil-after { z-index: 4; background: var(--sheet);
     padding-top: clamp(28px, 5vh, 56px); }
   /* the step before a sheet: its description is already on the sheet. Its foot is lifted over the building and printed on the
      same thin paper, so when the pin lets go the foot and the sheet are one piece, from the description down */
   .obra > .pl.pre, .pl.pre > .flow { z-index: auto; }
   .pl.pre .lam { z-index: 4; }
-  .pl.pre .lam-foot { background: rgba(255, 255, 255, .72); }
+  .pl.pre .lam-foot { background: var(--sheet); }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) - 1px) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -660,9 +664,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=56"></script>
-<script src="kit.js?v=56"></script>
-<script src="pillars3d.js?v=56"></script>
+<script src="content.js?v=57"></script>
+<script src="kit.js?v=57"></script>
+<script src="pillars3d.js?v=57"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
