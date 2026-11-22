@@ -7,8 +7,10 @@
 <meta name="description" content="How Gomet Verd Estudi builds brands: in order, on ground we know, and with you in every decision.">
 <meta name="theme-color" content="#FFFFFF">
 <script>
+/* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
+(function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "53"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "54"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -18,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=53" as="script">
-<link rel="preload" href="kit.js?v=53" as="script">
-<link rel="preload" href="pillars3d.js?v=53" as="script">
+<link rel="preload" href="content.js?v=54" as="script">
+<link rel="preload" href="kit.js?v=54" as="script">
+<link rel="preload" href="pillars3d.js?v=54" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -76,6 +78,8 @@
     --hd: 56px;
     /* the sheet: a white margin round the page (--fi), and on wide screens a binding gutter on the left (--gut) */
     --fi: 8px; --gut: 0px; --tint: #F4F4F5;
+    /* roles: rules, the construction band, the flow arrows, the step chips, the + buttons (the colour edition recolours them) */
+    --rule: var(--g); --stripe: var(--g); --arrow: var(--g); --chip: var(--mi); --btn: var(--mi);
     /* the grey boxes are printed: a flat tint with a fine, real grain over it, dark and light specks drawn at three times the screen's density */
     /* the ink grain: laid over the whole page in "overlay", it leaves the white paper untouched and grains every grey: letters, lines, bands, stripes */
     --ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='i' color-interpolation-filters='sRGB'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1.15 0 0 0 -0.075 1.15 0 0 0 -0.075 1.15 0 0 0 -0.075 0 0 0 0 1'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23i)'/%3E%3C/svg%3E");
@@ -95,7 +99,7 @@
   .prog { position: fixed; top: 0; left: 0; height: 2px; width: 100%; background: var(--mi); z-index: 32; transform: scaleX(0); transform-origin: 0 0; will-change: transform; }
   /* the sheet's header row: a white band inside the frame, closed by a hairline, like the title row of a data sheet */
   .top { position: fixed; top: var(--fi); left: calc(var(--fi) + var(--gut)); right: var(--fi); height: calc(var(--hd) - var(--fi)); z-index: 30; display: flex; align-items: center; justify-content: space-between;
-    background: var(--white); border-bottom: 1px solid var(--g);
+    background: var(--white); border-bottom: 1px solid var(--rule);
     padding: 0 max(calc(var(--pad) - var(--fi)), env(safe-area-inset-right)) 0 max(calc(var(--pad) - var(--fi)), env(safe-area-inset-left)); pointer-events: none; }
   .top > * { pointer-events: auto; }
   .gve { display: inline-flex; text-decoration: none; }
@@ -121,20 +125,18 @@
   #read { padding-left: var(--gut); }
   .pl { position: relative; padding: calc(var(--hd) - 1px) var(--pad) clamp(72px, 11vh, 132px); }
   /* blocks are separated like a building site: a band of thick 45° stripes, edge to edge */
-  .pl::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--g) 0 6px, transparent 6px 12px); pointer-events: none; }
+  .pl::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--stripe) 0 6px, transparent 6px 12px); pointer-events: none; }
   .pl.cover::before { display: none; }
   /* every plate opens with a section bar, as on a data sheet: small bold capitals on a tinted band, ruled above and below,
      running from frame to frame and sitting right under the header row */
   .pl-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; text-align: center; gap: 4px 26px;
-    margin: 0 calc(var(--fi) - var(--pad)); padding: 7px var(--pad) 6px; min-height: 32px; background: var(--paper); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
+    margin: 0 calc(var(--fi) - var(--pad)); padding: 7px var(--pad) 6px; min-height: 32px; background: var(--paper); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
   .pl-meta .vs { display: inline-flex; align-items: center; gap: 7px; position: relative; z-index: 4; }
   .pl-meta .vs:hover { color: var(--mi); }
   .pl-meta .vs svg { width: 13px; height: 13px; }
   /* the title is a statement on the centre axis: its number, thin, stacked on top; the word itself in a lighter cut */
   .pl-top { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: clamp(16px, 3.4vh, 38px); }
   .pno { font-weight: 200; font-stretch: 62%; font-size: clamp(30px, 3.4vw, 62px); line-height: .8; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-bottom: .1em; margin-right: -.55em; }
-  /* the step's number, inside its title: the same letters in the thinnest cut, a hair of space after it */
-  .ttl .tno { font-weight: 200; letter-spacing: -.02em; }
   .pno small { font-size: .34em; font-weight: 700; font-stretch: 100%; letter-spacing: .06em; vertical-align: top; margin-left: .2em; }
   .ttl { font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), 25vh, calc((100vw - var(--gut) - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
   .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--pad); }
@@ -169,16 +171,16 @@
 
   /* ---------- the data sheet: the page is one ruled sheet. A white margin and a hairline frame round it, a header row,
      a footer row, a binding gutter with the sheet's reference and two punched holes; inside, section bars and ruled tables ---------- */
-  .sheet { position: fixed; top: var(--fi); right: var(--fi); bottom: var(--fi); left: calc(var(--fi) + var(--gut)); border: 1px solid var(--g); pointer-events: none; z-index: 31;
+  .sheet { position: fixed; top: var(--fi); right: var(--fi); bottom: var(--fi); left: calc(var(--fi) + var(--gut)); border: 1px solid var(--rule); pointer-events: none; z-index: 31;
     box-shadow: 0 0 0 calc(var(--fi) + var(--gut) + 4px) var(--white); }
   /* the binding gutter: the sheet's code read upwards, as on a product sheet, between two punched holes */
   .vcode { position: fixed; left: var(--fi); top: var(--fi); bottom: var(--fi); width: var(--gut); z-index: 32; pointer-events: none; display: grid; place-items: center; }
   .vcode span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; letter-spacing: .26em; font-size: 10px; }
   .vcode span b { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--mi); margin-top: .9em; }
-  .vcode::before, .vcode::after { content: ""; position: absolute; left: 50%; width: 12px; height: 12px; margin-left: -6px; border: 1px solid var(--g); border-radius: 50%; background: var(--white); }
+  .vcode::before, .vcode::after { content: ""; position: absolute; left: 50%; width: 12px; height: 12px; margin-left: -6px; border: 1px solid var(--rule); border-radius: 50%; background: var(--white); }
   .vcode::before { top: 18%; } .vcode::after { bottom: 18%; }
   /* the footer row: a hairline across the foot of the sheet, with the two links in it */
-  .sfoot { position: fixed; left: calc(var(--fi) + var(--gut)); right: var(--fi); bottom: var(--fi); height: 29px; z-index: 29; background: var(--white); border-top: 1px solid var(--g); pointer-events: none; }
+  .sfoot { position: fixed; left: calc(var(--fi) + var(--gut)); right: var(--fi); bottom: var(--fi); height: 29px; z-index: 29; background: var(--white); border-top: 1px solid var(--rule); pointer-events: none; }
   @media (max-width: 899px) { .vcode, .sfoot { display: none; } }
   @media (min-width: 900px) { .lam { padding-bottom: calc(var(--fi) + 29px + 2.2vh) !important; } .pl { padding-bottom: clamp(88px, 13vh, 150px); } }
   /* the grain: one layer over the whole sheet in "overlay". White paper stays white; every ink takes the grain,
@@ -190,28 +192,28 @@
   @media (max-resolution: 1.5dppx), (-webkit-max-device-pixel-ratio: 1.5) { .grain { opacity: .6; } }
   /* a ruled table, frame to frame: a tinted bar of small bold labels on top, white cells under it, hairlines between */
   .tab { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 0; align-items: stretch;
-    margin-left: calc(var(--fi) - var(--pad)); margin-right: calc(var(--fi) - var(--pad)); padding-top: 0; border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
+    margin-left: calc(var(--fi) - var(--pad)); margin-right: calc(var(--fi) - var(--pad)); padding-top: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
   .tab > * { grid-area: auto; grid-row: 2; min-width: 0; padding: 11px var(--pad) 13px; }
-  .tab > .fl { grid-row: 1; background: var(--paper); border-bottom: 1px solid var(--g); padding-top: 7px; padding-bottom: 6px; }
-  .tab > :nth-child(2n) { border-left: 1px solid var(--g); }
+  .tab > .fl { grid-row: 1; background: var(--paper); border-bottom: 1px solid var(--rule); padding-top: 7px; padding-bottom: 6px; }
+  .tab > :nth-child(2n) { border-left: 1px solid var(--rule); }
   .tab .hl { max-width: none; font-size: clamp(19px, 1.5vw, 28px); line-height: 1; }
   .tab .lead { max-width: 34em; line-height: 1.12; }
   .tab .lead > p:first-child::before { left: -.75em; }
-  .chip { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; margin-right: .6em; border-radius: 50%; background: var(--mi); color: #fff; font-weight: 800; letter-spacing: 0; vertical-align: middle; }
+  .chip { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; margin-right: .6em; border-radius: 50%; background: var(--chip); color: #fff; font-weight: 800; letter-spacing: 0; vertical-align: middle; }
   .ob-stage svg { overflow: visible; }
   /* tables of rows (the parts, the contacts): ruled, every other row tinted, like the materials table of a product sheet */
   .parts-t, .kv-t { width: calc(100% + 2 * (var(--pad) - var(--fi))); margin: 0 calc(var(--fi) - var(--pad)); border-collapse: collapse; }
   .parts-t { font-size: clamp(15px, 1.2vw, 19px); }
-  .parts-t caption { text-align: left; background: var(--paper); border-top: 1px solid var(--g); padding: 7px var(--pad) 6px; }
-  .parts-t th, .parts-t td { border-top: 1px solid var(--g); border-left: 1px solid var(--g); padding: 8px var(--pad); text-align: left; font-weight: 500; }
+  .parts-t caption { text-align: left; background: var(--paper); border-top: 1px solid var(--rule); padding: 7px var(--pad) 6px; }
+  .parts-t th, .parts-t td { border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); padding: 8px var(--pad); text-align: left; font-weight: 500; }
   .parts-t th:first-child, .parts-t td:first-child { border-left: 0; }
-  .parts-t tbody tr:last-child td { border-bottom: 1px solid var(--g); }
+  .parts-t tbody tr:last-child td { border-bottom: 1px solid var(--rule); }
   .parts-t thead th { background: var(--paper); padding-top: 7px; padding-bottom: 6px; }
   .parts-t tbody tr:nth-child(even) td, .kv-t tr:nth-child(even) td { background: var(--paper); }
   .parts-t td:last-child, .parts-t th:last-child { text-align: center; width: 4.5em; font-variant-numeric: tabular-nums; }
   .parts-t td:first-child { width: 1px; white-space: nowrap; }
   .kv-t { width: 100%; margin: 0; }
-  .kv-t td { padding: 9px var(--pad) 10px; border-top: 1px solid var(--g); vertical-align: top; }
+  .kv-t td { padding: 9px var(--pad) 10px; border-top: 1px solid var(--rule); vertical-align: top; }
   .kv-t tr:first-child td { border-top: 0; }
   .kv-t td:first-child { width: 34%; font-weight: 800; }
   .kv-t a { text-decoration: none; } .kv-t a:hover { color: var(--mi); }
@@ -221,8 +223,8 @@
   .kv-t td:first-child { width: 26%; }
   /* the sign-off strip, the sheet's last row: go-ahead, date, signature left blank, and the sheet's reference with its bar code */
   .sign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.2fr); margin: clamp(28px, 5vh, 56px) calc(var(--fi) - var(--pad)) 0;
-    border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
-  .sign > div { padding: 7px var(--pad) 40px; border-left: 1px solid var(--g); }
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .sign > div { padding: 7px var(--pad) 40px; border-left: 1px solid var(--rule); }
   .sign > div:first-child { border-left: 0; }
   .sign .ref { background: var(--paper); padding-bottom: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
   .sign .ref svg { display: block; width: 100%; max-width: 220px; height: 30px; }
@@ -234,16 +236,16 @@
      the folded sheets are numbered instruction lists. The technical hand is a monospace */
   :root { --mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; }
   .pl:not(.cover):not(.pil-after)::after { content: ""; position: absolute; left: 50%; top: calc(14px + (var(--hd) - 15px - 26px) / 2); width: 26px; height: 26px; margin-left: -13px; z-index: 2; pointer-events: none;
-    background: var(--g); -webkit-clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); }
+    background: var(--arrow); -webkit-clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); }
   .pl.pil-after + .pl::after { top: calc((var(--hd) - 1px - 26px) / 2); }
   @media (max-width: 899px) { .pl:not(.cover):not(.pil-after)::after { top: calc(10px + (var(--hd) - 11px - 26px) / 2); } .pl.pil-after + .pl::after { top: calc((var(--hd) - 1px - 26px) / 2); } }
   /* the box starts a little under the hole's top: the brackets and descenders of the big title hang below its line */
-  .fig { position: absolute; inset: max(14px, min(3vh, 1.9vw)) 0 10px; display: flex; flex-direction: column; border: 1px solid var(--g); transition: border-color .35s ease; }
+  .fig { position: absolute; inset: max(14px, min(3vh, 1.9vw)) 0 10px; display: flex; flex-direction: column; border: 1px solid var(--rule); transition: border-color .35s ease; }
   /* the box and its caption are the plate of a step: they show while the step stands pinned, and step aside while pages move */
   .fig-c { transition: opacity .35s ease, border-color .35s ease; }
   .obra:not(.pinned) .ob-stage .fig, .pl.st:not(.pinned) .stage .fig { border-color: transparent; }
   .obra:not(.pinned) .ob-stage .fig-c, .pl.st:not(.pinned) .stage .fig-c { opacity: 0; border-bottom-color: transparent; }
-  .fig-c { flex: none; display: flex; gap: 12px; align-items: baseline; min-height: 28px; padding: 6px 10px 5px; border-bottom: 1px solid var(--g);
+  .fig-c { flex: none; display: flex; gap: 12px; align-items: baseline; min-height: 28px; padding: 6px 10px 5px; border-bottom: 1px solid var(--rule);
     font-family: var(--mono); font-size: 11px; line-height: 1.3; letter-spacing: 0; text-transform: uppercase; color: var(--g); }
   .fig-c b { flex: none; font-weight: 700; }
   .fig-c span { min-width: 0; }
@@ -252,33 +254,94 @@
   .stage .fig-a .kit { position: absolute; inset: 0; }
   .vcode span, .sign .ref span { font-family: var(--mono); letter-spacing: .08em; }
 
+  /* the colour switch: a small pill in the header row; its track shows the kit's three colours when on */
+  .csw { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 9px 0 12px; border-radius: 999px; background: var(--white); box-shadow: 0 0 0 1.5px var(--g) inset;
+    font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--g); }
+  .csw-t { position: relative; width: 30px; height: 16px; border-radius: 999px; box-shadow: 0 0 0 1.5px var(--g) inset; transition: background .3s; }
+  .csw-t i { position: absolute; left: 3px; top: 3px; width: 10px; height: 10px; border-radius: 50%; background: var(--g); transition: transform .3s cubic-bezier(.3, .8, .3, 1), background .3s; }
+  .csw[aria-checked="true"] .csw-t { background: linear-gradient(90deg, #D8382A 0 34%, #F1BE27 34% 67%, #1F59A5 67%); box-shadow: 0 0 0 1.5px var(--g) inset; }
+  .csw[aria-checked="true"] .csw-t i { transform: translateX(14px); background: #FFFCF4; box-shadow: 0 0 0 1.5px var(--g); }
+  .csw:focus-visible { outline: 2px solid var(--mi); outline-offset: 2px; }
+  @media (max-width: 380px) { .csw-l { display: none; } .csw { padding: 0 8px; } }
+
+  /* ---------- the colour edition: a vintage construction-kit catalogue ----------
+     Cream paper and black print; the kit's three primaries take the roles a catalogue gives them: yellow bands for the
+     sections and the parts, blue blocks for the captions and the chips, red for the band of the site, the arrows, the
+     buttons and the closing strip. Gomet's green stays where it was: the baseplate the building stands on and the sign-offs */
+  html.is-color {
+    --c-paper: #F2EBDA; --c-ink: #24211D; --c-red: #D8382A; --c-red-d: #A8271C; --c-red-l: #E8695C; --c-yel: #F1BE27; --c-yel-d: #C8960F; --c-yel-l: #F6D670;
+    --c-blue: #1F59A5; --c-blue-d: #163F78; --c-blue-l: #5D8DCF; --c-grn: #0A9651; --c-brick: #FFFCF4; --c-glass: #BCD6EA;
+    --white: var(--c-paper); --blank: var(--c-brick); --g: var(--c-ink); --g0: #D9CFBB; --tint: #E7DCC4;
+    --rule: rgba(36, 33, 29, .6); --stripe: var(--c-red); --arrow: var(--c-red); --chip: var(--c-blue); --btn: var(--c-red);
+  }
+  .is-color .grain { opacity: .5; }
+  .is-color .pl-meta { background: var(--c-yel); }
+  .is-color .cover .logo { filter: brightness(.16) sepia(.4); }
+  .is-color .cue .blk { fill: var(--c-red); }
+  .is-color .mf-st { color: var(--c-red); }
+  .is-color .fig-c { background: var(--c-blue); color: var(--c-paper); border-bottom-color: var(--c-blue); }
+  .is-color .obra > .pl.pil-after { background: rgba(242, 235, 218, .74); }
+  .is-color .pl.pre .lam-foot { background: rgba(242, 235, 218, .82); }
+  .is-color .more-in { background: rgba(242, 235, 218, .93); }
+  .is-color .more-bar { background: var(--c-blue); color: var(--c-paper); }
+  .is-color .pil h3 { background: var(--c-yel); }
+  .is-color .sign .ref { background: var(--c-blue); color: var(--c-paper); }
+  .is-color .sign .ref rect { fill: var(--c-paper); }
+  .is-color .closing .giant { background: var(--c-red); color: var(--c-paper); margin: 0 calc(var(--fi) - var(--pad)); }
+  .is-color .lng a.on { color: var(--c-paper); }
+  /* the drawings: black outline and flat colour, like the plates of a building-set manual */
+  .is-color .kit .bx path, .is-color .kit .ln, .is-color .kit .ground, .is-color .kit .ghost, .is-color .kit .amp, .is-color .kit .pit-floor, .is-color .kit .pit-wall,
+  .is-color .kit .pour, .is-color .kit .window, .is-color .kit .panel, .is-color .kit .door, .is-color .kit .hook-line, .is-color .kit .lattice, .is-color .kit .ppl .pf,
+  .is-color .kit .co-l, .is-color .kit .opt.out { stroke: var(--c-ink); }
+  .is-color .kit .bx .ft { fill: #FFFDF7; } .is-color .kit .bx .fl { fill: #ECE4D4; } .is-color .kit .bx .fr { fill: #D8CEBB; }
+  .is-color .kit .ground { fill: var(--c-grn); }
+  .is-color .kit .ln.grid { stroke: var(--c-paper); opacity: .5; }
+  .is-color .kit .ln.mark { stroke: var(--c-red); }
+  .is-color .kit :is(.city, .tower, .book) .ft { fill: var(--c-blue-l); } .is-color .kit :is(.city, .tower, .book) .fl { fill: var(--c-blue); } .is-color .kit :is(.city, .tower, .book) .fr { fill: var(--c-blue-d); }
+  .is-color .kit :is(.wall, .parapet, .stake, .post, .hall, .solution) .ft { fill: var(--c-red-l); } .is-color .kit :is(.wall, .parapet, .stake, .post, .hall, .solution) .fl { fill: var(--c-red); } .is-color .kit :is(.wall, .parapet, .stake, .post, .hall, .solution) .fr { fill: var(--c-red-d); }
+  .is-color .kit :is(.pillar, .crane, .scaf, .plank, .node, .shared, .sign, .crate) .ft { fill: var(--c-yel-l); } .is-color .kit :is(.pillar, .crane, .scaf, .plank, .node, .shared, .sign, .crate) .fl { fill: var(--c-yel); } .is-color .kit :is(.pillar, .crane, .scaf, .plank, .node, .shared, .sign, .crate) .fr { fill: var(--c-yel-d); }
+  .is-color .kit .hook .f { fill: #4A453E; }
+  .is-color .kit .window { fill: var(--c-glass); }
+  .is-color .kit .door { fill: var(--c-blue); }
+  .is-color .kit .pit-floor { fill: #BDB4A4; } .is-color .kit .pit-wall { fill: #A89E8D; } .is-color .kit .pour { fill: #D3CAB8; }
+  .is-color .kit .opt { fill: var(--c-blue); }
+  .is-color .kit .ppl .p-k { fill: var(--c-ink); }
+  .is-color .kit .sw0 .f { fill: var(--c-red); } .is-color .kit .sw1 .f { fill: var(--c-yel); } .is-color .kit .sw2 .f { fill: var(--c-blue); } .is-color .kit .sw3 .f { fill: var(--c-grn); }
+  .is-color .kit .co-c { fill: var(--c-blue); } .is-color .kit .co-p { fill: var(--c-ink); }
+  /* the pillars in 3D: an A brick in red, a page with blue and red modules, the colour fan in the kit's colours, a print with a green hill and a yellow sun */
+  .is-color .p3 { --p3k: var(--c-ink); --p3h: rgba(36, 33, 29, .12); --p3l: #FFFCF4; --p3s: #D3C9B6; }
+  .is-color [data-pillar="typo"] .p3 { --p3l: #E5493B; --p3s: #9C2318; }
+  .is-color [data-pillar="grid"] .p3 { --p3g: var(--c-red); --p32: var(--c-blue-l); }
+  .is-color [data-pillar="color"] .p3 { --p3g: var(--c-red); --p31: var(--c-yel); --p32: var(--c-blue); --p33: var(--c-grn); }
+  .is-color [data-pillar="imagery"] .p3 { --p3g: var(--c-yel); --p33: var(--c-grn); }
+
   /* ---------- more detail, folded ----------
      The button is the last row of the foot's table: a small label, what is inside, and a green + that turns into a −.
      The sheet it opens is a ruled table on the same thin paper as the foot, frame to frame; it unfolds from the foot */
-  .more-b { display: flex; align-items: center; gap: 8px 18px; width: 100%; min-height: 40px; padding: 8px var(--pad) 8px; text-align: left; border-top: 1px solid var(--g); cursor: pointer; }
+  .more-b { display: flex; align-items: center; gap: 8px 18px; width: 100%; min-height: 40px; padding: 8px var(--pad) 8px; text-align: left; border-top: 1px solid var(--rule); cursor: pointer; }
   .tab > .more-b.more-b { grid-column: 1 / -1; grid-row: 3; padding: 8px var(--pad) 8px; border-left: 0; }
   .more-b .more-t { flex: none; }
   .more-b .more-s { flex: 1 1 auto; min-width: 0; font-size: clamp(14px, 1vw, 17px); line-height: 1.15; }
-  .more-i { flex: none; position: relative; width: 24px; height: 24px; border-radius: 50%; background: var(--mi); transition: transform .35s cubic-bezier(.3, .8, .3, 1); }
+  .more-i { flex: none; position: relative; width: 24px; height: 24px; border-radius: 50%; background: var(--btn); transition: transform .35s cubic-bezier(.3, .8, .3, 1); }
   .more-i::before, .more-i::after { content: ""; position: absolute; left: 6px; right: 6px; top: 11px; height: 2px; background: #fff; border-radius: 1px; }
   .more-i::after { transform: rotate(90deg); transition: transform .35s cubic-bezier(.3, .8, .3, 1); }
   .more-b[aria-expanded="true"] .more-i::after { transform: rotate(0deg); }
   .more-b:hover .more-s, .more-b:focus-visible .more-s { color: var(--mi); }
   .more-b:focus-visible { outline: 2px solid var(--mi); outline-offset: -2px; }
-  .more-row { margin: clamp(36px, 7vh, 80px) calc(var(--fi) - var(--pad)) 0; border-bottom: 1px solid var(--g); }
-  .more-row .more-b { border-top: 1px solid var(--g); }
+  .more-row { margin: clamp(36px, 7vh, 80px) calc(var(--fi) - var(--pad)) 0; border-bottom: 1px solid var(--rule); }
+  .more-row .more-b { border-top: 1px solid var(--rule); }
   .more-p { position: relative; z-index: 4; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.3, .8, .3, 1); margin: 0 var(--fi); }
   .pl .more-p { margin: 0 calc(var(--fi) - var(--pad)); }
   .more-p.open { grid-template-rows: 1fr; }
   .more-c { min-height: 0; overflow: hidden; }
   .more-p:not(.open) .more-c { visibility: hidden; transition: visibility 0s .5s; }
-  .more-in { background: rgba(255, 255, 255, .86); border-bottom: 1px solid var(--g);
+  .more-in { background: rgba(255, 255, 255, .86); border-bottom: 1px solid var(--rule);
     font-size: clamp(16px, 1.2vw, 21px); line-height: 1.15; padding-bottom: clamp(18px, 3vh, 32px); }
-  .more-bar { background: var(--paper); border-bottom: 1px solid var(--g); padding: 7px var(--pad) 6px; }
-  .more-in > .more-bar:not(:first-child) { border-top: 1px solid var(--g); margin-top: clamp(10px, 2vh, 20px); }
-  .more-r { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); border-bottom: 1px solid var(--g); }
+  .more-bar { background: var(--paper); border-bottom: 1px solid var(--rule); padding: 7px var(--pad) 6px; }
+  .more-in > .more-bar:not(:first-child) { border-top: 1px solid var(--rule); margin-top: clamp(10px, 2vh, 20px); }
+  .more-r { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); border-bottom: 1px solid var(--rule); }
   .more-k { padding: 9px var(--pad) 10px; font-weight: 800; }
-  .more-v { padding: 9px var(--pad) 10px; border-left: 1px solid var(--g); max-width: 52em; }
+  .more-v { padding: 9px var(--pad) 10px; border-left: 1px solid var(--rule); max-width: 52em; }
   .more-in > .more-r:last-child { border-bottom: 0; }
   @media print { .more-p { grid-template-rows: 1fr !important; } .more-c { visibility: visible !important; } .more-b { display: none; } }
 
@@ -340,25 +403,25 @@
   .pil-st .lab { position: absolute; left: 0; right: 0; bottom: 0; text-align: center; color: var(--mi); }
   /* the pillars in 3D: white faces, green edges, like the rest of the drawings */
   .p3 { position: absolute; left: 0; right: 0; top: 0; bottom: 22px; width: 100%; height: calc(100% - 22px); overflow: visible; }
-  .p3 path { stroke: var(--mi); stroke-width: 1.3px; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-  .p3 .fw { fill: #FFFFFF; } .p3 .fg { fill: var(--mi); } .p3 .f1 { fill: #6CC593; } .p3 .f2 { fill: #ABDABD; } .p3 .f3 { fill: #E1E9DB; }
+  .p3 path { stroke: var(--p3k, var(--mi)); stroke-width: 1.3px; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+  .p3 .fw { fill: var(--p3l, #FFFFFF); } .p3 .fg { fill: var(--p3g, var(--mi)); } .p3 .f1 { fill: var(--p31, #6CC593); } .p3 .f2 { fill: var(--p32, #ABDABD); } .p3 .f3 { fill: var(--p33, #E1E9DB); }
   .p3 .ln { fill: none; } .p3 .lt { stroke-width: .8px; opacity: .55; }
   /* the light on the solids: a cast shadow in the palest green on a short floor line, and the hidden edges dashed, as on a technical drawing */
-  .p3 .sh { fill: #E6F1E9; stroke: none; }
+  .p3 .sh { fill: var(--p3h, #E6F1E9); stroke: none; }
   .p3 .fl { fill: none; stroke-width: 1px; opacity: .5; }
   .p3 .hd { fill: none; stroke-width: .8px; stroke-dasharray: 3 3; opacity: .42; }
-  .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: clamp(28px, 5vh, 56px) calc(var(--fi) - var(--pad)) 0; border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
-  .pil figure { position: relative; margin: 0; padding: 18px var(--pad) 16px; border-left: 1px solid var(--g); }
+  .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: clamp(28px, 5vh, 56px) calc(var(--fi) - var(--pad)) 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+  .pil figure { position: relative; margin: 0; padding: 18px var(--pad) 16px; border-left: 1px solid var(--rule); }
   .pil figure:first-child { border-left: 0; }
   .pl.pil-after { padding-top: 0; }
   .pl.pil-after::before { display: none; }
   /* the construction band that closes the pillars belongs to the paper sheet: it sits at its foot, and the next step opens without one */
-  .pl.pil-after::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--g) 0 6px, transparent 6px 12px); pointer-events: none; }
+  .pl.pil-after::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--stripe) 0 6px, transparent 6px 12px); pointer-events: none; }
   .pl.pil-after + .pl::before { display: none; }
   .pl.pil-after .pil { margin-top: 0; }
   .pil .pd { position: relative; z-index: 2; aspect-ratio: 1 / 1; margin-bottom: 18px; }
   .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
-  .pil h3 { margin: 0 calc(-1 * var(--pad)) .6em; background: var(--paper); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding: 6px var(--pad) 5px; }
+  .pil h3 { margin: 0 calc(-1 * var(--pad)) .6em; background: var(--paper); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 6px var(--pad) 5px; }
 
   /* the opener: two scales only. A small, dense paragraph on the left axis; three statements, huge, on the centre axis,
      each under its own thin number, printed over the small type in multiply */
@@ -518,7 +581,7 @@
     .kv-v { margin-top: .12em; }
     .lam { padding: calc(var(--hd) - 1px) 0 2vh; }
     .hole { min-height: 30vh; min-height: 30svh; }
-    .pl::before, .pl.pil-after::after { height: 10px; background: repeating-linear-gradient(-45deg, var(--g) 0 4.5px, transparent 4.5px 9px); }
+    .pl::before, .pl.pil-after::after { height: 10px; background: repeating-linear-gradient(-45deg, var(--stripe) 0 4.5px, transparent 4.5px 9px); }
     /* on the phone the tables stack: one label bar, the headline, then the text under a hairline */
     .tab { grid-template-columns: minmax(0, 1fr); }
     .tab > *, .tab > .fl { grid-row: auto; }
@@ -526,26 +589,26 @@
     .tab > .fl:first-child { display: none; }
     .tab > .fl { padding-top: 6px; padding-bottom: 5px; }
     .tab > :nth-child(2n) { border-left: 0; }
-    .tab > :not(.fl) + :not(.fl) { border-top: 1px solid var(--g); }
+    .tab > :not(.fl) + :not(.fl) { border-top: 1px solid var(--rule); }
     .tab .hl { font-size: 20px; }
     .tab.cl > .fl:first-child { display: block; order: 0; }
     .tab.cl > .hl { order: 1; }
-    .tab.cl > .fl:nth-child(2) { order: 2; border-top: 1px solid var(--g); }
+    .tab.cl > .fl:nth-child(2) { order: 2; border-top: 1px solid var(--rule); }
     .tab.cl > .kvc { order: 3; border-top: 0; }
     .kv-t td { display: block; width: auto !important; border-top: 0; padding-top: 2px; padding-bottom: 2px; }
     .kv-t td:first-child { padding-top: 9px; }
     .kv-t td:last-child { padding-bottom: 10px; }
-    .kv-t tr + tr td:first-child { border-top: 1px solid var(--g); }
+    .kv-t tr + tr td:first-child { border-top: 1px solid var(--rule); }
     :root { --fi: 4px; }
     .top { background: var(--white); }
     .lead > p:first-child::before, .mf-p::before { left: -.52em; }
     .sign { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .sign > div { padding-bottom: 30px; }
     .sign > div:nth-child(3) { border-left: 0; }
-    .sign > div:nth-child(n+3) { border-top: 1px solid var(--g); }
+    .sign > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
     .sign .ref { padding-bottom: 8px; }
     .tab .lead { font-size: 17px; }
-    .tab > .more-b.more-b { order: 9; grid-row: auto; border-top: 1px solid var(--g); }
+    .tab > .more-b.more-b { order: 9; grid-row: auto; border-top: 1px solid var(--rule); }
     .more-b { flex-wrap: wrap; }
     .more-b .more-t { order: 0; }
     .more-b .more-i { order: 1; margin-left: auto; }
@@ -559,7 +622,7 @@
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; }
     .pil figure:nth-child(odd) { border-left: 0; }
-    .pil figure:nth-child(n+3) { border-top: 1px solid var(--g); }
+    .pil figure:nth-child(n+3) { border-top: 1px solid var(--rule); }
     .fig-c { min-height: 42px; font-size: 10.5px; }
     .pil .pd { margin-bottom: 12px; }
     .pl-meta .vs span { display: none; }
@@ -571,7 +634,7 @@
     /* the contacts in two columns, label beside value: half the height of the stacked rows */
     .closing .kv-t td { display: table-cell; padding-top: clamp(6px, 1.1vh, 11px); padding-bottom: clamp(7px, 1.2vh, 12px); font-size: 15px; }
     .closing .kv-t td:first-child { width: 30% !important; padding-right: 6px; }
-    .closing .kv-t tr + tr td { border-top: 1px solid var(--g); }
+    .closing .kv-t tr + tr td { border-top: 1px solid var(--rule); }
     .closing .tab .hl { font-size: 18px; }
     .closing .sign > div { padding-top: 5px; }
     .mx tbody th { font-size: 16px; }
@@ -588,7 +651,7 @@
     .tab { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); }
     .tab > .fl, .tab > .fl:first-child { grid-row: 1; display: block; }
     .tab > :not(.fl) { grid-row: 2; padding-top: 7px; padding-bottom: 9px; }
-    .tab > :nth-child(2n) { border-left: 1px solid var(--g); }
+    .tab > :nth-child(2n) { border-left: 1px solid var(--rule); }
     .tab > :not(.fl) + :not(.fl) { border-top: 0; }
     .tab > .fl { padding-top: 4px; padding-bottom: 3px; }
     .tab .hl { font-size: 17px; }
@@ -608,6 +671,7 @@
 <header class="top">
   <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
   <div class="tr2">
+  <button class="csw" id="csw" type="button" role="switch" aria-checked="false"><span class="csw-l">Color</span><span class="csw-t" aria-hidden="true"><i></i></span></button>
   <nav class="lng" aria-label="Language / Idioma"><a href="?lang=en" data-l="en" hreflang="en" lang="en">EN</a><a href="?lang=es" data-l="es" hreflang="es" lang="es">ES</a></nav>
   </div>
 </header>
@@ -632,9 +696,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=53"></script>
-<script src="kit.js?v=53"></script>
-<script src="pillars3d.js?v=53"></script>
+<script src="content.js?v=54"></script>
+<script src="kit.js?v=54"></script>
+<script src="pillars3d.js?v=54"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1176,6 +1240,22 @@
     var vs = e.target.closest("[data-slide]");
     if (vs) { var n = +vs.getAttribute("data-slide"); openLb("slides/s" + pad(n) + ".webp", TX.slide + " " + pad(n) + " · " + (vs.getAttribute("data-name") || "")); }
   });
+
+  /* ---------- the colour edition: on and off ---------- */
+  var CSW = $("csw");
+  function setColour(on, anim) {
+    var go = function () {
+      root.classList.toggle("is-color", on); CSW.setAttribute("aria-checked", on ? "true" : "false");
+      var tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute("content", on ? "#F2EBDA" : "#FFFFFF");
+      try { localStorage.setItem("gve-color", on ? "1" : "0"); } catch (e) {}
+      // the pillars are drawn in JS: draw them again in the new colours
+      pgs.forEach(function (pg) { if (pg.p3) pg.p3.forEach(function (m) { m.render(performance.now() / 1000, scrollY * 0.0012); }); });
+    };
+    // a soft cross-fade where the browser can do it; otherwise the page simply changes
+    if (anim && !RM && document.startViewTransition) document.startViewTransition(go); else go();
+  }
+  setColour(root.classList.contains("is-color"), false);
+  CSW.addEventListener("click", function () { setColour(!root.classList.contains("is-color"), true); });
 
   /* ---------- the folded sheets: open and close ---------- */
   $("read").addEventListener("click", function (e) {
