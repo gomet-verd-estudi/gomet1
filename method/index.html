@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "34"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "35"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -50,6 +50,11 @@
 .kit .sw1 .f { fill: #6CC593; }
 .kit .sw2 .f { fill: #ABDABD; }
 .kit .sw3 .f { fill: #E1E9DB; }
+
+.kit .co-l { fill: none; stroke: var(--mi); stroke-width: 1.1; }
+.kit .co-p { fill: var(--mi); }
+.kit .co-c { fill: var(--mi); }
+.kit .co-t { font: 700 10.5px "Archivo", sans-serif; fill: #fff; }
 </style>
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
@@ -140,6 +145,32 @@
   .gm { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--mi); margin-right: 7px; }
   .pl-foot { margin-top: clamp(28px, 5vh, 64px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; }
 
+  /* ---------- the data sheet: a hairline frame round the page, ruled tables, lettered parts ---------- */
+  .sheet { position: fixed; inset: 8px; border: 1px solid var(--g); pointer-events: none; z-index: 29; }
+  :root { --tint: #F4F4F5; }
+  /* every foot is a ruled table: the headline on a tinted bar, the text in the cell below, hairlines all round */
+  .lam-foot, .pl-body.two { border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding-top: 0; column-gap: 0; }
+  .lam-foot .hl, .pl-body.two > .hl { align-self: stretch; max-width: none; background: var(--tint); padding: 10px 14px 12px; font-size: clamp(19px, 1.65vw, 30px); line-height: 1; }
+  .lam-foot .lead, .pl-body.two > .dr { padding: 10px 14px 12px; border-left: 1px solid var(--g); }
+  .lam-foot .lead { max-width: none !important; }
+  .chip { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; margin-right: .6em; border-radius: 50%; background: var(--mi); color: #fff; font-weight: 800; letter-spacing: 0; vertical-align: middle; }
+  .ob-stage svg { overflow: visible; }
+  /* the parts list after the last step: the building's eight parts, lettered as in the drawing */
+  .parts-t { width: 100%; border-collapse: collapse; border: 1px solid var(--g); font-size: clamp(15px, 1.25vw, 20px); }
+  .parts-t caption { text-align: left; background: var(--tint); border: 1px solid var(--g); border-bottom: 0; padding: 10px 14px; font-weight: 640; font-size: clamp(19px, 1.65vw, 30px); line-height: 1; }
+  .parts-t th, .parts-t td { border: 1px solid var(--g); padding: 8px 14px; text-align: left; font-weight: 500; }
+  .parts-t th { font-family: inherit; }
+  .parts-t td:last-child, .parts-t th:last-child { text-align: center; width: 4.5em; font-variant-numeric: tabular-nums; }
+  .parts-t td:first-child { width: 1px; white-space: nowrap; }
+  /* specs at a glance on the intro: small line icons with their figure, like an instruction sheet's header */
+  .specs { display: flex; flex-wrap: wrap; gap: 14px 28px; margin-top: 1.2em; }
+  .specs li { list-style: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .specs svg { width: 30px; height: 30px; fill: none; stroke: var(--mi); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  /* the sign-off strip on the last plate: go-ahead, date, signature — ruled lines left blank */
+  .sign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--g); margin-top: clamp(28px, 5vh, 56px); }
+  .sign > div { padding: 8px 14px 34px; border-left: 1px solid var(--g); }
+  .sign > div:first-child { border-left: 0; }
+
   /* ---------- the green plate: sticky in its block, printed over the grey letters in multiply ---------- */
   .stage { position: sticky; z-index: 3; pointer-events: none; mix-blend-mode: multiply;
     margin-top: var(--ht, 30vh); top: var(--ht, 30vh); height: var(--hh, 40vh); width: 100%; }
@@ -217,7 +248,7 @@
   .mf-p { margin-top: clamp(26px, 5vh, 60px); max-width: 44em; text-wrap: pretty; }
   .mf-side { margin-top: 1.1em; line-height: 1.25; }
   .mf-side span { display: block; }
-  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: calc(var(--fs) * -.6);
+  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: calc(var(--fs) * 1.1);
     font-weight: 560; font-stretch: 62%; text-transform: uppercase; font-size: clamp(56px, 9.2vw, 176px); line-height: .8; letter-spacing: -.02em; }
   .mf-st li { text-wrap: balance; }
   .mf-st li + li { margin-top: .32em; }
@@ -355,7 +386,15 @@
     .lam-foot > .hl, .lam-foot > .lead, .lam-foot > .legend, .lam-foot:not(.has-lg) > .lead { grid-column: 1; grid-row: auto; }
     .lam-foot .legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 16px; }
     .lam-foot .legend .n { width: 19px; height: 19px; font-size: 10px; border-width: 1.5px; }
-    .lam-foot .hl { font-size: 24px; }
+    .lam-foot .hl { font-size: 20px; }
+    .lam-foot .lead, .pl-body.two > .dr { border-left: 0; border-top: 1px solid var(--g); }
+    .lam-foot { row-gap: 0; }
+    .sheet { inset: 4px; }
+    .lead > p:first-child::before, .mf-p::before { left: -.52em; }
+    .specs { gap: 12px 20px; }
+    .sign { grid-template-columns: minmax(0, 1fr); }
+    .sign > div { border-left: 0; border-top: 1px solid var(--g); padding-bottom: 26px; }
+    .sign > div:first-child { border-top: 0; }
     .lam-foot .lead { font-size: 17px; }
     .st .flow > .kv, .st .flow > .pil { margin-top: 4vh; }
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -375,6 +414,7 @@
 </head>
 <body>
 <div class="prog" id="prog"></div>
+<div class="sheet" aria-hidden="true"></div>
 <header class="top">
   <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
   <div class="tr2">
@@ -401,9 +441,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=34"></script>
-<script src="kit.js?v=34"></script>
-<script src="pillars3d.js?v=34"></script>
+<script src="content.js?v=35"></script>
+<script src="kit.js?v=35"></script>
+<script src="pillars3d.js?v=35"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -552,6 +592,11 @@
   /* ---------- plates ---------- */
   function kvRow(k, v) { return '<div class="kv-row two"><div class="kv-k">' + k + '</div><div class="kv-v">' + v + '</div></div>'; }
   var OB = false; // true while the steps are being laid out: their blocks keep the pinned sheet but not a drawing of their own
+  var ICON = [
+    '<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="16" r="10.5"/><path d="M15 10v6.5l4 2.5M12 3.5h6"/></svg>',
+    '<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 25h5v-5h5v-5h5v-5h5V5"/><path d="M4 25h22"/></svg>',
+    '<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M7 26V9l8-5 8 5v17M4 26h22M12 26v-6h6v6M11 13h2M17 13h2"/></svg>',
+    '<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="11" cy="10" r="3.5"/><circle cx="20" cy="11" r="3"/><path d="M4.5 25c0-4.5 3-7.5 6.5-7.5s6.5 3 6.5 7.5M17.5 18.5c.8-.4 1.6-.6 2.5-.6 3 0 5.5 2.6 5.5 7.1"/></svg>'];
   function plate(s, i) {
     var n = i + 1;
     if (s.kind === "cover") {
@@ -564,7 +609,7 @@
       var mf = s.blocks[0];
       return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
         '<h2 class="sr">' + esc(s.title) + '</h2><p class="mf-p">' + esc(mf[1]) + '</p>' +
-        '<p class="mf-side sc">' + mf[3].map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</p>' +
+        '<ul class="specs sc">' + mf[3].map(function (t, k) { return '<li>' + (ICON[k] || "") + '<span>' + esc(t) + '</span></li>'; }).join("") + '</ul>' +
         '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol></section>';
     }
     if (s.kind === "closing") {
@@ -573,6 +618,7 @@
         '<div class="pl-body two"><p class="hl">' + TX.thanksLine + '</p></div>' +
         '<div class="kv">' + kvRow(TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>') + kvRow(TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>') +
         kvRow("Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>') + kvRow(TX.studioK, "Gomet Verd Estudi<br>Valencia · Barcelona") + '</div>' +
+        '<div class="sign sc">' + (ES ? ["Visto bueno", "Fecha", "Firma"] : ["Go-ahead", "Date", "Signature"]).map(function (t) { return '<div>' + t + '</div>'; }).join("") + '</div>' +
         '<p class="giant" aria-hidden="true">[Gomet Verd Estudi]</p></section>';
     }
     var hl = "", lead = [], rows = [], foot = [], dr = "", stage = "", pillars = "", lgd = null, key = null, val = [];
@@ -629,7 +675,7 @@
       : (leadH ? '<div class="dr lead">' + leadH + '</div>' : "");
     // one numbering only: the eight steps carry their number (1/8 … 8/8); the other plates carry none
     var stp = /^(?:Paso|Step) 0?(\d+)$/.exec(s.sec || "");
-    var head = '<div class="pl-meta sc">' + (stp ? '<span>' + esc(s.sub) + '</span>' : '<span>' + esc(s.sec) + '</span>' + (s.sub ? '<span>' + esc(s.sub) + '</span>' : '')) + '</div>' +
+    var head = '<div class="pl-meta sc">' + (stp ? '<span><b class="chip" aria-hidden="true">' + "ABCDEFGH"[+stp[1] - 1] + '</b>' + esc(s.sub) + '</span>' : '<span>' + esc(s.sec) + '</span>' + (s.sub ? '<span>' + esc(s.sub) + '</span>' : '')) + '</div>' +
       '<div class="pl-top">' + (stp ? '<p class="pno" aria-label="' + (ES ? 'Paso ' : 'Step ') + stp[1] + (ES ? ' de 8' : ' of 8') + '">' + stp[1] + '<small>/8</small></p>' : '') + '<h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2></div>';
     var flow = (st
       ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
@@ -646,10 +692,18 @@
   var html = "", grp = "", alts = [];
   D.forEach(function (s, i) {
     if (STEP.test(s.sec || "")) { OB = true; grp += plate(s, i); OB = false; s.blocks.forEach(function (b) { if (b[0] === "img") alts.push(b[2]); }); return; }
-    if (grp) { html += obra(grp); grp = ""; }
+    if (grp) { html += obra(grp + partsList(i)); grp = ""; }
     html += plate(s, i);
   });
   if (grp) html += obra(grp);
+  function partsList(nLast) {
+    var rows = D.filter(function (s) { return STEP.test(s.sec || ""); }).map(function (s) {
+      var m = STEP.exec(s.sec), L = "ABCDEFGH"[+m[1] - 1];
+      return '<tr><td><b class="chip">' + L + '</b></td><td>' + esc(s.sub) + '</td><td>' + esc(s.title.replace(/^\[|\]$/g, "")) + '</td><td>' + m[1] + '/8</td></tr>';
+    }).join("");
+    return '<section class="pl pil-after parts" data-n="' + nLast + '"><table class="parts-t"><caption>' + (ES ? "El edificio, pieza a pieza" : "The building, part by part") + '</caption>' +
+      '<thead class="sc"><tr><th></th><th>' + (ES ? "Pieza" : "Part") + '</th><th>' + (ES ? "Paso" : "Step") + '</th><th>' + (ES ? "Nº" : "No.") + '</th></tr></thead><tbody>' + rows + '</tbody></table></section>';
+  }
   function obra(inner) {
     return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="draw"></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
   }
