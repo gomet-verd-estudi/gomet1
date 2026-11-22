@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "58"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "59"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=58" as="script">
-<link rel="preload" href="kit.js?v=58" as="script">
-<link rel="preload" href="pillars3d.js?v=58" as="script">
+<link rel="preload" href="content.js?v=59" as="script">
+<link rel="preload" href="kit.js?v=59" as="script">
+<link rel="preload" href="pillars3d.js?v=59" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -132,18 +132,68 @@
   .pl-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; text-align: center; gap: 4px 26px;
     margin: 0 calc(var(--fi) - var(--pad)); padding: 7px var(--pad) 6px; min-height: 32px; background: var(--paper); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
   .pl-meta { position: relative; }
-  .ic { display: inline-block; flex: none; width: 1.5em; height: 1.5em; margin-right: .55em; vertical-align: -.42em; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  /* ---------- the instruction-sheet marks ----------
+     Taken from packaging leaflets, data sheets and technical posters: a dot-grid mark before every small label; a row
+     of eight blocks for how far the build has come; capsules for how a step closes; inverted tags; crop crosses at the
+     corners of a figure and four screw holes in its plate; dotted lines to sign on; a key that explains them all */
   .pm-l, .pm-r { position: absolute; top: 50%; transform: translateY(-50%); display: flex; align-items: center; }
   .pm-l { left: var(--pad); } .pm-r { right: var(--pad); }
-  .pm-l .ic, .pm-r .ic { width: 18px; height: 18px; margin: 0; vertical-align: 0; }
-  .pm-r .ic { margin-right: 7px; }
-  .more-t .ic { width: 16px; height: 16px; margin-right: 8px; vertical-align: -4px; }
-  .more-bar .ic { width: 15px; height: 15px; margin-right: 7px; vertical-align: -3px; }
-  .more-k .ic { width: 1.15em; height: 1.15em; margin-right: .45em; vertical-align: -.18em; }
-  .fig-c .ic { width: 14px; height: 14px; margin: 0 2px 0 0; vertical-align: -2px; align-self: flex-start; }
-  .kv-t td:first-child .ic { width: 1.05em; height: 1.05em; margin-right: .5em; vertical-align: -.14em; }
-  .sign .ic { width: 15px; height: 15px; margin-right: 7px; vertical-align: -3px; }
-  @media (max-width: 899px) { .pm-rt { display: none; } .pm-r .ic { margin-right: 0; } }
+  :root { --dot-on: var(--mi); }
+  .dots { display: inline-flex; gap: 2px; vertical-align: middle; }
+  .dots i { width: 7px; height: 7px; box-shadow: inset 0 0 0 1.2px currentColor; }
+  .dots i.on { background: var(--dot-on); box-shadow: none; }
+  .cap { display: inline-flex; align-items: center; height: 19px; padding: 0 8px; border: 1.3px solid currentColor; border-radius: 999px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; line-height: 1; white-space: nowrap; }
+  .cap-s { display: none; }
+  /* on phones the intro's bar is full with its two labels: the empty row of blocks is left out there */
+  @media (max-width: 899px) { .mf .pm-l { display: none; } }
+  @media (max-width: 380px) { .pm-l.dots i { width: 5px; height: 5px; } }
+  @media (max-width: 899px) { .cap-l { display: none; } .cap-s { display: inline; } .pm-r.cap { padding: 0 6px; letter-spacing: .08em; } }
+  /* the dot-grid mark (3 × 2) before the small labels */
+  .tab > .fl::before, .more-bar::before, .pil h3::before, .more-t::before, .lg-h::before, .sign .sg::before {
+    content: ""; display: inline-block; width: 8px; height: 5px; margin-right: 8px; vertical-align: .08em;
+    background: radial-gradient(circle, currentColor 1.05px, transparent 1.3px) 0 0 / 3px 2.6px; }
+  .tag { flex: none; align-self: flex-start; padding: 1px 5px 0; margin-right: 2px; background: var(--g); color: var(--white); font-weight: 700; letter-spacing: .02em; }
+  /* crop crosses round the figure, centred on its corners */
+  .fig .reg { position: absolute; inset: -7px; pointer-events: none; transition: opacity .35s ease;
+    --x: linear-gradient(var(--g), var(--g));
+    background: var(--x) 0 6px / 15px 1px no-repeat, var(--x) 7px 0 / 1px 15px no-repeat, var(--x) 100% 6px / 15px 1px no-repeat, var(--x) calc(100% - 7px) 0 / 1px 15px no-repeat,
+      var(--x) 0 calc(100% - 6px) / 15px 1px no-repeat, var(--x) 7px 100% / 1px 15px no-repeat, var(--x) 100% calc(100% - 6px) / 15px 1px no-repeat, var(--x) calc(100% - 7px) 100% / 1px 15px no-repeat; }
+  /* four screw holes in the corners of a plate */
+  .holes { position: absolute; inset: 7px; pointer-events: none; --h: radial-gradient(circle, transparent 2.4px, var(--hc, var(--g)) 2.6px 3.6px, transparent 3.8px);
+    background: var(--h), var(--h), var(--h), var(--h); background-size: 9px 9px; background-repeat: no-repeat; background-position: 0 0, 100% 0, 0 100%, 100% 100%; transition: opacity .35s ease; }
+  .obra:not(.pinned) .ob-stage :is(.reg, .holes), .pl.st:not(.pinned) .stage :is(.reg, .holes) { opacity: 0; }
+  .closing .giant { position: relative; }
+  .closing .giant .holes { inset: 9px; }
+  /* the sign-off strip: a dotted line to sign on in each cell */
+  .sign .sg { position: relative; }
+  .sign .sg::after { content: ""; position: absolute; left: var(--pad); right: var(--pad); bottom: 9px; border-bottom: 1.5px dotted var(--rule); }
+  /* the key */
+  .lg { margin: clamp(36px, 7vh, 80px) calc(var(--fi) - var(--pad)) 0; border-top: 1px solid var(--rule); }
+  .lg-h { background: var(--paper); border-bottom: 1px solid var(--rule); padding: 7px var(--pad) 6px; }
+  .lg-g { list-style: none; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .lg-g li { display: flex; flex-direction: column; gap: 10px; padding: 14px var(--pad) 14px; border-left: 1px solid var(--rule); }
+  .lg-g li:first-child { border-left: 0; }
+  .lg-s { display: flex; align-items: center; min-height: 26px; gap: 4px; }
+  .lg-s .chip { margin: 0; }
+  .lg-s .more-i { display: inline-block; }
+  .lg-to { padding: 0 2px; }
+  .lg-t { font-size: clamp(14px, 1vw, 17px); line-height: 1.15; }
+  .lg-band { display: block; width: 58px; height: 12px; background: repeating-linear-gradient(-45deg, var(--stripe) 0 5px, transparent 5px 10px); }
+  .lg + .more-row { margin-top: 0; border-top: 0; }
+  .lg + .more-row .more-b { border-top: 1px solid var(--rule); }
+  @media (max-width: 899px) {
+    .lg-g { grid-template-columns: minmax(0, 1fr); }
+    .lg-g li { flex-direction: row; align-items: center; gap: 14px; border-left: 0; border-top: 1px solid var(--rule); padding: 9px var(--pad); }
+    .lg-g li:first-child { border-top: 0; }
+    .lg-s { flex: none; width: 76px; }
+  }
+  /* registration crosses on the corners of the sheet */
+  @media (min-width: 900px) {
+    .sheet::before { content: ""; position: absolute; inset: -8px; --x: linear-gradient(var(--g), var(--g));
+      background: var(--x) 0 7px / 15px 1px no-repeat, var(--x) 7px 0 / 1px 15px no-repeat, var(--x) 100% 7px / 15px 1px no-repeat, var(--x) calc(100% - 7px) 0 / 1px 15px no-repeat,
+        var(--x) 0 calc(100% - 7px) / 15px 1px no-repeat, var(--x) 7px 100% / 1px 15px no-repeat, var(--x) 100% calc(100% - 7px) / 15px 1px no-repeat, var(--x) calc(100% - 7px) 100% / 1px 15px no-repeat; }
+  }
   .pl-meta .vs { display: inline-flex; align-items: center; gap: 7px; position: relative; z-index: 4; }
   .pl-meta .vs:hover { color: var(--mi); }
   .pl-meta .vs svg { width: 13px; height: 13px; }
@@ -298,6 +348,11 @@
   .is-color .sign .ref rect { fill: var(--c-cream); }
   .is-color .closing .giant { margin: 0 calc(var(--fi) - var(--pad)); }
   .is-color .pl-meta .chip { box-shadow: 0 0 0 1.5px var(--c-cream); }
+  html.is-color { --dot-on: var(--c-cream); }
+  .is-color .fig-c .tag { background: var(--c-cream); color: var(--c-red); }
+  .is-color .lg-h { background: var(--c-red); color: var(--c-cream); }
+  .is-color .closing .giant .holes { --hc: var(--c-cream); }
+  .is-color .lg .dots { --dot-on: var(--c-blue); }
   .is-color .lead > p:first-child::before { background: var(--c-red); }
   .is-color .cover .logo { opacity: 0; }
   .is-color .logo-m { display: block; }
@@ -690,9 +745,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=58"></script>
-<script src="kit.js?v=58"></script>
-<script src="pillars3d.js?v=58"></script>
+<script src="content.js?v=59"></script>
+<script src="kit.js?v=59"></script>
+<script src="pillars3d.js?v=59"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -855,56 +910,32 @@
      A button row closes the plate's foot; the sheet it opens follows the foot, on the same thin paper */
   var MORE = D.more || {};
   var MDEF = ES ? { t: "Ficha del paso", s: "Qué hacemos, vuestra parte y lo que recibís" } : { t: "Step sheet", s: "What we do, your part and what you get" };
-  /* ---------- micro icons: the construction-site and drafting-table kit, one line weight, in the ink of their place ----------
-     Each one says what a thing is: the phase of a step, whether it closes with your go-ahead, what a row of a sheet is about */
-  var IC = {
-    survey: "M12 3.5a3 3 0 1 1 0 6a3 3 0 1 1 0-6ZM15 6.5h4M12 9.5v3M12 12.5L6.5 21M12 12.5l5.5 8.5M12 12.5V21",
-    pin: "M12 20s-5.5-5.4-5.5-9.8a5.5 5.5 0 0 1 11 0C17.5 14.6 12 20 12 20ZM12 8.4a1.8 1.8 0 1 1 0 3.6a1.8 1.8 0 1 1 0-3.6ZM4 21h16",
-    footing: "M3 11h18M10 3v8M14 3v8M10 11v4H6v4h12v-4h-4v-4M5 8l2-2M17 8l2-2",
-    beam: "M5 3.5h14v3h-5v11h5v3H5v-3h5v-11H5Z",
-    layers: "M12 3l9 4.5-9 4.5-9-4.5ZM3 12l9 4.5 9-4.5M3 16.5L12 21l9-4.5",
-    roller: "M4 4h12v4H4ZM16 6h3v5h-7v3M11 14h2v7h-2Z",
-    key: "M11 14a4 4 0 1 1-8 0a4 4 0 1 1 8 0ZM11 14h10M18 14v3M21 14v2.5",
-    wrench: "M14.6 4.4a4.6 4.6 0 0 0-4.3 6.2L4 16.9V20h3.1l6.3-6.3a4.6 4.6 0 0 0 6.2-4.3l-2.7 2.7-2.6-.5-.5-2.6Z",
-    clock: "M20 13a8 8 0 1 1-16 0a8 8 0 1 1 16 0ZM12 9v4l2.8 1.8M9.5 2.5h5M12 2.5V5",
-    funnel: "M3 4h18l-7 8.2V18l-4 2.5v-8.3Z",
-    hat: "M3 17.5h18M5 17.5a7 7 0 0 1 14 0M10 11V7.2h4V11M12 7.2V5",
-    flag: "M6 21V3M6 4h11l-2.2 3.5L17 11H6M3 21h7",
-    sheet: "M8.5 3.5h7v3h-7ZM6.5 5H5v16h14V5h-1.5M8 11h8M8 14.5h8M8 18h5",
-    hammer: "M13.5 3.5l6 6-2 2-6-6ZM12.5 8.5L4 17l3 3 8.5-8.5",
-    person: "M12 3.5a3.2 3.2 0 1 1 0 6.4a3.2 3.2 0 1 1 0-6.4ZM5 21a7 7 0 0 1 14 0",
-    stamp: "M20 12a8 8 0 1 1-16 0a8 8 0 1 1 16 0ZM8.4 12.4l2.5 2.5 4.7-5",
-    box: "M12 3l8 4.5v9L12 21l-8-4.5v-9ZM4 7.5l8 4.5 8-4.5M12 12v9",
-    loop: "M4.5 12a7.5 7.5 0 0 1 13-5.1M19.5 12a7.5 7.5 0 0 1-13 5.1M17.5 3v4h-4M6.5 21v-4h4",
-    mail: "M3 5.5h18v13H3ZM3 5.5l9 7 9-7",
-    phone: "M8 2.5h8v19H8ZM8 5.5h8M8 16h8M11 18.8h2",
-    camera: "M3.5 3.5h17v17h-17ZM16 12a4 4 0 1 1-8 0a4 4 0 1 1 8 0ZM17 7h.01",
-    cal: "M4 5.5h16v15H4ZM4 10h16M8 3v5M16 3v5",
-    pen: "M4 20l4.2-1L19 8.2 15.8 5 5 15.8ZM13.5 7.3l3.2 3.2",
-    square: "M4 20V4l16 16ZM8.2 15.8v-4.4l4.4 4.4Z"
-  };
-  function ico(name, cls) { return IC[name] ? '<svg class="ic' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24" aria-hidden="true"><path d="' + IC[name] + '"/></svg>' : ""; }
-  // the eight phases, and the other plates, by what happens in them
-  var STEP_IC = ["survey", "pin", "footing", "beam", "layers", "roller", "key", "wrench"];
-  var PLATE_IC = { 2: "clock", 31: "funnel", 34: "hat", 38: "flag" };
-  // on the right of a step's bar: how the step closes
+  /* ---------- the instruction-sheet marks (no pictograms: dots, blocks, capsules, tags, crosses, holes, rules) ----------
+     dots(n): eight small blocks, the first n laid: how far the build has come (all empty before it starts, all laid after it) */
+  function dots(n, cls) { var h = ""; for (var i = 1; i <= 8; i++) h += '<i' + (i <= n ? ' class="on"' : '') + '></i>'; return '<span class="dots' + (cls ? " " + cls : "") + '" aria-hidden="true">' + h + '</span>'; }
+  // the capsule on the right of a step's bar: how the step closes (written out on wide screens, abbreviated on phones)
   function stepTag(n) {
-    var t = n <= 6 ? ["stamp", ES ? "Visto bueno" : "Go-ahead"] : n === 7 ? ["key", ES ? "Llave en mano" : "Turnkey"] : ["loop", ES ? "Opcional" : "Optional"];
-    return '<span class="pm-r" title="' + t[1] + '">' + ico(t[0]) + '<span class="pm-rt">' + t[1] + '</span></span>';
+    var t = n <= 6 ? (ES ? ["Visto bueno", "V.º B.º"] : ["Go-ahead", "OK"]) : n === 7 ? (ES ? ["Llave en mano", "Llave"] : ["Turnkey", "Keys"]) : (ES ? ["Opcional", "Opc."] : ["Optional", "Opt."]);
+    return '<span class="pm-r cap" title="' + t[0] + '"><span class="cap-l">' + t[0] + '</span><span class="cap-s">' + t[1] + '</span></span>';
   }
-  // the rows of a folded sheet: the four questions each have their mark
-  var ROW_IC = { "hacemos": "hammer", "we do": "hammer", "vuestra parte": "person", "your part": "person", "vuestro visto bueno": "stamp", "your go-ahead": "stamp",
-    "así queda": "key", "how it ends": "key", "para empezar": "flag", "to start": "flag" };
+  // the key, as on every instruction sheet: what each mark of this guide means
+  function keyBlock() {
+    var L = ES ? ["Cómo leer esta guía", "Las partes del edificio, de la A a la H, como en el dibujo", "Lo que va levantado de la obra", "Cada paso se cierra con vuestro visto bueno", "Abre la ficha con todo el detalle", "Fin de un bloque: pasamos al siguiente"]
+      : ["How to read this guide", "The parts of the building, A to H, as in the drawing", "How much of the building is up", "Every step closes with your go-ahead", "Opens the sheet with every detail", "End of a block: on to the next"];
+    var sym = ['<b class="chip">A</b><span class="lg-to">–</span><b class="chip">H</b>', dots(3), '<span class="cap">' + (ES ? "V.º B.º" : "OK") + '</span>', '<b class="more-i"></b>', '<i class="lg-band"></i>'];
+    return '<div class="lg"><p class="lg-h sc">' + L[0] + '</p><ul class="lg-g">' + sym.map(function (x, k) { return '<li><span class="lg-s" aria-hidden="true">' + x + '</span><span class="lg-t">' + L[k + 1] + '</span></li>'; }).join("") + '</ul></div>';
+  }
+  var TAG = ES ? "Plano" : "Plan";
   function moreBtn(num) {
     var m = MORE[num]; if (!m) return "";
     return '<button class="more-b" type="button" id="mb-' + num + '" aria-expanded="false" aria-controls="mp-' + num + '">' +
-      '<span class="more-t sc">' + ico("sheet") + esc(m.t || MDEF.t) + '</span><span class="more-s">' + esc(m.s || MDEF.s) + '</span><b class="more-i" aria-hidden="true"></b></button>';
+      '<span class="more-t sc">' + esc(m.t || MDEF.t) + '</span><span class="more-s">' + esc(m.s || MDEF.s) + '</span><b class="more-i" aria-hidden="true"></b></button>';
   }
   function morePanel(num) {
     var m = MORE[num]; if (!m) return "";
     var k = 0, rows = m.r.map(function (r) {
-      return r[0] === "bar" ? '<div class="more-bar sc">' + (/^(lo que recib|what you get|lo que hacemos|what we do)/i.test(r[1]) ? ico("box") : "") + esc(r[1]) + '</div>'
-        : '<div class="more-r"><div class="more-k">' + ico(ROW_IC[r[0].toLowerCase()]) + esc(r[0]) + '</div><div class="more-v">' + esc(r[1]) + '</div></div>';
+      return r[0] === "bar" ? '<div class="more-bar sc">' + esc(r[1]) + '</div>'
+        : '<div class="more-r"><div class="more-k">' + esc(r[0]) + '</div><div class="more-v">' + esc(r[1]) + '</div></div>';
     }).join("");
     return '<div class="more-p" id="mp-' + num + '" role="region" aria-labelledby="mb-' + num + '"><div class="more-c"><div class="more-in">' + rows + '</div></div></div>';
   }
@@ -918,22 +949,22 @@
     }
     if (s.blocks[0] && s.blocks[0][0] === "mf") {
       var mf = s.blocks[0];
-      return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span class="pm-l">' + ico("clock") + '</span><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
+      return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc">' + dots(0, "pm-l") + '<span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
         '<h2 class="sr">' + esc(s.title) + '</h2><div class="tab one mf-t"><div class="lead"><p>' + esc(mf[1]) + '</p></div></div>' +
         '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol>' +
-        (MORE[s.num] ? '<div class="more-row">' + moreBtn(s.num) + '</div>' + morePanel(s.num) : '') + '</section>';
+        keyBlock() + (MORE[s.num] ? '<div class="more-row">' + moreBtn(s.num) + '</div>' + morePanel(s.num) : '') + '</section>';
     }
     if (s.kind === "closing") {
       return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="cl-in">' +
         '<div class="pl-top"><h2 class="ttl" style="--ch:' + TX.thanksCh + '">' + TX.thanks + '</h2></div>' +
         '<div class="tab cl"><p class="fl sc">' + (ES ? "Nota" : "Note") + '</p><p class="fl sc">' + (ES ? "Contacto" : "Contact") + '</p>' +
         '<p class="hl">' + TX.thanksLine + '</p><div class="kvc"><table class="kv-t"><tbody>' +
-        [[ico("mail") + TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>'], [ico("phone") + TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>'],
-          [ico("camera") + "Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>'], [ico("pin") + TX.studioK, "Gomet Verd Estudi, Valencia · Barcelona"]]
+        [[TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>'], [TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>'],
+          ["Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>'], [TX.studioK, "Gomet Verd Estudi, Valencia · Barcelona"]]
           .map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join("") + '</tbody></table></div></div>' +
-        '<div class="sign sc">' + (ES ? ["Visto bueno", "Fecha", "Firma"] : ["Go-ahead", "Date", "Signature"]).map(function (t, k) { return '<div>' + ico(["stamp", "cal", "pen"][k]) + t + '</div>'; }).join("") +
+        '<div class="sign sc">' + (ES ? ["Visto bueno", "Fecha", "Firma"] : ["Go-ahead", "Date", "Signature"]).map(function (t) { return '<div class="sg">' + t + '</div>'; }).join("") +
         '<div class="ref"><span>Ref. ' + REF + '</span>' + barcode(REF) + '</div></div>' +
-        '<p class="giant" aria-hidden="true"><span>[Gomet Verd Estudi]</span></p></div></section>';
+        '<p class="giant" aria-hidden="true"><i class="holes"></i><span>[Gomet Verd Estudi]</span></p></div></section>';
     }
     var hl = "", lead = [], rows = [], foot = [], dr = "", stage = "", pillars = "", lgd = null, key = null, val = [];
     var flush = function () { if (key !== null) { rows.push(kvRow(esc(key), val.join(""))); key = null; val = []; } };
@@ -954,7 +985,7 @@
         case "img":
           if (b[1] === "v09") stage = '<div class="stage dg" aria-hidden="true">' + rings() + '</div>';
           else if (b[1] === "v10") stage = '<div class="stage dg" aria-hidden="true">' + map() + '</div>';
-          else if (KIT && KIT.has(s.scene)) stage = '<div class="stage" aria-hidden="true"><div class="fig"><p class="fig-c">' + ico("square") + '<span>' + esc(b[2] || "") + '</span></p><div class="fig-a"><div class="draw" data-scene="' + s.scene + '"></div></div></div></div><p class="sr">' + esc(b[2] || "") + '</p>';
+          else if (KIT && KIT.has(s.scene)) stage = '<div class="stage" aria-hidden="true"><div class="fig"><i class="reg"></i><p class="fig-c"><b class="tag">' + TAG + '</b><span>' + esc(b[2] || "") + '</span></p><div class="fig-a"><i class="holes"></i><div class="draw" data-scene="' + s.scene + '"></div></div></div></div><p class="sr">' + esc(b[2] || "") + '</p>';
           break;
         case "wide": dr = b[1] === "v28" ? timeline() : b[1] === "v30" ? truss() : matrix(lgd); break;
         case "legend": lgd = b[1]; break;
@@ -989,7 +1020,7 @@
       : (leadH ? '<div class="dr lead">' + leadH + '</div>' : "");
     // one numbering only: the eight steps carry their number (1/8 … 8/8); the other plates carry none
     var stp = /^(?:Paso|Step) 0?(\d+)$/.exec(s.sec || "");
-    var head = '<div class="pl-meta sc">' + '<span class="pm-l">' + ico(stp ? STEP_IC[+stp[1] - 1] : PLATE_IC[s.num]) + '</span>' +
+    var head = '<div class="pl-meta sc">' + dots(stp ? +stp[1] : 8, "pm-l") +
       (stp ? '<span><b class="chip" aria-hidden="true">' + "ABCDEFGH"[+stp[1] - 1] + '</b>' + esc(s.sub) + '</span>' + stepTag(+stp[1]) : '<span>' + esc(s.sec) + '</span>' + (s.sub ? '<span>' + esc(s.sub) + '</span>' : '')) + '</div>' +
       '<div class="pl-top"><h2 class="ttl" style="--ch:' + (s.title.length + (stp ? 2 : 0)) + '">' +
         (stp ? '[<span class="tno">' + (+stp[1]) + '</span> ' + esc(s.title.replace(/^\[|\]$/g, "")) + ']' : esc(s.title)) + '</h2></div>';
@@ -1014,7 +1045,7 @@
   });
   if (grp) html += obra(grp);
   function obra(inner) {
-    return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="fig"><p class="fig-c">' + ico("square") + '<span>' + esc(alts[0] || "") + '</span></p><div class="fig-a"><div class="draw"></div></div></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
+    return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="fig"><i class="reg"></i><p class="fig-c"><b class="tag">' + TAG + '</b><span>' + esc(alts[0] || "") + '</span></p><div class="fig-a"><i class="holes"></i><div class="draw"></div></div></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
   }
   $("read").innerHTML = html;
   // a pinned plate followed by a sheet of thin paper (its folded detail, or the pillars) carries its foot on that paper (see .pre)
