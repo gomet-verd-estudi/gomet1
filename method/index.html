@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "35"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "36"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -67,7 +67,10 @@
     --pad: clamp(16px, 1.25vw, 24px);
     --fs: clamp(18px, 1.42vw, 26px);
     --hd: 56px;
+    /* the sheet: a white margin round the page (--fi), and on wide screens a binding gutter on the left (--gut) */
+    --fi: 8px; --gut: 0px; --tint: #F4F4F5;
   }
+  @media (min-width: 900px) { :root { --gut: 32px; } }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   body { background: var(--white); color: var(--g); font-family: "Archivo", "Helvetica Neue", Arial, sans-serif; font-size: var(--fs); font-weight: 500; line-height: 1.07; letter-spacing: -.004em; -webkit-font-smoothing: antialiased; overflow-x: hidden; overflow-x: clip; }
@@ -78,9 +81,11 @@
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ---------- chrome: small and fixed in the corners ---------- */
-  .prog { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: var(--mi); z-index: 31; }
-  .top { position: fixed; top: 0; left: 0; right: 0; height: var(--hd); z-index: 30; display: flex; align-items: center; justify-content: space-between;
-    padding: 0 max(var(--pad), env(safe-area-inset-right)) 0 max(var(--pad), env(safe-area-inset-left)); pointer-events: none; }
+  .prog { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: var(--mi); z-index: 32; }
+  /* the sheet's header row: a white band inside the frame, closed by a hairline, like the title row of a data sheet */
+  .top { position: fixed; top: var(--fi); left: calc(var(--fi) + var(--gut)); right: var(--fi); height: calc(var(--hd) - var(--fi)); z-index: 30; display: flex; align-items: center; justify-content: space-between;
+    background: var(--white); border-bottom: 1px solid var(--g);
+    padding: 0 max(calc(var(--pad) - var(--fi)), env(safe-area-inset-right)) 0 max(calc(var(--pad) - var(--fi)), env(safe-area-inset-left)); pointer-events: none; }
   .top > * { pointer-events: auto; }
   .gve { display: inline-flex; text-decoration: none; }
   .gve span { width: 26px; height: 26px; display: grid; place-items: center; border: 1.5px solid var(--g); border-radius: 4px; margin-left: -1.5px; font-size: 13px; font-weight: 800; color: var(--g); line-height: 1; background: var(--white); }
@@ -95,26 +100,30 @@
   .lng a.on { background: var(--g); color: var(--white); }
   .lng a:not(.on):hover { color: var(--mi); }
   .tile .tnum { display: flex; align-items: flex-end; height: 74px; padding: 8px 10px; font-weight: 200; font-stretch: 62%; font-size: 56px; line-height: .8; color: var(--g); }
-  .corner { position: fixed; bottom: 9px; z-index: 30; color: var(--g); text-decoration: none; background: var(--white); padding: 4px 7px; border-radius: 4px; }
-  .corner.l { left: max(var(--pad), env(safe-area-inset-left)); margin-left: -7px; }
+  .corner { position: fixed; bottom: calc(var(--fi) + 4px); z-index: 30; color: var(--g); text-decoration: none; background: var(--white); padding: 4px 7px; border-radius: 4px; }
+  .corner.l { left: max(calc(var(--gut) + var(--pad)), env(safe-area-inset-left)); margin-left: -7px; }
   .corner.r { right: max(var(--pad), env(safe-area-inset-right)); margin-right: -7px; }
   .corner:hover { color: var(--mi); }
   @media (max-width: 899px) { .corner { display: none; } }
 
   /* ---------- plates ---------- */
-  .pl { position: relative; padding: calc(var(--hd) + 3vh) var(--pad) clamp(72px, 11vh, 132px); }
+  #read { padding-left: var(--gut); }
+  .pl { position: relative; padding: calc(var(--hd) - 1px) var(--pad) clamp(72px, 11vh, 132px); }
   /* blocks are separated like a building site: a band of thick 45° stripes, edge to edge */
   .pl::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--g) 0 6px, transparent 6px 12px); pointer-events: none; }
   .pl.cover::before { display: none; }
-  .pl-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; text-align: center; gap: 4px 26px; }
+  /* every plate opens with a section bar, as on a data sheet: small bold capitals on a tinted band, ruled above and below,
+     running from frame to frame and sitting right under the header row */
+  .pl-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; text-align: center; gap: 4px 26px;
+    margin: 0 calc(var(--fi) - var(--pad)); padding: 7px var(--pad) 6px; min-height: 32px; background: var(--tint); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
   .pl-meta .vs { display: inline-flex; align-items: center; gap: 7px; position: relative; z-index: 4; }
   .pl-meta .vs:hover { color: var(--mi); }
   .pl-meta .vs svg { width: 13px; height: 13px; }
   /* the title is a statement on the centre axis: its number, thin, stacked on top; the word itself in a lighter cut */
-  .pl-top { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 14px; }
+  .pl-top { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: clamp(16px, 3.4vh, 38px); }
   .pno { font-weight: 200; font-stretch: 62%; font-size: clamp(30px, 3.4vw, 62px); line-height: .8; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-bottom: .1em; margin-right: -.55em; }
   .pno small { font-size: .34em; font-weight: 700; font-stretch: 100%; letter-spacing: .06em; vertical-align: top; margin-left: .2em; }
-  .ttl { font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
+  .ttl { font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), calc((100vw - var(--gut) - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
   .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--pad); }
   .pl-body { margin-top: clamp(26px, 4.5vh, 56px); grid-template-areas: "hl dr" "lg dr" "xx dr"; grid-template-rows: auto auto 1fr; align-items: start; }
   .hl { grid-area: hl; font-size: clamp(25px, 2.35vw, 44px); line-height: .93; font-weight: 640; letter-spacing: -.015em; max-width: 13.5em; text-wrap: balance; }
@@ -145,31 +154,59 @@
   .gm { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--mi); margin-right: 7px; }
   .pl-foot { margin-top: clamp(28px, 5vh, 64px); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; }
 
-  /* ---------- the data sheet: a hairline frame round the page, ruled tables, lettered parts ---------- */
-  .sheet { position: fixed; inset: 8px; border: 1px solid var(--g); pointer-events: none; z-index: 29; }
-  :root { --tint: #F4F4F5; }
-  /* every foot is a ruled table: the headline on a tinted bar, the text in the cell below, hairlines all round */
-  .lam-foot, .pl-body.two { border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding-top: 0; column-gap: 0; }
-  .lam-foot .hl, .pl-body.two > .hl { align-self: stretch; max-width: none; background: var(--tint); padding: 10px 14px 12px; font-size: clamp(19px, 1.65vw, 30px); line-height: 1; }
-  .lam-foot .lead, .pl-body.two > .dr { padding: 10px 14px 12px; border-left: 1px solid var(--g); }
-  .lam-foot .lead { max-width: none !important; }
+  /* ---------- the data sheet: the page is one ruled sheet. A white margin and a hairline frame round it, a header row,
+     a footer row, a binding gutter with the sheet's reference and two punched holes; inside, section bars and ruled tables ---------- */
+  .sheet { position: fixed; top: var(--fi); right: var(--fi); bottom: var(--fi); left: calc(var(--fi) + var(--gut)); border: 1px solid var(--g); pointer-events: none; z-index: 31;
+    box-shadow: 0 0 0 calc(var(--fi) + var(--gut) + 4px) var(--white); }
+  /* the binding gutter: the sheet's code read upwards, as on a product sheet, between two punched holes */
+  .vcode { position: fixed; left: var(--fi); top: var(--fi); bottom: var(--fi); width: var(--gut); z-index: 32; pointer-events: none; display: grid; place-items: center; }
+  .vcode span { writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; letter-spacing: .26em; font-size: 10px; }
+  .vcode span b { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--mi); margin-top: .9em; }
+  .vcode::before, .vcode::after { content: ""; position: absolute; left: 50%; width: 12px; height: 12px; margin-left: -6px; border: 1px solid var(--g); border-radius: 50%; background: var(--white); }
+  .vcode::before { top: 18%; } .vcode::after { bottom: 18%; }
+  /* the footer row: a hairline across the foot of the sheet, with the two links in it */
+  .sfoot { position: fixed; left: calc(var(--fi) + var(--gut)); right: var(--fi); bottom: var(--fi); height: 29px; z-index: 29; background: var(--white); border-top: 1px solid var(--g); pointer-events: none; }
+  @media (max-width: 899px) { .vcode, .sfoot { display: none; } }
+  @media (min-width: 900px) { .lam { padding-bottom: calc(var(--fi) + 29px + 2.2vh) !important; } .pl { padding-bottom: clamp(88px, 13vh, 150px); } }
+  /* a ruled table, frame to frame: a tinted bar of small bold labels on top, white cells under it, hairlines between */
+  .tab { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 0; align-items: stretch;
+    margin-left: calc(var(--fi) - var(--pad)); margin-right: calc(var(--fi) - var(--pad)); padding-top: 0; border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
+  .tab > * { grid-area: auto; grid-row: 2; min-width: 0; padding: 11px var(--pad) 13px; }
+  .tab > .fl { grid-row: 1; background: var(--tint); border-bottom: 1px solid var(--g); padding-top: 7px; padding-bottom: 6px; }
+  .tab > :nth-child(2n) { border-left: 1px solid var(--g); }
+  .tab .hl { max-width: none; font-size: clamp(19px, 1.5vw, 28px); line-height: 1; }
+  .tab .lead { max-width: 34em; line-height: 1.12; }
+  .tab .lead > p:first-child::before { left: -.75em; }
   .chip { display: inline-grid; place-items: center; width: 1.7em; height: 1.7em; margin-right: .6em; border-radius: 50%; background: var(--mi); color: #fff; font-weight: 800; letter-spacing: 0; vertical-align: middle; }
   .ob-stage svg { overflow: visible; }
-  /* the parts list after the last step: the building's eight parts, lettered as in the drawing */
-  .parts-t { width: 100%; border-collapse: collapse; border: 1px solid var(--g); font-size: clamp(15px, 1.25vw, 20px); }
-  .parts-t caption { text-align: left; background: var(--tint); border: 1px solid var(--g); border-bottom: 0; padding: 10px 14px; font-weight: 640; font-size: clamp(19px, 1.65vw, 30px); line-height: 1; }
-  .parts-t th, .parts-t td { border: 1px solid var(--g); padding: 8px 14px; text-align: left; font-weight: 500; }
-  .parts-t th { font-family: inherit; }
+  /* tables of rows (the parts, the contacts): ruled, every other row tinted, like the materials table of a product sheet */
+  .parts-t, .kv-t { width: calc(100% + 2 * (var(--pad) - var(--fi))); margin: 0 calc(var(--fi) - var(--pad)); border-collapse: collapse; }
+  .parts-t { font-size: clamp(15px, 1.2vw, 19px); }
+  .parts-t caption { text-align: left; background: var(--tint); border-top: 1px solid var(--g); padding: 7px var(--pad) 6px; }
+  .parts-t th, .parts-t td { border-top: 1px solid var(--g); border-left: 1px solid var(--g); padding: 8px var(--pad); text-align: left; font-weight: 500; }
+  .parts-t th:first-child, .parts-t td:first-child { border-left: 0; }
+  .parts-t tbody tr:last-child td { border-bottom: 1px solid var(--g); }
+  .parts-t thead th { background: var(--tint); padding-top: 7px; padding-bottom: 6px; }
+  .parts-t tbody tr:nth-child(even) td, .kv-t tr:nth-child(even) td { background: rgba(244, 244, 245, .9); }
   .parts-t td:last-child, .parts-t th:last-child { text-align: center; width: 4.5em; font-variant-numeric: tabular-nums; }
   .parts-t td:first-child { width: 1px; white-space: nowrap; }
-  /* specs at a glance on the intro: small line icons with their figure, like an instruction sheet's header */
-  .specs { display: flex; flex-wrap: wrap; gap: 14px 28px; margin-top: 1.2em; }
-  .specs li { list-style: none; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-  .specs svg { width: 30px; height: 30px; fill: none; stroke: var(--mi); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  /* the sign-off strip on the last plate: go-ahead, date, signature — ruled lines left blank */
-  .sign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--g); margin-top: clamp(28px, 5vh, 56px); }
-  .sign > div { padding: 8px 14px 34px; border-left: 1px solid var(--g); }
+  .kv-t { width: 100%; margin: 0; }
+  .kv-t td { padding: 9px var(--pad) 10px; border-top: 1px solid var(--g); vertical-align: top; }
+  .kv-t tr:first-child td { border-top: 0; }
+  .kv-t td:first-child { width: 34%; font-weight: 800; }
+  .kv-t a { text-decoration: none; } .kv-t a:hover { color: var(--mi); }
+  .tab > .kvc { padding: 0; }
+  .tab.cl { margin-top: clamp(30px, 5.5vh, 64px); }
+  .tab.cl + .sign { margin-top: -1px; }
+  .kv-t td:first-child { width: 26%; }
+  /* the sign-off strip, the sheet's last row: go-ahead, date, signature left blank, and the sheet's reference with its bar code */
+  .sign { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.2fr); margin: clamp(28px, 5vh, 56px) calc(var(--fi) - var(--pad)) 0;
+    border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
+  .sign > div { padding: 7px var(--pad) 40px; border-left: 1px solid var(--g); }
   .sign > div:first-child { border-left: 0; }
+  .sign .ref { background: var(--tint); padding-bottom: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+  .sign .ref svg { display: block; width: 100%; max-width: 220px; height: 30px; }
+  .sign .ref rect { fill: var(--g); }
 
   /* ---------- the green plate: sticky in its block, printed over the grey letters in multiply ---------- */
   .stage { position: sticky; z-index: 3; pointer-events: none; mix-blend-mode: multiply;
@@ -197,19 +234,14 @@
   .obra > .pl.pil-after { z-index: 3; background: rgba(255, 255, 255, .8); -webkit-backdrop-filter: blur(1.4px); backdrop-filter: blur(1.4px);
     padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 -1px 0 rgba(0, 0, 0, .025), 0 1px 0 rgba(0, 0, 0, .025); }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
-  .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) + 3vh) 0 calc(3vh + 16px); }
+  .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) - 1px) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
   /* the title waits at the top: it stays sticky after the sheet lets go, until the text below comes up to
      its usual distance; from there title and text travel together, as one block */
-  .tw { position: absolute; left: 0; right: 0; top: 0; height: var(--wh, 100vh); padding-top: calc(var(--hd) + 3vh); pointer-events: none; z-index: 1; }
-  .hd2 { position: sticky; top: calc(var(--hd) + 3vh); pointer-events: auto; }
+  .tw { position: absolute; left: 0; right: 0; top: 0; height: var(--wh, 100vh); padding-top: calc(var(--hd) - 1px); pointer-events: none; z-index: 1; }
+  .hd2 { position: sticky; top: calc(var(--hd) - 1px); pointer-events: auto; }
   .hsp { flex: none; height: var(--hdh, 0px); }
-  .lam-foot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr); column-gap: var(--pad); align-items: start; position: relative; padding-top: 8px; }
-  .lam-foot > * { grid-area: auto; grid-row: 1; }
-  .lam-foot .hl { grid-column: 1; }
-  .lam-foot .lead { grid-column: 2; }
-  .lam-foot .legend { grid-column: 3; margin-top: 0; }
-  .lam-foot:not(.has-lg) .lead { grid-column: 2 / 4; max-width: 30em; }
+  .lam-foot { position: relative; }
   .stage .mapw { width: min(100%, calc(var(--hh, 40vh) * 1.42)); }
   .stage .rings { width: min(100%, calc(var(--hh, 40vh) * 2.1)); }
   .stage .draw { position: absolute; inset: 0; }
@@ -240,15 +272,18 @@
   .pl.pil-after .pil { margin-top: 0; }
   .pil .pd { position: relative; aspect-ratio: 1 / 1; margin-bottom: 18px; }
   .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
-  .pil h3 { margin-bottom: .5em; }
+  .pil h3 { margin-bottom: .6em; background: var(--tint); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding: 6px 10px 5px; }
 
   /* the opener: two scales only. A small, dense paragraph on the left axis; three statements, huge, on the centre axis,
      each under its own thin number, printed over the small type in multiply */
   .mf { padding-bottom: clamp(72px, 14vh, 160px); }
-  .mf-p { margin-top: clamp(26px, 5vh, 60px); max-width: 44em; text-wrap: pretty; }
+  .mf-t { margin-top: clamp(26px, 5vh, 60px); }
+  .tab.one { grid-template-columns: minmax(0, 1fr); }
+  .tab.one > :nth-child(2n) { border-left: 0; }
+  .mf-t .lead { max-width: 46em; text-wrap: pretty; }
   .mf-side { margin-top: 1.1em; line-height: 1.25; }
   .mf-side span { display: block; }
-  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: calc(var(--fs) * 1.1);
+  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: clamp(40px, 8vh, 104px);
     font-weight: 560; font-stretch: 62%; text-transform: uppercase; font-size: clamp(56px, 9.2vw, 176px); line-height: .8; letter-spacing: -.02em; }
   .mf-st li { text-wrap: balance; }
   .mf-st li + li { margin-top: .32em; }
@@ -367,8 +402,6 @@
   /* ---------- phones and tablets ---------- */
   @media (max-width: 899px) {
     :root { --fs: 18.5px; --hd: 52px; }
-    .top { background: linear-gradient(var(--white) 62%, rgba(255, 255, 255, 0)); }
-    .pl { padding-top: calc(var(--hd) + 18px); }
     .two { grid-template-columns: minmax(0, 1fr); }
     .pl-body { grid-template-areas: "hl" "dr" "lg" "xx"; grid-template-rows: auto; }
     .xx { margin-top: 1.2em; }
@@ -377,25 +410,35 @@
     .kv-row { padding: .5em 0 .42em; border-top: 1px solid var(--g0); }
     .kv-row:first-child { border-top: 0; }
     .kv-v { margin-top: .12em; }
-    .lam { padding: calc(var(--hd) + 18px) 0 2vh; }
+    .lam { padding: calc(var(--hd) - 1px) 0 2vh; }
     .hole { min-height: 30vh; min-height: 30svh; }
-    .tw { padding-top: calc(var(--hd) + 18px); }
-    .hd2 { top: calc(var(--hd) + 18px); }
-    .lam-foot { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding-top: 6px; }
     .pl::before, .pl.pil-after::after { height: 10px; background: repeating-linear-gradient(-45deg, var(--g) 0 4.5px, transparent 4.5px 9px); }
-    .lam-foot > .hl, .lam-foot > .lead, .lam-foot > .legend, .lam-foot:not(.has-lg) > .lead { grid-column: 1; grid-row: auto; }
-    .lam-foot .legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 16px; }
-    .lam-foot .legend .n { width: 19px; height: 19px; font-size: 10px; border-width: 1.5px; }
-    .lam-foot .hl { font-size: 20px; }
-    .lam-foot .lead, .pl-body.two > .dr { border-left: 0; border-top: 1px solid var(--g); }
-    .lam-foot { row-gap: 0; }
-    .sheet { inset: 4px; }
+    /* on the phone the tables stack: one label bar, the headline, then the text under a hairline */
+    .tab { grid-template-columns: minmax(0, 1fr); }
+    .tab > *, .tab > .fl { grid-row: auto; }
+    .tab > * { padding-top: 9px; padding-bottom: 11px; }
+    .tab > .fl:first-child { display: none; }
+    .tab > .fl { padding-top: 6px; padding-bottom: 5px; }
+    .tab > :nth-child(2n) { border-left: 0; }
+    .tab > :not(.fl) + :not(.fl) { border-top: 1px solid var(--g); }
+    .tab .hl { font-size: 20px; }
+    .tab.cl > .fl:first-child { display: block; order: 0; }
+    .tab.cl > .hl { order: 1; }
+    .tab.cl > .fl:nth-child(2) { order: 2; border-top: 1px solid var(--g); }
+    .tab.cl > .kvc { order: 3; border-top: 0; }
+    .kv-t td { display: block; width: auto !important; border-top: 0; padding-top: 2px; padding-bottom: 2px; }
+    .kv-t td:first-child { padding-top: 9px; }
+    .kv-t td:last-child { padding-bottom: 10px; }
+    .kv-t tr + tr td:first-child { border-top: 1px solid var(--g); }
+    :root { --fi: 4px; }
+    .top { background: var(--white); }
     .lead > p:first-child::before, .mf-p::before { left: -.52em; }
-    .specs { gap: 12px 20px; }
-    .sign { grid-template-columns: minmax(0, 1fr); }
-    .sign > div { border-left: 0; border-top: 1px solid var(--g); padding-bottom: 26px; }
-    .sign > div:first-child { border-top: 0; }
-    .lam-foot .lead { font-size: 17px; }
+    .sign { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .sign > div { padding-bottom: 30px; }
+    .sign > div:nth-child(3) { border-left: 0; }
+    .sign > div:nth-child(n+3) { border-top: 1px solid var(--g); }
+    .sign .ref { padding-bottom: 8px; }
+    .tab .lead { font-size: 17px; }
     .st .flow > .kv, .st .flow > .pil { margin-top: 4vh; }
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
@@ -409,12 +452,14 @@
     .mx thead th:first-child { width: 38%; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
-  @media print { .top, .corner, .prog, .ix, .lb, .vs { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .tw { position: static; height: auto; } .hd2 { position: static; } .hsp { display: none; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
+  @media print { .top, .corner, .prog, .ix, .lb, .vs, .sheet, .vcode, .sfoot { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .tw { position: static; height: auto; } .hd2 { position: static; } .hsp { display: none; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
 </style>
 </head>
 <body>
 <div class="prog" id="prog"></div>
 <div class="sheet" aria-hidden="true"></div>
+<div class="vcode sc" aria-hidden="true"><span>GVE-M-01 <b></b></span></div>
+<div class="sfoot" aria-hidden="true"></div>
 <header class="top">
   <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
   <div class="tr2">
@@ -441,9 +486,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=35"></script>
-<script src="kit.js?v=35"></script>
-<script src="pillars3d.js?v=35"></script>
+<script src="content.js?v=36"></script>
+<script src="kit.js?v=36"></script>
+<script src="pillars3d.js?v=36"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -592,11 +637,16 @@
   /* ---------- plates ---------- */
   function kvRow(k, v) { return '<div class="kv-row two"><div class="kv-k">' + k + '</div><div class="kv-v">' + v + '</div></div>'; }
   var OB = false; // true while the steps are being laid out: their blocks keep the pinned sheet but not a drawing of their own
-  var ICON = [
-    '<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="15" cy="16" r="10.5"/><path d="M15 10v6.5l4 2.5M12 3.5h6"/></svg>',
-    '<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M4 25h5v-5h5v-5h5v-5h5V5"/><path d="M4 25h22"/></svg>',
-    '<svg viewBox="0 0 30 30" aria-hidden="true"><path d="M7 26V9l8-5 8 5v17M4 26h22M12 26v-6h6v6M11 13h2M17 13h2"/></svg>',
-    '<svg viewBox="0 0 30 30" aria-hidden="true"><circle cx="11" cy="10" r="3.5"/><circle cx="20" cy="11" r="3"/><path d="M4.5 25c0-4.5 3-7.5 6.5-7.5s6.5 3 6.5 7.5M17.5 18.5c.8-.4 1.6-.6 2.5-.6 3 0 5.5 2.6 5.5 7.1"/></svg>'];
+  var REF = "GVE-M-01"; // the sheet's reference, in the binding gutter and on the sign-off strip
+  var LBL = ES ? ["En corto", "Descripción"] : ["In short", "Description"];
+  // a bar code for the reference: a printed-sheet detail, drawn from the code's own letters (decorative only)
+  function barcode(t) {
+    var x = 0, r = "", seq = [2, 1];
+    t.split("").forEach(function (c) { var k = c.charCodeAt(0); seq.push(1 + k % 3, 1 + (k >> 2) % 2, 1 + (k >> 3) % 3, 1 + (k >> 1) % 2); });
+    seq.push(1, 2);
+    seq.forEach(function (w, i) { if (i % 2 === 0) r += '<rect x="' + x + '" y="0" width="' + w + '" height="30"/>'; x += w + (i % 2 ? 0 : 0); });
+    return '<svg viewBox="0 0 ' + x + ' 30" preserveAspectRatio="none" aria-hidden="true">' + r + '</svg>';
+  }
   function plate(s, i) {
     var n = i + 1;
     if (s.kind === "cover") {
@@ -608,17 +658,19 @@
     if (s.blocks[0] && s.blocks[0][0] === "mf") {
       var mf = s.blocks[0];
       return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
-        '<h2 class="sr">' + esc(s.title) + '</h2><p class="mf-p">' + esc(mf[1]) + '</p>' +
-        '<ul class="specs sc">' + mf[3].map(function (t, k) { return '<li>' + (ICON[k] || "") + '<span>' + esc(t) + '</span></li>'; }).join("") + '</ul>' +
+        '<h2 class="sr">' + esc(s.title) + '</h2><div class="tab one mf-t"><p class="fl sc">' + LBL[1] + '</p><div class="lead"><p>' + esc(mf[1]) + '</p></div></div>' +
         '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol></section>';
     }
     if (s.kind === "closing") {
       return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + TX.closing + '</span></div>' +
         '<div class="pl-top"><h2 class="ttl" style="--ch:' + TX.thanksCh + '">' + TX.thanks + '</h2></div>' +
-        '<div class="pl-body two"><p class="hl">' + TX.thanksLine + '</p></div>' +
-        '<div class="kv">' + kvRow(TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>') + kvRow(TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>') +
-        kvRow("Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>') + kvRow(TX.studioK, "Gomet Verd Estudi<br>Valencia · Barcelona") + '</div>' +
-        '<div class="sign sc">' + (ES ? ["Visto bueno", "Fecha", "Firma"] : ["Go-ahead", "Date", "Signature"]).map(function (t) { return '<div>' + t + '</div>'; }).join("") + '</div>' +
+        '<div class="tab cl"><p class="fl sc">' + (ES ? "Nota" : "Note") + '</p><p class="fl sc">' + (ES ? "Contacto" : "Contact") + '</p>' +
+        '<p class="hl">' + TX.thanksLine + '</p><div class="kvc"><table class="kv-t"><tbody>' +
+        [[TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>'], [TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>'],
+          ["Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>'], [TX.studioK, "Gomet Verd Estudi, Valencia · Barcelona"]]
+          .map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join("") + '</tbody></table></div></div>' +
+        '<div class="sign sc">' + (ES ? ["Visto bueno", "Fecha", "Firma"] : ["Go-ahead", "Date", "Signature"]).map(function (t) { return '<div>' + t + '</div>'; }).join("") +
+        '<div class="ref"><span>Ref. ' + REF + '</span>' + barcode(REF) + '</div></div>' +
         '<p class="giant" aria-hidden="true">[Gomet Verd Estudi]</p></section>';
     }
     var hl = "", lead = [], rows = [], foot = [], dr = "", stage = "", pillars = "", lgd = null, key = null, val = [];
@@ -679,7 +731,7 @@
       '<div class="pl-top">' + (stp ? '<p class="pno" aria-label="' + (ES ? 'Paso ' : 'Step ') + stp[1] + (ES ? ' de 8' : ' of 8') + '">' + stp[1] + '<small>/8</small></p>' : '') + '<h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2></div>';
     var flow = (st
       ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
-        '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
+        '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot tab">' + (hl && leadH ? '<p class="fl sc">' + LBL[0] + '</p><p class="fl sc">' + LBL[1] + '</p>' : '') + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + '</div></div></div>'
       : head + (hl || right || legend ? '<div class="pl-body two">' + hl + right + legend + '</div>' : '')) + (st ? '' : pillars) +
       (rows.length ? '<div class="kv">' + rows.join("") + '</div>' : '') +
       (foot.length ? '<div class="pl-foot sc">' + foot.join("") + '</div>' : '');
@@ -701,7 +753,7 @@
       var m = STEP.exec(s.sec), L = "ABCDEFGH"[+m[1] - 1];
       return '<tr><td><b class="chip">' + L + '</b></td><td>' + esc(s.sub) + '</td><td>' + esc(s.title.replace(/^\[|\]$/g, "")) + '</td><td>' + m[1] + '/8</td></tr>';
     }).join("");
-    return '<section class="pl pil-after parts" data-n="' + nLast + '"><table class="parts-t"><caption>' + (ES ? "El edificio, pieza a pieza" : "The building, part by part") + '</caption>' +
+    return '<section class="pl pil-after parts" data-n="' + nLast + '"><table class="parts-t"><caption class="sc">' + (ES ? "El edificio, pieza a pieza" : "The building, part by part") + '</caption>' +
       '<thead class="sc"><tr><th></th><th>' + (ES ? "Pieza" : "Part") + '</th><th>' + (ES ? "Paso" : "Step") + '</th><th>' + (ES ? "Nº" : "No.") + '</th></tr></thead><tbody>' + rows + '</tbody></table></section>';
   }
   function obra(inner) {
