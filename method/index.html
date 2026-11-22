@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "36"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "37"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -69,6 +69,8 @@
     --hd: 56px;
     /* the sheet: a white margin round the page (--fi), and on wide screens a binding gutter on the left (--gut) */
     --fi: 8px; --gut: 0px; --tint: #F4F4F5;
+    /* the grey boxes are printed: a flat tint with a fine grain over it, like a riso or a photocopy */
+    --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .62 0 0 0 0 .64 3.4 0 0 0 -1.6'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px, var(--tint);
   }
   @media (min-width: 900px) { :root { --gut: 32px; } }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -115,7 +117,7 @@
   /* every plate opens with a section bar, as on a data sheet: small bold capitals on a tinted band, ruled above and below,
      running from frame to frame and sitting right under the header row */
   .pl-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; text-align: center; gap: 4px 26px;
-    margin: 0 calc(var(--fi) - var(--pad)); padding: 7px var(--pad) 6px; min-height: 32px; background: var(--tint); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
+    margin: 0 calc(var(--fi) - var(--pad)); padding: 7px var(--pad) 6px; min-height: 32px; background: var(--paper); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
   .pl-meta .vs { display: inline-flex; align-items: center; gap: 7px; position: relative; z-index: 4; }
   .pl-meta .vs:hover { color: var(--mi); }
   .pl-meta .vs svg { width: 13px; height: 13px; }
@@ -172,7 +174,7 @@
   .tab { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: 0; align-items: stretch;
     margin-left: calc(var(--fi) - var(--pad)); margin-right: calc(var(--fi) - var(--pad)); padding-top: 0; border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
   .tab > * { grid-area: auto; grid-row: 2; min-width: 0; padding: 11px var(--pad) 13px; }
-  .tab > .fl { grid-row: 1; background: var(--tint); border-bottom: 1px solid var(--g); padding-top: 7px; padding-bottom: 6px; }
+  .tab > .fl { grid-row: 1; background: var(--paper); border-bottom: 1px solid var(--g); padding-top: 7px; padding-bottom: 6px; }
   .tab > :nth-child(2n) { border-left: 1px solid var(--g); }
   .tab .hl { max-width: none; font-size: clamp(19px, 1.5vw, 28px); line-height: 1; }
   .tab .lead { max-width: 34em; line-height: 1.12; }
@@ -182,12 +184,12 @@
   /* tables of rows (the parts, the contacts): ruled, every other row tinted, like the materials table of a product sheet */
   .parts-t, .kv-t { width: calc(100% + 2 * (var(--pad) - var(--fi))); margin: 0 calc(var(--fi) - var(--pad)); border-collapse: collapse; }
   .parts-t { font-size: clamp(15px, 1.2vw, 19px); }
-  .parts-t caption { text-align: left; background: var(--tint); border-top: 1px solid var(--g); padding: 7px var(--pad) 6px; }
+  .parts-t caption { text-align: left; background: var(--paper); border-top: 1px solid var(--g); padding: 7px var(--pad) 6px; }
   .parts-t th, .parts-t td { border-top: 1px solid var(--g); border-left: 1px solid var(--g); padding: 8px var(--pad); text-align: left; font-weight: 500; }
   .parts-t th:first-child, .parts-t td:first-child { border-left: 0; }
   .parts-t tbody tr:last-child td { border-bottom: 1px solid var(--g); }
-  .parts-t thead th { background: var(--tint); padding-top: 7px; padding-bottom: 6px; }
-  .parts-t tbody tr:nth-child(even) td, .kv-t tr:nth-child(even) td { background: rgba(244, 244, 245, .9); }
+  .parts-t thead th { background: var(--paper); padding-top: 7px; padding-bottom: 6px; }
+  .parts-t tbody tr:nth-child(even) td, .kv-t tr:nth-child(even) td { background: var(--paper); }
   .parts-t td:last-child, .parts-t th:last-child { text-align: center; width: 4.5em; font-variant-numeric: tabular-nums; }
   .parts-t td:first-child { width: 1px; white-space: nowrap; }
   .kv-t { width: 100%; margin: 0; }
@@ -204,7 +206,7 @@
     border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
   .sign > div { padding: 7px var(--pad) 40px; border-left: 1px solid var(--g); }
   .sign > div:first-child { border-left: 0; }
-  .sign .ref { background: var(--tint); padding-bottom: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
+  .sign .ref { background: var(--paper); padding-bottom: 8px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; }
   .sign .ref svg { display: block; width: 100%; max-width: 220px; height: 30px; }
   .sign .ref rect { fill: var(--g); }
 
@@ -272,18 +274,19 @@
   .pl.pil-after .pil { margin-top: 0; }
   .pil .pd { position: relative; aspect-ratio: 1 / 1; margin-bottom: 18px; }
   .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
-  .pil h3 { margin-bottom: .6em; background: var(--tint); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding: 6px 10px 5px; }
+  .pil h3 { margin-bottom: .6em; background: var(--paper); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding: 6px 10px 5px; }
 
   /* the opener: two scales only. A small, dense paragraph on the left axis; three statements, huge, on the centre axis,
      each under its own thin number, printed over the small type in multiply */
   .mf { padding-bottom: clamp(72px, 14vh, 160px); }
-  .mf-t { margin-top: clamp(26px, 5vh, 60px); }
+  .mf-t { margin-top: -1px; border-top: 0; }
+  .mf-t > .lead { padding-top: 14px; padding-bottom: 16px; }
   .tab.one { grid-template-columns: minmax(0, 1fr); }
   .tab.one > :nth-child(2n) { border-left: 0; }
   .mf-t .lead { max-width: 46em; text-wrap: pretty; }
   .mf-side { margin-top: 1.1em; line-height: 1.25; }
   .mf-side span { display: block; }
-  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: clamp(40px, 8vh, 104px);
+  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: -.5em; /* the big statements are printed over the small text, as on designofficefun: they cross it in multiply */
     font-weight: 560; font-stretch: 62%; text-transform: uppercase; font-size: clamp(56px, 9.2vw, 176px); line-height: .8; letter-spacing: -.02em; }
   .mf-st li { text-wrap: balance; }
   .mf-st li + li { margin-top: .32em; }
@@ -299,7 +302,8 @@
   .cue path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   .cue:hover { color: var(--mi); }
   @keyframes cue { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(9px); } }
-  .closing .giant { margin-top: clamp(48px, 10vh, 120px); font-weight: 560; font-stretch: 62%; font-size: 14.2vw; line-height: .8; letter-spacing: -.02em; white-space: nowrap; text-align: center; }
+  /* the studio's name is stamped over the foot of the sheet: it crosses the sign-off strip in multiply */
+  .closing .giant { position: relative; z-index: 2; mix-blend-mode: multiply; margin-top: -.24em; font-weight: 560; font-stretch: 62%; font-size: 14.2vw; line-height: .8; letter-spacing: -.02em; white-space: nowrap; text-align: center; }
 
   /* ---------- diagrams in the same green line ---------- */
   .rings { position: relative; width: 100%; aspect-ratio: 682 / 300; }
@@ -446,7 +450,7 @@
     .pl-meta .vs span { display: none; }
     .ttl { font-size: min(26vw, 150px, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); }
     .cover .logo { width: 100%; }
-    .mf-st { font-size: clamp(46px, 14.4vw, 76px); }
+    .mf-st { font-size: clamp(46px, 14.4vw, 76px); margin-top: -.62em; }
     .closing .giant { font-size: 13.6vw; }
     .mx tbody th { font-size: 16px; }
     .mx thead th:first-child { width: 38%; }
@@ -486,9 +490,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=36"></script>
-<script src="kit.js?v=36"></script>
-<script src="pillars3d.js?v=36"></script>
+<script src="content.js?v=37"></script>
+<script src="kit.js?v=37"></script>
+<script src="pillars3d.js?v=37"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -658,7 +662,7 @@
     if (s.blocks[0] && s.blocks[0][0] === "mf") {
       var mf = s.blocks[0];
       return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
-        '<h2 class="sr">' + esc(s.title) + '</h2><div class="tab one mf-t"><p class="fl sc">' + LBL[1] + '</p><div class="lead"><p>' + esc(mf[1]) + '</p></div></div>' +
+        '<h2 class="sr">' + esc(s.title) + '</h2><div class="tab one mf-t"><div class="lead"><p>' + esc(mf[1]) + '</p></div></div>' +
         '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol></section>';
     }
     if (s.kind === "closing") {
