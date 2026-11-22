@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "55"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "56"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=55" as="script">
-<link rel="preload" href="kit.js?v=55" as="script">
-<link rel="preload" href="pillars3d.js?v=55" as="script">
+<link rel="preload" href="content.js?v=56" as="script">
+<link rel="preload" href="kit.js?v=56" as="script">
+<link rel="preload" href="pillars3d.js?v=56" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -292,9 +292,11 @@
   .more-b:focus-visible { outline: 2px solid var(--mi); outline-offset: -2px; }
   .more-row { margin: clamp(36px, 7vh, 80px) calc(var(--fi) - var(--pad)) 0; border-bottom: 1px solid var(--rule); }
   .more-row .more-b { border-top: 1px solid var(--rule); }
-  .more-p { position: relative; z-index: 4; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.3, .8, .3, 1); margin: 0 var(--fi); }
+  .more-p { position: relative; z-index: 1; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.3, .8, .3, 1); margin: 0 var(--fi); }
   .pl .more-p { margin: 0 calc(var(--fi) - var(--pad)); }
   .more-p.open { grid-template-rows: 1fr; }
+  .more-p.paper { z-index: 4; }
+  .more-p:not(.paper) .more-in { background: none; }
   .more-c { min-height: 0; overflow: hidden; }
   .more-p:not(.open) .more-c { visibility: hidden; transition: visibility 0s .5s; }
   .more-in { background: rgba(255, 255, 255, .86); border-bottom: 1px solid var(--rule);
@@ -658,9 +660,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=55"></script>
-<script src="kit.js?v=55"></script>
-<script src="pillars3d.js?v=55"></script>
+<script src="content.js?v=56"></script>
+<script src="kit.js?v=56"></script>
+<script src="pillars3d.js?v=56"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -949,8 +951,11 @@
   each(".pl.st", function (st) {
     var nx = st.nextElementSibling, sheet = nx && (nx.classList.contains("more-p") || nx.classList.contains("pil-after")) ? nx : null;
     if (!sheet) return;
-    st.classList.add("pre");
-    SHEETS.push({ st: st, sheet: sheet, after: sheet.classList.contains("more-p") && sheet.nextElementSibling && sheet.nextElementSibling.classList.contains("pil-after") ? sheet.nextElementSibling : null });
+    var after = sheet.classList.contains("more-p") && sheet.nextElementSibling && sheet.nextElementSibling.classList.contains("pil-after") ? sheet.nextElementSibling : null;
+    // only the step that leads to the pillars sits on thin paper (its foot, its folded sheet and the pillars, one piece);
+    // every other foot and folded sheet has no ground and passes under the drawing, like the rest of the grey
+    if (after || sheet.classList.contains("pil-after")) { st.classList.add("pre"); if (after) sheet.classList.add("paper"); }
+    SHEETS.push({ st: st, sheet: sheet, after: after });
   });
 
   /* ---------- the drawings move with the scroll ---------- */
