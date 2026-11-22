@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "37"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "38"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -69,8 +69,8 @@
     --hd: 56px;
     /* the sheet: a white margin round the page (--fi), and on wide screens a binding gutter on the left (--gut) */
     --fi: 8px; --gut: 0px; --tint: #F4F4F5;
-    /* the grey boxes are printed: a flat tint with a fine grain over it, like a riso or a photocopy */
-    --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .62 0 0 0 0 .62 0 0 0 0 .64 3.4 0 0 0 -1.6'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 180px 180px, var(--tint);
+    /* the grey boxes are printed: a flat tint with a fine, real grain over it, dark and light specks drawn at three times the screen's density */
+    --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cfilter id='g3'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.45 0 0 0 0 0.45 0 0 0 0 0.47 3.2 0 0 0 -1.68'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23g3)'/%3E%3Cfilter id='g7'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1.0 0 0 0 0 1.0 0 0 0 0 1.02 -3.0 0 0 0 1.4'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23g7)'/%3E%3C/svg%3E") 0 0 / 120px 120px, var(--tint);
   }
   @media (min-width: 900px) { :root { --gut: 32px; } }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -490,9 +490,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=37"></script>
-<script src="kit.js?v=37"></script>
-<script src="pillars3d.js?v=37"></script>
+<script src="content.js?v=38"></script>
+<script src="kit.js?v=38"></script>
+<script src="pillars3d.js?v=38"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
