@@ -107,7 +107,7 @@
   // the eye looks down on the solids a little, as on the building: the floor and the shadows open up
   var CAM = rx(0.36), cam = function (v) { return ap(CAM, v); };
   var WASH = [[255, 255, 255], [214, 234, 221]]; // white → the palest green of the palette
-  var mix = function (k) { k = Math.max(0, Math.min(1, k)); return "rgb(" + WASH[0].map(function (c, i) { return Math.round(c + (WASH[1][i] - c) * k); }).join(",") + ")"; };
+  var mix = function (k) { k = Math.round(Math.max(0, Math.min(1, k)) * 24) / 24; return "rgb(" + WASH[0].map(function (c, i) { return Math.round(c + (WASH[1][i] - c) * k); }).join(",") + ")"; };
   function mount(host, name) {
     var svg = document.createElementNS(NS, "svg");
     svg.setAttribute("class", "p3"); svg.setAttribute("viewBox", "-1.08 -1.08 2.16 2.16"); svg.setAttribute("aria-hidden", "true");
@@ -117,7 +117,15 @@
     var pool = [], scene = PIL[name](), shown = 1;
     var path = function (i) { var p = pool[i]; if (!p) { p = pool[i] = document.createElementNS(NS, "path"); svg.appendChild(p); } return p; };
     var proj = function (v, s) { var q = F / (F - v[2] * s); return [v[0] * s * q, -v[1] * s * q]; };
-    var ring = function (pts, close) { var d = ""; for (var i = 0; i < pts.length; i++) d += (i ? "L" : "M") + pts[i][0].toFixed(4) + " " + pts[i][1].toFixed(4); return close ? d + "Z" : d; };
+    // 3 decimals of a 2.16-wide view box: finer than a screen pixel; rounding by hand is much cheaper than toFixed
+    var r3 = function (v) { return Math.round(v * 1000) / 1000; };
+    var ring = function (pts, close) { var d = ""; for (var i = 0; i < pts.length; i++) d += (i ? "L" : "M") + r3(pts[i][0]) + " " + r3(pts[i][1]); return close ? d + "Z" : d; };
+    // each pooled path remembers what it was given, so only what changed is written to the page
+    var put = function (p, d, cls, fill) {
+      if (p._d !== d) { p.setAttribute("d", d); p._d = d; }
+      if (p._c !== cls) { p.setAttribute("class", cls); p._c = cls; }
+      if (p._f !== fill) { p.style.fill = fill; p._f = fill; }
+    };
     function render(t, k) {
       var s = 0.001 + shown, items = [], hidden = [], world = [], low = 1e9;
       var objs = scene(t, k || 0);
@@ -151,11 +159,11 @@
       items.sort(function (a, b) { return a.z - b.z; });
       var i = 0;
       items.forEach(function (it) {
-        var p = path(i++); p.setAttribute("d", it.d); p.setAttribute("class", it.cls); p.style.fill = it.fill;
-        it.deco.forEach(function (q) { var e = path(i++); e.setAttribute("d", q.d); e.setAttribute("class", q.cls); e.style.fill = ""; });
+        put(path(i++), it.d, it.cls, it.fill);
+        it.deco.forEach(function (q) { put(path(i++), q.d, q.cls, ""); });
       });
-      if (hidden.length) { var hp = path(i++); hp.setAttribute("d", hidden.join("")); hp.setAttribute("class", "hd"); hp.style.fill = ""; }
-      for (; i < pool.length; i++) pool[i].setAttribute("d", "");
+      if (hidden.length) put(path(i++), hidden.join(""), "hd", "");
+      for (; i < pool.length; i++) if (pool[i]._d !== "") { pool[i].setAttribute("d", ""); pool[i]._d = ""; }
     }
     render(0, 0);
     return { render: render, show: function (v) { shown = Math.max(0, Math.min(1, v)); } };

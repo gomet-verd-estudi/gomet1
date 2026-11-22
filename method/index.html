@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "42"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "43"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -94,12 +94,12 @@
   .gve { display: inline-flex; text-decoration: none; }
   .gve span { width: 26px; height: 26px; display: grid; place-items: center; border: 1.5px solid var(--g); border-radius: 4px; margin-left: -1.5px; font-size: 13px; font-weight: 800; color: var(--g); line-height: 1; background: var(--white); }
   .gve span:first-child { margin-left: 0; }
-  .pill { display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 14px; border-radius: 999px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  .pill { display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--white);
     font-size: 14.5px; font-weight: 700; letter-spacing: .02em; color: var(--g); font-variant-numeric: tabular-nums; box-shadow: 0 0 0 1.5px var(--g) inset; }
   .pill svg { width: 13px; height: 13px; }
   .pill:hover, .pill:focus-visible { box-shadow: 0 0 0 1.5px var(--mi) inset; color: var(--mi); outline: none; }
   .tr2 { display: inline-flex; align-items: center; gap: 8px; }
-  .lng { display: inline-flex; align-items: center; height: 34px; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1.5px var(--g) inset; }
+  .lng { display: inline-flex; align-items: center; height: 34px; padding: 3px; gap: 2px; border-radius: 999px; background: var(--white); box-shadow: 0 0 0 1.5px var(--g) inset; }
   .lng a { display: grid; place-items: center; min-width: 32px; height: 28px; padding: 0 6px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--g); text-decoration: none; }
   .lng a.on { background: var(--g); color: var(--white); }
   .lng a:not(.on):hover { color: var(--mi); }
@@ -529,9 +529,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=42"></script>
-<script src="kit.js?v=42"></script>
-<script src="pillars3d.js?v=42"></script>
+<script src="content.js?v=43"></script>
+<script src="kit.js?v=43"></script>
+<script src="pillars3d.js?v=43"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -804,11 +804,12 @@
   }
   $("read").innerHTML = html;
   // the steps followed by a sheet of thin paper carry their foot on that paper (see .pre)
+  var PRE = [];
   each(".obra > .pl.pil-after", function (pa) {
     var st = pa.previousElementSibling;
     while (st && !st.classList.contains("ob")) st = st.previousElementSibling;
     if (!st) return;
-    st.classList.add("pre");
+    st.classList.add("pre"); PRE.push({ st: st, pa: pa, on: false });
   });
 
   /* ---------- the drawings move with the scroll ---------- */
@@ -825,7 +826,7 @@
       sc.mount = function () {
         var ms = Array.prototype.map.call(pil, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
         // they come in one after the other as the sheet arrives; then they keep turning (see spin)
-        sc.apply = function (p) { ms.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((p + 0.3 - k * 0.08) / 0.42))); if (!spinning) m.render(T0, scrollY * 0.0012); }); };
+        sc.apply = function (p) { ms.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((p + 0.3 - k * 0.08) / 0.42))); if (!spinning) m.render(performance.now() / 1000, scrollY * 0.0012); }); };
         sc.p3 = ms;
       };
     } else if (ring) {
@@ -944,13 +945,15 @@
     // …then write
     scrubs.forEach(function (sc, i) {
       var r = rs[i];
-      sc.near = r.bottom > -vh && r.top < vh * 2; sc.vis = r.bottom > 0 && r.top < vh;
+      var was = sc.near; sc.near = r.bottom > -vh && r.top < vh * 2; sc.vis = r.bottom > 0 && r.top < vh;
+      if (sc.near && !was && sc.ready) sc.apply(sc.cur);
       sc.target = RM ? 1 : progress(sc, r);
       if (sc.near && !sc.ready && KIT) { sc.mount(); sc.ready = true; sc.cur = sc.target; sc.apply(sc.cur); }
     });
     if (OBR) {
       var orr = OBR.getBoundingClientRect(), ors = obs.map(function (o) { return o.sec.getBoundingClientRect(); });
-      obNear = orr.bottom > -vh && orr.top < vh * 2;
+      var obWas = obNear; obNear = orr.bottom > -vh && orr.top < vh * 2;
+      if (obNear && !obWas && bld) obApply();
       obs.forEach(function (o, i) { var p = progress(o, ors[i]); phTgt[o.ph - 1] = RM ? (p > 0.06 ? 1 : 0) : clamp((p - 0.06) / 0.9); });
       if (obNear && !bld && KIT && KIT.building) { bld = KIT.building(OBR.querySelector(".ob-stage .draw")); phCur = phTgt.slice(); obApply(); }
     }
@@ -960,7 +963,7 @@
       var r = prs[i]; pg.near = r.bottom > -vh && r.top < vh * 2; pg.vis = r.bottom > 0 && r.top < vh;
       if (pg.near && !pg.p3 && window.GVE_P3D) pg.p3 = Array.prototype.map.call(pg.els, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
       // only the pillars on screen are drawn; the others keep their place and are drawn again when they come back
-      if (pg.p3 && pg.near) pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - pts[i][k]) / (vh * 0.3)))); if (pg.vis && (RM || !spinning)) m.render(T0 || 0, scrollY * 0.0012); });
+      if (pg.p3 && pg.near) pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - pts[i][k]) / (vh * 0.3)))); if (pg.vis && (RM || !spinning)) m.render(RM ? 0 : performance.now() / 1000, scrollY * 0.0012); });
     });
     rvs.forEach(function (el, i) { var t = ts[i]; if (t < vh * 0.9) el.classList.add("in"); else if (t > vh * 0.97) el.classList.remove("in"); });
   }
@@ -982,11 +985,9 @@
     if (moving) requestAnimationFrame(frame); else { running = false; lastT = 0; }
   }
   var spinning = false, T0 = 0;
-  var odd = false;
   function spin(now) {
     var live = scrubs.concat(pgs).filter(function (sc) { return sc.p3 && sc.vis; });
     if (!live.length || RM) { spinning = false; return; }
-    odd = !odd; if (odd) { requestAnimationFrame(spin); return; }
     T0 = now / 1000;
     live.forEach(function (sc) { sc.p3.forEach(function (m) { m.render(T0, scrollY * 0.0012); }); });
     requestAnimationFrame(spin);

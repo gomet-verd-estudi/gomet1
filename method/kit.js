@@ -68,7 +68,7 @@
         it.fn(t);
       }
     };
-    const kw = (a, b) => (t) => win(t, a, b).toFixed(4);
+    const kw = (a, b) => (t) => Math.round(win(t, a, b) * 1e4);
 
     k.box = (cls) => { const g = mk('g', { class: 'bx ' + (cls || '') }, scene); return { g, o: mk('path', { class: 'o' }, g), l: mk('path', { class: 'f fl' }, g), r: mk('path', { class: 'f fr' }, g), t: mk('path', { class: 'f ft' }, g) }; };
     k.draw = (n, x, y, z, w, d, h) => {
@@ -195,7 +195,7 @@
     opt = opt || {};
     const L = Array(9).fill(0);
     k.add((t) => { const v = sched(t); for (let i = 1; i <= 8; i++) L[i] = v[i]; });
-    const key = (...ph) => () => ph.map((p) => L[p].toFixed(4)).join(',');
+    const key = (...ph) => () => { let s = 0; for (let i = 0; i < ph.length; i++) s = s * 10007 + Math.round(L[ph[i]] * 1e4); return s; };
     const W = 8, F = -0.3, D = 1.3, S = 1.7, T = 0.3, TOP = F + 4 * S;
     const rise = (ph, a, b, x, y, z, w, d, h, cls) => { const n = k.box(cls); k.add(() => k.draw(n, x, y, z, w, d, h * eo(win(L[ph], a, b))), key(ph)); return n; };
     const spread = (ph, a, b, x, y, z, w, d, h, cls) => { const n = k.box(cls); k.add(() => { const v = eo(win(L[ph], a, b)); k.draw(n, x, y, z, w * v, d * Math.min(1, v * 1.15), h); }, key(ph)); };
