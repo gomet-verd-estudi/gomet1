@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "28"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "29"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,7 +17,40 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=28">
+<style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
+/* drawings: green line art, as on the Gomet web */
+.kit { width: 100%; height: 100%; display: block; overflow: visible; }
+.kit .bx path { fill: var(--blank); stroke: var(--mi); stroke-width: var(--thin); stroke-linejoin: round; }
+.kit .bx path.o { stroke-width: var(--outer); }
+.kit .ln { fill: none; stroke: var(--mi); stroke-width: var(--thin); stroke-linecap: round; stroke-linejoin: round; }
+.kit .ln.dash, .kit .ghost, .kit .amp { stroke-dasharray: var(--dd) var(--dd); }
+.kit .grid { opacity: .32; }
+.kit .ground { fill: none; stroke: var(--mi); stroke-width: var(--outer); stroke-linejoin: round; }
+.kit .ghost, .kit .amp { fill: none; stroke: var(--mi); stroke-width: var(--thin); }
+.kit .ghost { opacity: .6; }
+.kit .mark, .kit .missing { stroke-width: var(--thin); }
+.kit .pit-floor, .kit .pit-wall, .kit .pour, .kit .window, .kit .panel, .kit .door { fill: var(--blank); stroke: var(--mi); stroke-width: var(--thin); stroke-linejoin: round; }
+.kit .panel.on, .kit .logo-mark { fill: var(--mi); stroke: var(--mi); stroke-width: var(--thin); }
+.kit .mullion { opacity: .55; }
+.kit .hook-line, .kit .lattice { fill: none; stroke: var(--mi); stroke-width: var(--thin); }
+.kit .opt { fill: var(--mi); }
+.kit .opt.out { fill: var(--blank); stroke: var(--mi); stroke-width: var(--thin); }
+.kit .ppl .pf { fill: var(--blank); stroke: var(--mi); stroke-width: var(--pw, var(--thin)); stroke-linejoin: round; stroke-linecap: round; }
+.kit .ppl .p-k, .kit .ppl .p-green { fill: var(--mi); }
+.kit .ppl .p-none { fill: none; }
+.kit .ppl .nk { stroke: none; }
+.kit use.under { --pw: var(--pwo); }
+.kit .gv-c { fill: var(--mi); stroke: var(--mi-d); stroke-width: 1; }
+.kit .gv-k { fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.kit .mk circle { fill: var(--blank); stroke: var(--mi); stroke-width: 1.3; transition: fill .2s; }
+.kit .mk text { font: 700 10.5px "Archivo", sans-serif; fill: var(--mi); font-variant-numeric: tabular-nums; transition: fill .2s; }
+.kit .mk.hi circle { fill: var(--mi); }
+.kit .mk.hi text { fill: var(--blank); }
+.kit .sw0 .f { fill: var(--mi); }
+.kit .sw1 .f { fill: #6CC593; }
+.kit .sw2 .f { fill: #ABDABD; }
+.kit .sw3 .f { fill: #E1E9DB; }
+</style>
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
@@ -351,9 +384,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=28"></script>
-<script src="kit.js?v=28"></script>
-<script src="pillars3d.js?v=28"></script>
+<script src="content.js?v=29"></script>
+<script src="kit.js?v=29"></script>
+<script src="pillars3d.js?v=29"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
