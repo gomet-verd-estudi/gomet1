@@ -30,3 +30,8 @@
 .kit .sw1 .f { fill: #6CC593; }
 .kit .sw2 .f { fill: #ABDABD; }
 .kit .sw3 .f { fill: #E1E9DB; }
+
+.kit .co-l { fill: none; stroke: var(--mi); stroke-width: 1.1; }
+.kit .co-p { fill: var(--mi); }
+.kit .co-c { fill: var(--mi); }
+.kit .co-t { font: 700 10.5px "Archivo", sans-serif; fill: #fff; }

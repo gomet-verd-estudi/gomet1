@@ -322,6 +322,25 @@
       k.add(() => { const v = back(win(L[ph], 0.92, 1) * 1); inner.setAttribute('transform', `scale(${v.toFixed(3)})`); g.style.opacity = v > 0 ? 1 : 0; }, key(ph));
     });
 
+    /* lettered callouts, like an assembly sheet: one per phase (A–H), a dot on the part, a leader out to its letter */
+    if (opt.callouts) {
+      const lab0 = k.svg.querySelector('.labels');
+      const CO = [[1, [-1, W * 0.78, 0], -1], [2, [W + 0.5, -0.5, 0.9], 1], [3, [2, W, F], -1], [4, [0.7, 0.7, TOP - T], -1],
+        [5, [W, 4, F + S - T], 1], [6, [W, 0.1, TOP + 0.4], 1], [7, [12.2, 9.8, 0.05], 1], [8, [W + 0.6, 3, 5], 1]];
+      CO.forEach(([ph, p, sx]) => {
+        const [cx, cy] = P(p[0], p[1], p[2]);
+        const g = k.el('g', { class: 'co' }, lab0), inner = k.el('g', {}, g);
+        const dx = sx * 34, dy = -20;
+        k.el('path', { class: 'co-l', d: `M0 0L${(dx * 0.45).toFixed(1)} ${dy}L${dx} ${dy}` }, inner);
+        k.el('circle', { class: 'co-p', r: 2.3 }, inner);
+        const cg = k.el('g', { transform: `translate(${dx + sx * 9} ${dy})` }, inner);
+        k.el('circle', { class: 'co-c', r: 9 }, cg);
+        const tx = k.el('text', { class: 'co-t', y: 3.7, 'text-anchor': 'middle' }, cg); tx.textContent = 'ABCDEFGH'[ph - 1];
+        k.marks.push({ g, inner, x: cx, y: cy });
+        k.add(() => { const v = win(L[ph], 0.78, 1); g.style.opacity = v.toFixed(3); inner.setAttribute('transform', `scale(${(0.7 + 0.3 * eo(v)).toFixed(3)})`); }, key(ph));
+      });
+    }
+
     /* numbered marks: what each phase points at, in the order of the legend */
     const MARKS = {
       1: [[2.6, -2, 4.6], [10.8, -1.6, 3.6], [10.36, 5.56, 1]],
@@ -598,7 +617,7 @@
     // one building for the whole method: phases(arr) sets how far each of the eight phases has gone (0–1)
     building: (host, opts) => {
       let ext = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-      const st = mount(host, (k) => { obra(k, () => ext, { upto: 8, from: 1 }); return 1; }, opts);
+      const st = mount(host, (k) => { obra(k, () => ext, { upto: 8, from: 1, callouts: true }); return 1; }, opts);
       st.phases = (arr) => { ext = [0].concat(arr); st.k.set(0.5); };
       return st;
     },

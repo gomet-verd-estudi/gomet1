@@ -14,7 +14,7 @@ window.DECK_I18N = (function () {
     P(1, 0, "", "", "", "Cover", [["cover"]], "cover"),
     P(2, 0, "How we work", "In two minutes", "[Method]", "Introduction", [
       ["mf", "A brand is built like a building: step by step, from the ground up. And at the end of every step, we don't go on without your go-ahead.",
-        ["In order", "On solid ground", "With you in every decision"], ["8 steps", "1 building", "1 team"]]
+        ["In order", "On solid ground", "With you in every decision"], ["2 min", "8 steps", "1 building", "1 team"]]
     ]),
     P(5, 5, "Step 01", "The ground", "[Listen]", "Listen", [
       ["img", "v05", "The plot surrounded by competitors, industry and audience"],
@@ -79,7 +79,7 @@ window.DECK_I18N = (function () {
     P(1, 0, "", "", "", "Portada", [["cover"]], "cover"),
     P(2, 0, "Cómo trabajamos", "En dos minutos", "[Método]", "Introducción", [
       ["mf", "Una marca se construye como un edificio: paso a paso, de abajo arriba. Y al final de cada paso, no seguimos sin vuestro visto bueno.",
-        ["Con orden", "Sobre terreno firme", "Con vosotros en cada decisión"], ["8 pasos", "1 edificio", "1 equipo"]]
+        ["Con orden", "Sobre terreno firme", "Con vosotros en cada decisión"], ["2 min", "8 pasos", "1 edificio", "1 equipo"]]
     ]),
     P(5, 5, "Paso 01", "El terreno", "[Escuchar]", "Escuchar", [
       ["img", "v05", "El solar rodeado de competencia, sector y público"],
