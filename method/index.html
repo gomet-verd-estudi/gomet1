@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "32"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "33"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -154,15 +154,17 @@
      with the scroll, it travels over empty paper, never over the text */
   .pl.st { padding-bottom: var(--pb, calc(var(--hh, 40vh) + 6vh)); }
   .st .track { bottom: var(--tb, 0px); }
-  /* the steps: one drawing under all of them. It waits in the same place for the whole run of steps and the grey
-     titles, texts and bands slide over it; at the end it rests on blank paper and leaves */
+  /* the steps: one drawing over all of them, printed in multiply. It waits in the same place for the whole run of steps
+     while the grey titles, texts and bands slide under it; at the end it rests on blank paper and leaves */
   .obra { position: relative; padding-bottom: var(--opb, 60vh); }
-  .ob-track { position: absolute; left: var(--pad); right: var(--pad); top: 0; bottom: 0; pointer-events: none; z-index: 0; }
+  .ob-track { position: absolute; left: var(--pad); right: var(--pad); top: 0; bottom: 0; pointer-events: none; z-index: 2; mix-blend-mode: multiply; }
   .ob-stage { position: sticky; top: var(--ost, 30vh); margin-top: var(--ost, 30vh); height: var(--osh, 40vh); width: 100%; }
   .ob-stage .draw { position: absolute; inset: 0; }
   .obra > .pl { z-index: 1; }
   .pl.st.ob { padding-bottom: clamp(40px, 7vh, 88px); }
-  .obra .pil figure { background: var(--white); }
+  /* the 3D pillars come on a sheet of thin paper laid over the drawing: white, but you can still make out the building under it */
+  .obra > .pl.pil-after { z-index: 3; background: rgba(255, 255, 255, .8); -webkit-backdrop-filter: blur(1.4px); backdrop-filter: blur(1.4px);
+    padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 -1px 0 rgba(0, 0, 0, .025), 0 1px 0 rgba(0, 0, 0, .025); }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) + 3vh) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -396,9 +398,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=32"></script>
-<script src="kit.js?v=32"></script>
-<script src="pillars3d.js?v=32"></script>
+<script src="content.js?v=33"></script>
+<script src="kit.js?v=33"></script>
+<script src="pillars3d.js?v=33"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
