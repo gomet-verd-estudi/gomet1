@@ -1,3 +1,6 @@
+Space Mono — Copyright 2016 The Space Mono Project Authors (https://github.com/googlefonts/spacemono)
+Archivo and Space Mono are both licensed under the SIL Open Font License, Version 1.1, below.
+
 Copyright 2020 The Archivo Project Authors (https://github.com/Omnibus-Type/Archivo)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
