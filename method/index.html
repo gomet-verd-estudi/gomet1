@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "27"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "28"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,13 +17,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="fonts/spacemono-700.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="kit.css?v=27">
+<link rel="stylesheet" href="kit.css?v=28">
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
-  /* Space Mono: SIL Open Font License 1.1 (fonts/OFL-SpaceMono.txt), Latin */
-  @font-face { font-family: "Space Mono"; src: url("fonts/spacemono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
-  @font-face { font-family: "Space Mono"; src: url("fonts/spacemono-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
   /* the Gomet web system: one light grey for every letter, one green ink for every drawing, on white */
   :root {
@@ -32,8 +28,7 @@
     --mi: #0A9651; --mi-d: #087A42;
     --pad: clamp(16px, 1.25vw, 24px);
     --fs: clamp(18px, 1.42vw, 26px);
-    --hd: 78px;
-    --mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --hd: 56px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
@@ -41,46 +36,47 @@
   img { display: block; max-width: 100%; height: auto; }
   a { color: inherit; }
   button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .sc { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: .01em; text-transform: uppercase; line-height: 1.2; }
+  .sc { font-size: 11px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; line-height: 1.15; }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ---------- chrome: small and fixed in the corners ---------- */
   .prog { position: fixed; top: 0; left: 0; height: 2px; width: 0; background: var(--mi); z-index: 31; }
-  /* the header is a label: a dashed box with its cells split by dashed rules, like a specimen tag */
-  .top { position: fixed; top: 0; left: 0; right: 0; z-index: 30; background: var(--white);
-    padding: 10px max(var(--pad), env(safe-area-inset-right)) 8px max(var(--pad), env(safe-area-inset-left)); }
-  .tag { display: flex; align-items: stretch; height: 60px; border: 1.5px dashed var(--g); }
-  .tag > * { display: flex; align-items: center; padding: 0 14px; border-left: 1.5px dashed var(--g); }
-  .tag > :first-child { border-left: 0; }
-  .gve { text-decoration: none; }
+  .top { position: fixed; top: 0; left: 0; right: 0; height: var(--hd); z-index: 30; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 max(var(--pad), env(safe-area-inset-right)) 0 max(var(--pad), env(safe-area-inset-left)); pointer-events: none; }
+  .top > * { pointer-events: auto; }
+  .gve { display: inline-flex; text-decoration: none; }
   .gve span { width: 26px; height: 26px; display: grid; place-items: center; border: 1.5px solid var(--g); border-radius: 4px; margin-left: -1.5px; font-size: 13px; font-weight: 800; color: var(--g); line-height: 1; background: var(--white); }
   .gve span:first-child { margin-left: 0; }
-  .perf { flex: 0 0 72px; background: repeating-linear-gradient(90deg, transparent 0 11px, var(--g) 11px 12.5px) center / 100% 70% no-repeat;
-    -webkit-mask: repeating-linear-gradient(transparent 0 3px, #000 3px 7px); mask: repeating-linear-gradient(transparent 0 3px, #000 3px 7px); }
-  .tg-mid { flex: 1 1 auto; flex-direction: column; align-items: flex-start !important; justify-content: center; gap: 4px; }
-  .tg-lk { flex-direction: column; align-items: flex-end !important; justify-content: center; gap: 4px; text-align: right; }
-  .tg-lk a, .lng a { color: var(--g); text-decoration: none; white-space: nowrap; }
-  .tg-lk a:hover, .lng a:hover { color: var(--mi); }
-  .lng { gap: 12px; }
-  .lng a { text-decoration-line: underline; text-decoration-color: transparent; text-decoration-thickness: 1.5px; text-underline-offset: 4px; }
-  .lng a.on { color: var(--mi); text-decoration-color: var(--mi); }
+  .pill { display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 14px; border-radius: 999px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    font-size: 14.5px; font-weight: 700; letter-spacing: .02em; color: var(--g); font-variant-numeric: tabular-nums; box-shadow: 0 0 0 1.5px var(--g) inset; }
+  .pill svg { width: 13px; height: 13px; }
+  .pill:hover, .pill:focus-visible { box-shadow: 0 0 0 1.5px var(--mi) inset; color: var(--mi); outline: none; }
+  .tr2 { display: inline-flex; align-items: center; gap: 8px; }
+  .lng { display: inline-flex; align-items: center; height: 34px; padding: 3px; gap: 2px; border-radius: 999px; background: rgba(255, 255, 255, .9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); box-shadow: 0 0 0 1.5px var(--g) inset; }
+  .lng a { display: grid; place-items: center; min-width: 32px; height: 28px; padding: 0 6px; border-radius: 999px; font-size: 12px; font-weight: 800; letter-spacing: .08em; color: var(--g); text-decoration: none; }
+  .lng a.on { background: var(--g); color: var(--white); }
+  .lng a:not(.on):hover { color: var(--mi); }
   .tile .tnum { display: flex; align-items: flex-end; height: 74px; padding: 8px 10px; font-weight: 200; font-stretch: 62%; font-size: 56px; line-height: .8; color: var(--g); }
+  .corner { position: fixed; bottom: 9px; z-index: 30; color: var(--g); text-decoration: none; background: var(--white); padding: 4px 7px; border-radius: 4px; }
+  .corner.l { left: max(var(--pad), env(safe-area-inset-left)); margin-left: -7px; }
+  .corner.r { right: max(var(--pad), env(safe-area-inset-right)); margin-right: -7px; }
+  .corner:hover { color: var(--mi); }
+  @media (max-width: 899px) { .corner { display: none; } }
 
   /* ---------- plates ---------- */
   .pl { position: relative; padding: calc(var(--hd) + 3vh) var(--pad) clamp(72px, 11vh, 132px); }
   /* blocks are separated like a building site: a band of thick 45° stripes, edge to edge */
   .pl::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--g) 0 6px, transparent 6px 12px); pointer-events: none; }
   .pl.cover::before { display: none; }
-  .pl-meta { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
-  .pl-meta .dash { flex: 1 1 12px; min-width: 12px; height: 1px; background: linear-gradient(90deg, currentColor 55%, transparent 0) 0 0 / 7px 1px repeat-x; }
+  .pl-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; text-align: center; gap: 4px 26px; }
   .pl-meta .vs { display: inline-flex; align-items: center; gap: 7px; position: relative; z-index: 4; }
   .pl-meta .vs:hover { color: var(--mi); }
   .pl-meta .vs svg { width: 13px; height: 13px; }
   /* the title is a statement on the centre axis: its number, thin, stacked on top; the word itself in a lighter cut */
-  .pl-top { margin-top: 12px; }
+  .pl-top { display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 14px; }
   .pno { font-weight: 200; font-stretch: 62%; font-size: clamp(30px, 3.4vw, 62px); line-height: .8; letter-spacing: -.02em; font-variant-numeric: tabular-nums; margin-bottom: .1em; margin-right: -.55em; }
   .pno small { font-size: .34em; font-weight: 700; font-stretch: 100%; letter-spacing: .06em; vertical-align: top; margin-left: .2em; }
-  .ttl { display: flex; justify-content: space-between; align-items: baseline; white-space: nowrap; font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
+  .ttl { font-weight: 560; font-stretch: 62%; font-size: min(clamp(70px, 12.6vw, 232px), calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); line-height: .8; letter-spacing: -.022em; }
   .two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--pad); }
   .pl-body { margin-top: clamp(26px, 4.5vh, 56px); grid-template-areas: "hl dr" "lg dr" "xx dr"; grid-template-rows: auto auto 1fr; align-items: start; }
   .hl { grid-area: hl; font-size: clamp(25px, 2.35vw, 44px); line-height: .93; font-weight: 640; letter-spacing: -.015em; max-width: 13.5em; text-wrap: balance; }
@@ -88,9 +84,8 @@
   .dr { grid-area: dr; min-width: 0; }
   .xx { grid-area: xx; margin-top: 1.4em; max-width: 26em; }
   .lead p + p, .kv-v p + p { margin-top: .8em; }
-  .lead, .mf-p, .pil figcaption p { font-family: var(--mono); font-weight: 700; font-size: .74em; line-height: 1.38; letter-spacing: 0; text-align: justify; -webkit-hyphens: manual; hyphens: manual; }
   .lead > p:first-child, .mf-p { position: relative; }
-  .lead > p:first-child::before, .mf-p::before { content: ""; position: absolute; left: -.85em; top: .46em; width: .5em; height: .5em; border-radius: 50%; background: var(--mi); }
+  .lead > p:first-child::before, .mf-p::before { content: ""; position: absolute; left: -.7em; top: .34em; width: .4em; height: .4em; border-radius: 50%; background: var(--mi); }
   .legend { grid-area: lg; list-style: none; margin-top: 1.1em; font-weight: 700; }
   .legend li { display: flex; align-items: center; gap: .45em; padding: 1px 0; line-height: 1.02; cursor: default; }
   .legend .n { flex: none; width: 22px; height: 22px; display: inline-grid; place-items: center; border: 2px solid var(--g); border-radius: 50%; font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; transition: background .2s, color .2s; }
@@ -98,7 +93,6 @@
   .kv { margin-top: clamp(30px, 6vh, 76px); }
   .kv-row { padding: .45em 0; }
   .kv-k { font-weight: 800; }
-  .closing .kv-k { font-family: var(--mono); font-weight: 400; font-size: 12px; text-transform: uppercase; letter-spacing: .01em; padding-top: .45em; }
   .kv-k i, .kv-v .lbl i { font-style: normal; font-weight: 500; margin-right: .2em; }
   .kv-v .kl { font-weight: 800; letter-spacing: -.012em; }
   .kv-v .kl + p:not(.sb) { margin-top: .25em; }
@@ -170,16 +164,12 @@
   /* the opener: two scales only. A small, dense paragraph on the left axis; three statements, huge, on the centre axis,
      each under its own thin number, printed over the small type in multiply */
   .mf { padding-bottom: clamp(72px, 14vh, 160px); }
-  .mf-p { margin-top: clamp(26px, 5vh, 60px); }
+  .mf-p { margin-top: clamp(26px, 5vh, 60px); max-width: 44em; text-wrap: pretty; }
   .mf-side { margin-top: 1.1em; line-height: 1.25; }
   .mf-side span { display: block; }
   .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: calc(var(--fs) * -.6);
     font-weight: 560; font-stretch: 62%; text-transform: uppercase; font-size: clamp(56px, 9.2vw, 176px); line-height: .8; letter-spacing: -.02em; }
   .mf-st li { text-wrap: balance; }
-  .mf-w { position: relative; }
-  .scrib { position: absolute; left: calc(-1 * var(--pad)); top: -8%; height: 116%; width: calc(100% + 2 * var(--pad)); z-index: 1; pointer-events: none;
-    clip-path: inset(0 calc(100% - var(--sp, 0) * 100%) 0 0); }
-  .scrib path { fill: none; stroke: var(--mi); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; opacity: .85; }
   .mf-st li + li { margin-top: .32em; }
   .mf-st i { display: block; font-style: normal; font-weight: 200; font-size: .62em; line-height: .9; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 
@@ -295,14 +285,7 @@
 
   /* ---------- phones and tablets ---------- */
   @media (max-width: 899px) {
-    :root { --fs: 18.5px; --hd: 66px; }
-    .top { padding-top: 8px; padding-bottom: 6px; }
-    .tag { height: 52px; }
-    .tag > * { padding: 0 10px; }
-    .perf { flex: 1 1 auto; }
-    .tg-mid { display: none !important; }
-    .tg-lk, .lng { font-size: 10.5px; }
-    .lng { gap: 9px; }
+    :root { --fs: 18.5px; --hd: 52px; }
     .top { background: linear-gradient(var(--white) 62%, rgba(255, 255, 255, 0)); }
     .pl { padding-top: calc(var(--hd) + 18px); }
     .two { grid-template-columns: minmax(0, 1fr); }
@@ -323,9 +306,7 @@
     .lam-foot .legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 16px; }
     .lam-foot .legend .n { width: 19px; height: 19px; font-size: 10px; border-width: 1.5px; }
     .lam-foot .hl { font-size: 24px; }
-    .lam-foot .lead { font-size: 14px; }
-    .lead, .mf-p, .pil figcaption p { font-size: 14.5px; text-align: left; }
-    .pl-meta { gap: 7px; font-size: 11px; }
+    .lam-foot .lead { font-size: 17px; }
     .st .flow > .kv, .st .flow > .pil { margin-top: 4vh; }
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
@@ -339,20 +320,19 @@
     .mx thead th:first-child { width: 38%; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
-  @media print { .top, .prog, .ix, .lb, .vs { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .tw { position: static; height: auto; } .hd2 { position: static; } .hsp { display: none; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
+  @media print { .top, .corner, .prog, .ix, .lb, .vs { display: none !important; } .track { position: relative; inset: auto; } .stage { position: relative; top: 0; margin-top: 0; height: 60vh; } .pin { height: auto; } .lam { position: static; height: auto; } .tw { position: static; height: auto; } .hd2 { position: static; } .hsp { display: none; } .hole { display: none; } .rv-i, .rv-o { opacity: 1 !important; transform: none !important; } }
 </style>
 </head>
 <body>
 <div class="prog" id="prog"></div>
 <header class="top">
-  <div class="tag">
-    <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
-    <i class="perf" aria-hidden="true"></i>
-    <p class="tg-mid sc"><span id="tgHow">How we work</span><span id="clock">VLC · BCN --:--</span></p>
-    <p class="tg-lk sc"><a id="talk" href="mailto:gometverdestudi@gmail.com">↗ Let's talk</a><a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">↗ Instagram</a></p>
-    <nav class="lng sc" aria-label="Language / Idioma"><a href="?lang=en" data-l="en" hreflang="en" lang="en">EN</a><a href="?lang=es" data-l="es" hreflang="es" lang="es">ES</a></nav>
+  <a class="gve" id="home" href="#slide-1" aria-label="Gomet Verd Estudi — back to the start"><span>G</span><span>V</span><span>E</span></a>
+  <div class="tr2">
+  <nav class="lng" aria-label="Language / Idioma"><a href="?lang=en" data-l="en" hreflang="en" lang="en">EN</a><a href="?lang=es" data-l="es" hreflang="es" lang="es">ES</a></nav>
   </div>
 </header>
+<a class="corner l sc" id="talk" href="mailto:gometverdestudi@gmail.com">Let's talk</a>
+<a class="corner r sc" href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">IG ↗</a>
 
 <main id="read"></main>
 
@@ -371,9 +351,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=27"></script>
-<script src="kit.js?v=27"></script>
-<script src="pillars3d.js?v=27"></script>
+<script src="content.js?v=28"></script>
+<script src="kit.js?v=28"></script>
+<script src="pillars3d.js?v=28"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -521,14 +501,6 @@
 
   /* ---------- plates ---------- */
   function kvRow(k, v) { return '<div class="kv-row two"><div class="kv-k">' + k + '</div><div class="kv-v">' + v + '</div></div>'; }
-  function ledger(items) {
-    var parts = [ES ? "G.V.E. Método" : "G.V.E. Method"].concat(items.filter(Boolean));
-    return '<div class="pl-meta sc">' + parts.map(function (t) { return '<span>' + esc(t) + '</span>'; }).join('<i class="dash" aria-hidden="true"></i>') + '</div>';
-  }
-  function spread(t) {
-    var m = /^\[(.*)\]$/.exec(t);
-    return '<h2 class="ttl" style="--ch:' + t.length + '" aria-label="' + esc(t) + '">' + (m ? '<span aria-hidden="true">[</span><span aria-hidden="true">' + esc(m[1]) + '</span><span aria-hidden="true">]</span>' : '<span>' + esc(t) + '</span>') + '</h2>';
-  }
   function plate(s, i) {
     var n = i + 1;
     if (s.kind === "cover") {
@@ -539,15 +511,14 @@
     }
     if (s.blocks[0] && s.blocks[0][0] === "mf") {
       var mf = s.blocks[0];
-      return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '">' + ledger([s.sec, s.sub]) +
+      return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
         '<h2 class="sr">' + esc(s.title) + '</h2><p class="mf-p">' + esc(mf[1]) + '</p>' +
         '<p class="mf-side sc">' + mf[3].map(function (t) { return '<span>' + esc(t) + '</span>'; }).join("") + '</p>' +
-        '<div class="mf-w"><svg class="scrib" viewBox="0 0 1000 600" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 70 C 150 90 260 260 360 380 C 430 470 560 560 640 470 C 700 400 650 300 570 330 C 480 365 520 520 640 545 C 780 575 900 470 1040 430"/></svg>' +
-        '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol></div></section>';
+        '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol></section>';
     }
     if (s.kind === "closing") {
-      return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '">' + ledger([TX.closing]) +
-        '<div class="pl-top">' + spread(TX.thanks) + '</div>' +
+      return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + TX.closing + '</span></div>' +
+        '<div class="pl-top"><h2 class="ttl" style="--ch:' + TX.thanksCh + '">' + TX.thanks + '</h2></div>' +
         '<div class="pl-body two"><p class="hl">' + TX.thanksLine + '</p></div>' +
         '<div class="kv">' + kvRow(TX.email, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a>') + kvRow(TX.phone, '<a href="tel:+34684450515">+34 684 450 515</a>') +
         kvRow("Instagram", '<a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>') + kvRow(TX.studioK, "Gomet Verd Estudi<br>Valencia · Barcelona") + '</div>' +
@@ -605,9 +576,10 @@
     var right = st ? (leadH ? '<div class="lead xx">' + leadH + '</div>' : "")
       : dr ? '<div class="dr">' + dr + '</div>' + (leadH ? '<div class="lead xx">' + leadH + '</div>' : "")
       : (leadH ? '<div class="dr lead">' + leadH + '</div>' : "");
-    // the meta line is a ledger: brand · step (1/8 … 8/8, the only numbering) · where we are, joined by dashed leaders
+    // one numbering only: the eight steps carry their number (1/8 … 8/8); the other plates carry none
     var stp = /^(?:Paso|Step) 0?(\d+)$/.exec(s.sec || "");
-    var head = ledger(stp ? [stp[1] + "/8", s.sub] : [s.sec, s.sub]) + '<div class="pl-top">' + spread(s.title) + '</div>';
+    var head = '<div class="pl-meta sc">' + (stp ? '<span>' + esc(s.sub) + '</span>' : '<span>' + esc(s.sec) + '</span>' + (s.sub ? '<span>' + esc(s.sub) + '</span>' : '')) + '</div>' +
+      '<div class="pl-top">' + (stp ? '<p class="pno" aria-label="' + (ES ? 'Paso ' : 'Step ') + stp[1] + (ES ? ' de 8' : ' of 8') + '">' + stp[1] + '<small>/8</small></p>' : '') + '<h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2></div>';
     var flow = (st
       ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
         '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot' + (legend ? ' has-lg' : '') + '">' + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + legend + '</div></div></div>'
@@ -801,18 +773,7 @@
   for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '">' + (ES ? '<span class="tnum">' + pad(n) + '</span>' : '<img loading="lazy" src="slides/t' + pad(D[n - 1].num) + '.webp" alt="" width="480" height="270">') + '<span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(D[n - 1].sec || (n === 1 ? TX.sections[0] : TX.closing)) + '</span></span></button>';
   $("ixGrid").innerHTML = g; $("ixN").textContent = "(" + N + ")";
   $("home").setAttribute("aria-label", TX.home); $("ix").setAttribute("aria-label", TX.plates);
-  $("talk").textContent = "↗ " + TX.talk; $("tgHow").textContent = TX.how;
-  // the manifesto's marker line draws itself across as the plate comes up
-  (function () {
-    var w = document.querySelector(".mf-w"); if (!w) return; var q = false;
-    function upd() { q = false; var r = w.getBoundingClientRect(), vh = innerHeight; var p = Math.max(0, Math.min(1, (vh * .95 - r.top) / (vh * .7))); w.style.setProperty("--sp", RM ? 1 : p.toFixed(3)); }
-    addEventListener("scroll", function () { if (!q) { q = true; requestAnimationFrame(upd); } }, { passive: true }); addEventListener("resize", upd); upd();
-  })();
-  (function clock() {
-    var f; try { f = new Intl.DateTimeFormat("es-ES", { timeZone: "Europe/Madrid", hour: "2-digit", minute: "2-digit", hour12: false }); } catch (e) {}
-    function tick() { if (f) $("clock").textContent = "VLC · BCN " + f.format(new Date()); }
-    tick(); setInterval(tick, 20000);
-  })(); $("ixHow").textContent = TX.how; $("ixIntro").textContent = TX.intro; $("ixStudio").textContent = TX.studio;
+  $("talk").textContent = TX.talk; $("ixHow").textContent = TX.how; $("ixIntro").textContent = TX.intro; $("ixStudio").textContent = TX.studio;
   $("ixClose").textContent = TX.close; $("lbClose").textContent = TX.close; $("lb").setAttribute("aria-label", TX.original);
   /* the language switch: the page reloads in the other language, on the same plate */
   each(".lng a", function (a) {
