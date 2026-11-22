@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "51"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "52"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,9 +17,10 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=51" as="script">
-<link rel="preload" href="kit.js?v=51" as="script">
-<link rel="preload" href="pillars3d.js?v=51" as="script">
+<link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="content.js?v=52" as="script">
+<link rel="preload" href="kit.js?v=52" as="script">
+<link rel="preload" href="pillars3d.js?v=52" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -61,6 +62,9 @@
 </style>
 <style>
   /* Archivo: SIL Open Font License 1.1 (fonts/OFL.txt), subset to Latin, width 62–100, weight 400–900 */
+  /* Space Mono: SIL Open Font License 1.1 (fonts/OFL.txt) — the technical hand: figure captions, part codes, numbered rows */
+  @font-face { font-family: "Space Mono"; src: url("fonts/spacemono-400.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+  @font-face { font-family: "Space Mono"; src: url("fonts/spacemono-700.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
   @font-face { font-family: "Archivo"; src: url("fonts/archivo-var.woff2") format("woff2"); font-weight: 200 900; font-stretch: 62% 100%; font-style: normal; font-display: swap; }
   /* the Gomet web system: one light grey for every letter, one green ink for every drawing, on white */
   :root {
@@ -222,6 +226,31 @@
   .sign .ref svg { display: block; width: 100%; max-width: 220px; height: 30px; }
   .sign .ref rect { fill: var(--g); }
 
+  /* ---------- construction kit × technical drawing ----------
+     Flowchart block arrows join the plates; every drawing is a figure in a ruled box with a typed caption (FIG. n);
+     the callouts hang on curved leaders, as on a patent sheet; the pillars are catalogue cells with a part code;
+     the folded sheets are numbered instruction lists. The technical hand is a monospace */
+  :root { --mono: "Space Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; }
+  .pl:not(.cover):not(.pil-after)::after { content: ""; position: absolute; left: 50%; top: -9px; width: 30px; height: 30px; margin-left: -15px; z-index: 2; pointer-events: none;
+    background: var(--g); -webkit-clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); clip-path: polygon(32% 0, 68% 0, 68% 48%, 100% 48%, 50% 100%, 0 48%, 32% 48%); }
+  .pl.pil-after + .pl::after { top: -14px; }
+  /* the box starts a little under the hole's top: the brackets and descenders of the big title hang below its line */
+  .fig { position: absolute; inset: max(6px, min(3vh, 1.9vw)) 0 0; display: flex; flex-direction: column; border: 1px solid var(--g); transition: border-color .35s ease; }
+  /* the box and its caption are the plate of a step: they show while the step stands pinned, and step aside while pages move */
+  .fig-c { transition: opacity .35s ease, border-color .35s ease; }
+  .obra:not(.pinned) .ob-stage .fig, .pl.st:not(.pinned) .stage .fig { border-color: transparent; }
+  .obra:not(.pinned) .ob-stage .fig-c, .pl.st:not(.pinned) .stage .fig-c { opacity: 0; border-bottom-color: transparent; }
+  .fig-c { flex: none; display: flex; gap: 12px; align-items: baseline; min-height: 28px; padding: 6px 10px 5px; border-bottom: 1px solid var(--g);
+    font-family: var(--mono); font-size: 11px; line-height: 1.3; letter-spacing: 0; text-transform: uppercase; color: var(--g); }
+  .fig-c b { flex: none; font-weight: 700; }
+  .fig-c span { min-width: 0; }
+  .fig-a { position: relative; flex: 1 1 auto; min-height: 0; }
+  .fig .fig-a > .draw { position: absolute; inset: 6px 6px 8px; }
+  .stage .fig-a .kit { position: absolute; inset: 0; }
+  .pcode { position: absolute; left: 10px; top: 8px; z-index: 3; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0; }
+  .vcode span, .sign .ref span { font-family: var(--mono); letter-spacing: .08em; }
+  .more-n { display: inline-block; min-width: 2.2em; font-family: var(--mono); font-style: normal; font-weight: 400; font-size: .72em; letter-spacing: 0; vertical-align: .08em; }
+
   /* ---------- more detail, folded ----------
      The button is the last row of the foot's table: a small label, what is inside, and a green + that turns into a −.
      The sheet it opens is a ruled table on the same thin paper as the foot, frame to frame; it unfolds from the foot */
@@ -317,8 +346,9 @@
   .p3 .sh { fill: #E6F1E9; stroke: none; }
   .p3 .fl { fill: none; stroke-width: 1px; opacity: .5; }
   .p3 .hd { fill: none; stroke-width: .8px; stroke-dasharray: 3 3; opacity: .42; }
-  .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px var(--pad); margin-top: clamp(28px, 5vh, 56px); }
-  .pil figure { margin: 0; }
+  .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: clamp(28px, 5vh, 56px) calc(var(--fi) - var(--pad)) 0; border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); }
+  .pil figure { position: relative; margin: 0; padding: 26px var(--pad) 16px; border-left: 1px solid var(--g); }
+  .pil figure:first-child { border-left: 0; }
   .pl.pil-after { padding-top: 0; }
   .pl.pil-after::before { display: none; }
   /* the construction band that closes the pillars belongs to the paper sheet: it sits at its foot, and the next step opens without one */
@@ -327,7 +357,7 @@
   .pl.pil-after .pil { margin-top: 0; }
   .pil .pd { position: relative; z-index: 2; aspect-ratio: 1 / 1; margin-bottom: 18px; }
   .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
-  .pil h3 { margin-bottom: .6em; background: var(--paper); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding: 6px 10px 5px; }
+  .pil h3 { margin: 0 calc(-1 * var(--pad)) .6em; background: var(--paper); border-top: 1px solid var(--g); border-bottom: 1px solid var(--g); padding: 6px var(--pad) 5px; }
 
   /* the opener: two scales only. A small, dense paragraph on the left axis; three statements, huge, on the centre axis,
      each under its own thin number, printed over the small type in multiply */
@@ -351,7 +381,8 @@
   /* the one thing to do on the cover: scroll. Centred, big, with a long thin arrow that breathes */
   .cue { justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 14px; text-decoration: none; white-space: nowrap;
     font-size: clamp(15px, 1.2vw, 19px); letter-spacing: .24em; margin-right: -.24em; }
-  .cue svg { width: clamp(22px, 1.8vw, 30px); height: clamp(56px, 7vh, 84px); overflow: visible; animation: cue 2.4s cubic-bezier(.45, 0, .25, 1) infinite; }
+  .cue svg { width: clamp(34px, 3vw, 52px); height: clamp(52px, 7vh, 80px); overflow: visible; animation: cue 2.4s cubic-bezier(.45, 0, .25, 1) infinite; }
+  .cue .blk { fill: currentColor; stroke: none; }
   .cue path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
   .cue:hover { color: var(--mi); }
   @keyframes cue { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(9px); } }
@@ -524,7 +555,10 @@
     .more-in { font-size: 16px; }
     .st .flow > .kv, .st .flow > .pil { margin-top: 4vh; }
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
+    .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; }
+    .pil figure:nth-child(odd) { border-left: 0; }
+    .pil figure:nth-child(n+3) { border-top: 1px solid var(--g); }
+    .fig-c { min-height: 42px; font-size: 10.5px; }
     .pil .pd { margin-bottom: 12px; }
     .pl-meta .vs span { display: none; }
     .ttl { font-size: min(26vw, 150px, 25vh, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); }
@@ -596,9 +630,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=51"></script>
-<script src="kit.js?v=51"></script>
-<script src="pillars3d.js?v=51"></script>
+<script src="content.js?v=52"></script>
+<script src="kit.js?v=52"></script>
+<script src="pillars3d.js?v=52"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -760,6 +794,7 @@
   /* ---------- more detail, folded (content.js: D.more) ----------
      A button row closes the plate's foot; the sheet it opens follows the foot, on the same thin paper */
   var MORE = D.more || {};
+  var FIGW = ES ? "FIG." : "FIG.";
   var MDEF = ES ? { t: "Ficha del paso", s: "Qué hacemos, vuestra parte y lo que recibís" } : { t: "Step sheet", s: "What we do, your part and what you get" };
   function moreBtn(num) {
     var m = MORE[num]; if (!m) return "";
@@ -768,9 +803,9 @@
   }
   function morePanel(num) {
     var m = MORE[num]; if (!m) return "";
-    var rows = m.r.map(function (r) {
+    var k = 0, rows = m.r.map(function (r) {
       return r[0] === "bar" ? '<div class="more-bar sc">' + esc(r[1]) + '</div>'
-        : '<div class="more-r"><div class="more-k">' + esc(r[0]) + '</div><div class="more-v">' + esc(r[1]) + '</div></div>';
+        : '<div class="more-r"><div class="more-k"><i class="more-n" aria-hidden="true">' + pad(++k) + '</i>' + esc(r[0]) + '</div><div class="more-v">' + esc(r[1]) + '</div></div>';
     }).join("");
     return '<div class="more-p" id="mp-' + num + '" role="region" aria-labelledby="mb-' + num + '"><div class="more-c"><div class="more-in">' + rows + '</div></div></div>';
   }
@@ -780,7 +815,7 @@
       return '<section class="pl cover" id="slide-1" data-n="1"><h1 class="sr">Gomet Verd Estudi — ' + TX.how + '</h1>' +
         '<img class="logo" src="logo-gve.svg" alt="Gomet Verd Estudi — Always WIPing [Working In Play]" width="1374" height="240">' +
         '<a class="cue sc" href="#slide-2"><span>' + TX.scroll.replace(/\s*↓/, "") + '</span>' +
-        '<svg viewBox="0 0 24 64" aria-hidden="true"><path d="M12 2v58M2 50l10 10 10-10"/></svg></a></section>';
+        '<svg viewBox="0 0 40 60" aria-hidden="true"><path class="blk" d="M13 0H27V32H40L20 60L0 32H13Z"/></svg></a></section>';
     }
     if (s.blocks[0] && s.blocks[0][0] === "mf") {
       var mf = s.blocks[0];
@@ -820,7 +855,7 @@
         case "img":
           if (b[1] === "v09") stage = '<div class="stage dg" aria-hidden="true">' + rings() + '</div>';
           else if (b[1] === "v10") stage = '<div class="stage dg" aria-hidden="true">' + map() + '</div>';
-          else if (KIT && KIT.has(s.scene)) stage = '<div class="stage" aria-hidden="true"><div class="draw" data-scene="' + s.scene + '"></div></div><p class="sr">' + esc(b[2] || "") + '</p>';
+          else if (KIT && KIT.has(s.scene)) stage = '<div class="stage" aria-hidden="true"><div class="fig"><p class="fig-c"><b>' + FIGW + '</b><span>' + esc(b[2] || "") + '</span></p><div class="fig-a"><div class="draw" data-scene="' + s.scene + '"></div></div></div></div><p class="sr">' + esc(b[2] || "") + '</p>';
           break;
         case "wide": dr = b[1] === "v28" ? timeline() : b[1] === "v30" ? truss() : matrix(lgd); break;
         case "legend": lgd = b[1]; break;
@@ -840,7 +875,8 @@
         case "pillars":
           // the pillars travel with the page like the text: each drawing sits on top of its own text
           var names = ["typo", "grid", "color", "imagery"];
-          pillars = '<div class="pil">' + b[1].map(function (p, i) { return '<figure><div class="pd" data-pillar="' + names[i] + '" aria-hidden="true"></div><figcaption><h3 class="sc">' + esc(p[1]) + '</h3><p>' + esc(p[2]) + '</p></figcaption></figure>'; }).join("") + '</div>';
+          var pc = (/(\d+)$/.exec(s.sec || "") || [0, 4])[1];
+          pillars = '<div class="pil">' + b[1].map(function (p, i) { return '<figure><span class="pcode" aria-hidden="true">' + "ABCDEFGH"[+pc - 1] + '.' + (i + 1) + '</span><div class="pd" data-pillar="' + names[i] + '" aria-hidden="true"></div><figcaption><h3 class="sc">' + esc(p[1]) + '</h3><p>' + esc(p[2]) + '</p></figcaption></figure>'; }).join("") + '</div>';
           break;
         case "meta": flush(); b[1].forEach(function (m) { foot.push('<span>' + (TX.gomet.test(m) ? '<b class="gm"></b>' : '') + esc(m) + '</span>'); }); break;
         case "contact": flush(); rows.push(kvRow(TX.contact, '<a href="mailto:gometverdestudi@gmail.com">gometverdestudi@gmail.com</a><br><a href="tel:+34684450515">+34 684 450 515</a><br><a href="https://www.instagram.com/gometverdestudi/" target="_blank" rel="noopener">@gometverdestudi ↗</a>')); break;
@@ -878,7 +914,7 @@
   });
   if (grp) html += obra(grp);
   function obra(inner) {
-    return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="draw"></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
+    return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="fig"><p class="fig-c"><b>' + FIGW + ' 1</b><span>' + esc(alts[0] || "") + '</span></p><div class="fig-a"><div class="draw"></div></div></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
   }
   $("read").innerHTML = html;
   // a pinned plate followed by a sheet of thin paper (its folded detail, or the pillars) carries its foot on that paper (see .pre)
@@ -935,6 +971,14 @@
   var OBR = document.querySelector(".obra"), obs = [], bld = null, phCur = [0, 0, 0, 0, 0, 0, 0, 0], phTgt = [0, 0, 0, 0, 0, 0, 0, 0], obNear = false;
   each(".pl.ob", function (sec) { obs.push({ sec: sec, ph: +sec.getAttribute("data-ph"), run: 1 }); });
   function obApply() { if (bld) bld.phases(phCur.map(function (v) { return Math.min(1, v); })); }
+  var FIGC = OBR && OBR.querySelector(".ob-stage .fig-c"), figN = 1, obPinned = false;
+  function figCaption(Y) {
+    if (!FIGC) return;
+    // the figure is the step whose sheet holds the middle of the screen
+    var n = 1; obs.forEach(function (o) { if (o.box && o.box[0] - Y <= vh * 0.5) n = o.ph; });
+    if (n === figN) return; figN = n;
+    FIGC.firstChild.textContent = FIGW + " " + n; FIGC.lastChild.textContent = alts[n - 1] || "";
+  }
   // the pillars are not pinned: they scroll with their text, grow in as they enter, and keep turning while seen
   var pgs = [];
   each(".pil", function (g) { pgs.push({ sec: g, els: g.querySelectorAll("[data-pillar]"), p3: null, vis: false, near: false }); });
@@ -1051,6 +1095,7 @@
       var was = sc.near; sc.near = r.bottom > -vh && r.top < vh * 2; sc.vis = r.bottom > 0 && r.top < vh;
       if (sc.near && !was && sc.ready) sc.apply(sc.cur);
       sc.target = RM ? 1 : progress(sc, r);
+      var pn = r.top <= 2 && r.top > -sc.run - 2; if (pn !== sc.pinned) { sc.pinned = pn; sc.sec.classList.toggle("pinned", pn); }
       if (sc.near && !sc.ready && KIT) { sc.mount(); sc.ready = true; sc.cur = sc.target; sc.apply(sc.cur); }
     });
     if (OBR) {
@@ -1058,6 +1103,9 @@
       if (obNear && !obWas && bld) obApply();
       obs.forEach(function (o) { var p = progress(o, { top: o.box[0] - Y, bottom: o.box[1] - Y }); phTgt[o.ph - 1] = RM ? (p > 0.06 ? 1 : 0) : clamp((p - 0.06) / 0.9); });
       if (obNear && !bld && KIT && KIT.building) { bld = KIT.building(OBR.querySelector(".ob-stage .draw")); phCur = phTgt.slice(); obApply(); }
+      if (obNear) figCaption(Y);
+      var opn = obs.some(function (o) { var t = o.box[0] - Y; return t <= 2 && t > -o.run - 2; });
+      if (opn !== obPinned) { obPinned = opn; OBR.classList.toggle("pinned", opn); }
     }
     pgs.forEach(function (pg) {
       var top = pg.box[0] - Y, bot = pg.box[1] - Y;

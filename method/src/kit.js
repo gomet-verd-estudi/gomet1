@@ -331,7 +331,8 @@
         const [cx, cy] = P(p[0], p[1], p[2]);
         const g = k.el('g', { class: 'co' }, lab0), inner = k.el('g', {}, g);
         const dx = sx * 34, dy = -20;
-        k.el('path', { class: 'co-l', d: `M0 0L${(dx * 0.45).toFixed(1)} ${dy}L${dx} ${dy}` }, inner);
+        // a patent leader: a single soft curve from the point to its letter
+        k.el('path', { class: 'co-l', d: `M0 0C${(dx * 0.06).toFixed(1)} ${(dy * 0.8).toFixed(1)} ${(dx * 0.4).toFixed(1)} ${dy} ${dx} ${dy}` }, inner);
         k.el('circle', { class: 'co-p', r: 2.3 }, inner);
         const cg = k.el('g', { transform: `translate(${dx + sx * 9} ${dy})` }, inner);
         k.el('circle', { class: 'co-c', r: 9 }, cg);
