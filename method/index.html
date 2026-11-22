@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "44"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "45"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,9 +17,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=44" as="script">
-<link rel="preload" href="kit.js?v=44" as="script">
-<link rel="preload" href="pillars3d.js?v=44" as="script">
+<link rel="preload" href="content.js?v=45" as="script">
+<link rel="preload" href="kit.js?v=45" as="script">
+<link rel="preload" href="pillars3d.js?v=45" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -309,7 +309,7 @@
   .mf-t .lead { max-width: 46em; text-wrap: pretty; }
   .mf-side { margin-top: 1.1em; line-height: 1.25; }
   .mf-side span { display: block; }
-  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: -.5em; /* the big statements are printed over the small text, as on designofficefun: they cross it in multiply */
+  .mf-st { list-style: none; position: relative; z-index: 2; mix-blend-mode: multiply; text-align: center; margin-top: -.34em; color: var(--mi); /* the big statements, in the green ink, printed over the foot of the small text in multiply: they touch it, they do not bury it */
     font-weight: 560; font-stretch: 62%; text-transform: uppercase; font-size: clamp(56px, 9.2vw, 176px); line-height: .8; letter-spacing: -.02em; }
   .mf-st li { text-wrap: balance; }
   .mf-st li + li { margin-top: .32em; }
@@ -473,7 +473,7 @@
     .pl-meta .vs span { display: none; }
     .ttl { font-size: min(26vw, 150px, 25vh, calc((100vw - 2 * var(--pad)) / (var(--ch, 10) * .38))); }
     .cover .logo { width: 100%; }
-    .mf-st { font-size: clamp(46px, 14.4vw, 76px); margin-top: -.62em; }
+    .mf-st { font-size: clamp(46px, 14.4vw, 76px); margin-top: -.4em; }
     .closing .giant { font-size: 13.6vw; }
     .mx tbody th { font-size: 16px; }
     .mx thead th:first-child { width: 38%; }
@@ -532,9 +532,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=44"></script>
-<script src="kit.js?v=44"></script>
-<script src="pillars3d.js?v=44"></script>
+<script src="content.js?v=45"></script>
+<script src="kit.js?v=45"></script>
+<script src="pillars3d.js?v=45"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
