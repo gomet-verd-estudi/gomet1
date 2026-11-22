@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "40"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "41"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -252,8 +252,14 @@
   /* a light sheet, like thin paper: the building shows through it, softened, and its edges cast the faintest shadow.
      It starts right under the step's description: the step's foot and the sheet meet on the same rule */
   .obra > .pl.pil-after { z-index: 4; background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
-    padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 -10px 18px -16px rgba(16, 40, 28, .28), 0 10px 18px -16px rgba(16, 40, 28, .28); }
-  .pl.pil-after > .grain.in { opacity: .6; }
+    padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 10px 18px -16px rgba(16, 40, 28, .28); }
+  .pl.pil-after > .grain.in, .pl.pre .lam-foot > .grain.in { opacity: .6; }
+  /* the step before a sheet: its description is already on the sheet. Its foot is lifted over the building and printed on the
+     same thin paper, so when the pin lets go the foot and the sheet are one piece, from the description down */
+  .obra > .pl.pre, .pl.pre > .flow { z-index: auto; }
+  .pl.pre .lam { z-index: 4; }
+  .pl.pre .lam-foot { background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); box-shadow: 0 -10px 18px -16px rgba(16, 40, 28, .28); }
+  .tab > .grain { padding: 0 !important; border: 0 !important; }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) - 1px) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -515,9 +521,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=40"></script>
-<script src="kit.js?v=40"></script>
-<script src="pillars3d.js?v=40"></script>
+<script src="content.js?v=41"></script>
+<script src="kit.js?v=41"></script>
+<script src="pillars3d.js?v=41"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -789,6 +795,15 @@
     return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="draw"></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
   }
   $("read").innerHTML = html;
+  // the steps followed by a sheet of thin paper carry their foot on that paper (see .pre)
+  each(".obra > .pl.pil-after", function (pa) {
+    var st = pa.previousElementSibling;
+    while (st && !st.classList.contains("ob")) st = st.previousElementSibling;
+    if (!st) return;
+    st.classList.add("pre");
+    var ft = st.querySelector(".lam-foot"), g = document.createElement("div");
+    g.className = "grain in"; g.setAttribute("aria-hidden", "true"); ft.appendChild(g);
+  });
 
   /* ---------- the drawings move with the scroll ---------- */
   // Each sticky block is a scrubber: 0 when its plate peeks in, 1 a little before it lets go.
