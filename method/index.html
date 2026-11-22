@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "33"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "34"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -203,6 +203,9 @@
   .pil figure { margin: 0; }
   .pl.pil-after { padding-top: 0; }
   .pl.pil-after::before { display: none; }
+  /* the construction band that closes the pillars belongs to the paper sheet: it sits at its foot, and the next step opens without one */
+  .pl.pil-after::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: repeating-linear-gradient(-45deg, var(--g) 0 6px, transparent 6px 12px); pointer-events: none; }
+  .pl.pil-after + .pl::before { display: none; }
   .pl.pil-after .pil { margin-top: 0; }
   .pil .pd { position: relative; aspect-ratio: 1 / 1; margin-bottom: 18px; }
   .pil .pd .p3 { inset: 0; width: 100%; height: 100%; }
@@ -348,7 +351,7 @@
     .tw { padding-top: calc(var(--hd) + 18px); }
     .hd2 { top: calc(var(--hd) + 18px); }
     .lam-foot { grid-template-columns: minmax(0, 1fr); row-gap: 10px; padding-top: 6px; }
-    .pl::before { height: 10px; background: repeating-linear-gradient(-45deg, var(--g) 0 4.5px, transparent 4.5px 9px); }
+    .pl::before, .pl.pil-after::after { height: 10px; background: repeating-linear-gradient(-45deg, var(--g) 0 4.5px, transparent 4.5px 9px); }
     .lam-foot > .hl, .lam-foot > .lead, .lam-foot > .legend, .lam-foot:not(.has-lg) > .lead { grid-column: 1; grid-row: auto; }
     .lam-foot .legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 16px; }
     .lam-foot .legend .n { width: 19px; height: 19px; font-size: 10px; border-width: 1.5px; }
@@ -398,9 +401,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=33"></script>
-<script src="kit.js?v=33"></script>
-<script src="pillars3d.js?v=33"></script>
+<script src="content.js?v=34"></script>
+<script src="kit.js?v=34"></script>
+<script src="pillars3d.js?v=34"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
