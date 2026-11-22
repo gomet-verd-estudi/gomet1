@@ -101,37 +101,60 @@
 
   /* ---------- drawing ---------- */
   var F = 4.2; // the eye, on the z axis
+  // the light comes from the upper left, in front: lit faces stay white paper, faces turned away take a pale green wash
+  var LT = (function (v) { var l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; })([-0.55, 0.62, 0.56]);
+  var SHD = [0.55, -1, -0.45]; // where the light falls: the shadow is cast down, to the right and back, on a floor under the solid
+  // the eye looks down on the solids a little, as on the building: the floor and the shadows open up
+  var CAM = rx(0.36), cam = function (v) { return ap(CAM, v); };
+  var WASH = [[255, 255, 255], [214, 234, 221]]; // white → the palest green of the palette
+  var mix = function (k) { k = Math.max(0, Math.min(1, k)); return "rgb(" + WASH[0].map(function (c, i) { return Math.round(c + (WASH[1][i] - c) * k); }).join(",") + ")"; };
   function mount(host, name) {
     var svg = document.createElementNS(NS, "svg");
     svg.setAttribute("class", "p3"); svg.setAttribute("viewBox", "-1.08 -1.08 2.16 2.16"); svg.setAttribute("aria-hidden", "true");
     host.appendChild(svg);
+    var shadow = document.createElementNS(NS, "path"); shadow.setAttribute("class", "sh"); svg.appendChild(shadow);
+    var floor = document.createElementNS(NS, "path"); floor.setAttribute("class", "fl"); svg.appendChild(floor);
     var pool = [], scene = PIL[name](), shown = 1;
     var path = function (i) { var p = pool[i]; if (!p) { p = pool[i] = document.createElementNS(NS, "path"); svg.appendChild(p); } return p; };
     var proj = function (v, s) { var q = F / (F - v[2] * s); return [v[0] * s * q, -v[1] * s * q]; };
     var ring = function (pts, close) { var d = ""; for (var i = 0; i < pts.length; i++) d += (i ? "L" : "M") + pts[i][0].toFixed(4) + " " + pts[i][1].toFixed(4); return close ? d + "Z" : d; };
     function render(t, k) {
-      var s = 0.001 + shown, items = [];
-      scene(t, k || 0).forEach(function (o) {
+      var s = 0.001 + shown, items = [], hidden = [], world = [], low = 1e9;
+      var objs = scene(t, k || 0);
+      // every face in world space first: the floor sits just under the lowest point of the solid
+      objs.forEach(function (o) {
         o.faces.forEach(function (f) {
-          var n = ap(o.m, f.n), v0 = ap(o.m, f.rings[0][0]), p0 = [v0[0] + o.at[0], v0[1] + o.at[1], v0[2] + o.at[2]];
-          // facing the eye? (eye at (0,0,F/s) in object space)
-          if (-p0[0] * n[0] - p0[1] * n[1] + (F / s - p0[2]) * n[2] <= 0) return;
-          var zsum = 0, cnt = 0, d = "";
-          f.rings.forEach(function (r) {
-            d += ring(r.map(function (p) { var v = ap(o.m, p); v = [v[0] + o.at[0], v[1] + o.at[1], v[2] + o.at[2]]; zsum += v[2]; cnt++; return proj(v, s); }), true);
-          });
-          var deco = (f.deco || []).map(function (q) {
-            return { cls: q.cls, d: ring(q.pts.map(function (p) { var v = ap(o.m, [p[0], p[1], f.z + (f.z > 0 ? 0.002 : -0.002)]); return proj([v[0] + o.at[0], v[1] + o.at[1], v[2] + o.at[2]], s); }), q.closed) };
-          });
-          items.push({ z: zsum / cnt, d: d, cls: f.cls, deco: deco });
+          var rs = f.rings.map(function (r) { return r.map(function (p) { var v = ap(o.m, p); v = [v[0] + o.at[0], v[1] + o.at[1], v[2] + o.at[2]]; if (v[1] < low) low = v[1]; return v; }); });
+          world.push({ o: o, f: f, rs: rs });
         });
       });
+      var gy = low - 0.03, sh = "";
+      world.forEach(function (w) {
+        var o = w.o, f = w.f, nw = ap(o.m, f.n), n = cam(nw), p0 = cam(w.rs[0][0]);
+        // the cast shadow: every face pressed onto the floor along the light (their union is the shadow)
+        sh += ring(w.rs[0].map(function (v) { var tt = (gy - v[1]) / SHD[1]; return proj(cam([v[0] + SHD[0] * tt, gy, v[2] + SHD[2] * tt]), s); }), true);
+        var facing = -p0[0] * n[0] - p0[1] * n[1] + (F / s - p0[2]) * n[2] > 0;
+        var zsum = 0, cnt = 0, d = "";
+        w.rs.forEach(function (r) { d += ring(r.map(function (v) { v = cam(v); zsum += v[2]; cnt++; return proj(v, s); }), true); });
+        // faces turned away are not painted, but their edges are drawn dashed, as hidden lines on a technical drawing
+        if (!facing) { hidden.push(d); return; }
+        var deco = (f.deco || []).map(function (q) {
+          return { cls: q.cls, d: ring(q.pts.map(function (p) { var v = ap(o.m, [p[0], p[1], f.z + (f.z > 0 ? 0.002 : -0.002)]); return proj(cam([v[0] + o.at[0], v[1] + o.at[1], v[2] + o.at[2]]), s); }), q.closed) };
+        });
+        var lit = n[0] * LT[0] + n[1] * LT[1] + n[2] * LT[2];
+        items.push({ z: zsum / cnt, d: d, cls: f.cls, fill: f.cls === "fw" ? mix((0.5 - lit) * 1.25) : "", deco: deco });
+      });
+      shadow.setAttribute("d", sh);
+      // the floor: a short ruled line under the solid, where its shadow lands
+      var c0 = proj(cam([-0.72, gy, 0.08]), s), c1 = proj(cam([0.9, gy, 0.08]), s);
+      floor.setAttribute("d", "M" + c0[0].toFixed(4) + " " + c0[1].toFixed(4) + "L" + c1[0].toFixed(4) + " " + c1[1].toFixed(4));
       items.sort(function (a, b) { return a.z - b.z; });
       var i = 0;
       items.forEach(function (it) {
-        var p = path(i++); p.setAttribute("d", it.d); p.setAttribute("class", it.cls);
-        it.deco.forEach(function (q) { var e = path(i++); e.setAttribute("d", q.d); e.setAttribute("class", q.cls); });
+        var p = path(i++); p.setAttribute("d", it.d); p.setAttribute("class", it.cls); p.style.fill = it.fill;
+        it.deco.forEach(function (q) { var e = path(i++); e.setAttribute("d", q.d); e.setAttribute("class", q.cls); e.style.fill = ""; });
       });
+      if (hidden.length) { var hp = path(i++); hp.setAttribute("d", hidden.join("")); hp.setAttribute("class", "hd"); hp.style.fill = ""; }
       for (; i < pool.length; i++) pool[i].setAttribute("d", "");
     }
     render(0, 0);

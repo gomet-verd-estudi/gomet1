@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "39"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "40"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -249,8 +249,11 @@
   .obra > .pl { z-index: 1; }
   .pl.st.ob { padding-bottom: clamp(40px, 7vh, 88px); }
   /* the 3D pillars come on a sheet of thin paper laid over the drawing: white, but you can still make out the building under it */
-  .obra > .pl.pil-after { z-index: 4; background: rgba(255, 255, 255, .8); -webkit-backdrop-filter: blur(1.4px); backdrop-filter: blur(1.4px);
-    padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 -1px 0 rgba(0, 0, 0, .025), 0 1px 0 rgba(0, 0, 0, .025); }
+  /* a light sheet, like thin paper: the building shows through it, softened, and its edges cast the faintest shadow.
+     It starts right under the step's description: the step's foot and the sheet meet on the same rule */
+  .obra > .pl.pil-after { z-index: 4; background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+    padding-top: clamp(28px, 5vh, 56px); box-shadow: 0 -10px 18px -16px rgba(16, 40, 28, .28), 0 10px 18px -16px rgba(16, 40, 28, .28); }
+  .pl.pil-after > .grain.in { opacity: .6; }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) - 1px) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -280,6 +283,10 @@
   .p3 path { stroke: var(--mi); stroke-width: 1.3px; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
   .p3 .fw { fill: #FFFFFF; } .p3 .fg { fill: var(--mi); } .p3 .f1 { fill: #6CC593; } .p3 .f2 { fill: #ABDABD; } .p3 .f3 { fill: #E1E9DB; }
   .p3 .ln { fill: none; } .p3 .lt { stroke-width: .8px; opacity: .55; }
+  /* the light on the solids: a cast shadow in the palest green on a short floor line, and the hidden edges dashed, as on a technical drawing */
+  .p3 .sh { fill: #E6F1E9; stroke: none; }
+  .p3 .fl { fill: none; stroke-width: 1px; opacity: .5; }
+  .p3 .hd { fill: none; stroke-width: .8px; stroke-dasharray: 3 3; opacity: .42; }
   .pil { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 40px var(--pad); margin-top: clamp(28px, 5vh, 56px); }
   .pil figure { margin: 0; }
   .pl.pil-after { padding-top: 0; }
@@ -508,9 +515,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=39"></script>
-<script src="kit.js?v=39"></script>
-<script src="pillars3d.js?v=39"></script>
+<script src="content.js?v=40"></script>
+<script src="kit.js?v=40"></script>
+<script src="pillars3d.js?v=40"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -887,6 +894,16 @@
       });
       var osh = Math.max(120, gBot - gTop), ow = OBR.querySelector(".ob-track").clientWidth, dh = Math.min(osh, ow / 1.233);
       obs.forEach(function (o) { o.sec.style.setProperty("--wh", o.wh + "px"); });
+      // the sheet of thin paper after a step starts on the rule under that step's description: it is pulled up by the room
+      // left under the foot (the sheet's padding and the block's), so the two meet as the pin lets go
+      each(".obra > .pl.pil-after", function (pa) {
+        var st = pa.previousElementSibling;
+        while (st && !st.classList.contains("ob")) st = st.previousElementSibling;
+        if (!st) return;
+        var fl = st.querySelector(".flow"), pin = st.querySelector(".pin"), lam = st.querySelector(".lam"), ft = st.querySelector(".lam-foot");
+        var gap = (st.offsetHeight - (fl.offsetTop + pin.offsetTop + pin.offsetHeight)) + (lam.offsetHeight - ft.offsetTop - ft.offsetHeight);
+        pa.style.marginTop = -Math.max(0, Math.round(gap)) + "px";
+      });
       OBR.style.setProperty("--ost", Math.round(gTop) + "px"); OBR.style.setProperty("--osh", Math.round(osh) + "px");
       OBR.style.setProperty("--opb", Math.round(dh + GAP_TEXT + GAP_END + Math.max(0, (osh - dh) / 2)) + "px");
     }
