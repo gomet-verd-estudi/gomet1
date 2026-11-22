@@ -106,8 +106,14 @@
   var SHD = [0.55, -1, -0.45]; // where the light falls: the shadow is cast down, to the right and back, on a floor under the solid
   // the eye looks down on the solids a little, as on the building: the floor and the shadows open up
   var CAM = rx(0.36), cam = function (v) { return ap(CAM, v); };
-  var WASH = [[255, 255, 255], [214, 234, 221]]; // white → the palest green of the palette
-  var mix = function (k) { k = Math.round(Math.max(0, Math.min(1, k)) * 24) / 24; return "rgb(" + WASH[0].map(function (c, i) { return Math.round(c + (WASH[1][i] - c) * k); }).join(",") + ")"; };
+  // lit faces in the page's light colour, faces turned away towards its shade colour (white → palest green, or the colour edition's)
+  var MIX_OK = window.CSS && CSS.supports && CSS.supports("color", "color-mix(in srgb, red 50%, blue)");
+  var WASH = [[255, 255, 255], [214, 234, 221]];
+  var mix = function (k) {
+    k = Math.round(Math.max(0, Math.min(1, k)) * 24) / 24;
+    if (MIX_OK) return "color-mix(in srgb, var(--p3s, #D6EADD) " + Math.round(k * 100) + "%, var(--p3l, #FFFFFF))";
+    return "rgb(" + WASH[0].map(function (c, i) { return Math.round(c + (WASH[1][i] - c) * k); }).join(",") + ")";
+  };
   function mount(host, name) {
     var svg = document.createElementNS(NS, "svg");
     svg.setAttribute("class", "p3"); svg.setAttribute("viewBox", "-1.08 -1.08 2.16 2.16"); svg.setAttribute("aria-hidden", "true");
