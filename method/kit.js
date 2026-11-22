@@ -366,7 +366,8 @@
    * Scenes, keyed by slide number. Each returns its duration in seconds.
    * ==================================================================================== */
   const SCENES = {};
-  const phaseScene = (ph) => (k) => { obra(k, phaseAt(ph, 0.35, 4.6), { marks: { [ph]: true }, upto: ph, from: ph, markAt: (p, n) => 0.62 + n * 0.07 }); return 5.4; };
+  // every step shows the same building, framed the same way: what came before is already built, its own phase builds now
+  const phaseScene = (ph) => (k) => { obra(k, phaseAt(ph, 0.35, 4.6), { upto: 8, from: 1 }); return 5.4; };
   [[5, 1], [7, 2], [11, 3], [17, 4], [20, 5], [22, 6], [24, 7], [26, 8]].forEach(([n, ph]) => { SCENES[n] = phaseScene(ph); });
 
   // 04 · the building: every layer rests on the one before
@@ -594,8 +595,6 @@
     has: (n) => !!SCENES[n],
     mount: (host, n, opts) => mount(host, SCENES[n], opts),
     pillar: (host, name, opts) => mount(host, PILLARS[name], Object.assign({ pad: 10 }, opts)),
-    // one building through all eight phases: seek(p) with p = t / 8, phase i builds while t goes from i-1 to i
-    sequence: (host, opts) => mount(host, (k) => { obra(k, sequence(0, 1), { upto: 8, from: 1 }); return 8; }, opts),
     // a small, already finished building at the end of phase `ph`, for the timeline
     phaseIcon: (host, ph) => mount(host, (k) => { obra(k, phaseAt(ph + 1, 0, 0.001), { upto: ph, from: ph }); return 0.01; }, { final: true, pad: 4, sw: 0.42 })
   };
