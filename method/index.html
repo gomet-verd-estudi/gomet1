@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "43"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "44"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,6 +17,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="content.js?v=44" as="script">
+<link rel="preload" href="kit.js?v=44" as="script">
+<link rel="preload" href="pillars3d.js?v=44" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -529,9 +532,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=43"></script>
-<script src="kit.js?v=43"></script>
-<script src="pillars3d.js?v=43"></script>
+<script src="content.js?v=44"></script>
+<script src="kit.js?v=44"></script>
+<script src="pillars3d.js?v=44"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -826,7 +829,7 @@
       sc.mount = function () {
         var ms = Array.prototype.map.call(pil, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
         // they come in one after the other as the sheet arrives; then they keep turning (see spin)
-        sc.apply = function (p) { ms.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((p + 0.3 - k * 0.08) / 0.42))); if (!spinning) m.render(performance.now() / 1000, scrollY * 0.0012); }); };
+        sc.apply = function (p) { ms.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((p + 0.3 - k * 0.08) / 0.42))); m.render(performance.now() / 1000, scrollY * 0.0012); }); };
         sc.p3 = ms;
       };
     } else if (ring) {
@@ -888,9 +891,8 @@
     var m = Array.prototype.map.call(ts, function (t) { return [t, t.scrollWidth, t.parentNode.clientWidth, parseFloat(getComputedStyle(t).fontSize)]; });
     m.forEach(function (x) { if (x[1] > x[2]) x[0].style.fontSize = (x[3] * x[2] / x[1] * 0.98).toFixed(1) + "px"; });
   }
-  var relaid = true;
   function holes() {
-    relaid = true;
+    geoOK = false;
     fitTitles();
     var heads = scrubs.map(function (sc) { return sc.sec.querySelector(".hd2").offsetHeight; });
     scrubs.forEach(function (sc, i) { sc.sec.style.setProperty("--hdh", heads[i] + "px"); });
@@ -933,42 +935,54 @@
     }
     scrubs.forEach(function (sc) { var st = sc.sec.style; st.setProperty("--ht", sc.ht + "px"); st.setProperty("--hh", sc.hh + "px"); st.setProperty("--pb", sc.pb + "px"); st.setProperty("--tb", sc.tb + "px"); st.setProperty("--wh", sc.wh + "px"); });
   }
-  var docH = 0, PROG = $("prog");
-  function measure() {
+  /* ---------- one loop for everything that moves ----------
+     Where every block sits in the page is measured only when the page is laid out again (load, fonts, a real resize, any
+     change of size): during the scroll nothing is read back from the page, every position comes from scrollY alone.
+     One requestAnimationFrame loop then does all the work of a frame, and stops by itself when nothing moves. */
+  var docH = 0, PROG = $("prog"), geoOK = false;
+  function relayout() {
+    var Y = scrollY, box = function (el) { var r = el.getBoundingClientRect(); return [r.top + Y, r.bottom + Y]; };
+    scrubs.forEach(function (sc) { sc.box = box(sc.sec); });
+    obs.forEach(function (o) { o.box = box(o.sec); });
+    if (OBR) OBR._box = box(OBR);
+    pgs.forEach(function (pg) { pg.box = box(pg.sec); pg.tops = Array.prototype.map.call(pg.els, box); });
+    rvs.forEach(function (el) { el._box = box(el); });
+    docH = document.documentElement.scrollHeight;
+    geoOK = true;
+  }
+  function measure(Y) {
     // the phone's address bar changes the height all the time: only a real resize (width, or rotating) re-lays the sheets
     if (innerWidth !== lastW || Math.abs(innerHeight - lastH) > 160) { lastW = innerWidth; lastH = innerHeight; holes(); }
-    if (!docH || relaid) { docH = document.documentElement.scrollHeight; relaid = false; }
+    if (!geoOK) relayout();
     vh = innerHeight;
-    // read everything first…
-    var rs = scrubs.map(function (sc) { return sc.sec.getBoundingClientRect(); });
-    var ts = rvs.map(function (el) { return el.getBoundingClientRect().top; });
-    // …then write
-    scrubs.forEach(function (sc, i) {
-      var r = rs[i];
+    scrubs.forEach(function (sc) {
+      var r = { top: sc.box[0] - Y, bottom: sc.box[1] - Y };
       var was = sc.near; sc.near = r.bottom > -vh && r.top < vh * 2; sc.vis = r.bottom > 0 && r.top < vh;
       if (sc.near && !was && sc.ready) sc.apply(sc.cur);
       sc.target = RM ? 1 : progress(sc, r);
       if (sc.near && !sc.ready && KIT) { sc.mount(); sc.ready = true; sc.cur = sc.target; sc.apply(sc.cur); }
     });
     if (OBR) {
-      var orr = OBR.getBoundingClientRect(), ors = obs.map(function (o) { return o.sec.getBoundingClientRect(); });
-      var obWas = obNear; obNear = orr.bottom > -vh && orr.top < vh * 2;
+      var obWas = obNear; obNear = OBR._box[1] - Y > -vh && OBR._box[0] - Y < vh * 2;
       if (obNear && !obWas && bld) obApply();
-      obs.forEach(function (o, i) { var p = progress(o, ors[i]); phTgt[o.ph - 1] = RM ? (p > 0.06 ? 1 : 0) : clamp((p - 0.06) / 0.9); });
+      obs.forEach(function (o) { var p = progress(o, { top: o.box[0] - Y, bottom: o.box[1] - Y }); phTgt[o.ph - 1] = RM ? (p > 0.06 ? 1 : 0) : clamp((p - 0.06) / 0.9); });
       if (obNear && !bld && KIT && KIT.building) { bld = KIT.building(OBR.querySelector(".ob-stage .draw")); phCur = phTgt.slice(); obApply(); }
     }
-    var prs = pgs.map(function (pg) { return pg.sec.getBoundingClientRect(); });
-    var pts = pgs.map(function (pg) { return Array.prototype.map.call(pg.els, function (el) { return el.getBoundingClientRect().top; }); });
-    pgs.forEach(function (pg, i) {
-      var r = prs[i]; pg.near = r.bottom > -vh && r.top < vh * 2; pg.vis = r.bottom > 0 && r.top < vh;
+    pgs.forEach(function (pg) {
+      var top = pg.box[0] - Y, bot = pg.box[1] - Y;
+      pg.near = bot > -vh && top < vh * 2; pg.vis = bot > 0 && top < vh;
       if (pg.near && !pg.p3 && window.GVE_P3D) pg.p3 = Array.prototype.map.call(pg.els, function (el) { return window.GVE_P3D.mount(el, el.getAttribute("data-pillar")); });
-      // only the pillars on screen are drawn; the others keep their place and are drawn again when they come back
-      if (pg.p3 && pg.near) pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - pts[i][k]) / (vh * 0.3)))); if (pg.vis && (RM || !spinning)) m.render(RM ? 0 : performance.now() / 1000, scrollY * 0.0012); });
+      if (!pg.p3 || !pg.near) return;
+      // each pillar grows in as it enters, and only the ones on screen are drawn
+      pg.on = pg.tops.map(function (b) { return b[1] - Y > 0 && b[0] - Y < vh; });
+      pg.p3.forEach(function (m, k) { m.show(RM ? 1 : eo(clamp((vh - (pg.tops[k][0] - Y)) / (vh * 0.3)))); if (RM && pg.on[k]) m.render(0, Y * 0.0012); });
     });
-    rvs.forEach(function (el, i) { var t = ts[i]; if (t < vh * 0.9) el.classList.add("in"); else if (t > vh * 0.97) el.classList.remove("in"); });
+    rvs.forEach(function (el) { var t = el._box[0] - Y; if (t < vh * 0.9) el.classList.add("in"); else if (t > vh * 0.97) el.classList.remove("in"); });
+    var h = docH - vh; PROG.style.transform = "scaleX(" + (h > 0 ? Math.min(1, Y / h) : 0).toFixed(4) + ")";
   }
-  function frame(now) {
-    var dt = lastT ? Math.min(50, now - lastT) : 16, k = 1 - Math.exp(-dt / 90), moving = false; lastT = now;
+  // the drawings catch up with the scroll with a soft lag (the same in time at 60, 90 or 120 frames a second)
+  function smooth(k) {
+    var moving = false;
     scrubs.forEach(function (sc) {
       if (!sc.ready) return;
       var d = sc.target - sc.cur;
@@ -982,31 +996,35 @@
       for (var j = 0; j < 8; j++) { var d2 = phTgt[j] - phCur[j]; if (Math.abs(d2) > 0.0005) { phCur[j] += d2 * k; ch = true; } else if (phCur[j] !== phTgt[j]) { phCur[j] = phTgt[j]; ch = true; } }
       if (ch) { moving = true; if (obNear) obApply(); }
     }
-    if (moving) requestAnimationFrame(frame); else { running = false; lastT = 0; }
+    return moving;
   }
-  var spinning = false, T0 = 0;
-  function spin(now) {
-    var live = scrubs.concat(pgs).filter(function (sc) { return sc.p3 && sc.vis; });
-    if (!live.length || RM) { spinning = false; return; }
-    T0 = now / 1000;
-    live.forEach(function (sc) { sc.p3.forEach(function (m) { m.render(T0, scrollY * 0.0012); }); });
-    requestAnimationFrame(spin);
+  // the pillars on screen keep turning, on the page's clock
+  function spin(now, Y) {
+    if (RM) return false;
+    var any = false;
+    pgs.forEach(function (pg) { if (!pg.p3 || !pg.vis) return; pg.p3.forEach(function (m, k) { if (pg.on && pg.on[k]) { m.render(now / 1000, Y * 0.0012); any = true; } }); });
+    return any;
   }
-  function update() {
-    measure();
-    if (!spinning && !RM && scrubs.concat(pgs).some(function (sc) { return sc.p3 && sc.vis; })) { spinning = true; requestAnimationFrame(spin); }
-    var h = docH - vh; PROG.style.transform = "scaleX(" + (h > 0 ? Math.min(1, scrollY / h) : 0).toFixed(4) + ")";
-    if (!running) { running = true; requestAnimationFrame(frame); }
+  var looping = false, lastT = 0, lastY = -1, lastVH = -1;
+  function loop(now) {
+    var dt = lastT ? Math.min(50, now - lastT) : 16, k = 1 - Math.exp(-dt / 90); lastT = now;
+    var Y = scrollY, moved = Y !== lastY || innerHeight !== lastVH || !geoOK;
+    if (moved) { lastY = Y; lastVH = innerHeight; measure(Y); }
+    var busy = smooth(k), spun = spin(now, Y);
+    if (moved || busy || spun) requestAnimationFrame(loop); else { looping = false; lastT = 0; }
   }
-  // when we jump (index, keys, links) the drawings on the way are not replayed: they take their place at once
+  function kick() { if (!looping) { looping = true; requestAnimationFrame(loop); } }
+  function update() { lastY = -1; kick(); }
+  // when we jump (keys, links) the drawings on the way are not replayed: they take their place at once
   function jumped() {
-    measure();
+    measure(scrollY); lastY = scrollY;
     scrubs.forEach(function (sc) { if (sc.ready) { sc.cur = sc.target; sc.apply(sc.cur); } });
-    phCur = phTgt.slice(); obApply();
+    phCur = phTgt.slice(); obApply(); kick();
   }
-  var ticking = false;
-  window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; update(); }); } }, { passive: true });
+  window.addEventListener("scroll", kick, { passive: true });
   window.addEventListener("resize", update);
+  // any change of size in the page (a font arriving late, a sheet re-laid) moves the blocks: measure them again
+  if ("ResizeObserver" in window) new ResizeObserver(function () { geoOK = false; update(); }).observe($("read"));
   // the timeline's small buildings, finished, one per phase
   each(".tl .ico", function (el) { if (KIT) KIT.phaseIcon(el, +el.getAttribute("data-ph")); });
 
@@ -1022,9 +1040,7 @@
   /* ---------- where we are ---------- */
   var cur = 1, lockUntil = 0;
   var setHash = function (n) { try { history.replaceState(null, "", location.pathname + location.search + "#slide-" + n); } catch (e) {} };
-  function paint() {
-    each(".tile", function (t) { t.classList.toggle("cur", +t.getAttribute("data-n") === cur); });
-  }
+  function paint() {}
   var cio = new IntersectionObserver(function (es) {
     if (Date.now() < lockUntil) return;
     es.forEach(function (e) { if (e.isIntersecting) { var n = +e.target.getAttribute("data-n"); if (n !== cur) { cur = n; setHash(cur); paint(); } } });
@@ -1040,9 +1056,7 @@
   window.addEventListener("hashchange", function () { var m = /slide-(\d+)/.exec(location.hash); if (m) go(+m[1]); });
 
   /* ---------- index ---------- */
-  var ix = $("ix"), g = "";
-  for (var n = 1; n <= N; n++) g += '<button class="tile" data-n="' + n + '">' + (ES ? '<span class="tnum">' + pad(n) + '</span>' : '<img loading="lazy" src="slides/t' + pad(D[n - 1].num) + '.webp" alt="" width="480" height="270">') + '<span class="cap"><span>' + pad(n) + ' ' + esc(D[n - 1].name || "") + '</span><span>' + esc(D[n - 1].sec || (n === 1 ? TX.sections[0] : TX.closing)) + '</span></span></button>';
-  $("ixGrid").innerHTML = g; $("ixN").textContent = "(" + N + ")";
+  var ix = $("ix"); $("ixN").textContent = "(" + N + ")"; // the old index is no longer offered: its grid is not built
   $("home").setAttribute("aria-label", TX.home); $("ix").setAttribute("aria-label", TX.plates);
   $("talk").textContent = TX.talk; $("ixHow").textContent = TX.how; $("ixIntro").textContent = TX.intro; $("ixStudio").textContent = TX.studio;
   $("ixClose").textContent = TX.close; $("lbClose").textContent = TX.close; $("lb").setAttribute("aria-label", TX.original);
