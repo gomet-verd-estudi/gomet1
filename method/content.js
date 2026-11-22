@@ -31,7 +31,8 @@ window.DECK_I18N = (function () {
       ["h", "The idea that holds it all up"],
       ["p", "Like foundations, you don't see it, but everything rests on it: what your brand says, what it's like and why it's different."]
     ]),
-    P(18, 0, "Step 04", "The structure", "[Define]", "Define", [
+    P(18, 17, "Step 04", "The structure", "[Define]", "Define", [
+      ["img", "v17", "Four pillars rising on the foundation slab"],
       ["h", "The house rules"],
       ["p", "Four pillars that make everything look like your brand, whoever makes it."],
       ["pillars", [["v18a", "Typography", "The letters it speaks in."], ["v18b", "Grid", "How every page is laid out."], ["v18c", "Colour", "The colours that identify it."], ["v18d", "Imagery", "What its photos and drawings are like."]]]
@@ -95,7 +96,8 @@ window.DECK_I18N = (function () {
       ["h", "La idea que lo sostiene todo"],
       ["p", "Como los cimientos, no se ve, pero todo se apoya en ella: qué dice vuestra marca, cómo es y por qué es distinta."]
     ]),
-    P(18, 0, "Paso 04", "La estructura", "[Definir]", "Definir", [
+    P(18, 17, "Paso 04", "La estructura", "[Definir]", "Definir", [
+      ["img", "v17", "Cuatro pilares que suben sobre la losa de cimentación"],
       ["h", "Las reglas de la casa"],
       ["p", "Cuatro pilares que hacen que todo parezca de vuestra marca, lo haga quien lo haga."],
       ["pillars", [["v18a", "Tipografía", "Con qué letras habla."], ["v18b", "Retícula", "Cómo se ordena cada página."], ["v18c", "Color", "Qué colores la identifican."], ["v18d", "Imagen", "Cómo son sus fotos y dibujos."]]]
