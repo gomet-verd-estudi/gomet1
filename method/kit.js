@@ -595,6 +595,13 @@
     has: (n) => !!SCENES[n],
     mount: (host, n, opts) => mount(host, SCENES[n], opts),
     pillar: (host, name, opts) => mount(host, PILLARS[name], Object.assign({ pad: 10 }, opts)),
+    // one building for the whole method: phases(arr) sets how far each of the eight phases has gone (0–1)
+    building: (host, opts) => {
+      let ext = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+      const st = mount(host, (k) => { obra(k, () => ext, { upto: 8, from: 1 }); return 1; }, opts);
+      st.phases = (arr) => { ext = [0].concat(arr); st.k.set(0.5); };
+      return st;
+    },
     // a small, already finished building at the end of phase `ph`, for the timeline
     phaseIcon: (host, ph) => mount(host, (k) => { obra(k, phaseAt(ph + 1, 0, 0.001), { upto: ph, from: ph }); return 0.01; }, { final: true, pad: 4, sw: 0.42 })
   };
