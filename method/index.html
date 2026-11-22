@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#FFFFFF">
 <script>
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "49"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "50"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -17,9 +17,9 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=49" as="script">
-<link rel="preload" href="kit.js?v=49" as="script">
-<link rel="preload" href="pillars3d.js?v=49" as="script">
+<link rel="preload" href="content.js?v=50" as="script">
+<link rel="preload" href="kit.js?v=50" as="script">
+<link rel="preload" href="pillars3d.js?v=50" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -222,6 +222,36 @@
   .sign .ref svg { display: block; width: 100%; max-width: 220px; height: 30px; }
   .sign .ref rect { fill: var(--g); }
 
+  /* ---------- more detail, folded ----------
+     The button is the last row of the foot's table: a small label, what is inside, and a green + that turns into a −.
+     The sheet it opens is a ruled table on the same thin paper as the foot, frame to frame; it unfolds from the foot */
+  .more-b { display: flex; align-items: center; gap: 8px 18px; width: 100%; min-height: 40px; padding: 8px var(--pad) 8px; text-align: left; border-top: 1px solid var(--g); cursor: pointer; }
+  .tab > .more-b.more-b { grid-column: 1 / -1; grid-row: 3; padding: 8px var(--pad) 8px; border-left: 0; }
+  .more-b .more-t { flex: none; }
+  .more-b .more-s { flex: 1 1 auto; min-width: 0; font-size: clamp(14px, 1vw, 17px); line-height: 1.15; }
+  .more-i { flex: none; position: relative; width: 24px; height: 24px; border-radius: 50%; background: var(--mi); transition: transform .35s cubic-bezier(.3, .8, .3, 1); }
+  .more-i::before, .more-i::after { content: ""; position: absolute; left: 6px; right: 6px; top: 11px; height: 2px; background: #fff; border-radius: 1px; }
+  .more-i::after { transform: rotate(90deg); transition: transform .35s cubic-bezier(.3, .8, .3, 1); }
+  .more-b[aria-expanded="true"] .more-i::after { transform: rotate(0deg); }
+  .more-b:hover .more-s, .more-b:focus-visible .more-s { color: var(--mi); }
+  .more-b:focus-visible { outline: 2px solid var(--mi); outline-offset: -2px; }
+  .more-row { margin: clamp(36px, 7vh, 80px) calc(var(--fi) - var(--pad)) 0; border-bottom: 1px solid var(--g); }
+  .more-row .more-b { border-top: 1px solid var(--g); }
+  .more-p { position: relative; z-index: 4; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.3, .8, .3, 1); margin: 0 var(--fi); }
+  .pl .more-p { margin: 0 calc(var(--fi) - var(--pad)); }
+  .more-p.open { grid-template-rows: 1fr; }
+  .more-c { min-height: 0; overflow: hidden; }
+  .more-p:not(.open) .more-c { visibility: hidden; transition: visibility 0s .5s; }
+  .more-in { background: rgba(255, 255, 255, .86); border-bottom: 1px solid var(--g); box-shadow: 0 10px 18px -16px rgba(16, 40, 28, .28);
+    font-size: clamp(16px, 1.2vw, 21px); line-height: 1.15; padding-bottom: clamp(18px, 3vh, 32px); }
+  .more-bar { background: var(--paper); border-bottom: 1px solid var(--g); padding: 7px var(--pad) 6px; }
+  .more-in > .more-bar:not(:first-child) { border-top: 1px solid var(--g); margin-top: clamp(10px, 2vh, 20px); }
+  .more-r { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); border-bottom: 1px solid var(--g); }
+  .more-k { padding: 9px var(--pad) 10px; font-weight: 800; }
+  .more-v { padding: 9px var(--pad) 10px; border-left: 1px solid var(--g); max-width: 52em; }
+  .more-in > .more-r:last-child { border-bottom: 0; }
+  @media print { .more-p { grid-template-rows: 1fr !important; } .more-c { visibility: visible !important; } .more-b { display: none; } }
+
   /* ---------- the green plate: sticky in its block, printed over the grey letters in multiply ---------- */
   .stage { position: sticky; z-index: 3; pointer-events: none; mix-blend-mode: multiply;
     margin-top: var(--ht, 30vh); top: var(--ht, 30vh); height: var(--hh, 40vh); width: 100%; }
@@ -253,7 +283,7 @@
      same thin paper, so when the pin lets go the foot and the sheet are one piece, from the description down */
   .obra > .pl.pre, .pl.pre > .flow { z-index: auto; }
   .pl.pre .lam { z-index: 4; }
-  .pl.pre .lam-foot { background: rgba(255, 255, 255, .6); -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px); box-shadow: 0 -10px 18px -16px rgba(16, 40, 28, .28); }
+  .pl.pre .lam-foot { background: rgba(255, 255, 255, .72); box-shadow: 0 -10px 18px -16px rgba(16, 40, 28, .28); }
   .pin { position: relative; height: calc(100vh + var(--runv, 150vh)); height: calc(100svh + var(--run, 150svh)); }
   .lam { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; height: 100svh; padding: calc(var(--hd) - 1px) 0 calc(3vh + 16px); }
   .hole { flex: 1 1 auto; min-height: 26vh; min-height: 26svh; }
@@ -483,6 +513,15 @@
     .sign > div:nth-child(n+3) { border-top: 1px solid var(--g); }
     .sign .ref { padding-bottom: 8px; }
     .tab .lead { font-size: 17px; }
+    .tab > .more-b.more-b { order: 9; grid-row: auto; border-top: 1px solid var(--g); }
+    .more-b { flex-wrap: wrap; }
+    .more-b .more-t { order: 0; }
+    .more-b .more-i { order: 1; margin-left: auto; }
+    .more-b .more-s { order: 2; flex-basis: 100%; font-size: 14px; }
+    .more-r { grid-template-columns: minmax(0, 1fr); }
+    .more-k { padding-bottom: 0; }
+    .more-v { border-left: 0; padding-top: 2px; }
+    .more-in { font-size: 16px; }
     .st .flow > .kv, .st .flow > .pil { margin-top: 4vh; }
     .pil-st { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .pil { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 16px; }
@@ -518,6 +557,7 @@
     .tab > .fl { padding-top: 4px; padding-bottom: 3px; }
     .tab .hl { font-size: 17px; }
     .tab .lead { font-size: 15px; }
+    .tab > .more-b.more-b { grid-row: 3; grid-column: 1 / -1; }
     .lam { padding-bottom: 1vh; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
@@ -556,9 +596,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=49"></script>
-<script src="kit.js?v=49"></script>
-<script src="pillars3d.js?v=49"></script>
+<script src="content.js?v=50"></script>
+<script src="kit.js?v=50"></script>
+<script src="pillars3d.js?v=50"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -717,6 +757,23 @@
     seq.forEach(function (w, i) { if (i % 2 === 0) r += '<rect x="' + x + '" y="0" width="' + w + '" height="30"/>'; x += w + (i % 2 ? 0 : 0); });
     return '<svg viewBox="0 0 ' + x + ' 30" preserveAspectRatio="none" aria-hidden="true">' + r + '</svg>';
   }
+  /* ---------- more detail, folded (content.js: D.more) ----------
+     A button row closes the plate's foot; the sheet it opens follows the foot, on the same thin paper */
+  var MORE = D.more || {};
+  var MDEF = ES ? { t: "Ficha del paso", s: "Qué hacemos, vuestra parte y lo que recibís" } : { t: "Step sheet", s: "What we do, your part and what you get" };
+  function moreBtn(num) {
+    var m = MORE[num]; if (!m) return "";
+    return '<button class="more-b" type="button" id="mb-' + num + '" aria-expanded="false" aria-controls="mp-' + num + '">' +
+      '<span class="more-t sc">' + esc(m.t || MDEF.t) + '</span><span class="more-s">' + esc(m.s || MDEF.s) + '</span><b class="more-i" aria-hidden="true"></b></button>';
+  }
+  function morePanel(num) {
+    var m = MORE[num]; if (!m) return "";
+    var rows = m.r.map(function (r) {
+      return r[0] === "bar" ? '<div class="more-bar sc">' + esc(r[1]) + '</div>'
+        : '<div class="more-r"><div class="more-k">' + esc(r[0]) + '</div><div class="more-v">' + esc(r[1]) + '</div></div>';
+    }).join("");
+    return '<div class="more-p" id="mp-' + num + '" role="region" aria-labelledby="mb-' + num + '"><div class="more-c"><div class="more-in">' + rows + '</div></div></div>';
+  }
   function plate(s, i) {
     var n = i + 1;
     if (s.kind === "cover") {
@@ -729,7 +786,8 @@
       var mf = s.blocks[0];
       return '<section class="pl mf" id="slide-' + n + '" data-n="' + n + '"><div class="pl-meta sc"><span>' + esc(s.sec) + '</span><span>' + esc(s.sub) + '</span></div>' +
         '<h2 class="sr">' + esc(s.title) + '</h2><div class="tab one mf-t"><div class="lead"><p>' + esc(mf[1]) + '</p></div></div>' +
-        '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol></section>';
+        '<ol class="mf-st">' + mf[2].map(function (t, k) { return '<li>' + esc(t) + '</li>'; }).join("") + '</ol>' +
+        (MORE[s.num] ? '<div class="more-row">' + moreBtn(s.num) + '</div>' + morePanel(s.num) : '') + '</section>';
     }
     if (s.kind === "closing") {
       return '<section class="pl closing" id="slide-' + n + '" data-n="' + n + '"><div class="cl-in">' +
@@ -801,11 +859,12 @@
       '<div class="pl-top">' + (stp ? '<p class="pno" aria-label="' + (ES ? 'Paso ' : 'Step ') + stp[1] + (ES ? ' de 8' : ' of 8') + '">' + stp[1] + '<small>/8</small></p>' : '') + '<h2 class="ttl" style="--ch:' + s.title.length + '">' + esc(s.title) + '</h2></div>';
     var flow = (st
       ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
-        '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot tab">' + (hl && leadH ? '<p class="fl sc">' + LBL[0] + '</p><p class="fl sc">' + LBL[1] + '</p>' : '') + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + '</div></div></div>'
+        '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot tab' + (MORE[s.num] ? ' has-more' : '') + '">' + (hl && leadH ? '<p class="fl sc">' + LBL[0] + '</p><p class="fl sc">' + LBL[1] + '</p>' : '') + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + moreBtn(s.num) + '</div></div></div>'
       : head + (hl || right || legend ? '<div class="pl-body two">' + hl + right + legend + '</div>' : '')) + (st ? '' : pillars) +
       (rows.length ? '<div class="kv">' + rows.join("") + '</div>' : '') +
       (foot.length ? '<div class="pl-foot sc">' + foot.join("") + '</div>' : '');
     return '<section class="pl' + (st ? ' st' : '') + (ob ? ' ob' : '') + '" id="slide-' + n + '" data-n="' + n + '" data-scene="' + (s.scene || 0) + '"' + (ob ? ' data-ph="' + (+(/(\d+)$/.exec(s.sec) || [0, 0])[1]) + '"' : '') + '>' + (st && !ob ? '<div class="track">' + stage + '</div>' : '') + '<div class="flow">' + flow + '</div></section>' +
+      (st ? morePanel(s.num) : '') +
       (st && pillars ? '<section class="pl pil-after" data-n="' + n + '">' + pillars + '</section>' : '');
   }
   /* the eight steps are laid out over one single drawing: a building that stays put under them and grows,
@@ -822,13 +881,13 @@
     return '<div class="obra"><div class="ob-track" aria-hidden="true"><div class="ob-stage"><div class="draw"></div></div></div><p class="sr">' + esc(alts.join(". ")) + '</p>' + inner + '</div>';
   }
   $("read").innerHTML = html;
-  // the steps followed by a sheet of thin paper carry their foot on that paper (see .pre)
-  var PRE = [];
-  each(".obra > .pl.pil-after", function (pa) {
-    var st = pa.previousElementSibling;
-    while (st && !st.classList.contains("ob")) st = st.previousElementSibling;
-    if (!st) return;
-    st.classList.add("pre"); PRE.push({ st: st, pa: pa, on: false });
+  // a pinned plate followed by a sheet of thin paper (its folded detail, or the pillars) carries its foot on that paper (see .pre)
+  var SHEETS = [];
+  each(".pl.st", function (st) {
+    var nx = st.nextElementSibling, sheet = nx && (nx.classList.contains("more-p") || nx.classList.contains("pil-after")) ? nx : null;
+    if (!sheet) return;
+    st.classList.add("pre");
+    SHEETS.push({ st: st, sheet: sheet, after: sheet.classList.contains("more-p") && sheet.nextElementSibling && sheet.nextElementSibling.classList.contains("pil-after") ? sheet.nextElementSibling : null });
   });
 
   /* ---------- the drawings move with the scroll ---------- */
@@ -952,17 +1011,19 @@
       obs.forEach(function (o) { o.sec.style.setProperty("--wh", o.wh + "px"); });
       // the sheet of thin paper after a step starts on the rule under that step's description: it is pulled up by the room
       // left under the foot (the sheet's padding and the block's), so the two meet as the pin lets go
-      each(".obra > .pl.pil-after", function (pa) {
-        var st = pa.previousElementSibling;
-        while (st && !st.classList.contains("ob")) st = st.previousElementSibling;
-        if (!st) return;
-        var fl = st.querySelector(".flow"), pin = st.querySelector(".pin"), lam = st.querySelector(".lam"), ft = st.querySelector(".lam-foot");
-        var gap = (st.offsetHeight - (fl.offsetTop + pin.offsetTop + pin.offsetHeight)) + (lam.offsetHeight - ft.offsetTop - ft.offsetHeight);
-        pa.style.marginTop = -Math.max(0, Math.round(gap)) + "px";
-      });
       OBR.style.setProperty("--ost", Math.round(gTop) + "px"); OBR.style.setProperty("--osh", Math.round(osh) + "px");
       OBR.style.setProperty("--opb", Math.round(dh + GAP_TEXT + GAP_END + Math.max(0, (osh - dh) / 2)) + "px");
     }
+    // the sheet after a pinned plate starts on the rule under its foot: it is pulled up by the room left under the foot
+    // (the block's own and the sheet's), so the two meet as the pin lets go. A folded sheet gives that room back below
+    // itself, so while it is closed nothing else moves
+    SHEETS.forEach(function (o) {
+      var st = o.st, fl = st.querySelector(".flow"), pin = st.querySelector(".pin"), lam = st.querySelector(".lam"), ft = st.querySelector(".lam-foot");
+      var gap = Math.max(0, Math.round((st.offsetHeight - (fl.offsetTop + pin.offsetTop + pin.offsetHeight)) + (lam.offsetHeight - ft.offsetTop - ft.offsetHeight)));
+      o.sheet.style.marginTop = -gap + "px";
+      if (o.sheet.classList.contains("more-p")) o.sheet.style.marginBottom = (o.after ? 0 : gap) + "px";
+      if (o.after) o.after.style.marginTop = "0px";
+    });
     scrubs.forEach(function (sc) { var st = sc.sec.style; st.setProperty("--ht", sc.ht + "px"); st.setProperty("--hh", sc.hh + "px"); st.setProperty("--pb", sc.pb + "px"); st.setProperty("--tb", sc.tb + "px"); st.setProperty("--wh", sc.wh + "px"); });
   }
   /* ---------- one loop for everything that moves ----------
@@ -1065,6 +1126,21 @@
   $("read").addEventListener("click", function (e) {
     var vs = e.target.closest("[data-slide]");
     if (vs) { var n = +vs.getAttribute("data-slide"); openLb("slides/s" + pad(n) + ".webp", TX.slide + " " + pad(n) + " · " + (vs.getAttribute("data-name") || "")); }
+  });
+
+  /* ---------- the folded sheets: open and close ---------- */
+  $("read").addEventListener("click", function (e) {
+    var b = e.target.closest && e.target.closest(".more-b"); if (!b) return;
+    var p = $(b.getAttribute("aria-controls")); if (!p) return;
+    var open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", open ? "true" : "false");
+    p.classList.toggle("open", open);
+    if (!open) return;
+    // if the sheet opens below the screen (the plate is still pinned), the page glides down until it can be read
+    setTimeout(function () {
+      var r = p.getBoundingClientRect(), want = innerHeight * 0.42;
+      if (r.top > innerHeight * 0.7) window.scrollTo({ top: scrollY + r.top - want, behavior: RM ? "auto" : "smooth" });
+    }, 60);
   });
 
   /* ---------- where we are ---------- */
