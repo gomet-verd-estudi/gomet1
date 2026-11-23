@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "67"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "68"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=67" as="script">
-<link rel="preload" href="kit.js?v=67" as="script">
-<link rel="preload" href="pillars3d.js?v=67" as="script">
+<link rel="preload" href="content.js?v=68" as="script">
+<link rel="preload" href="kit.js?v=68" as="script">
+<link rel="preload" href="pillars3d.js?v=68" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -735,9 +735,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=67"></script>
-<script src="kit.js?v=67"></script>
-<script src="pillars3d.js?v=67"></script>
+<script src="content.js?v=68"></script>
+<script src="kit.js?v=68"></script>
+<script src="pillars3d.js?v=68"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1314,50 +1314,47 @@
   });
 
   /* ---------- the blocks: the logo's three letters as toy blocks on a flat floor ----------
-     Each block has a letter on its four sides. A small director picks what the three do next: hop along together,
-     spread out, come back together (often back home, so the logo reads), spin on their vertical axis, somersault on
-     the horizontal one, hop one after another. They never leave the header row and never reach the buttons.
-     At rest every block is flat: a plain square seen straight on, no perspective, exactly the logo as it always was
-     (26 px squares, 1.5 px line, 4 px corners, 13 px letters, centred in the row). In 3D they keep that same size.
-     Each move lifts a block into 3D as it starts and lays it flat again, facing us, as soon as its own part ends.
-     They are drawn on one small canvas (each block with its own perspective), and only while they move:
-     between two moves the loop sleeps, so the page keeps the whole frame for itself. */
+     Each block has a letter on its four sides. A small director picks what the three do next: slide along together,
+     slide apart, slide back together (often back home, so the logo reads), turn on their vertical axis, tumble on
+     the horizontal one, tumble one after another. They never leave the header row and never reach the buttons.
+     At rest every block is flat: a plain square seen straight on, exactly the logo as it always was (26 px squares,
+     1.5 px line, 4 px corners, 13 px letters, centred in the row). Each move lifts a block into 3D as it starts and
+     lays it flat again, facing us, as soon as its own part ends. The 3D is drawn the way instruction sheets draw a
+     box (a parallel, oblique view): the face with the letter keeps its exact size and place, the depth simply shows
+     behind it, so a block never grows or shrinks. They slide on the floor; they never travel by jumping.
+     They are drawn on one small canvas, and only while they move: between two moves the loop sleeps. */
   (function () {
     var home = $("home"); if (!home) return;
-    var L = ["G", "V", "E"], S = 26, LW = 1.5, R0 = 4, TILT = -22, HOP = 0.32, TOUCH = -1.5, D = 520, RAD = Math.PI / 180, OX = 8, SQ = 0.07;
+    var L = ["G", "V", "E"], S = 26, LW = 1.5, R0 = 4, TOUCH = -1.5, K = 0.3, OX = 8, RAD = Math.PI / 180;
     var G = S - LW, h = G / 2; // the outline runs on the middle of the line, so the ink measures S, like the old squares
-    // how far below its centre a block's ink reaches: half its side when flat, a little more once tilted towards us
-    function reach(td) { var a = Math.abs(TILT) * td * RAD; return h * (Math.cos(a) + Math.sin(a)) * (1 + td * h / D) + LW / 2; }
-    var RMAX = reach(1), FH = h * Math.SQRT2 * (1 + h * Math.SQRT2 / D) + LW / 2; // FH: half the height of a block mid-somersault
     home.innerHTML = '<canvas class="cv" aria-hidden="true"></canvas>';
     var cv = home.firstChild, ctx = cv.getContext("2d"); if (!ctx) return;
-    var C = L.map(function (ch) { return { ch: ch, x: 0, y: 0, ry: 0, rx: 0, sq: 0, td: 0, tw: [], hop: 0, hx: -99, hy: -99, bb: null, over: false }; });
-    // the canvas reaches OX px into the row's left margin, so a block spinning at home is never cut
-    var W = 0, H = 0, DPR = 1, minX = 0, maxX = 0, HMAX = 8, FMAX = 6, FLOOR = 45;
+    var C = L.map(function (ch) { return { ch: ch, x: 0, ry: 0, rx: 0, td: 0, tw: [], hx: -99, hy: -99, bb: null, over: false }; });
+    // the canvas reaches OX px into the row's left margin, so a block turning at home is never cut
+    var W = 0, H = 0, DPR = 1, minX = 0, maxX = 0, FL = 36;
     function bounds() {
       W = home.clientWidth; H = home.clientHeight; DPR = Math.min(3, window.devicePixelRatio || 1);
       var bw = Math.max(1, Math.round((W + OX) * DPR)), bh = Math.max(1, Math.round(H * DPR));
       if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
-      var spin = Math.ceil(S * 0.22); // a block turning on its axis is wider by this on each side (and OX covers it at home)
+      var spin = Math.ceil(S * 0.22); // a block turning on its axis is wider by this on each side (OX covers it at home)
       minX = 0; maxX = Math.max(minX + 3 * S, W - S - spin - 2);
-      FLOOR = H - 3;                                         // in 3D the blocks stand on a floor near the bottom of the row
-      HMAX = Math.max(3, FLOOR - 2 * RMAX - 2);              // a hop, tilted, with its perspective, under the top
-      FMAX = Math.max(3, FLOOR - RMAX - FH - 2);             // a somersault needs half the diagonal above the centre
+      FL = H / 2 + h; // the floor: the bottom edge of the old logo, centred in the row
     }
     function formation(x0) { return [x0, x0 + S + TOUCH, x0 + 2 * (S + TOUCH)]; }
     bounds();
     formation(minX).forEach(function (x, i) { C[i].x = x; });
 
-    // ---- the faces: outward normal and three corners (top-left, top-right, bottom-left) as seen from outside; y up, z towards us ----
+    // ---- the faces: three corners (top-left, top-right, bottom-left) as seen from outside; y up, z towards us ----
     var F = [
-      { n: [0, 0, 1], c: [[-h, h, h], [h, h, h], [-h, -h, h]], k: "w", t: 1 },
-      { n: [0, 0, -1], c: [[h, h, -h], [-h, h, -h], [h, -h, -h]], k: "w", t: 1 },
-      { n: [1, 0, 0], c: [[h, h, h], [h, h, -h], [h, -h, h]], k: "w", t: 1 },
-      { n: [-1, 0, 0], c: [[-h, h, -h], [-h, h, h], [-h, -h, -h]], k: "w", t: 1 },
-      { n: [0, 1, 0], c: [[-h, h, -h], [h, h, -h], [-h, h, h]], k: "t", t: 0 },
-      { n: [0, -1, 0], c: [[-h, -h, h], [h, -h, h], [-h, -h, -h]], k: "w", t: 0 }
+      { c: [[-h, h, h], [h, h, h], [-h, -h, h]], k: "w", t: 1 },
+      { c: [[h, h, -h], [-h, h, -h], [h, -h, -h]], k: "w", t: 1 },
+      { c: [[h, h, h], [h, h, -h], [h, -h, h]], k: "w", t: 1 },
+      { c: [[-h, h, -h], [-h, h, h], [-h, -h, -h]], k: "w", t: 1 },
+      { c: [[-h, h, -h], [h, h, -h], [-h, h, h]], k: "t", t: 0 },
+      { c: [[-h, -h, h], [h, -h, h], [-h, -h, -h]], k: "w", t: 0 }
     ];
     F.forEach(function (f) { var a = f.c[0], b = f.c[1], c = f.c[2]; f.c.push([b[0] + c[0] - a[0], b[1] + c[1] - a[1], b[2] + c[2] - a[2]]); });
+    var V8 = []; [-h, h].forEach(function (x) { [-h, h].forEach(function (y) { [-h, h].forEach(function (z) { V8.push([x, y, z]); }); }); });
 
     // ---- colours, letters and the soft shadow, read once and again when the edition changes ----
     var COL = { g: "#C4C4C8", w: "#FFFFFF", t: "#F1F1F3" }, FONT = "", BASE = {}, SH = document.createElement("canvas");
@@ -1370,14 +1367,14 @@
     }
     (function () {
       SH.width = 64; SH.height = 16; var s = SH.getContext("2d"); s.setTransform(1, 0, 0, 0.25, 0, 0);
-      var g = s.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(40,40,48,.22)"); g.addColorStop(1, "rgba(40,40,48,0)");
+      var g = s.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(40,40,48,.2)"); g.addColorStop(1, "rgba(40,40,48,0)");
       s.fillStyle = g; s.fillRect(0, 0, 64, 64);
     })();
 
     // ---- tweens ----
     var T = 0, RMb = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-    var E = { lin: function (p) { return p; }, io: function (p) { return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; },
-      back: function (p) { var c = 2.2; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); } };
+    var E = { io: function (p) { return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; },
+      slide: function (p) { return p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; } };
     var rec = false;
     function add(c, o) {
       o.t0 = T + (o.delay || 0); o.ease = o.ease || E.io; c.tw.push(o);
@@ -1390,83 +1387,71 @@
       rec = true; var t = fn(); rec = false;
       C.forEach(function (c) {
         if (!(c.b1 > c.b0)) return;
-        add(c, { p: "td", to: 1, d: 0.2, delay: c.b0 - T });
-        t = Math.max(t, add(c, { p: "td", to: 0, d: 0.3, delay: Math.max(c.b0 + 0.2, c.b1 - 0.04) - T }));
+        add(c, { p: "td", to: 1, d: 0.22, delay: c.b0 - T });
+        t = Math.max(t, add(c, { p: "td", to: 0, d: 0.3, delay: Math.max(c.b0 + 0.22, c.b1 - 0.04) - T }));
       });
       return t;
     }
     function step(c) {
       var live = [];
-      c.hop = 0;
       c.tw.forEach(function (o) {
         if (T < o.t0) { live.push(o); return; }
         var p = Math.min(1, (T - o.t0) / o.d);
-        if (o.hopn) {
-          // n hops in a row: a sine bounce; between hops the block squats a little, and lands with a spring
-          var q = Math.abs(Math.sin(Math.PI * o.hopn * p));
-          c.y = o.h * q; c.hop = 1;
-          c.sq = SQ * Math.pow(1 - Math.min(1, q / 0.35), 2);
-          if (p >= 1) { c.y = 0; c.sq = SQ; add(c, { p: "sq", to: 0, d: 0.24, ease: E.back }); }
-        } else {
-          if (o.from === undefined) { o.from = c[o.p]; if (o.by !== undefined) o.to = o.from + o.by; }
-          c[o.p] = o.from + (o.to - o.from) * o.ease(p);
-        }
+        if (o.from === undefined) { o.from = c[o.p]; if (o.by !== undefined) o.to = o.from + o.by; }
+        c[o.p] = o.from + (o.to - o.from) * o.ease(p);
         if (p < 1) live.push(o);
       });
       c.tw = live;
       if (!live.length) { c.ry = ((Math.round(c.ry / 90) * 90) % 360 + 360) % 360; c.rx = 0; c.td = 0; } // square to the front
     }
     function busy() { return C.some(function (c) { return c.tw.length; }); }
-    function hopWalk(c, x, delay, h) {
-      var dist = Math.abs(x - c.x); if (dist < 0.5) return delay || 0;
-      var n = Math.max(1, Math.round(dist / (S * 0.85))), d = n * HOP;
-      add(c, { p: "x", to: x, d: d, delay: delay, ease: E.lin });
-      return add(c, { hopn: n, h: h || Math.min(HMAX, 6), d: d, delay: delay });
+    // sliding on the floor: the one in front of the way they go leaves first, so nobody is pushed
+    function glide(xs, stagger) {
+      var t = 0, right = xs[0] > C[0].x;
+      xs.forEach(function (x, i) {
+        var c = C[i], dist = Math.abs(x - c.x); if (dist < 0.5) return;
+        t = Math.max(t, add(c, { p: "x", to: x, d: 0.5 + dist / 170, delay: (right ? 2 - i : i) * (stagger || 0.06), ease: E.slide }));
+      });
+      return t;
     }
-    function walk(xs, stagger) { var t = 0; xs.forEach(function (x, i) { t = Math.max(t, hopWalk(C[i], x, i * (stagger || 0.07))); }); return t; }
     function rnd(a, b) { return a + Math.random() * (b - a); }
     function gaps() { return [C[1].x - C[0].x - S, C[2].x - C[1].x - S]; }
     function roomy(i) { var g = gaps(), need = S * 0.45; return (i === 0 || g[i - 1] >= need) && (i === 2 || g[i] >= need); }
 
     // ---- what the three do next ----
     var R = {
-      drift: function () { // hop along together, keeping their spacing
-        var g = gaps(), span = C[2].x - C[0].x, far = Math.min(16 * S, (maxX - minX) * 0.5);
+      drift: function () { // slide along together, keeping their spacing
+        var g = gaps(), span = C[2].x - C[0].x, far = Math.min(10 * S, (maxX - minX) * 0.5);
         var x0 = Math.max(minX, Math.min(maxX - span, C[0].x + rnd(-far, far)));
-        return walk([x0, x0 + g[0] + S, x0 + g[0] + g[1] + 2 * S]);
+        return glide([x0, x0 + g[0] + S, x0 + g[0] + g[1] + 2 * S]);
       },
       spread: function () {
         var g1 = rnd(0.5, 2.2) * S, g2 = rnd(0.5, 2.2) * S, span = 3 * S + g1 + g2;
         if (span > maxX + S - minX) { g1 = g2 = Math.max(0.5 * S, (maxX - minX - 2 * S) / 2); span = 3 * S + g1 + g2; }
         var mid = (C[0].x + C[2].x + S) / 2, x0 = Math.max(minX, Math.min(maxX + S - span, mid - span / 2 + rnd(-2, 2) * S));
-        return walk([x0, x0 + S + g1, x0 + 2 * S + g1 + g2]);
+        return glide([x0, x0 + S + g1, x0 + 2 * S + g1 + g2]);
       },
       gather: function () { // back together: home most of the time, or where they stand
         var x0 = Math.random() < 0.6 ? minX : Math.max(minX, Math.min(maxX - 2 * (S + TOUCH), C[1].x - (S + TOUCH)));
-        return walk(formation(x0), 0.06);
+        return glide(formation(x0), 0.05);
       },
       spin: function () { // turn on the vertical axis, each block with room around it
         var t = 0, k = 0;
         C.forEach(function (c, i) {
           if (!roomy(i)) return;
-          var by = [90, -90, 180, -180, 360][Math.floor(Math.random() * 5)], d = 0.55 + Math.abs(by) / 360 * 0.5;
-          t = Math.max(t, add(c, { p: "ry", by: by, d: d, delay: k * 0.14 }));
-          if (Math.random() < 0.5) add(c, { hopn: 1, h: Math.min(HMAX, 7), d: d, delay: k * 0.14 });
+          var by = [90, -90, 180, -180, 360][Math.floor(Math.random() * 5)];
+          t = Math.max(t, add(c, { p: "ry", by: by, d: 0.6 + Math.abs(by) / 360 * 0.5, delay: k * 0.14 }));
           k++;
         });
         return k ? t : R.spread();
       },
-      flip: function () { // a somersault on the horizontal axis; the others answer with a hop
-        var i = Math.floor(Math.random() * 3), c = C[i], d = 0.78, by = Math.random() < 0.5 ? 360 : -360;
-        add(c, { hopn: 1, h: FMAX, d: d });
-        add(c, { p: "rx", by: by, d: d * 0.9, delay: d * 0.05 });
-        var t = d;
-        C.forEach(function (o, j) { if (j !== i) t = Math.max(t, add(o, { hopn: 1, h: Math.min(HMAX, 5), d: 0.34, delay: d + Math.abs(j - i) * 0.1 })); });
-        return t;
+      flip: function () { // one block tumbles over on the horizontal axis, its lowest corner always on the floor
+        var c = C[Math.floor(Math.random() * 3)];
+        return add(c, { p: "rx", by: Math.random() < 0.5 ? 360 : -360, d: 0.85 });
       },
       wave: function () { // one after another
-        var rev = Math.random() < 0.5, t = 0, h = Math.min(HMAX, rnd(5, HMAX));
-        C.forEach(function (c, i) { t = Math.max(t, add(c, { hopn: 1, h: h, d: 0.42, delay: (rev ? 2 - i : i) * 0.13 })); });
+        var rev = Math.random() < 0.5, by = Math.random() < 0.5 ? 360 : -360, t = 0;
+        C.forEach(function (c, i) { t = Math.max(t, add(c, { p: "rx", by: by, d: 0.72, delay: (rev ? 2 - i : i) * 0.16 })); });
         return t;
       }
     };
@@ -1480,28 +1465,27 @@
 
     // ---- drawing ----
     function block(c, x0) {
-      // flat, the block sits where the old logo sat (centred in the row); in 3D it stands on the floor
-      var td = c.td, r = reach(td), cx = OX + x0 + S / 2, cy = (H / 2) * (1 - td) + (FLOOR - RMAX) * td - c.y, pv = cy + r, kx = 1 + c.sq * 0.6, ky = 1 - c.sq;
-      var aY = c.ry * RAD, aX = (-TILT * td + c.rx) * RAD, cY = Math.cos(aY), sY = Math.sin(aY), cX = Math.cos(aX), sX = Math.sin(aX);
+      var td = c.td, k = K * td, cx = OX + x0 + S / 2;
+      var aY = c.ry * RAD, aX = c.rx * RAD, cY = Math.cos(aY), sY = Math.sin(aY), cX = Math.cos(aX), sX = Math.sin(aX);
+      // turn (vertical axis, then horizontal) and draw in parallel: the depth rises behind the front, it never scales
+      function U(v) { var x1 = v[0] * cY + v[2] * sY, z1 = -v[0] * sY + v[2] * cY, y2 = v[1] * cX - z1 * sX, z2 = v[1] * sX + z1 * cX; return [x1, y2 - z2 * k]; }
+      var lo = 1e9; V8.forEach(function (v) { lo = Math.min(lo, U(v)[1]); }); // the lowest corner stands on the floor
       var bb = [1e9, 1e9, -1e9, -1e9];
-      function P(v) { // turn (vertical axis, then horizontal), project with the block's own perspective, squash from its foot
-        var x1 = v[0] * cY + v[2] * sY, z1 = -v[0] * sY + v[2] * cY, y2 = v[1] * cX - z1 * sX, z2 = v[1] * sX + z1 * cX, f = 1 + td * (D / (D - z2) - 1); // flat: no perspective at all
-        var X = cx + x1 * f * kx, Y = pv + (cy - y2 * f - pv) * ky;
-        if (X < bb[0]) bb[0] = X; if (Y < bb[1]) bb[1] = Y; if (X > bb[2]) bb[2] = X; if (Y > bb[3]) bb[3] = Y;
-        return [X, Y];
-      }
+      function P(v) { var u = U(v), X = cx + u[0], Y = FL - (u[1] - lo); bb[0] = Math.min(bb[0], X); bb[1] = Math.min(bb[1], Y); bb[2] = Math.max(bb[2], X); bb[3] = Math.max(bb[3], Y); return [X, Y]; }
       var vis = [];
       F.forEach(function (f) {
-        var n = f.n, z1 = -n[0] * sY + n[2] * cY, nz = n[1] * sX + z1 * cX;
-        if (nz > td * h / D + 0.012) vis.push({ f: f, p: f.c.map(P), nz: nz });
+        var p = f.c.map(P), ar = ((p[1][0] - p[0][0]) * (p[2][1] - p[0][1]) - (p[1][1] - p[0][1]) * (p[2][0] - p[0][0])) / (G * G);
+        if (ar > 0.01) vis.push({ f: f, p: p, ar: ar }); // only the faces turned towards us
       });
-      // never out of the row: a block mid-somersault low down is lifted, one near the top is pushed down
+      bb = [1e9, 1e9, -1e9, -1e9];
+      vis.forEach(function (v) { v.p.forEach(function (q) { bb[0] = Math.min(bb[0], q[0]); bb[1] = Math.min(bb[1], q[1]); bb[2] = Math.max(bb[2], q[0]); bb[3] = Math.max(bb[3], q[1]); }); });
+      // never out of the row: a block mid-tumble that would touch the top is let down a little
       var dy = bb[1] - LW / 2 < 2 ? 2 - (bb[1] - LW / 2) : bb[3] + LW / 2 > H - 2 ? H - 2 - (bb[3] + LW / 2) : 0;
-      if (dy) { vis.forEach(function (v) { v.p.forEach(function (q) { q[1] += dy; }); }); bb[1] += dy; bb[3] += dy; cy += dy; }
+      if (dy) { vis.forEach(function (v) { v.p.forEach(function (q) { q[1] += dy; }); }); bb[1] += dy; bb[3] += dy; }
       // the corners: rounded like the old squares when flat, sharp edges in 3D (rounded faces would leave notches)
       function path(p) {
-        var q = [p[0], p[1], p[3], p[2]], e = 1e9;
-        for (var i = 0; i < 4; i++) { var a = q[i], b = q[(i + 1) % 4]; e = Math.min(e, Math.hypot(b[0] - a[0], b[1] - a[1])); }
+        var q = [p[0], p[1], p[3], p[2]], e = 1e9, i, a, b;
+        for (i = 0; i < 4; i++) { a = q[i]; b = q[(i + 1) % 4]; e = Math.min(e, Math.hypot(b[0] - a[0], b[1] - a[1])); }
         var rr = Math.min(R0 - LW / 2, 0.45 * e) * (1 - td);
         ctx.beginPath(); ctx.moveTo((q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2);
         for (i = 1; i <= 4; i++) { a = q[i % 4]; b = q[(i + 1) % 4]; if (rr > 0.15) ctx.arcTo(a[0], a[1], b[0], b[1], rr); else ctx.lineTo(a[0], a[1]); }
@@ -1509,7 +1493,7 @@
       }
       vis.forEach(function (v) {
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0); path(v.p); ctx.fillStyle = COL[v.f.k]; ctx.fill();
-        if (v.f.t && v.nz > 0.16) { // the letter, laid on its face
+        if (v.f.t && v.ar > 0.16) { // the letter, laid on its face
           var p = v.p;
           ctx.setTransform(DPR * (p[1][0] - p[0][0]) / G, DPR * (p[1][1] - p[0][1]) / G, DPR * (p[2][0] - p[0][0]) / G, DPR * (p[2][1] - p[0][1]) / G, DPR * p[0][0], DPR * p[0][1]);
           ctx.fillStyle = COL.g; ctx.fillText(c.ch, G / 2, BASE[c.ch]);
@@ -1517,18 +1501,16 @@
       });
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
       vis.forEach(function (v) { path(v.p); ctx.stroke(); });
-      c.hx = cx; c.hy = cy; c.bb = bb;
+      c.hx = cx; c.hy = FL - h + dy; c.bb = bb;
     }
     function draw() {
       var x = [], prev = -1e9;
       C.forEach(function (c) { var v = Math.max(c.x, prev + S + TOUCH); v = Math.max(minX - 2, Math.min(maxX, v)); x.push(v); prev = v; });
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      var sy = FLOOR + 1;
-      C.forEach(function (c, i) { // the shadows first, only in 3D, smaller and fainter as a block rises
+      C.forEach(function (c, i) { // a soft contact shadow, only in 3D
         if (c.td < 0.01) return;
-        var a = Math.max(0, 1 - c.y / (HMAX * 2.2)), k = 0.55 + 0.45 * a, w = S * 1.1 * k, hh = 6 * k;
-        ctx.globalAlpha = c.td * (0.35 + 0.65 * a); ctx.drawImage(SH, OX + x[i] + S / 2 - w / 2, sy - hh / 2, w, hh);
+        ctx.globalAlpha = 0.7 * c.td; ctx.drawImage(SH, OX + x[i] + S / 2 - S * 0.6, FL + LW / 2 - 2, S * 1.2, 6);
       });
       ctx.globalAlpha = 1; ctx.font = FONT; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.lineWidth = LW; ctx.lineJoin = "round"; ctx.strokeStyle = COL.g;
@@ -1545,14 +1527,14 @@
       if (now - scrolledAt < 300) { lastT = 0; nap = setTimeout(function () { nap = 0; wake(); }, 150); return; }
       var dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0; lastT = now; T += dt;
       C.forEach(step);
-      if (!busy() && T >= nextAt) { last = pick(); nextAt = T + move(R[last]) + rnd(0.5, 1.6); }
+      if (!busy() && T >= nextAt) { last = pick(); nextAt = T + move(R[last]) + rnd(0.6, 1.8); }
       draw();
       if (busy()) raf = requestAnimationFrame(frame);
       else nap = setTimeout(function () { nap = 0; T = Math.max(T, nextAt); wake(); }, Math.max(0, nextAt - T) * 1000);
     }
     function wake() { if (RMb) { draw(); return; } if (nap) { clearTimeout(nap); nap = 0; } if (!raf) { lastT = 0; raf = requestAnimationFrame(frame); } }
 
-    // a block that is touched answers with a hop; only the blocks themselves lead back to the start
+    // a block that is touched answers with a turn (or a tumble, when it has no room); only the blocks lead back to the start
     function hit(e) {
       var r = cv.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top;
       for (var i = 0; i < 3; i++) if (Math.abs(px - C[i].hx) < S / 2 + 3 && Math.abs(py - C[i].hy) < S / 2 + 5) return i;
@@ -1562,7 +1544,10 @@
       var k = hit(e); cv.style.cursor = k < 0 ? "default" : "pointer";
       C.forEach(function (c, i) {
         var on = i === k;
-        if (on && !c.over && !RMb && !c.tw.length) { move(function () { return add(c, { hopn: 1, h: Math.min(HMAX, 8), d: 0.38 }); }); wake(); }
+        if (on && !c.over && !RMb && !c.tw.length) {
+          move(function () { return roomy(i) ? add(c, { p: "ry", by: Math.random() < 0.5 ? 90 : -90, d: 0.6 }) : add(c, { p: "rx", by: -360, d: 0.7 }); });
+          wake();
+        }
         c.over = on;
       });
     }
@@ -1574,7 +1559,7 @@
     // the row changes size: measure again and, if the blocks no longer fit, send them home
     function resized() {
       bounds();
-      if (C[2].x > maxX || C[0].x < minX) { C.forEach(function (c) { c.tw = []; c.y = 0; c.sq = 0; c.td = 0; c.rx = 0; c.ry = 0; }); formation(minX).forEach(function (x, i) { C[i].x = x; }); }
+      if (C[2].x > maxX || C[0].x < minX) { C.forEach(function (c) { c.tw = []; c.td = 0; c.rx = 0; c.ry = 0; }); formation(minX).forEach(function (x, i) { C[i].x = x; }); }
       draw();
     }
     if ("ResizeObserver" in window) new ResizeObserver(resized).observe(home); else window.addEventListener("resize", resized);
