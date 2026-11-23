@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "68"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "69"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=68" as="script">
-<link rel="preload" href="kit.js?v=68" as="script">
-<link rel="preload" href="pillars3d.js?v=68" as="script">
+<link rel="preload" href="content.js?v=69" as="script">
+<link rel="preload" href="kit.js?v=69" as="script">
+<link rel="preload" href="pillars3d.js?v=69" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -735,9 +735,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=68"></script>
-<script src="kit.js?v=68"></script>
-<script src="pillars3d.js?v=68"></script>
+<script src="content.js?v=69"></script>
+<script src="kit.js?v=69"></script>
+<script src="pillars3d.js?v=69"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1317,19 +1317,19 @@
      Each block has a letter on its four sides. A small director picks what the three do next: slide along together,
      slide apart, slide back together (often back home, so the logo reads), turn on their vertical axis, tumble on
      the horizontal one, tumble one after another. They never leave the header row and never reach the buttons.
-     At rest every block is flat: a plain square seen straight on, exactly the logo as it always was (26 px squares,
-     1.5 px line, 4 px corners, 13 px letters, centred in the row). Each move lifts a block into 3D as it starts and
-     lays it flat again, facing us, as soon as its own part ends. The 3D is drawn the way instruction sheets draw a
-     box (a parallel, oblique view): the face with the letter keeps its exact size and place, the depth simply shows
-     behind it, so a block never grows or shrinks. They slide on the floor; they never travel by jumping.
-     They are drawn on one small canvas, and only while they move: between two moves the loop sleeps. */
+     A block is a flat square seen straight on, exactly the logo as it always was (26 px squares, 1.5 px line, 4 px
+     corners, 13 px letters, centred in the row), and stays so while it slides: its depth only shows when it turns,
+     because of the turn itself, and every turn ends square to the front, flat again. Seen from straight in front,
+     with the face towards us drawn at its true size, a block never grows or shrinks. They slide on the floor; they
+     never travel by jumping. They are drawn on one small canvas, and only while they move: between two moves the
+     loop sleeps. */
   (function () {
     var home = $("home"); if (!home) return;
-    var L = ["G", "V", "E"], S = 26, LW = 1.5, R0 = 4, TOUCH = -1.5, K = 0.3, OX = 8, RAD = Math.PI / 180;
+    var L = ["G", "V", "E"], S = 26, LW = 1.5, R0 = 4, TOUCH = -1.5, D = 360, OX = 8, RAD = Math.PI / 180;
     var G = S - LW, h = G / 2; // the outline runs on the middle of the line, so the ink measures S, like the old squares
     home.innerHTML = '<canvas class="cv" aria-hidden="true"></canvas>';
     var cv = home.firstChild, ctx = cv.getContext("2d"); if (!ctx) return;
-    var C = L.map(function (ch) { return { ch: ch, x: 0, ry: 0, rx: 0, td: 0, tw: [], hx: -99, hy: -99, bb: null, over: false }; });
+    var C = L.map(function (ch) { return { ch: ch, x: 0, ry: 0, rx: 0, tw: [], hx: -99, hy: -99, bb: null, over: false }; });
     // the canvas reaches OX px into the row's left margin, so a block turning at home is never cut
     var W = 0, H = 0, DPR = 1, minX = 0, maxX = 0, FL = 36;
     function bounds() {
@@ -1356,8 +1356,8 @@
     F.forEach(function (f) { var a = f.c[0], b = f.c[1], c = f.c[2]; f.c.push([b[0] + c[0] - a[0], b[1] + c[1] - a[1], b[2] + c[2] - a[2]]); });
     var V8 = []; [-h, h].forEach(function (x) { [-h, h].forEach(function (y) { [-h, h].forEach(function (z) { V8.push([x, y, z]); }); }); });
 
-    // ---- colours, letters and the soft shadow, read once and again when the edition changes ----
-    var COL = { g: "#C4C4C8", w: "#FFFFFF", t: "#F1F1F3" }, FONT = "", BASE = {}, SH = document.createElement("canvas");
+    // ---- colours and letters, read once and again when the edition changes ----
+    var COL = { g: "#C4C4C8", w: "#FFFFFF", t: "#F1F1F3" }, FONT = "", BASE = {};
     function colours() {
       var cs = getComputedStyle(home), v = function (n, d) { return (cs.getPropertyValue(n) || "").trim() || d; };
       COL = { g: v("--g", "#C4C4C8"), w: v("--white", "#FFFFFF"), t: v("--cube-top", "#F1F1F3") };
@@ -1365,33 +1365,12 @@
       ctx.font = FONT;
       L.forEach(function (ch) { var m = ctx.measureText(ch), a = m.actualBoundingBoxAscent, d = m.actualBoundingBoxDescent; BASE[ch] = (isFinite(a) && a > 0 ? G / 2 + (a - (d || 0)) / 2 : G / 2 + 4.5) - 1; }); // 1 px above centre, like the old letters
     }
-    (function () {
-      SH.width = 64; SH.height = 16; var s = SH.getContext("2d"); s.setTransform(1, 0, 0, 0.25, 0, 0);
-      var g = s.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, "rgba(40,40,48,.2)"); g.addColorStop(1, "rgba(40,40,48,0)");
-      s.fillStyle = g; s.fillRect(0, 0, 64, 64);
-    })();
 
     // ---- tweens ----
     var T = 0, RMb = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     var E = { io: function (p) { return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; },
       slide: function (p) { return p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; } };
-    var rec = false;
-    function add(c, o) {
-      o.t0 = T + (o.delay || 0); o.ease = o.ease || E.io; c.tw.push(o);
-      if (rec) { c.b0 = Math.min(c.b0, o.t0); c.b1 = Math.max(c.b1, o.t0 + o.d); }
-      return (o.delay || 0) + o.d;
-    }
-    // every move: each block it involves rises into 3D as its part starts and is laid flat, facing us, as soon as its part ends
-    function move(fn) {
-      C.forEach(function (c) { c.b0 = Infinity; c.b1 = -Infinity; });
-      rec = true; var t = fn(); rec = false;
-      C.forEach(function (c) {
-        if (!(c.b1 > c.b0)) return;
-        add(c, { p: "td", to: 1, d: 0.22, delay: c.b0 - T });
-        t = Math.max(t, add(c, { p: "td", to: 0, d: 0.3, delay: Math.max(c.b0 + 0.22, c.b1 - 0.04) - T }));
-      });
-      return t;
-    }
+    function add(c, o) { o.t0 = T + (o.delay || 0); o.ease = o.ease || E.io; c.tw.push(o); return (o.delay || 0) + o.d; }
     function step(c) {
       var live = [];
       c.tw.forEach(function (o) {
@@ -1402,7 +1381,7 @@
         if (p < 1) live.push(o);
       });
       c.tw = live;
-      if (!live.length) { c.ry = ((Math.round(c.ry / 90) * 90) % 360 + 360) % 360; c.rx = 0; c.td = 0; } // square to the front
+      if (!live.length) { c.ry = ((Math.round(c.ry / 90) * 90) % 360 + 360) % 360; c.rx = 0; } // square to the front
     }
     function busy() { return C.some(function (c) { return c.tw.length; }); }
     // sliding on the floor: the one in front of the way they go leaves first, so nobody is pushed
@@ -1465,10 +1444,11 @@
 
     // ---- drawing ----
     function block(c, x0) {
-      var td = c.td, k = K * td, cx = OX + x0 + S / 2;
+      var cx = OX + x0 + S / 2;
       var aY = c.ry * RAD, aX = c.rx * RAD, cY = Math.cos(aY), sY = Math.sin(aY), cX = Math.cos(aX), sX = Math.sin(aX);
-      // turn (vertical axis, then horizontal) and draw in parallel: the depth rises behind the front, it never scales
-      function U(v) { var x1 = v[0] * cY + v[2] * sY, z1 = -v[0] * sY + v[2] * cY, y2 = v[1] * cX - z1 * sX, z2 = v[1] * sX + z1 * cX; return [x1, y2 - z2 * k]; }
+      // turn (vertical axis, then horizontal) and look from straight in front; the perspective is measured from the
+      // front face, so a face towards us is always drawn at its true size and only a turning block shows depth
+      function U(v) { var x1 = v[0] * cY + v[2] * sY, z1 = -v[0] * sY + v[2] * cY, y2 = v[1] * cX - z1 * sX, z2 = v[1] * sX + z1 * cX, f = (D - h) / (D - z2); return [x1 * f, y2 * f]; }
       var lo = 1e9; V8.forEach(function (v) { lo = Math.min(lo, U(v)[1]); }); // the lowest corner stands on the floor
       var bb = [1e9, 1e9, -1e9, -1e9];
       function P(v) { var u = U(v), X = cx + u[0], Y = FL - (u[1] - lo); bb[0] = Math.min(bb[0], X); bb[1] = Math.min(bb[1], Y); bb[2] = Math.max(bb[2], X); bb[3] = Math.max(bb[3], Y); return [X, Y]; }
@@ -1482,7 +1462,10 @@
       // never out of the row: a block mid-tumble that would touch the top is let down a little
       var dy = bb[1] - LW / 2 < 2 ? 2 - (bb[1] - LW / 2) : bb[3] + LW / 2 > H - 2 ? H - 2 - (bb[3] + LW / 2) : 0;
       if (dy) { vis.forEach(function (v) { v.p.forEach(function (q) { q[1] += dy; }); }); bb[1] += dy; bb[3] += dy; }
-      // the corners: rounded like the old squares when flat, sharp edges in 3D (rounded faces would leave notches)
+      // the corners: rounded like the old squares when a face is square to us, sharp as soon as the block turns
+      // (rounded faces would leave notches where they meet)
+      var amax = 0; vis.forEach(function (v) { amax = Math.max(amax, v.ar); });
+      var td = Math.min(1, Math.max(0, (1 - amax) / 0.03));
       function path(p) {
         var q = [p[0], p[1], p[3], p[2]], e = 1e9, i, a, b;
         for (i = 0; i < 4; i++) { a = q[i]; b = q[(i + 1) % 4]; e = Math.min(e, Math.hypot(b[0] - a[0], b[1] - a[1])); }
@@ -1508,11 +1491,7 @@
       C.forEach(function (c) { var v = Math.max(c.x, prev + S + TOUCH); v = Math.max(minX - 2, Math.min(maxX, v)); x.push(v); prev = v; });
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      C.forEach(function (c, i) { // a soft contact shadow, only in 3D
-        if (c.td < 0.01) return;
-        ctx.globalAlpha = 0.7 * c.td; ctx.drawImage(SH, OX + x[i] + S / 2 - S * 0.6, FL + LW / 2 - 2, S * 1.2, 6);
-      });
-      ctx.globalAlpha = 1; ctx.font = FONT; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+      ctx.font = FONT; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.lineWidth = LW; ctx.lineJoin = "round"; ctx.strokeStyle = COL.g;
       C.forEach(function (c, i) { block(c, x[i]); });
     }
@@ -1527,7 +1506,7 @@
       if (now - scrolledAt < 300) { lastT = 0; nap = setTimeout(function () { nap = 0; wake(); }, 150); return; }
       var dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0; lastT = now; T += dt;
       C.forEach(step);
-      if (!busy() && T >= nextAt) { last = pick(); nextAt = T + move(R[last]) + rnd(0.6, 1.8); }
+      if (!busy() && T >= nextAt) { last = pick(); nextAt = T + R[last]() + rnd(0.6, 1.8); }
       draw();
       if (busy()) raf = requestAnimationFrame(frame);
       else nap = setTimeout(function () { nap = 0; T = Math.max(T, nextAt); wake(); }, Math.max(0, nextAt - T) * 1000);
@@ -1545,7 +1524,7 @@
       C.forEach(function (c, i) {
         var on = i === k;
         if (on && !c.over && !RMb && !c.tw.length) {
-          move(function () { return roomy(i) ? add(c, { p: "ry", by: Math.random() < 0.5 ? 90 : -90, d: 0.6 }) : add(c, { p: "rx", by: -360, d: 0.7 }); });
+          if (roomy(i)) add(c, { p: "ry", by: Math.random() < 0.5 ? 90 : -90, d: 0.6 }); else add(c, { p: "rx", by: -360, d: 0.7 });
           wake();
         }
         c.over = on;
@@ -1559,7 +1538,7 @@
     // the row changes size: measure again and, if the blocks no longer fit, send them home
     function resized() {
       bounds();
-      if (C[2].x > maxX || C[0].x < minX) { C.forEach(function (c) { c.tw = []; c.td = 0; c.rx = 0; c.ry = 0; }); formation(minX).forEach(function (x, i) { C[i].x = x; }); }
+      if (C[2].x > maxX || C[0].x < minX) { C.forEach(function (c) { c.tw = []; c.rx = 0; c.ry = 0; }); formation(minX).forEach(function (x, i) { C[i].x = x; }); }
       draw();
     }
     if ("ResizeObserver" in window) new ResizeObserver(resized).observe(home); else window.addEventListener("resize", resized);
