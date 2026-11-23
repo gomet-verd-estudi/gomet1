@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "70"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "71"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=70" as="script">
-<link rel="preload" href="kit.js?v=70" as="script">
-<link rel="preload" href="pillars3d.js?v=70" as="script">
+<link rel="preload" href="content.js?v=71" as="script">
+<link rel="preload" href="kit.js?v=71" as="script">
+<link rel="preload" href="pillars3d.js?v=71" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -738,9 +738,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=70"></script>
-<script src="kit.js?v=70"></script>
-<script src="pillars3d.js?v=70"></script>
+<script src="content.js?v=71"></script>
+<script src="kit.js?v=71"></script>
+<script src="pillars3d.js?v=71"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1004,7 +1004,7 @@
     var head = '<div class="pl-meta sc">' + dots(stp ? +stp[1] : 8, "pm-l") +
       (stp ? '<span><b class="chip" aria-hidden="true">' + "ABCDEFGH"[+stp[1] - 1] + '</b>' + esc(s.sub) + '</span>' : '<span>' + esc(s.sec) + '</span>' + (s.sub ? '<span>' + esc(s.sub) + '</span>' : '')) + '</div>' +
       '<div class="pl-top"><h2 class="ttl' + (stp ? ' split' : '') + '" style="--ch:' + (s.title.length + (stp ? 2 : 0)) + '">' +
-        (stp ? '<span class="tno">' + (+stp[1]) + '</span> <span class="tnm">[' + esc(s.title.replace(/^\[|\]$/g, "")) + ']</span>' : esc(s.title)) + '</h2></div>';
+        (stp ? '<span class="tno">' + (+stp[1]) + '.</span> <span class="tnm">[' + esc(s.title.replace(/^\[|\]$/g, "")) + ']</span>' : esc(s.title)) + '</h2></div>';
     var flow = (st
       ? '<div class="tw"><div class="hd2">' + head + '</div></div>' +
         '<div class="pin" style="--run:' + RUN(s.scene) + 'svh;--runv:' + RUN(s.scene) + 'vh"><div class="lam"><div class="hsp" aria-hidden="true"></div><div class="hole"></div><div class="lam-foot tab' + (MORE[s.num] ? ' has-more' : '') + '">' + (hl && leadH ? '<p class="fl sc">' + LBL[0] + '</p><p class="fl sc">' + LBL[1] + '</p>' : '') + hl + (leadH ? '<div class="lead">' + leadH + '</div>' : '') + moreBtn(s.num) + '</div></div></div>'
