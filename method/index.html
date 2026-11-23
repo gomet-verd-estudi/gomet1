@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "66"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "67"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=66" as="script">
-<link rel="preload" href="kit.js?v=66" as="script">
-<link rel="preload" href="pillars3d.js?v=66" as="script">
+<link rel="preload" href="content.js?v=67" as="script">
+<link rel="preload" href="kit.js?v=67" as="script">
+<link rel="preload" href="pillars3d.js?v=67" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -107,7 +107,7 @@
      always inside the header row and clear of the switch and the language pill */
   .top > .gve { flex: 1 1 auto; align-self: stretch; position: relative; min-width: 0; margin-right: 12px; }
   /* one canvas draws the three blocks: a single flat layer, painted only while they move */
-  .gve .cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: default; }
+  .gve .cv { position: absolute; top: 0; bottom: 0; left: -8px; right: 0; width: calc(100% + 8px); height: 100%; display: block; cursor: default; }
   html.is-color { --cube-top: #F7D466; }
   .pill { display: inline-flex; align-items: center; gap: 9px; height: 34px; padding: 0 14px; border-radius: 999px; background: var(--white);
     font-size: 14.5px; font-weight: 700; letter-spacing: .02em; color: var(--g); font-variant-numeric: tabular-nums; box-shadow: 0 0 0 1.5px var(--g) inset; }
@@ -735,9 +735,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=66"></script>
-<script src="kit.js?v=66"></script>
-<script src="pillars3d.js?v=66"></script>
+<script src="content.js?v=67"></script>
+<script src="kit.js?v=67"></script>
+<script src="pillars3d.js?v=67"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1317,36 +1317,39 @@
      Each block has a letter on its four sides. A small director picks what the three do next: hop along together,
      spread out, come back together (often back home, so the logo reads), spin on their vertical axis, somersault on
      the horizontal one, hop one after another. They never leave the header row and never reach the buttons.
-     At rest every block is flat: a plain square seen straight on, no perspective, so the logo reads as a 2D mark.
+     At rest every block is flat: a plain square seen straight on, no perspective, exactly the logo as it always was
+     (26 px squares, 1.5 px line, 4 px corners, 13 px letters, centred in the row). In 3D they keep that same size.
      Each move lifts a block into 3D as it starts and lays it flat again, facing us, as soon as its own part ends.
      They are drawn on one small canvas (each block with its own perspective), and only while they move:
      between two moves the loop sleeps, so the page keeps the whole frame for itself. */
   (function () {
     var home = $("home"); if (!home) return;
-    var L = ["G", "V", "E"], S = 20, FB = 7, TILT = -24, HOP = 0.3, TOUCH = -1.5, D = 420, RAD = Math.PI / 180;
-    // how far below its centre a block reaches: half its side when flat, a little more once tilted towards us,
-    // so its lowest edge always stands on the floor
-    function reach(td) { var a = Math.abs(TILT) * td * RAD; return (S / 2) * (Math.cos(a) + Math.sin(a)); }
-    var RMAX = reach(1);
+    var L = ["G", "V", "E"], S = 26, LW = 1.5, R0 = 4, TILT = -22, HOP = 0.32, TOUCH = -1.5, D = 520, RAD = Math.PI / 180, OX = 8, SQ = 0.07;
+    var G = S - LW, h = G / 2; // the outline runs on the middle of the line, so the ink measures S, like the old squares
+    // how far below its centre a block's ink reaches: half its side when flat, a little more once tilted towards us
+    function reach(td) { var a = Math.abs(TILT) * td * RAD; return h * (Math.cos(a) + Math.sin(a)) * (1 + td * h / D) + LW / 2; }
+    var RMAX = reach(1), FH = h * Math.SQRT2 * (1 + h * Math.SQRT2 / D) + LW / 2; // FH: half the height of a block mid-somersault
     home.innerHTML = '<canvas class="cv" aria-hidden="true"></canvas>';
     var cv = home.firstChild, ctx = cv.getContext("2d"); if (!ctx) return;
     var C = L.map(function (ch) { return { ch: ch, x: 0, y: 0, ry: 0, rx: 0, sq: 0, td: 0, tw: [], hop: 0, hx: -99, hy: -99, bb: null, over: false }; });
-    var W = 0, H = 0, DPR = 1, minX = 0, maxX = 0, HMAX = 10, FMAX = 8;
+    // the canvas reaches OX px into the row's left margin, so a block spinning at home is never cut
+    var W = 0, H = 0, DPR = 1, minX = 0, maxX = 0, HMAX = 8, FMAX = 6, FLOOR = 45;
     function bounds() {
       W = home.clientWidth; H = home.clientHeight; DPR = Math.min(3, window.devicePixelRatio || 1);
-      var bw = Math.max(1, Math.round(W * DPR)), bh = Math.max(1, Math.round(H * DPR));
+      var bw = Math.max(1, Math.round((W + OX) * DPR)), bh = Math.max(1, Math.round(H * DPR));
       if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
-      var spin = Math.ceil(S * 0.22); // a block turning on its axis is wider by this on each side
-      minX = spin; maxX = Math.max(minX + 3 * S, W - S - spin - 2);
-      HMAX = Math.max(4, H - 2 - FB - 2 * RMAX * 1.03); // a hop, tilted, with its perspective
-      FMAX = Math.max(3, H - 2 - FB - RMAX - S * 0.9);  // a block somersaulting needs its whole diagonal
+      var spin = Math.ceil(S * 0.22); // a block turning on its axis is wider by this on each side (and OX covers it at home)
+      minX = 0; maxX = Math.max(minX + 3 * S, W - S - spin - 2);
+      FLOOR = H - 3;                                         // in 3D the blocks stand on a floor near the bottom of the row
+      HMAX = Math.max(3, FLOOR - 2 * RMAX - 2);              // a hop, tilted, with its perspective, under the top
+      FMAX = Math.max(3, FLOOR - RMAX - FH - 2);             // a somersault needs half the diagonal above the centre
     }
     function formation(x0) { return [x0, x0 + S + TOUCH, x0 + 2 * (S + TOUCH)]; }
     bounds();
     formation(minX).forEach(function (x, i) { C[i].x = x; });
 
     // ---- the faces: outward normal and three corners (top-left, top-right, bottom-left) as seen from outside; y up, z towards us ----
-    var h = S / 2, F = [
+    var F = [
       { n: [0, 0, 1], c: [[-h, h, h], [h, h, h], [-h, -h, h]], k: "w", t: 1 },
       { n: [0, 0, -1], c: [[h, h, -h], [-h, h, -h], [h, -h, -h]], k: "w", t: 1 },
       { n: [1, 0, 0], c: [[h, h, h], [h, h, -h], [h, -h, h]], k: "w", t: 1 },
@@ -1361,9 +1364,9 @@
     function colours() {
       var cs = getComputedStyle(home), v = function (n, d) { return (cs.getPropertyValue(n) || "").trim() || d; };
       COL = { g: v("--g", "#C4C4C8"), w: v("--white", "#FFFFFF"), t: v("--cube-top", "#F1F1F3") };
-      FONT = "800 11.5px " + (cs.fontFamily || "sans-serif");
+      FONT = "800 13px " + (cs.fontFamily || "sans-serif");
       ctx.font = FONT;
-      L.forEach(function (ch) { var m = ctx.measureText(ch), a = m.actualBoundingBoxAscent, d = m.actualBoundingBoxDescent; BASE[ch] = isFinite(a) && a > 0 ? S / 2 + (a - (d || 0)) / 2 : S / 2 + 4; });
+      L.forEach(function (ch) { var m = ctx.measureText(ch), a = m.actualBoundingBoxAscent, d = m.actualBoundingBoxDescent; BASE[ch] = (isFinite(a) && a > 0 ? G / 2 + (a - (d || 0)) / 2 : G / 2 + 4.5) - 1; }); // 1 px above centre, like the old letters
     }
     (function () {
       SH.width = 64; SH.height = 16; var s = SH.getContext("2d"); s.setTransform(1, 0, 0, 0.25, 0, 0);
@@ -1402,8 +1405,8 @@
           // n hops in a row: a sine bounce; between hops the block squats a little, and lands with a spring
           var q = Math.abs(Math.sin(Math.PI * o.hopn * p));
           c.y = o.h * q; c.hop = 1;
-          c.sq = 0.12 * Math.pow(1 - Math.min(1, q / 0.35), 2);
-          if (p >= 1) { c.y = 0; c.sq = 0.12; add(c, { p: "sq", to: 0, d: 0.26, ease: E.back }); }
+          c.sq = SQ * Math.pow(1 - Math.min(1, q / 0.35), 2);
+          if (p >= 1) { c.y = 0; c.sq = SQ; add(c, { p: "sq", to: 0, d: 0.24, ease: E.back }); }
         } else {
           if (o.from === undefined) { o.from = c[o.p]; if (o.by !== undefined) o.to = o.from + o.by; }
           c[o.p] = o.from + (o.to - o.from) * o.ease(p);
@@ -1462,7 +1465,7 @@
         return t;
       },
       wave: function () { // one after another
-        var rev = Math.random() < 0.5, t = 0, h = Math.min(HMAX, rnd(7, HMAX));
+        var rev = Math.random() < 0.5, t = 0, h = Math.min(HMAX, rnd(5, HMAX));
         C.forEach(function (c, i) { t = Math.max(t, add(c, { hopn: 1, h: h, d: 0.42, delay: (rev ? 2 - i : i) * 0.13 })); });
         return t;
       }
@@ -1477,7 +1480,8 @@
 
     // ---- drawing ----
     function block(c, x0) {
-      var r = reach(c.td), cx = x0 + S / 2, cy = H - FB - r - c.y, pv = cy + r, kx = 1 + c.sq * 0.6, ky = 1 - c.sq, td = c.td;
+      // flat, the block sits where the old logo sat (centred in the row); in 3D it stands on the floor
+      var td = c.td, r = reach(td), cx = OX + x0 + S / 2, cy = (H / 2) * (1 - td) + (FLOOR - RMAX) * td - c.y, pv = cy + r, kx = 1 + c.sq * 0.6, ky = 1 - c.sq;
       var aY = c.ry * RAD, aX = (-TILT * td + c.rx) * RAD, cY = Math.cos(aY), sY = Math.sin(aY), cX = Math.cos(aX), sX = Math.sin(aX);
       var bb = [1e9, 1e9, -1e9, -1e9];
       function P(v) { // turn (vertical axis, then horizontal), project with the block's own perspective, squash from its foot
@@ -1491,13 +1495,24 @@
         var n = f.n, z1 = -n[0] * sY + n[2] * cY, nz = n[1] * sX + z1 * cX;
         if (nz > td * h / D + 0.012) vis.push({ f: f, p: f.c.map(P), nz: nz });
       });
-      function path(p) { ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[3][0], p[3][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath(); }
+      // never out of the row: a block mid-somersault low down is lifted, one near the top is pushed down
+      var dy = bb[1] - LW / 2 < 2 ? 2 - (bb[1] - LW / 2) : bb[3] + LW / 2 > H - 2 ? H - 2 - (bb[3] + LW / 2) : 0;
+      if (dy) { vis.forEach(function (v) { v.p.forEach(function (q) { q[1] += dy; }); }); bb[1] += dy; bb[3] += dy; cy += dy; }
+      // the corners: rounded like the old squares when flat, sharp edges in 3D (rounded faces would leave notches)
+      function path(p) {
+        var q = [p[0], p[1], p[3], p[2]], e = 1e9;
+        for (var i = 0; i < 4; i++) { var a = q[i], b = q[(i + 1) % 4]; e = Math.min(e, Math.hypot(b[0] - a[0], b[1] - a[1])); }
+        var rr = Math.min(R0 - LW / 2, 0.45 * e) * (1 - td);
+        ctx.beginPath(); ctx.moveTo((q[0][0] + q[1][0]) / 2, (q[0][1] + q[1][1]) / 2);
+        for (i = 1; i <= 4; i++) { a = q[i % 4]; b = q[(i + 1) % 4]; if (rr > 0.15) ctx.arcTo(a[0], a[1], b[0], b[1], rr); else ctx.lineTo(a[0], a[1]); }
+        ctx.closePath();
+      }
       vis.forEach(function (v) {
         ctx.setTransform(DPR, 0, 0, DPR, 0, 0); path(v.p); ctx.fillStyle = COL[v.f.k]; ctx.fill();
         if (v.f.t && v.nz > 0.16) { // the letter, laid on its face
           var p = v.p;
-          ctx.setTransform(DPR * (p[1][0] - p[0][0]) / S, DPR * (p[1][1] - p[0][1]) / S, DPR * (p[2][0] - p[0][0]) / S, DPR * (p[2][1] - p[0][1]) / S, DPR * p[0][0], DPR * p[0][1]);
-          ctx.fillStyle = COL.g; ctx.fillText(c.ch, S / 2, BASE[c.ch]);
+          ctx.setTransform(DPR * (p[1][0] - p[0][0]) / G, DPR * (p[1][1] - p[0][1]) / G, DPR * (p[2][0] - p[0][0]) / G, DPR * (p[2][1] - p[0][1]) / G, DPR * p[0][0], DPR * p[0][1]);
+          ctx.fillStyle = COL.g; ctx.fillText(c.ch, G / 2, BASE[c.ch]);
         }
       });
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1509,14 +1524,14 @@
       C.forEach(function (c) { var v = Math.max(c.x, prev + S + TOUCH); v = Math.max(minX - 2, Math.min(maxX, v)); x.push(v); prev = v; });
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      var sy = H - FB + 1;
+      var sy = FLOOR + 1;
       C.forEach(function (c, i) { // the shadows first, only in 3D, smaller and fainter as a block rises
         if (c.td < 0.01) return;
-        var a = Math.max(0, 1 - c.y / (HMAX * 2.2)), k = 0.55 + 0.45 * a, w = S * 1.15 * k, hh = 6 * k;
-        ctx.globalAlpha = c.td * (0.35 + 0.65 * a); ctx.drawImage(SH, x[i] + S / 2 - w / 2, sy - hh / 2, w, hh);
+        var a = Math.max(0, 1 - c.y / (HMAX * 2.2)), k = 0.55 + 0.45 * a, w = S * 1.1 * k, hh = 6 * k;
+        ctx.globalAlpha = c.td * (0.35 + 0.65 * a); ctx.drawImage(SH, OX + x[i] + S / 2 - w / 2, sy - hh / 2, w, hh);
       });
       ctx.globalAlpha = 1; ctx.font = FONT; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-      ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.strokeStyle = COL.g;
+      ctx.lineWidth = LW; ctx.lineJoin = "round"; ctx.strokeStyle = COL.g;
       C.forEach(function (c, i) { block(c, x[i]); });
     }
     home._blocks = function () { return C.map(function (c) { return c.bb; }); }; // for the checks
@@ -1547,7 +1562,7 @@
       var k = hit(e); cv.style.cursor = k < 0 ? "default" : "pointer";
       C.forEach(function (c, i) {
         var on = i === k;
-        if (on && !c.over && !RMb && !c.tw.length) { move(function () { return add(c, { hopn: 1, h: Math.min(HMAX, 9), d: 0.38 }); }); wake(); }
+        if (on && !c.over && !RMb && !c.tw.length) { move(function () { return add(c, { hopn: 1, h: Math.min(HMAX, 8), d: 0.38 }); }); wake(); }
         c.over = on;
       });
     }
