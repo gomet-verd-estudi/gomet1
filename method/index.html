@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "65"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "66"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=65" as="script">
-<link rel="preload" href="kit.js?v=65" as="script">
-<link rel="preload" href="pillars3d.js?v=65" as="script">
+<link rel="preload" href="content.js?v=66" as="script">
+<link rel="preload" href="kit.js?v=66" as="script">
+<link rel="preload" href="pillars3d.js?v=66" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -735,9 +735,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=65"></script>
-<script src="kit.js?v=65"></script>
-<script src="pillars3d.js?v=65"></script>
+<script src="content.js?v=66"></script>
+<script src="kit.js?v=66"></script>
+<script src="pillars3d.js?v=66"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1317,17 +1317,20 @@
      Each block has a letter on its four sides. A small director picks what the three do next: hop along together,
      spread out, come back together (often back home, so the logo reads), spin on their vertical axis, somersault on
      the horizontal one, hop one after another. They never leave the header row and never reach the buttons.
-     They are drawn on one small canvas, in true 3D (each block with its own perspective), and only while they move:
+     At rest every block is flat: a plain square seen straight on, no perspective, so the logo reads as a 2D mark.
+     Each move lifts a block into 3D as it starts and lays it flat again, facing us, as soon as its own part ends.
+     They are drawn on one small canvas (each block with its own perspective), and only while they move:
      between two moves the loop sleeps, so the page keeps the whole frame for itself. */
   (function () {
     var home = $("home"); if (!home) return;
-    var L = ["G", "V", "E"], S = 20, FB = 5, TILT = -24, HOP = 0.3, TOUCH = -1.5, D = 420, RAD = Math.PI / 180;
-    // tilted towards us, a block reaches a little below its own box: lift it so its lowest edge stands on the floor
-    var A = Math.abs(TILT) * RAD, REST = (S / 2) * (Math.cos(A) + Math.sin(A)); FB += Math.ceil(REST - S / 2);
-    var CU = FB + S / 2; // height of a resting block's centre above the bottom of the row
+    var L = ["G", "V", "E"], S = 20, FB = 7, TILT = -24, HOP = 0.3, TOUCH = -1.5, D = 420, RAD = Math.PI / 180;
+    // how far below its centre a block reaches: half its side when flat, a little more once tilted towards us,
+    // so its lowest edge always stands on the floor
+    function reach(td) { var a = Math.abs(TILT) * td * RAD; return (S / 2) * (Math.cos(a) + Math.sin(a)); }
+    var RMAX = reach(1);
     home.innerHTML = '<canvas class="cv" aria-hidden="true"></canvas>';
     var cv = home.firstChild, ctx = cv.getContext("2d"); if (!ctx) return;
-    var C = L.map(function (ch) { return { ch: ch, x: 0, y: 0, ry: 0, rx: 0, sq: 0, tw: [], hop: 0, hx: -99, hy: -99, bb: null, over: false }; });
+    var C = L.map(function (ch) { return { ch: ch, x: 0, y: 0, ry: 0, rx: 0, sq: 0, td: 0, tw: [], hop: 0, hx: -99, hy: -99, bb: null, over: false }; });
     var W = 0, H = 0, DPR = 1, minX = 0, maxX = 0, HMAX = 10, FMAX = 8;
     function bounds() {
       W = home.clientWidth; H = home.clientHeight; DPR = Math.min(3, window.devicePixelRatio || 1);
@@ -1335,8 +1338,8 @@
       if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
       var spin = Math.ceil(S * 0.22); // a block turning on its axis is wider by this on each side
       minX = spin; maxX = Math.max(minX + 3 * S, W - S - spin - 2);
-      HMAX = Math.max(4, H - 2 - CU - REST);           // REST: half the height a resting block shows
-      FMAX = Math.max(3, H - 2 - CU - S * 0.9);        // a block somersaulting needs its whole diagonal
+      HMAX = Math.max(4, H - 2 - FB - 2 * RMAX * 1.03); // a hop, tilted, with its perspective
+      FMAX = Math.max(3, H - 2 - FB - RMAX - S * 0.9);  // a block somersaulting needs its whole diagonal
     }
     function formation(x0) { return [x0, x0 + S + TOUCH, x0 + 2 * (S + TOUCH)]; }
     bounds();
@@ -1372,7 +1375,23 @@
     var T = 0, RMb = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     var E = { lin: function (p) { return p; }, io: function (p) { return p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; },
       back: function (p) { var c = 2.2; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); } };
-    function add(c, o) { o.t0 = T + (o.delay || 0); o.ease = o.ease || E.io; c.tw.push(o); return (o.delay || 0) + o.d; }
+    var rec = false;
+    function add(c, o) {
+      o.t0 = T + (o.delay || 0); o.ease = o.ease || E.io; c.tw.push(o);
+      if (rec) { c.b0 = Math.min(c.b0, o.t0); c.b1 = Math.max(c.b1, o.t0 + o.d); }
+      return (o.delay || 0) + o.d;
+    }
+    // every move: each block it involves rises into 3D as its part starts and is laid flat, facing us, as soon as its part ends
+    function move(fn) {
+      C.forEach(function (c) { c.b0 = Infinity; c.b1 = -Infinity; });
+      rec = true; var t = fn(); rec = false;
+      C.forEach(function (c) {
+        if (!(c.b1 > c.b0)) return;
+        add(c, { p: "td", to: 1, d: 0.2, delay: c.b0 - T });
+        t = Math.max(t, add(c, { p: "td", to: 0, d: 0.3, delay: Math.max(c.b0 + 0.2, c.b1 - 0.04) - T }));
+      });
+      return t;
+    }
     function step(c) {
       var live = [];
       c.hop = 0;
@@ -1392,7 +1411,7 @@
         if (p < 1) live.push(o);
       });
       c.tw = live;
-      if (!live.length) { c.ry = ((c.ry % 360) + 360) % 360; c.rx = ((c.rx % 360) + 360) % 360; }
+      if (!live.length) { c.ry = ((Math.round(c.ry / 90) * 90) % 360 + 360) % 360; c.rx = 0; c.td = 0; } // square to the front
     }
     function busy() { return C.some(function (c) { return c.tw.length; }); }
     function hopWalk(c, x, delay, h) {
@@ -1458,11 +1477,11 @@
 
     // ---- drawing ----
     function block(c, x0) {
-      var cx = x0 + S / 2, cy = H - CU - c.y, pv = cy + S / 2, kx = 1 + c.sq * 0.6, ky = 1 - c.sq;
-      var aY = c.ry * RAD, aX = (-TILT + c.rx) * RAD, cY = Math.cos(aY), sY = Math.sin(aY), cX = Math.cos(aX), sX = Math.sin(aX);
+      var r = reach(c.td), cx = x0 + S / 2, cy = H - FB - r - c.y, pv = cy + r, kx = 1 + c.sq * 0.6, ky = 1 - c.sq, td = c.td;
+      var aY = c.ry * RAD, aX = (-TILT * td + c.rx) * RAD, cY = Math.cos(aY), sY = Math.sin(aY), cX = Math.cos(aX), sX = Math.sin(aX);
       var bb = [1e9, 1e9, -1e9, -1e9];
       function P(v) { // turn (vertical axis, then horizontal), project with the block's own perspective, squash from its foot
-        var x1 = v[0] * cY + v[2] * sY, z1 = -v[0] * sY + v[2] * cY, y2 = v[1] * cX - z1 * sX, z2 = v[1] * sX + z1 * cX, f = D / (D - z2);
+        var x1 = v[0] * cY + v[2] * sY, z1 = -v[0] * sY + v[2] * cY, y2 = v[1] * cX - z1 * sX, z2 = v[1] * sX + z1 * cX, f = 1 + td * (D / (D - z2) - 1); // flat: no perspective at all
         var X = cx + x1 * f * kx, Y = pv + (cy - y2 * f - pv) * ky;
         if (X < bb[0]) bb[0] = X; if (Y < bb[1]) bb[1] = Y; if (X > bb[2]) bb[2] = X; if (Y > bb[3]) bb[3] = Y;
         return [X, Y];
@@ -1470,7 +1489,7 @@
       var vis = [];
       F.forEach(function (f) {
         var n = f.n, z1 = -n[0] * sY + n[2] * cY, nz = n[1] * sX + z1 * cX;
-        if (nz > h / D + 0.012) vis.push({ f: f, p: f.c.map(P), nz: nz });
+        if (nz > td * h / D + 0.012) vis.push({ f: f, p: f.c.map(P), nz: nz });
       });
       function path(p) { ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[3][0], p[3][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath(); }
       vis.forEach(function (v) {
@@ -1490,10 +1509,11 @@
       C.forEach(function (c) { var v = Math.max(c.x, prev + S + TOUCH); v = Math.max(minX - 2, Math.min(maxX, v)); x.push(v); prev = v; });
       ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      var sy = H - (FB - 3);
-      C.forEach(function (c, i) { // the shadows first, smaller and fainter as a block rises
+      var sy = H - FB + 1;
+      C.forEach(function (c, i) { // the shadows first, only in 3D, smaller and fainter as a block rises
+        if (c.td < 0.01) return;
         var a = Math.max(0, 1 - c.y / (HMAX * 2.2)), k = 0.55 + 0.45 * a, w = S * 1.15 * k, hh = 6 * k;
-        ctx.globalAlpha = 0.35 + 0.65 * a; ctx.drawImage(SH, x[i] + S / 2 - w / 2, sy - hh / 2, w, hh);
+        ctx.globalAlpha = c.td * (0.35 + 0.65 * a); ctx.drawImage(SH, x[i] + S / 2 - w / 2, sy - hh / 2, w, hh);
       });
       ctx.globalAlpha = 1; ctx.font = FONT; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
       ctx.lineWidth = 1.5; ctx.lineJoin = "round"; ctx.strokeStyle = COL.g;
@@ -1510,7 +1530,7 @@
       if (now - scrolledAt < 300) { lastT = 0; nap = setTimeout(function () { nap = 0; wake(); }, 150); return; }
       var dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0; lastT = now; T += dt;
       C.forEach(step);
-      if (!busy() && T >= nextAt) { last = pick(); nextAt = T + R[last]() + rnd(0.5, 1.6); }
+      if (!busy() && T >= nextAt) { last = pick(); nextAt = T + move(R[last]) + rnd(0.5, 1.6); }
       draw();
       if (busy()) raf = requestAnimationFrame(frame);
       else nap = setTimeout(function () { nap = 0; T = Math.max(T, nextAt); wake(); }, Math.max(0, nextAt - T) * 1000);
@@ -1527,7 +1547,7 @@
       var k = hit(e); cv.style.cursor = k < 0 ? "default" : "pointer";
       C.forEach(function (c, i) {
         var on = i === k;
-        if (on && !c.over && !RMb && !c.tw.length) { add(c, { hopn: 1, h: Math.min(HMAX, 9), d: 0.38 }); wake(); }
+        if (on && !c.over && !RMb && !c.tw.length) { move(function () { return add(c, { hopn: 1, h: Math.min(HMAX, 9), d: 0.38 }); }); wake(); }
         c.over = on;
       });
     }
@@ -1539,7 +1559,7 @@
     // the row changes size: measure again and, if the blocks no longer fit, send them home
     function resized() {
       bounds();
-      if (C[2].x > maxX || C[0].x < minX) { C.forEach(function (c) { c.tw = []; c.y = 0; c.sq = 0; }); formation(minX).forEach(function (x, i) { C[i].x = x; }); }
+      if (C[2].x > maxX || C[0].x < minX) { C.forEach(function (c) { c.tw = []; c.y = 0; c.sq = 0; c.td = 0; c.rx = 0; c.ry = 0; }); formation(minX).forEach(function (x, i) { C[i].x = x; }); }
       draw();
     }
     if ("ResizeObserver" in window) new ResizeObserver(resized).observe(home); else window.addEventListener("resize", resized);
