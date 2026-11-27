@@ -10,7 +10,7 @@
 /* the colour edition is remembered (or asked for with ?color=1) and set before the first paint */
 (function () { try { var q = /[?&]color=(0|1)/.exec(location.search), on = q ? q[1] === "1" : localStorage.getItem("gve-color") === "1"; if (on) document.documentElement.classList.add("is-color"); } catch (e) {} })();
 /* GitHub Pages lets phones keep this page for up to 10 minutes: if a newer version is published, load it now */
-(function () { var B = "71"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
+(function () { var B = "72"; try { fetch("version.txt?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.ok ? r.text() : B; }).then(function (v) { v = (v || "").trim(); if (v && v !== B) { var u = new URL(location.href); if (u.searchParams.get("v") !== v) { u.searchParams.set("v", v); location.replace(u.toString()); } } }).catch(function () {}); } catch (e) {} })();
 </script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Gomet Verd Estudi — How we work">
@@ -20,9 +20,9 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A9651'/%3E%3Cpath d='M9.5 16.5l4.2 4.2 8.8-9.4' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preload" href="fonts/archivo-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/spacemono-400.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="content.js?v=71" as="script">
-<link rel="preload" href="kit.js?v=71" as="script">
-<link rel="preload" href="pillars3d.js?v=71" as="script">
+<link rel="preload" href="content.js?v=72" as="script">
+<link rel="preload" href="kit.js?v=72" as="script">
+<link rel="preload" href="pillars3d.js?v=72" as="script">
 <style>/* drawings (kit.css, inlined so the line art never depends on a second request) */
 /* drawings: green line art, as on the Gomet web */
 .kit { width: 100%; height: 100%; display: block; overflow: visible; }
@@ -311,6 +311,9 @@
   .fig-c span { min-width: 0; }
   .fig-a { position: relative; flex: 1 1 auto; min-height: 0; }
   .fig .fig-a > .draw { position: absolute; inset: 4px; }
+  .ob-stage .fig .fig-a > .draw { top: calc(4px - var(--oup, 0px)); bottom: calc(4px - var(--odn, 0px)); }
+  /* in colour, the red caption of the big desktop building is a label as long as its text: the drawing stands clear of it */
+  @media (min-width: 900px) { .is-color .ob-stage .fig-c { align-self: flex-start; max-width: 100%; } }
   .stage .fig-a .kit { position: absolute; inset: 0; }
   .vcode span, .sign .ref span { font-family: var(--mono); letter-spacing: .08em; }
 
@@ -738,9 +741,9 @@
   <div class="sc2" id="lbSc"><img id="lbImg" alt=""></div>
 </div>
 
-<script src="content.js?v=71"></script>
-<script src="kit.js?v=71"></script>
-<script src="pillars3d.js?v=71"></script>
+<script src="content.js?v=72"></script>
+<script src="kit.js?v=72"></script>
+<script src="pillars3d.js?v=72"></script>
 <script>
 (function () {
   /* language: English by default; ?lang=es (or the reader's last choice) switches to the original Spanish */
@@ -1138,6 +1141,66 @@
     if (need > room) inn.style.zoom = Math.max(0.55, room / need).toFixed(3);
 
   }
+  /* the desktop building: as big as the screen's height allows (the box keeps the drawing's ink between the section
+     bar and the foot of the plate), and the plan's caption kept clear of it, on one or two lines */
+  function bigDraw() {
+    var st = OBR.style, cap = OBR.querySelector(".ob-stage .fig-c"), span = cap && cap.lastChild;
+    st.setProperty("--oup", "0px"); st.setProperty("--odn", "0px");
+    if (innerWidth < 900) { if (span) span.style.maxWidth = ""; if (cap) cap.style.minHeight = ""; if (bld && bld.k) bld.k.frame(4); return; }
+    var od = OBR.querySelector(".ob-stage .draw"), metaB = 0;
+    obs.forEach(function (o) {
+      var hd = o.sec.querySelector(".hd2"), mt = hd.querySelector(".pl-meta"), sp = o.sec.querySelector(".hsp");
+      if (mt && sp) metaB = Math.max(metaB, sp.offsetTop + mt.getBoundingClientRect().bottom - hd.getBoundingClientRect().top);
+    });
+    for (var pass = 0; pass < 2; pass++) {
+      st.setProperty("--oup", "0px"); st.setProperty("--odn", "0px");
+      var sR = OBR.querySelector(".ob-stage").getBoundingClientRect(), dR = od.getBoundingClientRect(), gTop = parseFloat(st.getPropertyValue("--ost")) || 0;
+      var odn = Math.max(0, Math.floor(sR.bottom - dR.bottom - 2));
+      // how much of its box the drawing fills from the bottom up, at its tallest moment (the crane included): the
+      // outline of every point it ever reaches, as framed; its callouts keep their size on screen and may stand a
+      // little above it
+      var fill = 0.9, over = 2, M0, sv0 = od.querySelector("svg");
+      if (bld && bld.k && bld.k.frame && sv0) {
+        bld.k.frame(4); M0 = sv0.getScreenCTM();
+        if (M0 && dR.height > 0) { var tp = 1e9; bld.k.bounds.forEach(function (q) { tp = Math.min(tp, M0.b * q[0] + M0.d * q[1] + M0.f); }); fill = Math.max(0.5, Math.min(1, (dR.bottom - tp) / dR.height)); }
+      }
+      var boxB = gTop + (dR.bottom - sR.top) + odn, hb = Math.min(2 * dR.height, (boxB - (metaB + 10 + over)) / fill);
+      st.setProperty("--odn", odn + "px");
+      st.setProperty("--oup", Math.round(Math.max(0, hb - dR.height - odn)) + "px");
+      if (!(bld && bld.k && bld.k.frame && span)) { if (bld) obApply(); return; }
+      bld.k.frame(4);
+      // the caption: as wide as the room left of the drawing at its height (the drawing's outline, as seen there)
+      var svg = od.querySelector("svg"), M = svg && svg.getScreenCTM(); if (!M) { obApply(); return; }
+      var P = bld.k.bounds.map(function (q) { return [M.a * q[0] + M.c * q[1] + M.e, M.b * q[0] + M.d * q[1] + M.f]; });
+      P.sort(function (u, v) { return u[0] - v[0] || u[1] - v[1]; });
+      var hull = [], lo = [], hi = [], cr = function (o, u, v) { return (u[0] - o[0]) * (v[1] - o[1]) - (u[1] - o[1]) * (v[0] - o[0]); };
+      P.forEach(function (q) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+      P.slice().reverse().forEach(function (q) { while (hi.length > 1 && cr(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); });
+      hull = lo.concat(hi);
+      var cR = cap.getBoundingClientRect(), xl = 1e9;
+      [cR.top, cR.top + 44].forEach(function (y) {
+        for (var i = 0; i + 1 < hull.length; i++) {
+          var u = hull[i], v = hull[i + 1];
+          if ((u[1] - y) * (v[1] - y) <= 0 && u[1] !== v[1]) xl = Math.min(xl, u[0] + (v[0] - u[0]) * (y - u[1]) / (v[1] - u[1]));
+        }
+      });
+      span.style.maxWidth = "";
+      var sL = span.getBoundingClientRect().left, room = xl < 1e9 ? Math.max(160, xl - 20 - sL) : 1e9;
+      // how many lines the longest caption needs in that room: the bar is given that height for every step, so it never jumps
+      var cs = getComputedStyle(span), cx = document.createElement("canvas").getContext("2d"), lines = 1;
+      cx.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+      alts.forEach(function (t) {
+        var n = 1, w = 0, sp = cx.measureText(" ").width;
+        t.toUpperCase().split(/\s+/).forEach(function (wd) { var ww = cx.measureText(wd).width; if (w && w + sp + ww > room) { n++; w = ww; } else w += (w ? sp : 0) + ww; });
+        lines = Math.max(lines, n);
+      });
+      span.style.maxWidth = room < 1e9 ? Math.floor(room) + "px" : "";
+      var mh = lines > 1 ? Math.ceil(11 + lines * parseFloat(cs.lineHeight)) + "px" : "";
+      if (cap.style.minHeight === mh) break;
+      cap.style.minHeight = mh; // the bar grew or shrank: measure the box again
+    }
+    obApply();
+  }
   function holes() {
     geoOK = false;
     fitTitles();
@@ -1169,6 +1232,9 @@
       // the sheet of thin paper after a step starts on the rule under that step's description: it is pulled up by the room
       // left under the foot (the sheet's padding and the block's), so the two meet as the pin lets go
       OBR.style.setProperty("--ost", Math.round(gTop) + "px"); OBR.style.setProperty("--osh", Math.round(osh) + "px");
+      // on a desktop the building is drawn about twice as big: its box grows out of the plan's frame, upwards over the
+      // title row (number and title print over it, in multiply) to just under the section bar, and down to the foot
+      bigDraw();
     }
     /* when a plate lets go, its drawing comes to rest at the end of its block, over blank paper, with the same air (G)
        between the last text and the drawing and between the drawing and the next construction band. Measured on the
